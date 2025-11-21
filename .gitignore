@@ -48,3 +48,4 @@ lib/firebase_options.dart
 
 # Ignore teacher list file
 lib/utilities/data/teacher_list.dart
+android/app/google-services.json
