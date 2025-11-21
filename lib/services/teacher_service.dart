@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/utilities/data/teacher_list.dart';
 
 Future<List<Map<String, dynamic>>> getTeachers() async {
   final firestore = FirebaseFirestore.instance;
@@ -80,4 +81,21 @@ Stream<List<String>> starredTeachersStream() {
     if (data == null) return [];
     return List<String>.from(data['starredTeachers'] ?? []);
   });
+}
+
+String getKimStatus() {
+  final kimEntries = absenceList.keys
+      .where((k) => k.toLowerCase().contains("kim"))
+      .toList();
+
+  if (kimEntries.isEmpty) return "Present";
+
+  for (var key in kimEntries) {
+    final status = absenceList[key];
+    if (status != null && status != "Present") {
+      return status;
+    }
+  }
+
+  return "Present";
 }
