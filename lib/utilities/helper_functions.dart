@@ -27,7 +27,6 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
   }
 
   final document = parseHtmlDocument(response.body);
-
   Map<String, String> absenceMap = {};
   final allText = document.body?.text ?? '';
   // Matches formats like: November 18, 2025
@@ -46,8 +45,12 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
       final cells = rows[i].querySelectorAll('td');
       if (cells.length >= 2) {
         String teacher = cells[0].text!.trim();
+        print(teacher.contains("Kim") && teacher.contains("Ms"));
+        if (teacher.contains("Kim") && teacher.contains("Ms")) {
+          teacher = "Kim, Rosalyn";
+        }
+        // String teacher = cells[0].text!.trim();
         String period = cells[1].text!.trim().replaceAll("Day", "");
-
         // Skip header row
         if (teacher.toLowerCase().contains("teacher") &&
             period.toLowerCase().contains("period")) {
@@ -60,6 +63,7 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
       }
     }
   }
+  print(absenceMap);
 
   return absenceMap;
 }

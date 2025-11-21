@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     loadTeachers();
   }
 
+  // METHOD: Load the teachers
   Future<void> loadTeachers() async {
     final fetchedTeachers = await getTeachers();
     setState(() {
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // METHOD: Given a query search through the teachers
   void filterTeachers(String query) {
     final filtered = teachers.where((t) {
       final name = t['name'].toString().toLowerCase();
@@ -44,30 +46,40 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // METHOD: Go through the list and return a new, ordered one
+  /* METHOD: Order the teachers as followers: 
+      1. Absent + Starred
+      2. Present + Starred
+      3. Absent + Not-Starred
+      4. Present + Not-Starred
+  */
   List<Map<String, dynamic>> getOrderedTeachers(List<String> starredTeachers) {
     return filteredTeachers.toList()..sort((a, b) {
       final aName = a['name'].toString();
       final bName = b['name'].toString();
 
-      final aBase = aName.contains(",")
-          ? aName.split(",")[0].trim()
-          : aName.trim();
-      final bBase = bName.contains(",")
-          ? bName.split(",")[0].trim()
-          : bName.trim();
+      final aBase = aName.split(",")[0].trim();
+      final bBase = bName.split(",")[0].trim();
 
-      final aStatus = absenceList[aBase] ?? "Present";
-      final bStatus = absenceList[bBase] ?? "Present";
+      // EDGE-CASE: In the event that Kim is used, handle appropriate
+      final aStatus = aBase.toLowerCase() == "kim"
+          ? getKimStatus()
+          : (absenceList[aBase] ?? "Present");
 
-      final aStarred = starredTeachers.contains(aName);
-      final bStarred = starredTeachers.contains(bName);
+      final bStatus = bBase.toLowerCase() == "kim"
+          ? getKimStatus()
+          : (absenceList[bBase] ?? "Present");
 
-      if (aStarred && !bStarred) return -1;
-      if (!aStarred && bStarred) return 1;
+      final aStar = starredTeachers.contains(aName);
+      final bStar = starredTeachers.contains(bName);
+
+      // ORDER: Put starred first
+      if (aStar && !bStar) return -1;
+      if (!aStar && bStar) return 1;
+
       final aAbsent = aStatus != "Present";
       final bAbsent = bStatus != "Present";
 
+      // ORDER: Absent before present
       if (aAbsent && !bAbsent) return -1;
       if (!aAbsent && bAbsent) return 1;
 
@@ -82,7 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // HEADER
           CustomHeader(
             title: "Gr0ve".capitalized,
             subtitle: "Who are you looking for?".capitalized,
@@ -90,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 12),
 
-          // SEARCH BAR: Allows users to filter through the list of teachers
           TextField(
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
@@ -110,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 10),
 
-          // TEACHER LIST
           Expanded(
             child: StreamBuilder<List<String>>(
               stream: starredTeachersStream(),
@@ -134,11 +143,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     final t = orderedTeachers[i];
                     final tName = t['name'].toString();
 
-                    final status =
-                        absenceList[tName
-                            .substring(0, tName.indexOf(","))
-                            .trim()] ??
-                        "Present";
+                    final lastName = tName
+                        .substring(0, tName.indexOf(","))
+                        .trim();
+
+                    // --- Kim Fix here too ---
+                    final status = lastName.toLowerCase() == "kim"
+                        ? getKimStatus()
+                        : (absenceList[lastName] ?? "Present");
 
                     return CustomTeacherCard(
                       department: t['department'],
