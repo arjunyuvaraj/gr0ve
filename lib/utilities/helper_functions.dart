@@ -22,7 +22,6 @@ void displayMessageToUser(String message, BuildContext context) {
 Future<Map<String, String>> fetchGoogleDocMap(String url) async {
   final response = await http.get(Uri.parse(url));
   if (response.statusCode != 200) {
-    print("ERROR: ${response.statusCode}");
     return {};
   }
 
@@ -45,7 +44,6 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
       final cells = rows[i].querySelectorAll('td');
       if (cells.length >= 2) {
         String teacher = cells[0].text!.trim();
-        print(teacher.contains("Kim") && teacher.contains("Ms"));
         if (teacher.contains("Kim") && teacher.contains("Ms")) {
           teacher = "Kim, Rosalyn";
         }
@@ -63,7 +61,6 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
       }
     }
   }
-  print(absenceMap);
 
   return absenceMap;
 }
