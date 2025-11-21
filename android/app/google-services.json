@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "276521346272",
+    "project_id": "gr0ve-arjunyuvaraj",
+    "storage_bucket": "gr0ve-arjunyuvaraj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276521346272:android:5245b3832c54d27dc59c85",
+        "android_client_info": {
+          "package_name": "com.arjunyuvaraj.gr0ve"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl8aMkqltsBmMdOOaRw_Qdzx9AwKXuDkc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
