@@ -47,10 +47,10 @@ class NavigationScreenState extends State<NavigationScreen> {
       body: Stack(
         children: [
           Positioned(
-            top: 54,
-            left: 24,
+            top: 32,
+            left: 32,
             child: GestureDetector(
-              onTap: () => _scaffoldKey.currentState?.openDrawer(),
+              onTap: () => {_scaffoldKey.currentState?.openDrawer()},
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -90,7 +90,6 @@ class NavigationScreenState extends State<NavigationScreen> {
                 ),
               ),
             ),
-
             ListTile(
               leading: const Icon(Icons.home_rounded),
               title: const Text("Home"),

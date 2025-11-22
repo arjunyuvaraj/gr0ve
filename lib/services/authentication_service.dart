@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gr0ve/utilities/helper_functions.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class AuthenticationService {
   // VARIABLES: Instantiate GoogleSignIn, and create a variable to ensure we don't initialize multiple times
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
@@ -17,49 +19,62 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Sign in the user
   void signInWithGoogle(BuildContext context) async {
-    // GOOGLE: Start up the Google popup
+    // WEB: Use FirebaseAuth popup instead of google_sign_in (required)
+    if (kIsWeb) {
+      try {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+        final userCredential = await FirebaseAuth.instance.signInWithPopup(
+          googleProvider,
+        );
+
+        if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+          Navigator.pushNamed(context, '/onboarding');
+        } else {
+          Navigator.pushNamed(context, '/authentication');
+        }
+      } catch (e) {
+        displayMessageToUser('Google Web Sign-In failed: $e', context);
+      }
+      return; // IMPORTANT: Stop here or the mobile flow runs too
+    }
+
+    // MOBILE FLOW (unchanged)
     await initializeGoogleSignIn();
 
-    // TRY-CATCH: Prevent any unexpected errors
     try {
-      // GOOGLE: Get the user's email
+      // Sign in with Google popup
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
-        scopeHint: ['email'], // Get the email
+        scopeHint: ['email'],
       );
 
-      // GOOGLE: Get the ID Token to give to Firebase
-      final idToken = googleUser.authentication.idToken;
+      final idToken = (await googleUser.authentication).idToken;
 
-      // FIREBASE: Make sure it's stored with Google
+      // Convert to Firebase credential
       final credential = GoogleAuthProvider.credential(idToken: idToken);
 
-      // USER: Sign the user in
+      // Sign the user in
       final userCredential = await FirebaseAuth.instance.signInWithCredential(
         credential,
       );
 
-      // CHECK: If the user is new, have them fill out which school they are from
+      // Route based on whether user is new
       if (userCredential.additionalUserInfo?.isNewUser ?? false) {
         Navigator.pushNamed(context, '/onboarding');
       } else {
         Navigator.pushNamed(context, '/authentication');
       }
     } on GoogleSignInException catch (e) {
-      // ERROR: Some error occurred with Google
       displayMessageToUser(
         'Google Sign-In error: ${e.code} / ${e.description}',
         context,
       );
-      return;
     } catch (e) {
-      // ERROR: Some error occurred in general
       displayMessageToUser(
         'Unexpected error during Google Sign-In: $e',
         context,
       );
-      return;
     }
   }
 
@@ -97,18 +112,20 @@ class AuthenticationService {
 
   Future<void> signOutWithGoogle(BuildContext context) async {
     try {
-      // GOOGLE: Sign out from Google
-      await _googleSignIn.signOut();
+      if (kIsWeb) {
+        // WEB: Only sign out through Firebase
+        await FirebaseAuth.instance.signOut();
+      } else {
+        // MOBILE: Sign out from Google AND Firebase
+        await _googleSignIn.signOut();
+        await FirebaseAuth.instance.signOut();
+      }
 
-      // FIREBASE: Sign out from Firebase
-      await FirebaseAuth.instance.signOut();
-
-      // NAVIGATE: Re-route to the welcome page
+      // NAVIGATE: Go back to authentication
+      Navigator.pushNamed(context, '/authentication');
     } catch (e) {
-      // ERROR: Something went wrong when signing out
       displayMessageToUser("Error signing out: $e", context);
     }
-    Navigator.pushNamed(context, '/authentication');
   }
 
   void deleteAccount(BuildContext context) async {
@@ -128,5 +145,9 @@ class AuthenticationService {
     } catch (e) {
       displayMessageToUser("Account deletion failed: $e", context);
     }
+  }
+
+  bool userLoggedIn() {
+    return FirebaseAuth.instance.currentUser == null;
   }
 }
