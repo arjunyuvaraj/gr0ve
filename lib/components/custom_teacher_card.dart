@@ -7,6 +7,7 @@ class CustomTeacherCard extends StatelessWidget {
   final String status;
   final bool starred;
   final GestureDragCancelCallback onTap;
+  final bool star;
 
   const CustomTeacherCard({
     super.key,
@@ -16,6 +17,7 @@ class CustomTeacherCard extends StatelessWidget {
     required this.status,
     required this.starred,
     required this.onTap,
+    required this.star,
   });
 
   @override
@@ -126,19 +128,20 @@ class CustomTeacherCard extends StatelessWidget {
               const SizedBox(height: 8),
             ],
           ),
-
-          Positioned(
-            top: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: onTap,
-              child: Icon(
-                starred ? Icons.star_rounded : Icons.star_border_rounded,
-                size: 30,
-                color: starred ? Colors.amber.shade600 : Colors.black45,
-              ),
-            ),
-          ),
+          star
+              ? Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: Icon(
+                      starred ? Icons.star_rounded : Icons.star_border_rounded,
+                      size: 30,
+                      color: starred ? Colors.amber.shade600 : Colors.black45,
+                    ),
+                  ),
+                )
+              : const SizedBox(),
         ],
       ),
     );

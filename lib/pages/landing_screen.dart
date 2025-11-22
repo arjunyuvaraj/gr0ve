@@ -43,10 +43,20 @@ class LandingScreen extends StatelessWidget {
                             style: context.text.displaySmall,
                           ),
                           const SizedBox(height: 8),
-                          CustomPrimaryButton(
-                            label: "Sign In".capitalized,
-                            onTap: () => AuthenticationService()
-                                .signInWithGoogle(context),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: 600),
+                            child: CustomPrimaryButton(
+                              label: "Sign In".capitalized,
+                              onTap: () => AuthenticationService()
+                                  .signInWithGoogle(context),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pushNamed(context, "/navigation"),
+                            child: Text(
+                              "Or contuine without an account".capitalized,
+                            ),
                           ),
                         ],
                       ),

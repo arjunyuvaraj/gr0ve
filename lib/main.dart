@@ -6,6 +6,7 @@ import 'package:gr0ve/pages/authentication_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
+import 'package:gr0ve/pages/navigation_screen.dart';
 import 'package:gr0ve/pages/onboarding_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
 import 'package:gr0ve/theme/light_theme.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => OnboardingScreen(),
         '/account': (context) => AccountScreen(),
         '/privacy_policy': (context) => PrivacyPolicyScreen(),
+        '/navigation': (context) => NavigationScreen(),
         '/help': (context) => HelpScreen(),
       },
     );

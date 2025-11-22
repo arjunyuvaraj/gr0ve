@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_teacher_card.dart';
+import 'package:gr0ve/services/authentication_service.dart';
 import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 import 'package:gr0ve/utilities/data/teacher_list.dart';
@@ -136,29 +137,52 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 final orderedTeachers = getOrderedTeachers(starred);
 
-                return ListView.builder(
-                  padding: const EdgeInsets.only(top: 6),
-                  itemCount: orderedTeachers.length,
-                  itemBuilder: (context, i) {
-                    final t = orderedTeachers[i];
-                    final tName = t['name'].toString();
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
 
-                    final lastName = tName
-                        .substring(0, tName.indexOf(","))
-                        .trim();
+                    // set your breakpoints
+                    int columns = 1;
+                    if (width > 1000) {
+                      columns = 3;
+                    } else if (width > 650) {
+                      columns = 2;
+                    }
 
-                    // --- Kim Fix here too ---
-                    final status = lastName.toLowerCase() == "kim"
-                        ? getKimStatus()
-                        : (absenceList[lastName] ?? "Present");
+                    // compute width per card
+                    final double cardWidth =
+                        (width - (16 * (columns - 1))) / columns;
 
-                    return CustomTeacherCard(
-                      department: t['department'],
-                      email: t['email'],
-                      name: tName,
-                      status: status,
-                      starred: starred.contains(tName),
-                      onTap: () => toggleStarTeacher(tName),
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: orderedTeachers.map((t) {
+                            final tName = t['name'].toString();
+                            final lastName = tName
+                                .substring(0, tName.indexOf(","))
+                                .trim();
+                            final status = lastName.toLowerCase() == "kim"
+                                ? getKimStatus()
+                                : (absenceList[lastName] ?? "Present");
+
+                            return SizedBox(
+                              width: cardWidth,
+                              child: CustomTeacherCard(
+                                department: t['department'],
+                                email: t['email'],
+                                name: tName,
+                                status: status,
+                                starred: starred.contains(tName),
+                                onTap: () => toggleStarTeacher(tName),
+                                star: !(AuthenticationService().userLoggedIn()),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     );
                   },
                 );
