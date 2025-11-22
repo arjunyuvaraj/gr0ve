@@ -140,7 +140,6 @@ class AccountScreen extends StatelessWidget {
       );
     }
 
-    print(AuthenticationService().userLoggedIn());
     return AuthenticationService().userLoggedIn() == false
         ? userLoggedIn()
         : userNotLoggedIn();
