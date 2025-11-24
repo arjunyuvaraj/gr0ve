@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<String> periodOptions = [
     "All",
+    "IGS",
     "Period 1",
     "Period 2",
     "Period 3",
