@@ -18,7 +18,7 @@ final lightTheme = ThemeData(
     // TEXT: Displays
     displayLarge: GoogleFonts.robotoMono(
       fontWeight: FontWeight.w900,
-      fontSize: 64,
+      fontSize: 52,
       color: Color(0xFF253726).withAlpha(225),
       letterSpacing: getLetterSpacing(54, 25),
     ),

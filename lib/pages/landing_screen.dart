@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/components/landing_card.dart';
-import 'package:gr0ve/services/authentication_service.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 import 'package:gr0ve/utilities/data/landing_content.dart';
 
@@ -97,8 +96,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                     CustomPrimaryButton(
                       label: "Sign In".capitalized,
-                      onTap: () =>
-                          AuthenticationService().signInWithGoogle(context),
+                      onTap: () => Navigator.pushNamed(context, "/login"),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
