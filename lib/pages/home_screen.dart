@@ -18,11 +18,63 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> teachers = [];
   List<Map<String, dynamic>> filteredTeachers = [];
   bool isLoading = true;
+  bool showFavoritesOnly = false;
+  String selectedPeriod = "All";
+
+  List<String> periodOptions = [
+    "All",
+    "Period 1",
+    "Period 2",
+    "Period 3",
+    "Period 4",
+    "Period 5",
+    "Period 6",
+    "Period 7",
+    "Period 8",
+    "Period 9",
+  ];
 
   @override
   void initState() {
     super.initState();
     loadTeachers();
+  }
+
+  void applyFilters() {
+    List<Map<String, dynamic>> result = teachers;
+
+    // SEARCH FILTER
+    if (searchQuery.isNotEmpty) {
+      result = result.where((t) {
+        final name = t['name'].toString().toLowerCase();
+        return name.contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // PERIOD FILTER
+    if (selectedPeriod.trim().toLowerCase() != "all") {
+      result = result.where((t) {
+        final tName = t['name'].toString();
+        final lastName = tName.split(",")[0].trim();
+        final status = absenceList[lastName] ?? "Present";
+
+        // Status example: "Period 3"
+        return status.trim().toLowerCase().contains(
+          selectedPeriod.trim()[selectedPeriod.length - 1],
+        );
+      }).toList();
+    }
+
+    setState(() {
+      filteredTeachers = result;
+    });
+  }
+
+  String searchQuery = "";
+  // METHOD: Given a query search through the teachers
+  void filterTeachers(String query) {
+    searchQuery = query;
+    applyFilters();
   }
 
   // METHOD: Load the teachers
@@ -32,18 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
       teachers = fetchedTeachers;
       filteredTeachers = fetchedTeachers;
       isLoading = false;
-    });
-  }
-
-  // METHOD: Given a query search through the teachers
-  void filterTeachers(String query) {
-    final filtered = teachers.where((t) {
-      final name = t['name'].toString().toLowerCase();
-      return name.contains(query.toLowerCase());
-    }).toList();
-
-    setState(() {
-      filteredTeachers = filtered;
     });
   }
 
@@ -88,6 +128,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void fetchTeacher() async {
+    String docId =
+        "2PACX-1vT_iK6QcUDVJoo_A6Enz5eizn4PzAWGfJBGo1vaC6T2y_0vHaYcL3ZlwcPN4H6pNCNEExNKGwxyktWC";
+    String docUrl = 'https://docs.google.com/document/d/e/$docId/pub';
+    Map<String, String> content = await fetchGoogleDocMap(docUrl);
+    absenceList = content;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -97,7 +145,17 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           CustomHeader(
             title: "Gr0ve".capitalized,
-            subtitle: "Who are you looking for?".capitalized,
+            subtitle: "Last updated: ${absenceList['Date']}".capitalized,
+          ),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 600),
+            child: Container(
+              width: double.infinity,
+              child: TextButton(
+                child: Text("Refresh".capitalized),
+                onPressed: () => fetchTeacher(),
+              ),
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -118,6 +176,57 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             onChanged: filterTeachers,
           ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              // FAVORITES ONLY
+              Expanded(
+                child: Row(
+                  children: [
+                    Switch(
+                      value: showFavoritesOnly,
+                      onChanged: (value) {
+                        setState(() => showFavoritesOnly = value);
+                        applyFilters();
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "Starred",
+                      style: context.text.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // PERIOD DROPDOWN
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: selectedPeriod,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  items: periodOptions.map((p) {
+                    return DropdownMenuItem(value: p, child: Text(p.trim()));
+                  }).toList(),
+                  onChanged: (value) {
+                    selectedPeriod = value!;
+                    applyFilters();
+                  },
+                ),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 10),
 
@@ -135,7 +244,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   return const Center(child: Text('No teachers found'));
                 }
 
-                final orderedTeachers = getOrderedTeachers(starred);
+                List<Map<String, dynamic>> temp = getOrderedTeachers(starred);
+
+                // FAVORITES FILTER APPLIED HERE
+                if (showFavoritesOnly) {
+                  temp = temp
+                      .where((t) => starred.contains(t['name']))
+                      .toList();
+                }
+
+                final orderedTeachers = temp;
 
                 return LayoutBuilder(
                   builder: (context, constraints) {

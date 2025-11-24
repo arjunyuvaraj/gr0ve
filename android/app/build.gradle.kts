@@ -45,3 +45,11 @@ android {
 flutter {
     source = "../.."
 }
+dependencies {
+    // Required for Google Sign-In on Android
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    // If you use Firebase Auth:
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation("com.google.firebase:firebase-auth")
+}
