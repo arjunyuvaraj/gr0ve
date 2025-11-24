@@ -6,12 +6,13 @@ import 'package:gr0ve/pages/authentication_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
+import 'package:gr0ve/pages/login_screen.dart';
 import 'package:gr0ve/pages/navigation_screen.dart';
 import 'package:gr0ve/pages/onboarding_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
+import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/theme/light_theme.dart';
 import 'package:gr0ve/utilities/data/teacher_list.dart';
-import 'package:gr0ve/utilities/helper_functions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ void main() async {
       "2PACX-1vT_iK6QcUDVJoo_A6Enz5eizn4PzAWGfJBGo1vaC6T2y_0vHaYcL3ZlwcPN4H6pNCNEExNKGwxyktWC";
   String docUrl = 'https://docs.google.com/document/d/e/$docId/pub';
   Map<String, String> content = await fetchGoogleDocMap(docUrl);
+  print(content);
   absenceList = content;
   runApp(const MyApp());
 }
@@ -30,12 +32,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Gr0ve',
       theme: lightTheme,
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => AuthenticationScreen(),
         '/authentication': (context) => AuthenticationScreen(),
+        '/login': (context) => LoginScreen(),
         '/landing': (context) => LandingScreen(),
         '/home': (context) => HomeScreen(),
         '/onboarding': (context) => OnboardingScreen(),

@@ -20,13 +20,13 @@ final lightTheme = ThemeData(
       fontWeight: FontWeight.w900,
       fontSize: 64,
       color: Color(0xFF253726).withAlpha(225),
-      letterSpacing: getLetterSpacing(64, 25),
+      letterSpacing: getLetterSpacing(54, 25),
     ),
     displayMedium: GoogleFonts.robotoMono(
       fontWeight: FontWeight.w900,
       fontSize: 52,
       color: Color(0xFF253726).withAlpha(225),
-      letterSpacing: getLetterSpacing(64, 15),
+      letterSpacing: getLetterSpacing(54, 15),
     ),
     displaySmall: GoogleFonts.robotoMono(
       fontWeight: FontWeight.w500,

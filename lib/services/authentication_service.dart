@@ -78,6 +78,71 @@ class AuthenticationService {
     }
   }
 
+  void signInWithEmail(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    try {
+      // TRIM — SUPER IMPORTANT
+      email = email.trim();
+
+      // VALIDATION
+      if (email.isEmpty || password.isEmpty) {
+        displayMessageToUser("Email or password cannot be empty.", context);
+        return;
+      }
+
+      // Must look like an email
+      if (!email.contains("@") || !email.contains(".")) {
+        displayMessageToUser("Please enter a valid email.", context);
+        return;
+      }
+
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      // MATCH GOOGLE SIGN-IN LOGIC
+      if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+        Navigator.pushNamed(context, '/onboarding');
+      } else {
+        Navigator.pushNamed(context, '/authentication');
+      }
+    } on FirebaseAuthException catch (e) {
+      // HANDLE REAL AUTH CODE ERRORS CLEANLY
+      switch (e.code) {
+        case "user-not-found":
+          displayMessageToUser("No account found for that email.", context);
+          break;
+
+        case "wrong-password":
+          displayMessageToUser("Incorrect password.", context);
+          break;
+
+        case "invalid-email":
+          displayMessageToUser(
+            "The email address is badly formatted.",
+            context,
+          );
+          Navigator.pushNamed(context, '/onboarding');
+          break;
+
+        case "invalid-credential":
+          FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+          Navigator.pushNamed(context, '/onboarding');
+          break;
+
+        default:
+          displayMessageToUser("Sign-in error: ${e.code}", context);
+      }
+    } catch (e) {
+      displayMessageToUser("Unexpected error: $e", context);
+    }
+  }
+
   void onboardUser(BuildContext context, String name) async {
     final auth = FirebaseAuth.instance;
     final firestore = FirebaseFirestore.instance;

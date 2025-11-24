@@ -60,6 +60,7 @@ class AccountScreen extends StatelessWidget {
                     Text(
                       (docRef['name'] ?? 'Unknown').toString().capitalized,
                       style: textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -68,6 +69,7 @@ class AccountScreen extends StatelessWidget {
                         color: colorScheme.onSurfaceVariant,
                         letterSpacing: getLetterSpacing(14, 10),
                       ),
+                      textAlign: TextAlign.center,
                     ),
                     // FOOTER: All of the actions
                     const SizedBox(height: 12),

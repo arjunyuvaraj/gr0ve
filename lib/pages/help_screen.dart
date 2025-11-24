@@ -10,9 +10,7 @@ class HelpScreen extends StatelessWidget {
   // Helper function to open URL
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) null;
   }
 
   @override
