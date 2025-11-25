@@ -21,7 +21,6 @@ void main() async {
       "2PACX-1vT_iK6QcUDVJoo_A6Enz5eizn4PzAWGfJBGo1vaC6T2y_0vHaYcL3ZlwcPN4H6pNCNEExNKGwxyktWC";
   String docUrl = 'https://docs.google.com/document/d/e/$docId/pub';
   Map<String, String> content = await fetchGoogleDocMap(docUrl);
-  print(content);
   absenceList = content;
   runApp(const MyApp());
 }
