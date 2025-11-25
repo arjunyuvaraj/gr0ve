@@ -142,7 +142,7 @@ class AccountScreen extends StatelessWidget {
       );
     }
 
-    return AuthenticationService().userLoggedIn() == false
+    return AuthenticationService().userLoggedIn()
         ? userLoggedIn()
         : userNotLoggedIn();
   }

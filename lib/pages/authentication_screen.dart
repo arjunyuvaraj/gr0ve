@@ -15,6 +15,7 @@ class AuthenticationScreen extends StatelessWidget {
         builder: (context, snapshot) {
           // FIREBASE-AUTH: User is logged in
           if (snapshot.hasData) {
+            print("HERE");
             return NavigationScreen();
           }
           // FIREBASE-AUTH: User is not logged in

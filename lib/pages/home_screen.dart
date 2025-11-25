@@ -24,15 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> periodOptions = [
     "All",
     "IGS",
-    "Period 1",
-    "Period 2",
-    "Period 3",
-    "Period 4",
-    "Period 5",
-    "Period 6",
-    "Period 7",
-    "Period 8",
-    "Period 9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
   ];
 
   @override
@@ -58,11 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
         final tName = t['name'].toString();
         final lastName = tName.split(",")[0].trim();
         final status = absenceList[lastName] ?? "Present";
-
         return status.trim().toLowerCase().contains(
-              selectedPeriod.trim()[selectedPeriod.length - 1],
-            ) ||
-            status.trim().toLowerCase().contains("igs");
+          selectedPeriod.toLowerCase(),
+        );
       }).toList();
     }
 
@@ -208,7 +206,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   items: periodOptions.map((p) {
-                    return DropdownMenuItem(value: p, child: Text(p.trim()));
+                    return DropdownMenuItem(
+                      value: p,
+                      child: Text("Per: " + p.trim()),
+                    );
                   }).toList(),
                   onChanged: (value) {
                     selectedPeriod = value!;
