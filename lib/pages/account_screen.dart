@@ -127,14 +127,13 @@ class AccountScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 CustomPrimaryButton(
                   label: "Sign In".capitalized,
-                  onTap: () =>
-                      AuthenticationService().signInWithGoogle(context),
+                  onTap: () => Navigator.pushNamed(context, "/login"),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, "/login"),
+                  onPressed: () => Navigator.pushNamed(context, "/landing"),
                   child: Text(
-                    "Continue without an account".capitalized,
+                    "Back to landing page".capitalized,
                     textAlign: TextAlign.center,
                   ),
                 ),
