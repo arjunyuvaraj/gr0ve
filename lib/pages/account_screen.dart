@@ -132,8 +132,11 @@ class AccountScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, "/navigation"),
-                  child: Text("Continue without an account".capitalized),
+                  onPressed: () => Navigator.pushNamed(context, "/login"),
+                  child: Text(
+                    "Continue without an account".capitalized,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
