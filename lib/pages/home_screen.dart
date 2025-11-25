@@ -59,10 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
         final lastName = tName.split(",")[0].trim();
         final status = absenceList[lastName] ?? "Present";
 
-        // Status example: "Period 3"
         return status.trim().toLowerCase().contains(
-          selectedPeriod.trim()[selectedPeriod.length - 1],
-        );
+              selectedPeriod.trim()[selectedPeriod.length - 1],
+            ) ||
+            status.trim().toLowerCase().contains("igs");
       }).toList();
     }
 
@@ -146,17 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           CustomHeader(
             title: "Gr0ve".capitalized,
-            subtitle: "Last updated: ${absenceList['Date']}".capitalized,
-          ),
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600),
-            child: Container(
-              width: double.infinity,
-              child: TextButton(
-                child: Text("Refresh".capitalized),
-                onPressed: () => fetchTeacher(),
-              ),
-            ),
+            subtitle: absenceList['Date'].toString().capitalized,
           ),
 
           const SizedBox(height: 12),
