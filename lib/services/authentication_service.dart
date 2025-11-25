@@ -148,18 +148,30 @@ class AuthenticationService {
     final firestore = FirebaseFirestore.instance;
 
     final user = auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      displayMessageToUser(
+        'You reached onboarding but is not signed in. Wait a few seconds, or, close and restart the app',
+        context,
+      );
+      return;
+    }
 
     final uid = user.uid;
-    final email = user.email ?? '';
-    final displayName = user.displayName ?? '';
 
-    await firestore.collection('Students').doc(uid).set({
-      'name': name,
-      'displayName': displayName,
-      'email': email,
-      'starredTeachers': [],
-    });
+    try {
+      // Create the Firestore doc ONLY ONCE
+      await firestore.collection('Students').doc(uid).set({
+        'name': name,
+        'displayName': user.displayName ?? '',
+        'email': user.email ?? '',
+        'starredTeachers': [],
+      });
+    } catch (e) {
+      print('Onboarding Firestore error: $e');
+      return;
+    }
+
+    if (!context.mounted) return;
 
     Navigator.pushReplacementNamed(context, '/navigation');
   }
