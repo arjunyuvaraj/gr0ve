@@ -16,24 +16,25 @@ class CustomSecondaryButton extends StatelessWidget {
     final colors = context.colors;
     final textStyles = context.text;
 
-    return Material(
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: context.colors.primary, width: 3),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          alignment: Alignment.center,
-          child: Text(
-            label.capitalized,
-            style: textStyles.labelLarge?.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+    return Expanded(
+      child: Material(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: context.colors.primary, width: 3),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            alignment: Alignment.center,
+            child: Text(
+              label.capitalized,
+              style: textStyles.labelLarge?.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),

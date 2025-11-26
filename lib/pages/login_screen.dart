@@ -44,9 +44,20 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              CustomSecondaryButton(
-                label: "Sign in With Google".capitalized,
-                onTap: () => AuthenticationService().signInWithGoogle(context),
+              Row(
+                children: [
+                  CustomSecondaryButton(
+                    label: "Google".capitalized,
+                    onTap: () =>
+                        AuthenticationService().signInWithGoogle(context),
+                  ),
+                  const SizedBox(width: 8),
+                  CustomSecondaryButton(
+                    label: "Apple".capitalized,
+                    onTap: () =>
+                        AuthenticationService().signInWithApple(context),
+                  ),
+                ],
               ),
             ],
           ),
