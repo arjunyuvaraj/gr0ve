@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gr0ve/utilities/helper_functions.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -84,59 +85,57 @@ class AuthenticationService {
     String password,
   ) async {
     try {
-      // TRIM — SUPER IMPORTANT
       email = email.trim();
 
-      // VALIDATION
       if (email.isEmpty || password.isEmpty) {
         displayMessageToUser("Email or password cannot be empty.", context);
         return;
       }
 
-      // Must look like an email
       if (!email.contains("@") || !email.contains(".")) {
         displayMessageToUser("Please enter a valid email.", context);
         return;
       }
 
+      // Try normal email+password login
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // MATCH GOOGLE SIGN-IN LOGIC
+      // SUCCESS → route accordingly
       if (userCredential.additionalUserInfo?.isNewUser ?? false) {
         Navigator.pushNamed(context, '/onboarding');
       } else {
         Navigator.pushNamed(context, '/authentication');
       }
     } on FirebaseAuthException catch (e) {
-      // HANDLE REAL AUTH CODE ERRORS CLEANLY
       switch (e.code) {
-        case "user-not-found":
-          displayMessageToUser("No account found for that email.", context);
-          break;
-
         case "wrong-password":
           displayMessageToUser("Incorrect password.", context);
           break;
 
-        case "invalid-email":
-          displayMessageToUser(
-            "The email address is badly formatted.",
-            context,
-          );
-          Navigator.pushNamed(context, '/onboarding');
+        case "user-not-found":
+          displayMessageToUser("No account found.", context);
           break;
 
+        // CASE — Detect Google accounts
+        case "account-exists-with-different-credential":
+        // ignore: unreachable_switch_case
+        case "wrong-password":
         case "invalid-credential":
-          FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: email,
-            password: password,
+          displayMessageToUser(
+            "This email belongs to a Google account. Redirecting...",
+            context,
           );
-          Navigator.pushNamed(context, '/onboarding');
+          signInWithGoogle(context);
+          break;
+
+        case "invalid-email":
+          displayMessageToUser("Invalid email format.", context);
           break;
 
         default:
           displayMessageToUser("Sign-in error: ${e.code}", context);
+          break;
       }
     } catch (e) {
       displayMessageToUser("Unexpected error: $e", context);
@@ -226,5 +225,70 @@ class AuthenticationService {
 
   bool userLoggedIn() {
     return FirebaseAuth.instance.currentUser == null;
+  }
+
+  // METHOD: Sign in with Apple (iOS only)
+  Future<void> signInWithApple(BuildContext context) async {
+    try {
+      // 1. REQUEST APPLE CREDENTIAL
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      print("STEP 1 DONE");
+      // 2. CONVERT TO FIREBASE CREDENTIAL
+      final appleProvider = OAuthProvider("apple.com");
+      final firebaseCredential = appleProvider.credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+      print("STEP 2 DONE");
+      // 3. SIGN IN WITH FIREBASE
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        firebaseCredential,
+      );
+      print("STEP 3 DONE");
+      // 4. ROUTE BASED ON NEW USER STATUS
+      if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+        Navigator.pushNamed(context, '/onboarding');
+      } else {
+        Navigator.pushNamed(context, '/authentication');
+      }
+    } catch (e) {
+      displayMessageToUser("Apple Sign-In failed: $e", context);
+    }
+  }
+
+  // METHOD: Sign out for Apple (same as Firebase)
+  Future<void> signOutWithApple(BuildContext context) async {
+    try {
+      // Apple does NOT require separate sign-out unlike Google
+      await FirebaseAuth.instance.signOut();
+
+      Navigator.pushNamed(context, '/authentication');
+    } catch (e) {
+      displayMessageToUser("Error signing out: $e", context);
+    }
+  }
+
+  // METHOD: Delete Apple account (same as Firebase delete)
+  Future<void> deleteAppleAccount(BuildContext context) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        displayMessageToUser("No user found.", context);
+        return;
+      }
+      final uid = user.uid;
+
+      await user.delete();
+      await FirebaseFirestore.instance.collection("Students").doc(uid).delete();
+
+      Navigator.pushNamed(context, "/landing");
+    } catch (e) {
+      displayMessageToUser("Account deletion failed: $e", context);
+    }
   }
 }
