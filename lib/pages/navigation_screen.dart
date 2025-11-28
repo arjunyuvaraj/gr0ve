@@ -44,34 +44,38 @@ class NavigationScreenState extends State<NavigationScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 32,
-            left: 32,
-            child: GestureDetector(
-              onTap: () => {_scaffoldKey.currentState?.openDrawer()},
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.colors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.menu_rounded,
-                  color: context.colors.onSurface,
-                  size: 28,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned(
+              left: 32,
+              child: GestureDetector(
+                onTap: () => {_scaffoldKey.currentState?.openDrawer()},
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: context.colors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.menu_rounded,
+                    color: context.colors.onSurface,
+                    size: 28,
+                  ),
                 ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-              child: IndexedStack(index: _selectedIndex, children: children),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 32,
+                ),
+                child: IndexedStack(index: _selectedIndex, children: children),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       drawer: Drawer(
         child: ListView(

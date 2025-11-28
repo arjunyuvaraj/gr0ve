@@ -44,6 +44,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   url_launcher: ^6.3.2
   sign_in_with_apple: ^7.0.1
+  package_info_plus: ^8.0.0
 
 
 dev_dependencies:
