@@ -47,28 +47,23 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 32),
               SignInDivider(text: "or continue with"),
               const SizedBox(height: 24),
-              CustomSecondaryButton(
-                label: "Sign in With Google".capitalized,
-                onTap: () => AuthenticationService().signInWithGoogle(context),
-              ),
-              CustomSecondaryButton(
-                label: "Sign in With Apple".capitalized,
-                onTap: () => AuthenticationService().signInWithApple(context),
-              ),
-              Row(
-                children: [
-                  CustomSecondaryButton(
-                    label: "Google".capitalized,
-                    onTap: () =>
-                        AuthenticationService().signInWithGoogle(context),
-                  ),
-                  const SizedBox(width: 8),
-                  CustomSecondaryButton(
-                    label: "Apple".capitalized,
-                    onTap: () =>
-                        AuthenticationService().signInWithApple(context),
-                  ),
-                ],
+              SizedBox(
+                height: 128,
+                child: Column(
+                  children: [
+                    CustomSecondaryButton(
+                      label: "Sign in With Google".capitalized,
+                      onTap: () =>
+                          AuthenticationService().signInWithGoogle(context),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomSecondaryButton(
+                      label: "Sign in With Apple".capitalized,
+                      onTap: () =>
+                          AuthenticationService().signInWithApple(context),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

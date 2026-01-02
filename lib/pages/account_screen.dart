@@ -114,22 +114,26 @@ class AccountScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 16),
-                Text("You're Not Signed In", style: context.text.headlineSmall),
+                // Text("You're Not Signed In", style: context.text.headlineSmall),
                 const SizedBox(height: 6),
+                Text("More coming soon", style: context.text.headlineSmall),
+                // TODO: for sign in
                 Text(
-                  "Sign in for features like starring teachers!",
+                  "Starring, personalization, and more features are rolling out soon.",
+                  // "Sign in for features like starring teachers!",
                   textAlign: TextAlign.center,
                   style: context.text.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
 
-                const SizedBox(height: 20),
-                CustomPrimaryButton(
-                  label: "Sign In".capitalized,
-                  onTap: () => Navigator.pushNamed(context, "/login"),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
+                // TODO: for sign in
+                // CustomPrimaryButton(
+                //   label: "Sign In".capitalized,
+                //   onTap: () => Navigator.pushNamed(context, "/login"),
+                // ),
+                // const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, "/landing"),
                   child: Text(

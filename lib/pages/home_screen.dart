@@ -169,27 +169,27 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               // FAVORITES ONLY
-              Expanded(
-                child: Row(
-                  children: [
-                    Switch(
-                      value: showFavoritesOnly,
-                      onChanged: (value) {
-                        setState(() => showFavoritesOnly = value);
-                        applyFilters();
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "Starred",
-                      style: context.text.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+              // Expanded(
+              //   child: Row(
+              //     children: [
+              //       Switch(
+              //         value: showFavoritesOnly,
+              //         onChanged: (value) {
+              //           setState(() => showFavoritesOnly = value);
+              //           applyFilters();
+              //         },
+              //       ),
+              //       const SizedBox(width: 4),
+              //       Text(
+              //         "Starred",
+              //         style: context.text.bodyMedium,
+              //         textAlign: TextAlign.center,
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
-              const SizedBox(width: 16),
+              // const SizedBox(width: 16),
 
               // PERIOD DROPDOWN
               Expanded(
