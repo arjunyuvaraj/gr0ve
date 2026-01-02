@@ -10,6 +10,7 @@ class AuthenticationService {
   // VARIABLES: Instantiate GoogleSignIn, and create a variable to ensure we don't initialize multiple times
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _initialized = false;
+  bool _appleSigningIn = false;
 
   // METHOD: Get all Google Sign-In resources ready
   Future<void> initializeGoogleSignIn() async {
@@ -72,37 +73,55 @@ class AuthenticationService {
   }
 
   Future<UserCredential?> signInWithApple(BuildContext context) async {
+    // Debounce: prevent overlapping auth sessions
+    if (_appleSigningIn) return null;
+    _appleSigningIn = true;
+
     try {
-      // Step 1 — Get Apple credential
+      // Step 1: Request Apple credential
       final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
+        scopes: const [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
       );
 
-      // Step 2 — Convert to Firebase OAuth credential
-      final oAuthCredential = OAuthProvider("apple.com").credential(
+      // Step 2: Create Firebase OAuth credential
+      final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
 
-      // Step 3 — Sign in with Firebase
+      // Step 3: Sign in with Firebase
       final userCredential = await FirebaseAuth.instance.signInWithCredential(
-        oAuthCredential,
+        oauthCredential,
       );
 
-      // Step 4 — Route based on new/existing user
+      // Step 4: Navigate ONLY on success
       if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-        Navigator.pushNamed(context, '/onboarding');
+        Navigator.pushReplacementNamed(context, '/onboarding');
       } else {
-        Navigator.pushNamed(context, '/authentication');
+        Navigator.pushReplacementNamed(context, '/authentication');
       }
 
       return userCredential;
-    } catch (e) {
-      displayMessageToUser("Error: $e", context);
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // User tapped "Cancel" → SILENT
+      if (e.code == AuthorizationErrorCode.canceled) {
+        return null;
+      }
+
+      // Any other Apple auth error → silent fail
       return null;
+    } on FirebaseAuthException {
+      // Firebase rejected credential → silent fail
+      return null;
+    } catch (_) {
+      // Native iOS errors (ERR1000, etc.) → swallow
+      return null;
+    } finally {
+      // ALWAYS reset debounce flag
+      _appleSigningIn = false;
     }
   }
 

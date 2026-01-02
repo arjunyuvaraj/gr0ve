@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/components/custom_secondary_button.dart';
 import 'package:gr0ve/components/custom_text_field.dart';
+import 'package:gr0ve/components/sign_in_divider.dart';
 import 'package:gr0ve/services/authentication_service.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 
@@ -43,7 +44,17 @@ class LoginScreen extends StatelessWidget {
                   passwordController.text,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 32),
+              SignInDivider(text: "or continue with"),
+              const SizedBox(height: 24),
+              CustomSecondaryButton(
+                label: "Sign in With Google".capitalized,
+                onTap: () => AuthenticationService().signInWithGoogle(context),
+              ),
+              CustomSecondaryButton(
+                label: "Sign in With Apple".capitalized,
+                onTap: () => AuthenticationService().signInWithApple(context),
+              ),
               Row(
                 children: [
                   CustomSecondaryButton(
