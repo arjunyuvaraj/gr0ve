@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+import 'package:gr0ve/components/custom_bus_card.dart';
+import 'package:gr0ve/components/custom_header.dart';
+import 'package:gr0ve/services/bus_service.dart';
+
+class BusScreen extends StatefulWidget {
+  const BusScreen({super.key});
+
+  @override
+  State<BusScreen> createState() => _BusScreenState();
+}
+
+class _BusScreenState extends State<BusScreen> {
+  List<BusRoute> allRoutes = [];
+  List<BusRoute> filteredRoutes = [];
+  bool isLoading = true;
+  String searchQuery = "";
+
+  final String sheetUrl =
+      "https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/gviz/tq?tqx=out:csv&gid=0";
+
+  @override
+  void initState() {
+    super.initState();
+    loadRoutes();
+  }
+
+  Future<void> loadRoutes() async {
+    final routes = await fetchBusRoutes(sheetUrl);
+    setState(() {
+      allRoutes = routes;
+      filteredRoutes = routes;
+      isLoading = false;
+    });
+  }
+
+  void filterRoutes(String query) {
+    searchQuery = query.toLowerCase();
+
+    setState(() {
+      filteredRoutes = allRoutes.where((route) {
+        final townMatch = route.towns.any(
+          (t) => t.toLowerCase().contains(searchQuery),
+        );
+        final codeMatch = route.code.toLowerCase().contains(searchQuery);
+        return townMatch || codeMatch;
+      }).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const CustomHeader(title: "BUSES", subtitle: "DISMISSAL PLACES"),
+
+          const SizedBox(height: 12),
+
+          TextField(
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: "Search town or bus code…",
+              prefixIcon: const Icon(Icons.search, size: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onChanged: filterRoutes,
+          ),
+
+          const SizedBox(height: 12),
+
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : filteredRoutes.isEmpty
+                ? const Center(child: Text("No buses found"))
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      int columns = 1;
+                      if (constraints.maxWidth > 900) {
+                        columns = 3;
+                      } else if (constraints.maxWidth > 600) {
+                        columns = 2;
+                      }
+
+                      final cardWidth =
+                          (constraints.maxWidth - (16 * (columns - 1))) /
+                          columns;
+
+                      return SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 16,
+                          runSpacing: 4,
+                          children: filteredRoutes.map((route) {
+                            return SizedBox(
+                              width: cardWidth,
+                              child: CustomBusCard(
+                                route: route,
+                                starred: true,
+                                onStarTap: () {},
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}

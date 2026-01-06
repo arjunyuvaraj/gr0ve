@@ -45,29 +45,20 @@ class LandingScreen extends StatelessWidget {
                           ConstrainedBox(
                             constraints: BoxConstraints(maxWidth: 600),
                             child: CustomPrimaryButton(
-                              label: "Continue".capitalized,
+                              label: "Sign In".capitalized,
                               onTap: () =>
-                                  Navigator.pushNamed(context, "/navigation"),
+                                  Navigator.pushNamed(context, "/login"),
                             ),
                           ),
-                          // TODO: add login
-                          // ConstrainedBox(
-                          //   constraints: BoxConstraints(maxWidth: 600),
-                          //   child: CustomPrimaryButton(
-                          //     label: "Sign In".capitalized,
-                          //     onTap: () =>
-                          //         Navigator.pushNamed(context, "/login"),
-                          //   ),
-                          // ),
-                          // const SizedBox(height: 16),
-                          // TextButton(
-                          //   onPressed: () =>
-                          //       Navigator.pushNamed(context, "/navigation"),
-                          //   child: Text(
-                          //     "Or contuine without an account".capitalized,
-                          //     textAlign: TextAlign.center,
-                          //   ),
-                          // ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pushNamed(context, "/navigation"),
+                            child: Text(
+                              "Or contuine without an account".capitalized,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -107,16 +98,9 @@ class LandingScreen extends StatelessWidget {
                       label: "Get Started".capitalized,
                       onTap: () => Navigator.pushNamed(context, "/navigation"),
                     ),
-                    // TODO: add signin
-                    // CustomPrimaryButton(
-                    //   label: "Sign In".capitalized,
-                    //   onTap: () => Navigator.pushNamed(context, "/login"),
-                    // ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      child: Text("Privacy Policy".capitalized),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, "/privacy_policy"),
+                    CustomPrimaryButton(
+                      label: "Sign In".capitalized,
+                      onTap: () => Navigator.pushNamed(context, "/login"),
                     ),
                   ],
                 ),

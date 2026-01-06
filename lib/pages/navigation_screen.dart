@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/pages/account_screen.dart';
+import 'package:gr0ve/pages/bus_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
-import 'package:gr0ve/pages/home_screen.dart';
+import 'package:gr0ve/pages/absence_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 
@@ -36,7 +37,8 @@ class NavigationScreenState extends State<NavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[
-      HomeScreen(),
+      AbsenceScreen(),
+      BusScreen(),
       AccountScreen(),
       PrivacyPolicyScreen(),
       HelpScreen(),
@@ -44,37 +46,27 @@ class NavigationScreenState extends State<NavigationScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: Padding(
+          padding: EdgeInsetsGeometry.only(left: 16),
+          child: GestureDetector(
+            onTap: () => {_scaffoldKey.currentState?.openDrawer()},
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              child: Icon(
+                Icons.menu_rounded,
+                color: context.colors.onSurface,
+                size: 28,
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              left: 32,
-              child: GestureDetector(
-                onTap: () => {_scaffoldKey.currentState?.openDrawer()},
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    Icons.menu_rounded,
-                    color: context.colors.onSurface,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 32,
-                ),
-                child: IndexedStack(index: _selectedIndex, children: children),
-              ),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
+          child: IndexedStack(index: _selectedIndex, children: children),
         ),
       ),
       drawer: Drawer(
@@ -96,26 +88,31 @@ class NavigationScreenState extends State<NavigationScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.home_rounded),
-              title: const Text("Home"),
+              title: const Text("Teacher Absence"),
               onTap: () => changeIndex(0),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bus_alert_rounded),
+              title: const Text("Buses"),
+              onTap: () => changeIndex(1),
             ),
 
             ListTile(
               leading: const Icon(Icons.person_rounded),
               title: const Text("Account"),
-              onTap: () => changeIndex(1),
+              onTap: () => changeIndex(2),
             ),
 
             ListTile(
               leading: const Icon(Icons.info_outline_rounded),
               title: const Text("Privacy Policy"),
-              onTap: () => changeIndex(2),
+              onTap: () => changeIndex(3),
             ),
 
             ListTile(
               leading: const Icon(Icons.help_outline_rounded),
               title: const Text("Contact Us"),
-              onTap: () => changeIndex(3),
+              onTap: () => changeIndex(4),
             ),
           ],
         ),
