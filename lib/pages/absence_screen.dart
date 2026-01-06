@@ -168,7 +168,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
           const SizedBox(height: 8),
 
           DropdownButtonFormField<String>(
-            value: selectedPeriod,
+            initialValue: selectedPeriod,
             decoration: InputDecoration(
               isDense: true,
               border: OutlineInputBorder(

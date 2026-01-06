@@ -1,4 +1,3 @@
-import 'package:gr0ve/utilities/data/teacher_list.dart';
 import 'package:universal_html/parsing.dart';
 import 'package:http/http.dart' as http;
 
