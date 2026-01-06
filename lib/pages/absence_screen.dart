@@ -14,7 +14,6 @@ class AbsenceScreen extends StatefulWidget {
 class _AbsenceScreenState extends State<AbsenceScreen> {
   List<Map<String, dynamic>> teachers = [];
   List<Map<String, dynamic>> filteredTeachers = [];
-
   bool isLoading = true;
   String searchQuery = "";
   String selectedPeriod = "All";
@@ -33,43 +32,29 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     "9",
   ];
 
-  // -----------------------------
-  // KIM EDGE CASE
-  // -----------------------------
+  // KIM edge case
   String getKimStatus() {
     final kimEntries = absenceList.keys
         .where((k) => k.toLowerCase().contains("kim"))
         .toList();
-
     if (kimEntries.isEmpty) return "Present";
-
     for (final key in kimEntries) {
       final status = absenceList[key];
-      if (status != null && status != "Present") {
-        return status;
-      }
+      if (status != null && status != "Present") return status;
     }
-
     return "Present";
   }
 
-  // -----------------------------
-  // INIT
-  // -----------------------------
   @override
   void initState() {
     super.initState();
     loadTeachers();
   }
 
-  // -----------------------------
-  // LOAD FROM teacherList ONLY
-  // -----------------------------
   void loadTeachers() {
     final data = teacherList.values
         .map((t) => Map<String, dynamic>.from(t))
         .toList();
-
     setState(() {
       teachers = data;
       filteredTeachers = data;
@@ -77,13 +62,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     });
   }
 
-  // -----------------------------
-  // FILTERING
-  // -----------------------------
   void applyFilters() {
     List<Map<String, dynamic>> result = teachers;
 
-    // SEARCH
     if (searchQuery.isNotEmpty) {
       result = result.where((t) {
         return t['name'].toString().toLowerCase().contains(
@@ -92,14 +73,12 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       }).toList();
     }
 
-    // PERIOD
     if (selectedPeriod.toLowerCase() != "all") {
       result = result.where((t) {
         final lastName = t['name'].toString().split(",")[0].trim();
         final status = lastName.toLowerCase() == "kim"
             ? getKimStatus()
             : (absenceList[lastName] ?? "Present");
-
         return status.toLowerCase().contains(selectedPeriod.toLowerCase());
       }).toList();
     }
@@ -112,36 +91,29 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     applyFilters();
   }
 
-  // -----------------------------
-  // SORTING (ABSENT FIRST)
-  // -----------------------------
   List<Map<String, dynamic>> getOrderedTeachers() {
     return filteredTeachers.toList()..sort((a, b) {
       final aLast = a['name'].toString().split(",")[0].trim();
       final bLast = b['name'].toString().split(",")[0].trim();
-
       final aStatus = aLast.toLowerCase() == "kim"
           ? getKimStatus()
           : (absenceList[aLast] ?? "Present");
-
       final bStatus = bLast.toLowerCase() == "kim"
           ? getKimStatus()
           : (absenceList[bLast] ?? "Present");
-
       final aAbsent = aStatus != "Present";
       final bAbsent = bStatus != "Present";
-
       if (aAbsent && !bAbsent) return -1;
       if (!aAbsent && bAbsent) return 1;
       return 0;
     });
   }
 
-  // -----------------------------
-  // UI
-  // -----------------------------
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final textTheme = context.text;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Column(
@@ -150,42 +122,92 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
             title: "Teachers".capitalized,
             subtitle: absenceList['Date']?.toString().capitalized ?? "",
           ),
-
           const SizedBox(height: 12),
 
+          // ── SEARCH ─────────────────────────────
           TextField(
             decoration: InputDecoration(
-              hintText: 'Search teachers...',
+              hintText: 'Search teachers…',
               prefixIcon: const Icon(Icons.search, size: 20),
               isDense: true,
+              filled: true,
+              fillColor: colors.surface,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.primary, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+            style: textTheme.bodyMedium?.copyWith(
+              color: colors.onSurface,
+              fontWeight: FontWeight.w600,
             ),
             onChanged: filterTeachers,
           ),
-
           const SizedBox(height: 8),
 
+          // ── PERIOD DROPDOWN ───────────────────
           DropdownButtonFormField<String>(
-            initialValue: selectedPeriod,
+            value: selectedPeriod,
             decoration: InputDecoration(
               isDense: true,
+              filled: true,
+              fillColor: colors.surface,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.primary, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
             ),
+            style: textTheme.bodyMedium?.copyWith(
+              color: colors.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+            dropdownColor: colors.surface,
             items: periodOptions
-                .map((p) => DropdownMenuItem(value: p, child: Text("Per: $p")))
+                .map(
+                  (p) => DropdownMenuItem(
+                    value: p,
+                    child: Text(
+                      "Per: $p",
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                  ),
+                )
                 .toList(),
             onChanged: (value) {
               selectedPeriod = value!;
               applyFilters();
             },
           ),
+          const SizedBox(height: 12),
 
-          const SizedBox(height: 10),
-
+          // ── TEACHER LIST ──────────────────────
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -203,7 +225,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                       final cardWidth =
                           (constraints.maxWidth - (16 * (columns - 1))) /
                           columns;
-
                       final ordered = getOrderedTeachers();
 
                       return SingleChildScrollView(
@@ -211,13 +232,12 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                           padding: const EdgeInsets.only(top: 6),
                           child: Wrap(
                             spacing: 16,
-                            runSpacing: 16,
+                            runSpacing: 12,
                             children: ordered.map((t) {
                               final lastName = t['name']
                                   .toString()
                                   .split(",")[0]
                                   .trim();
-
                               final status = lastName.toLowerCase() == "kim"
                                   ? getKimStatus()
                                   : (absenceList[lastName] ?? "Present");
@@ -231,7 +251,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                   status: status,
                                   starred: false,
                                   star: false,
-                                  onTap: () {},
+                                  onStarTap: () {},
                                 ),
                               );
                             }).toList(),

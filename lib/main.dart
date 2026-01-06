@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/pages/account_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
@@ -8,6 +7,7 @@ import 'package:gr0ve/pages/privacy_policy_screen.dart';
 import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/theme/light_theme.dart';
 import 'package:gr0ve/utilities/data/teacher_list.dart';
+import 'package:gr0ve/utilities/landing_decider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,15 +36,14 @@ class MyApp extends StatelessWidget {
       title: 'Gr0ve',
       theme: lightTheme,
       debugShowCheckedModeBanner: false,
-
-      // 🚀 Direct entry — no auth gate
-      home: const NavigationScreen(),
-
+      home: LandingDecider(
+        landingPage: const LandingScreen(),
+        navigationRoute: '/navigation',
+      ),
       routes: {
         '/home': (context) => const AbsenceScreen(),
         '/landing': (context) => const LandingScreen(),
         '/navigation': (context) => const NavigationScreen(),
-        '/account': (context) => const AccountScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
         '/help': (context) => const HelpScreen(),
       },

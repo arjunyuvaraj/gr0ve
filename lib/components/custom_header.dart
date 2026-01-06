@@ -10,28 +10,37 @@ class CustomHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Main Title
         Text(
           title,
           style: context.text.displayLarge?.copyWith(
-            fontSize: 40,
-            height: 1.0,
-            letterSpacing: getLetterSpacing(40, 25),
+            fontSize: 36,
+            height: 1.1,
+            letterSpacing: getLetterSpacing(36, 24),
+            fontWeight: FontWeight.w800,
+            color: colors.primary, // accent color for the title
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 4), // tighter
+        const SizedBox(height: 6), // slightly more breathing room
+        // Subtitle
         Text(
           subtitle,
           style: context.text.displaySmall?.copyWith(
-            fontSize: 14,
+            fontSize: 15,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w600,
+            color: colors.onSurface.withAlpha(160), // subtle muted tone
           ),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 16), // separates header from content
       ],
     );
   }

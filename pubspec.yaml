@@ -44,6 +44,7 @@ dependencies:
   package_info_plus: ^8.0.0
   convert: ^3.1.2
   csv: ^6.0.0
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:

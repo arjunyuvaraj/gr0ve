@@ -10,9 +10,7 @@ class BusRoute {
 }
 
 Future<List<BusRoute>> fetchBusRoutes(String sheetUrl) async {
-  final csvUrl = sheetUrl.replaceAll('/pubhtml', '/gviz/tq?tqx=out:csv');
-
-  final response = await http.get(Uri.parse(csvUrl));
+  final response = await http.get(Uri.parse(sheetUrl));
 
   if (response.statusCode != 200) {
     print("ERROR: Failed to fetch bus routes CSV");
@@ -21,40 +19,41 @@ Future<List<BusRoute>> fetchBusRoutes(String sheetUrl) async {
 
   final List<BusRoute> routes = [];
 
-  // Parse CSV safely (handles quotes + commas)
   final rows = const CsvToListConverter(eol: '\n').convert(response.body);
+  if (rows.length <= 1) return [];
 
-  if (rows.isEmpty) return [];
-
-  // Columns that actually contain town data in your sheet
-  const townColumns = [0, 2];
+  // Column pairs: [townColumn, routeColumn]
+  const columnPairs = [
+    [0, 1],
+    [2, 3],
+  ];
 
   for (int i = 1; i < rows.length; i++) {
     final row = rows[i];
 
-    for (final col in townColumns) {
-      if (col >= row.length) continue;
+    for (final pair in columnPairs) {
+      final townCol = pair[0];
+      final routeCol = pair[1];
 
-      final cell = row[col]?.toString().trim() ?? "";
-      if (cell.isEmpty) continue;
+      if (townCol >= row.length || routeCol >= row.length) continue;
 
-      final towns = cell
+      final town = row[townCol]?.toString().trim() ?? "";
+      final code = row[routeCol]?.toString().trim() ?? "";
+
+      if (town.isEmpty || code.isEmpty) continue;
+
+      final towns = town
           .split('/')
           .map((t) => t.trim())
           .where((t) => t.isNotEmpty)
           .toList();
 
-      if (towns.isEmpty) continue;
-
-      routes.add(
-        BusRoute(
-          code: "?", // no codes exist in this CSV
-          towns: towns,
-          status: "Not here yet",
-        ),
-      );
+      routes.add(BusRoute(code: code, towns: towns, status: "Not here yet"));
     }
   }
+
+  routes.sort((a, b) => a.towns.first.compareTo(b.towns.first));
+
   print("Fetched ${routes.length} bus routes");
   return routes;
 }

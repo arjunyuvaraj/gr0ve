@@ -2,86 +2,92 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gr0ve/utilities/helper_functions.dart';
 
-final lightTheme = ThemeData(
-  // LIGHT THEME
+final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
-  scaffoldBackgroundColor: Colors.white,
-  // COLOR SCHEME
-  colorScheme: ColorScheme.light(
-    primary: Color(0xFF496E4C),
-    secondary: Color(0xFF202124),
-    tertiary: Color(0xFFF6F5F4),
-    onPrimary: Color(0xFFFDFDFD),
-    onSurface: Color(0xFF202124),
+  scaffoldBackgroundColor: const Color(0xFFFDFEFE),
+
+  // 🌱 COLOR SCHEME
+  colorScheme: const ColorScheme.light(
+    primary: Color(0xFF1F6F5B), // Forest green
+    secondary: Color(0xFF4FD1C5), // Accent mint (great for the "0")
+    errorContainer: Color(0xFF6F1F1F),
+    onErrorContainer: Color.fromARGB(255, 209, 79, 79),
+    surface: Color(0xFFFFFFFF),
+    tertiary: Color(0xFFF2F7F6),
+    onPrimary: Color(0xFFFFFFFF),
+    onSurface: Color(0xFF1A1D1F),
   ),
+
+  // 🔤 TEXT THEME
   textTheme: TextTheme(
-    // TEXT: Displays
-    displayLarge: GoogleFonts.robotoMono(
-      fontWeight: FontWeight.w900,
+    // BRAND / DISPLAY (use sparingly)
+    displayLarge: GoogleFonts.jetBrainsMono(
       fontSize: 52,
-      color: Color(0xFF253726).withAlpha(225),
-      letterSpacing: getLetterSpacing(54, 25),
+      fontWeight: FontWeight.w800,
+      letterSpacing: getLetterSpacing(52, 18),
+      color: const Color(0xFF1F6F5B),
     ),
-    displayMedium: GoogleFonts.robotoMono(
-      fontWeight: FontWeight.w900,
-      fontSize: 52,
-      color: Color(0xFF253726).withAlpha(225),
-      letterSpacing: getLetterSpacing(54, 15),
-    ),
-    displaySmall: GoogleFonts.robotoMono(
-      fontWeight: FontWeight.w500,
-      fontSize: 24,
-      fontStyle: FontStyle.italic,
-      color: Color(0xFF253726).withAlpha(100),
-      letterSpacing: getLetterSpacing(24, 5),
-    ),
-    // TEXT: Headlines
-    headlineMedium: GoogleFonts.roboto(
-      fontWeight: FontWeight.w900,
-      fontSize: 32,
-      letterSpacing: getLetterSpacing(32, 15),
-    ),
-    headlineSmall: GoogleFonts.roboto(
-      fontWeight: FontWeight.w600,
-      fontSize: 24,
-      color: Colors.black,
-      letterSpacing: getLetterSpacing(24, 5),
-    ),
-
-    // TEXT: Bodies
-    bodyMedium: GoogleFonts.roboto(
-      fontWeight: FontWeight.w400,
-      fontSize: 16,
-      color: Color(0xFF202124),
-      letterSpacing: getLetterSpacing(18, 2.5),
-    ),
-
-    // TEXT: Labels
-    labelLarge: GoogleFonts.workSans(
-      color: Color(0xFFDADADA),
-      fontSize: 16,
+    displayMedium: GoogleFonts.jetBrainsMono(
+      fontSize: 40,
       fontWeight: FontWeight.w700,
-      letterSpacing: getLetterSpacing(16, 10),
+      letterSpacing: getLetterSpacing(40, 14),
+      color: const Color(0xFF1F6F5B),
+    ),
+    displaySmall: GoogleFonts.manrope(
+      fontSize: 20,
+      fontWeight: FontWeight.w500,
+      color: const Color(0xFF5F6C72),
+      letterSpacing: getLetterSpacing(20, 4),
+    ),
+
+    // HEADLINES
+    headlineMedium: GoogleFonts.manrope(
+      fontSize: 30,
+      fontWeight: FontWeight.w700,
+      letterSpacing: getLetterSpacing(30, 8),
+      color: const Color(0xFF1A1D1F),
+    ),
+    headlineSmall: GoogleFonts.manrope(
+      fontSize: 22,
+      fontWeight: FontWeight.w600,
+      letterSpacing: getLetterSpacing(22, 4),
+      color: const Color(0xFF1A1D1F),
+    ),
+
+    // BODY
+    bodyMedium: GoogleFonts.manrope(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      letterSpacing: getLetterSpacing(16, 2),
+      color: const Color(0xFF2E3336),
+    ),
+
+    // LABELS / BUTTONS
+    labelLarge: GoogleFonts.manrope(
+      fontSize: 15,
+      fontWeight: FontWeight.w700,
+      letterSpacing: getLetterSpacing(15, 10),
+      color: const Color(0xFF1F6F5B),
     ),
   ),
 
-  // INPUT
+  // 🧩 INPUTS
   inputDecorationTheme: InputDecorationTheme(
-    labelStyle: GoogleFonts.workSans(
-      color: Color(0xFF202124), // visible label color when not focused
+    labelStyle: GoogleFonts.manrope(
       fontWeight: FontWeight.w600,
+      color: const Color(0xFF2E3336),
     ),
-    floatingLabelStyle: GoogleFonts.workSans(
-      color: Color(0xFF202124),
+    floatingLabelStyle: GoogleFonts.manrope(
       fontWeight: FontWeight.w700,
+      color: const Color(0xFF1F6F5B),
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.black45, width: 1.5),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: Color(0xFFD1D9D6), width: 1.4),
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.black45, width: 1.5),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: Color(0xFF1F6F5B), width: 1.8),
     ),
   ),
 );

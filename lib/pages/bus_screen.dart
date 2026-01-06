@@ -15,6 +15,8 @@ class _BusScreenState extends State<BusScreen> {
   List<BusRoute> filteredRoutes = [];
   bool isLoading = true;
   String searchQuery = "";
+  bool isRefreshing = false;
+  String? errorMessage;
 
   final String sheetUrl =
       "https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/gviz/tq?tqx=out:csv&gid=0";
@@ -25,13 +27,38 @@ class _BusScreenState extends State<BusScreen> {
     loadRoutes();
   }
 
-  Future<void> loadRoutes() async {
-    final routes = await fetchBusRoutes(sheetUrl);
-    setState(() {
-      allRoutes = routes;
-      filteredRoutes = routes;
-      isLoading = false;
-    });
+  Future<void> loadRoutes({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+    } else {
+      isRefreshing = true;
+    }
+
+    try {
+      final routes = await fetchBusRoutes(sheetUrl);
+
+      if (!mounted) return;
+
+      setState(() {
+        allRoutes = routes;
+        filterRoutes(searchQuery); // preserves search state
+        isLoading = false;
+        errorMessage = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+        errorMessage = "Failed to update bus data";
+        // IMPORTANT: we do NOT clear existing routes
+      });
+    } finally {
+      isRefreshing = false;
+    }
   }
 
   void filterRoutes(String query) {
@@ -91,20 +118,24 @@ class _BusScreenState extends State<BusScreen> {
                           (constraints.maxWidth - (16 * (columns - 1))) /
                           columns;
 
-                      return SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 16,
-                          runSpacing: 4,
-                          children: filteredRoutes.map((route) {
-                            return SizedBox(
-                              width: cardWidth,
-                              child: CustomBusCard(
-                                route: route,
-                                starred: true,
-                                onStarTap: () {},
-                              ),
-                            );
-                          }).toList(),
+                      return RefreshIndicator(
+                        onRefresh: () => loadRoutes(silent: true),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Wrap(
+                            spacing: 16,
+                            runSpacing: 8,
+                            children: filteredRoutes.map((route) {
+                              return SizedBox(
+                                width: cardWidth,
+                                child: CustomBusCard(
+                                  route: route,
+                                  starred: true,
+                                  onStarTap: () {},
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       );
                     },

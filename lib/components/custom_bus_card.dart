@@ -16,50 +16,42 @@ class CustomBusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.tertiary,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black12, width: 1),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: colors.onSurface.withAlpha(12), // slightly softer shadow
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // --- Star icon ---
-          // GestureDetector(
-          //   onTap: onStarTap,
-          //   child: Icon(
-          //     starred ? Icons.star_rounded : Icons.star_border_rounded,
-          //     size: 28,
-          //     color: starred ? Colors.amber.shade600 : Colors.black45,
-          //   ),
-          // ),
-          // const SizedBox(width: 12),
-
-          // --- Center column: Town + Status ---
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Towns
                 Text(
                   route.towns.join(" / "),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.black87,
                     fontWeight: FontWeight.w600,
                   ),
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6), // subtle spacing like teacher card
+                // Status
                 Text(
                   route.status,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.black.withAlpha(100),
-                    fontWeight: FontWeight.w500,
+                    color: colors.onSurface.withAlpha(120), // softer alpha
                   ),
                 ),
               ],
@@ -68,8 +60,27 @@ class CustomBusCard extends StatelessWidget {
 
           const SizedBox(width: 12),
 
-          // --- Right circle ---
-          CircleAvatar(child: Text(route.code)),
+          // Route Code Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: route.code == "?"
+                  ? colors.error.withAlpha(24)
+                  : colors.primary.withAlpha(24),
+              borderRadius: BorderRadius.circular(
+                18,
+              ), // matches teacher card style
+            ),
+            child: Text(
+              route.code,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: route.code == "?" ? colors.error : colors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
         ],
       ),
     );

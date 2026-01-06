@@ -1,51 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 
-// ignore: must_be_immutable
 class CustomContactCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final Color color;
-  final Color textColor;
-  GestureTapCallback? onTap = () {};
-  CustomContactCard({
+  final IconData icon;
+  final VoidCallback? onTap;
+  final bool isDestructive;
+
+  const CustomContactCard({
     super.key,
     required this.title,
     required this.subtitle,
-    required this.color,
-    required this.textColor,
+    required this.icon,
     this.onTap,
+    this.isDestructive = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(18),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.black12, width: 1.2),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            title,
-            style: context.text.headlineSmall?.copyWith(color: textColor),
-            textAlign: TextAlign.center,
+    final colors = context.colors;
+
+    final bgColor = isDestructive ? colors.error.withAlpha(30) : colors.surface;
+
+    final textColor = isDestructive ? colors.error : colors.onSurface;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: colors.onSurface.withAlpha(20),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          GestureDetector(
-            onTap: onTap,
-            child: Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: context.text.bodyMedium?.copyWith(color: textColor),
-            ),
+          child: Row(
+            children: [
+              Icon(icon, size: 26, color: textColor.withAlpha(220)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: context.text.titleMedium?.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: context.text.bodyMedium?.copyWith(
+                        color: textColor.withAlpha(180),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: textColor.withAlpha(160),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

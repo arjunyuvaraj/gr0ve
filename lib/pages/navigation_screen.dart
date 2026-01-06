@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/pages/account_screen.dart';
 import 'package:gr0ve/pages/bus_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
+import 'package:gr0ve/pages/quick_links_screen.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 
 class NavigationScreen extends StatefulWidget {
   final int initialIndex;
-  final String? initialStore;
 
-  const NavigationScreen({super.key, this.initialIndex = 0, this.initialStore});
+  const NavigationScreen({super.key, this.initialIndex = 0});
 
   @override
   NavigationScreenState createState() => NavigationScreenState();
@@ -29,91 +28,69 @@ class NavigationScreenState extends State<NavigationScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    Navigator.pop(context);
   }
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Widget _buildNavIcon(IconData icon, int index) {
+    final isSelected = _selectedIndex == index;
+
+    return IconButton(
+      onPressed: () => changeIndex(index),
+      icon: Icon(
+        icon,
+        size: 28,
+        color: isSelected
+            ? context.colors.primary
+            : context.colors.onSurface.withAlpha(140),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[
-      AbsenceScreen(),
-      BusScreen(),
-      AccountScreen(),
-      PrivacyPolicyScreen(),
-      HelpScreen(),
+      const AbsenceScreen(),
+      const BusScreen(),
+      const HelpScreen(),
+      QuickLinksScreen(),
     ];
 
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: Padding(
-          padding: EdgeInsetsGeometry.only(left: 16),
-          child: GestureDetector(
-            onTap: () => {_scaffoldKey.currentState?.openDrawer()},
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              child: Icon(
-                Icons.menu_rounded,
-                color: context.colors.onSurface,
-                size: 28,
-              ),
-            ),
-          ),
-        ),
-      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: IndexedStack(index: _selectedIndex, children: children),
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+
+      // 🔥 Bottom Navigation Bar
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: context.colors.onSurface.withAlpha(30),
+              blurRadius: 16,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.only(
+          left: 24,
+          right: 24,
+          bottom: 24,
+          top: 12,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: Center(
-                child: Text(
-                  "gr0ve".capitalized,
-                  style: context.text.displayMedium?.copyWith(
-                    color: context.colors.onPrimary.withAlpha(200),
-                  ),
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home_rounded),
-              title: const Text("Teacher Absence"),
-              onTap: () => changeIndex(0),
-            ),
-            ListTile(
-              leading: const Icon(Icons.bus_alert_rounded),
-              title: const Text("Buses"),
-              onTap: () => changeIndex(1),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.person_rounded),
-              title: const Text("Account"),
-              onTap: () => changeIndex(2),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.info_outline_rounded),
-              title: const Text("Privacy Policy"),
-              onTap: () => changeIndex(3),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.help_outline_rounded),
-              title: const Text("Contact Us"),
-              onTap: () => changeIndex(4),
-            ),
+            _buildNavIcon(Icons.home_rounded, 0),
+            _buildNavIcon(Icons.bus_alert_rounded, 1),
+            _buildNavIcon(Icons.help_outline_rounded, 2),
+            _buildNavIcon(Icons.link, 3),
           ],
         ),
       ),
