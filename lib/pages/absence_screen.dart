@@ -18,7 +18,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   List<Map<String, dynamic>> filteredTeachers = [];
   Map<String, String> absenceList = {};
 
-  Set<String> starredTeachers = {};
   bool isLoading = true;
   String searchQuery = "";
   String selectedPeriod = "All";
@@ -44,20 +43,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   }
 
   Future<void> _initializeScreen() async {
-    await loadStarredTeachers();
+    await StarredTeacherService.load();
     await loadTeachers();
     await loadAbsences();
-  }
-
-  Future<void> loadStarredTeachers() async {
-    final starred = await StarredTeacherService.getStarredTeachers();
-    if (!mounted) return;
-    setState(() => starredTeachers = starred);
-  }
-
-  Future<void> toggleTeacherStar(String fullName) async {
-    await StarredTeacherService.toggleTeacher(fullName);
-    await loadStarredTeachers();
   }
 
   Future<void> loadTeachers() async {
@@ -66,6 +54,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         .toList();
 
     if (!mounted) return;
+
     setState(() {
       teachers = data;
       filteredTeachers = applyFilters(data);
@@ -108,6 +97,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       }
       return "Present";
     }
+
     return absenceList[normalizedName.substring(
           0,
           normalizedName.indexOf(","),
@@ -136,7 +126,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     return result;
   }
 
-  List<Map<String, dynamic>> getOrderedTeachers() {
+  List<Map<String, dynamic>> getOrderedTeachers(Set<String> starredTeachers) {
     return filteredTeachers.toList()..sort((a, b) {
       final aName = a['name'];
       final bName = b['name'];
@@ -160,7 +150,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final orderedTeachers = getOrderedTeachers();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -216,51 +205,63 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
           const SizedBox(height: 12),
 
-          // TEACHERS
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : orderedTeachers.isEmpty
-                ? const Center(child: Text("No teachers found"))
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      int columns = 1;
-                      if (constraints.maxWidth > 1000) {
-                        columns = 3;
-                      } else if (constraints.maxWidth > 650) {
-                        columns = 2;
+                : ValueListenableBuilder<Set<String>>(
+                    valueListenable: StarredTeacherService.starredTeachers,
+                    builder: (context, starredTeachers, _) {
+                      final orderedTeachers = getOrderedTeachers(
+                        starredTeachers,
+                      );
+
+                      if (orderedTeachers.isEmpty) {
+                        return const Center(child: Text("No teachers found"));
                       }
 
-                      final cardWidth =
-                          (constraints.maxWidth - (16 * (columns - 1))) /
-                          columns;
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          int columns = 1;
+                          if (constraints.maxWidth > 1000) {
+                            columns = 3;
+                          } else if (constraints.maxWidth > 650) {
+                            columns = 2;
+                          }
 
-                      return RefreshIndicator(
-                        onRefresh: () => loadAbsences(silent: true),
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Wrap(
-                            spacing: 16,
-                            runSpacing: 12,
-                            children: orderedTeachers.map((t) {
-                              final name = t['name'];
-                              final status = getTeacherStatus(name);
+                          final cardWidth =
+                              (constraints.maxWidth - (16 * (columns - 1))) /
+                              columns;
 
-                              return SizedBox(
-                                width: cardWidth,
-                                child: CustomTeacherCard(
-                                  name: name,
-                                  department: t['department'],
-                                  email: t['email'],
-                                  status: status,
-                                  showStar: true,
-                                  starred: starredTeachers.contains(name),
-                                  onStarTap: () => toggleTeacherStar(name),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
+                          return RefreshIndicator(
+                            onRefresh: () => loadAbsences(silent: true),
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Wrap(
+                                spacing: 16,
+                                runSpacing: 12,
+                                children: orderedTeachers.map((t) {
+                                  final name = t['name'];
+
+                                  return SizedBox(
+                                    width: cardWidth,
+                                    child: CustomTeacherCard(
+                                      name: name,
+                                      department: t['department'],
+                                      email: t['email'],
+                                      status: getTeacherStatus(name),
+                                      showStar: true,
+                                      starred: starredTeachers.contains(name),
+                                      onStarTap: () =>
+                                          StarredTeacherService.toggleTeacher(
+                                            name,
+                                          ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

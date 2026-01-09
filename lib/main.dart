@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
+import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
 import 'package:gr0ve/pages/navigation_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
@@ -40,7 +41,8 @@ class MyApp extends StatelessWidget {
         navigationRoute: '/navigation',
       ),
       routes: {
-        '/home': (context) => const AbsenceScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/teacher_absence': (context) => const AbsenceScreen(),
         '/landing': (context) => const LandingScreen(),
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),

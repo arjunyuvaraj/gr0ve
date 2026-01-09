@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/pages/bus_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
+import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/pages/quick_links_screen.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 
@@ -47,6 +48,7 @@ class NavigationScreenState extends State<NavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[
+      const HomeScreen(),
       const AbsenceScreen(),
       const BusScreen(),
       const HelpScreen(),
@@ -86,11 +88,11 @@ class NavigationScreenState extends State<NavigationScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // _buildNavIcon(Icons.home_rounded, 4),
-            _buildNavIcon(Icons.person_off_rounded, 0),
-            _buildNavIcon(Icons.bus_alert_rounded, 1),
-            _buildNavIcon(Icons.help_outline_rounded, 2),
-            _buildNavIcon(Icons.link, 3),
+            _buildNavIcon(Icons.home_rounded, 0),
+            _buildNavIcon(Icons.person_off_rounded, 1),
+            _buildNavIcon(Icons.bus_alert_rounded, 2),
+            _buildNavIcon(Icons.help_outline_rounded, 3),
+            _buildNavIcon(Icons.link, 4),
           ],
         ),
       ),

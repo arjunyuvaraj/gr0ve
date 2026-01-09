@@ -16,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  bool isLoading = true;
+  bool isInitialLoading = true;
 
   Map<String, String> absenceList = {};
   Set<String> starredTeachers = {};
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadData();
+    _initialLoad();
   }
 
   @override
@@ -40,46 +40,116 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _loadData();
+    if (state == AppLifecycleState.resumed) {
+      _refreshStatusesOnly();
+      _refreshStars();
+    }
   }
 
-  Future<void> _loadData() async {
-    setState(() => isLoading = true);
+  Future<void> _refreshStars() async {
+    final newStarredTeachers = await StarredTeacherService.getStarredTeachers();
+    final newStarredTowns = await StarredBusService.getStarredTowns();
+
+    final allBuses = await fetchBusRoutes();
+
+    if (!mounted) return;
+
+    setState(() {
+      starredTeachers = newStarredTeachers;
+      starredTowns = newStarredTowns;
+
+      teachers = teacherList.values
+          .map((t) => Map<String, dynamic>.from(t))
+          .where((t) => starredTeachers.contains(t['name']))
+          .toList();
+
+      buses = allBuses.where((b) => starredTowns.contains(b.town)).toList();
+    });
+  }
+
+  /// ----------------------------
+  /// INITIAL LOAD (runs once)
+  /// ----------------------------
+  Future<void> _initialLoad() async {
+    await Future.wait([_loadAbsences(), _loadTeachers(), _loadBuses()]);
+
+    if (!mounted) return;
+    setState(() => isInitialLoading = false);
+  }
+
+  /// ----------------------------
+  /// LIGHT REFRESH (no spinner)
+  /// ----------------------------
+  Future<void> _refreshStatusesOnly() async {
+    final absences = await fetchGoogleDocMap('YOUR_DOC_URL_HERE');
+    if (!mounted) return;
+    setState(() => absenceList = absences);
+  }
+
+  Future<void> _loadAbsences() async {
     try {
       absenceList = await fetchGoogleDocMap('YOUR_DOC_URL_HERE');
     } catch (_) {
       absenceList = {};
     }
+  }
 
+  Future<void> _loadTeachers() async {
     starredTeachers = await StarredTeacherService.getStarredTeachers();
+
     teachers = teacherList.values
         .map((t) => Map<String, dynamic>.from(t))
         .where((t) => starredTeachers.contains(t['name']))
         .toList();
+  }
 
+  Future<void> _loadBuses() async {
     starredTowns = await StarredBusService.getStarredTowns();
     final allBuses = await fetchBusRoutes();
-    buses = allBuses.where((b) => starredTowns.contains(b.town)).toList();
 
-    if (!mounted) return;
-    setState(() => isLoading = false);
+    buses = allBuses.where((b) => starredTowns.contains(b.town)).toList();
   }
 
   String getTeacherStatus(String fullName) {
-    final key = fullName.contains(",")
-        ? fullName.split(",")[0].trim()
+    final key = fullName.contains(',')
+        ? fullName.split(',')[0].trim()
         : fullName.trim();
+
     return absenceList[key] ?? "Present";
   }
 
+  /// ----------------------------
+  /// LOCAL STAR UPDATES (NO RELOAD)
+  /// ----------------------------
   Future<void> toggleTeacherStar(String name) async {
     await StarredTeacherService.toggleTeacher(name);
-    await _loadData();
+
+    final updatedStarred = await StarredTeacherService.getStarredTeachers();
+
+    if (!mounted) return;
+
+    setState(() {
+      starredTeachers = updatedStarred;
+
+      teachers = teacherList.values
+          .map((t) => Map<String, dynamic>.from(t))
+          .where((t) => starredTeachers.contains(t['name']))
+          .toList();
+    });
   }
 
   Future<void> toggleBusStar(BusRoute route) async {
     await StarredBusService.toggleTown(route.town);
-    await _loadData();
+
+    final updatedStarred = await StarredBusService.getStarredTowns();
+    final allBuses = await fetchBusRoutes();
+
+    if (!mounted) return;
+
+    setState(() {
+      starredTowns = updatedStarred;
+      buses = allBuses.where((b) => starredTowns.contains(b.town)).toList();
+    });
   }
 
   @override
@@ -87,89 +157,83 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-        child: isLoading
+        child: isInitialLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
+            : ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: const CustomHeader(
-                        title: "GR0VE",
-                        subtitle: "FOR BCA",
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      "STARRED TEACHERS",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (teachers.isEmpty)
-                      const Center(
+                children: [
+                  const CustomHeader(title: "GR0VE", subtitle: "FOR BCA"),
+                  const SizedBox(height: 24),
+
+                  /// ----------------------------
+                  /// TEACHERS
+                  /// ----------------------------
+                  const Text(
+                    "STARRED TEACHERS",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (teachers.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
                         child: Text(
                           "Nothing here",
                           style: TextStyle(color: Colors.grey),
                         ),
-                      )
-                    else
-                      Column(
-                        children: teachers.map((t) {
-                          final name = t['name'];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: CustomTeacherCard(
-                              name: name,
-                              department: t['department'],
-                              email: t['email'],
-                              status: getTeacherStatus(name),
-                              showStar: true,
-                              starred: starredTeachers.contains(name),
-                              onStarTap: () => toggleTeacherStar(name),
-                            ),
-                          );
-                        }).toList(),
                       ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      "FAVORITE BUSES",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (buses.isEmpty)
-                      const Center(
+                    )
+                  else
+                    ...teachers.map((t) {
+                      final name = t['name'];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: CustomTeacherCard(
+                          name: name,
+                          department: t['department'],
+                          email: t['email'],
+                          status: getTeacherStatus(name),
+                          showStar: true,
+                          starred: true,
+                          onStarTap: () => toggleTeacherStar(name),
+                        ),
+                      );
+                    }),
+
+                  const SizedBox(height: 32),
+
+                  /// ----------------------------
+                  /// BUSES
+                  /// ----------------------------
+                  const Text(
+                    "FAVORITE BUSES",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (buses.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
                         child: Text(
                           "Nothing here",
                           style: TextStyle(color: Colors.grey),
                         ),
-                      )
-                    else
-                      Wrap(
-                        spacing: 16,
-                        runSpacing: 12,
-                        children: buses.map((b) {
-                          final isStarred = starredTowns.contains(b.town);
-                          return SizedBox(
-                            width: MediaQuery.of(context).size.width > 600
-                                ? (MediaQuery.of(context).size.width - 48) / 2
-                                : double.infinity,
-                            child: CustomBusCard(
-                              route: b,
-                              starred: isStarred,
-                              onStarTap: () => toggleBusStar(b),
-                            ),
-                          );
-                        }).toList(),
                       ),
-                  ],
-                ),
+                    )
+                  else
+                    ...buses.map((b) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: CustomBusCard(
+                          route: b,
+                          starred: true,
+                          onStarTap: () => toggleBusStar(b),
+                        ),
+                      );
+                    }),
+                ],
               ),
       ),
     );

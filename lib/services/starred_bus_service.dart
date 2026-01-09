@@ -3,28 +3,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 class StarredBusService {
   static const _key = 'starred_towns';
 
-  static Future<Set<String>> getStarredTowns() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(_key)?.toSet() ?? {};
+  class StarredBusService {
+  static final ValueNotifier<Set<String>> starredTowns =
+      ValueNotifier(<String>{});
+
+  static Future<void> load() async {
+    starredTowns.value = await getStarredTowns();
   }
 
   static Future<void> toggleTown(String town) async {
-    final prefs = await SharedPreferences.getInstance();
-    final towns = prefs.getStringList(_key)?.toSet() ?? {};
+    final current = await getStarredTowns();
 
-    if (towns.contains(town)) {
-      towns.remove(town);
+    if (current.contains(town)) {
+      current.remove(town);
     } else {
-      towns.add(town);
+      current.add(town);
     }
 
-    await prefs.setStringList(_key, towns.toList());
+    await saveStarredTowns(current);
+    starredTowns.value = Set.from(current);
   }
+}
 
-  static bool routeIsStarred(
-    List<String> routeTowns,
-    Set<String> starredTowns,
-  ) {
-    return routeTowns.any(starredTowns.contains);
-  }
 }

@@ -50,23 +50,39 @@ String _normalizeTeacherName(String raw) {
     final last = parts.last;
     return '$last, $first';
   }
-
   return raw;
 }
 
 String _formatPeriods(String input) {
   final hasIGS = input.contains('IGS');
 
+  final singlePeriodMatch = RegExp(
+    r'\b(\d+)(st|nd|rd|th)?\s+Period\b',
+    caseSensitive: false,
+  ).firstMatch(input);
+
+  if (singlePeriodMatch != null) {
+    final periodNumber = singlePeriodMatch.group(1);
+    return hasIGS ? 'Period $periodNumber & IGS' : 'Period $periodNumber';
+  }
+
   final cleaned = input
       .replaceAll('Periods', '')
+      .replaceAll('Period', '')
       .replaceAll('Day', '')
       .replaceAll('IGS', '')
+      .replaceAll('&', '')
+      .replaceAll('Only', '')
       .trim();
 
   final expanded = _expandRange(cleaned);
 
   if (expanded.isEmpty) return hasIGS ? 'IGS' : 'Present';
-  return hasIGS ? 'Periods $expanded & IGS' : 'Periods $expanded';
+  return expanded == "All"
+      ? "All"
+      : hasIGS
+      ? 'Periods $expanded & IGS'
+      : 'Periods $expanded';
 }
 
 String _expandRange(String range) {

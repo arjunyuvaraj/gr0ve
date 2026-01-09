@@ -14,24 +14,17 @@ class BusScreen extends StatefulWidget {
 class _BusScreenState extends State<BusScreen> {
   List<BusRoute> allRoutes = [];
   List<BusRoute> filteredRoutes = [];
+
   bool isLoading = true;
   bool isRefreshing = false;
   String searchQuery = "";
   String? errorMessage;
-  Set<String> starredTowns = {};
 
   @override
   void initState() {
     super.initState();
-    loadStarredTowns();
+    StarredBusService.load();
     loadRoutes();
-  }
-
-  Future<void> loadStarredTowns() async {
-    final towns = await StarredBusService.getStarredTowns();
-    if (!mounted) return;
-
-    setState(() => starredTowns = towns);
   }
 
   Future<void> loadRoutes({bool silent = false}) async {
@@ -50,11 +43,11 @@ class _BusScreenState extends State<BusScreen> {
 
       setState(() {
         allRoutes = routes;
-        filterRoutes(searchQuery);
+        applyFilters();
         isLoading = false;
         errorMessage = null;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       setState(() {
@@ -68,16 +61,19 @@ class _BusScreenState extends State<BusScreen> {
     }
   }
 
-  void filterRoutes(String query) {
-    searchQuery = query.toLowerCase();
+  void applyFilters() {
+    final query = searchQuery.toLowerCase();
 
     final results = allRoutes.where((route) {
-      final townMatch = route.town.toLowerCase().contains(searchQuery);
-      final codeMatch = route.code.toLowerCase().contains(searchQuery);
-      return townMatch || codeMatch;
+      return route.town.toLowerCase().contains(query) ||
+          route.code.toLowerCase().contains(query);
     }).toList();
 
-    results.sort((a, b) {
+    setState(() => filteredRoutes = results);
+  }
+
+  List<BusRoute> getOrderedRoutes(Set<String> starredTowns) {
+    return filteredRoutes.toList()..sort((a, b) {
       final aStar = starredTowns.contains(a.town);
       final bStar = starredTowns.contains(b.town);
 
@@ -86,19 +82,6 @@ class _BusScreenState extends State<BusScreen> {
 
       return a.town.compareTo(b.town);
     });
-
-    setState(() => filteredRoutes = results);
-  }
-
-  Future<void> toggleTown(BusRoute route) async {
-    await StarredBusService.toggleTown(route.town);
-    final updated = await StarredBusService.getStarredTowns();
-    if (!mounted) return;
-
-    setState(() {
-      starredTowns = updated;
-      filterRoutes(searchQuery);
-    });
   }
 
   @override
@@ -106,10 +89,10 @@ class _BusScreenState extends State<BusScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const CustomHeader(title: "BUSES", subtitle: "DISMISSAL PLACES"),
           const SizedBox(height: 12),
+
           TextField(
             decoration: InputDecoration(
               isDense: true,
@@ -119,51 +102,67 @@ class _BusScreenState extends State<BusScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            onChanged: filterRoutes,
+            onChanged: (value) {
+              searchQuery = value;
+              applyFilters();
+            },
           ),
 
           const SizedBox(height: 12),
+
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredRoutes.isEmpty
-                ? const Center(child: Text("No buses found"))
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      int columns = 1;
-                      if (constraints.maxWidth > 900) {
-                        columns = 3;
-                      } else if (constraints.maxWidth > 600) {
-                        columns = 2;
+                : ValueListenableBuilder<Set<String>>(
+                    valueListenable: StarredBusService.starredTowns,
+                    builder: (context, starredTowns, _) {
+                      final orderedRoutes = getOrderedRoutes(starredTowns);
+
+                      if (orderedRoutes.isEmpty) {
+                        return const Center(child: Text("No buses found"));
                       }
 
-                      final cardWidth =
-                          (constraints.maxWidth - (16 * (columns - 1))) /
-                          columns;
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          int columns = 1;
+                          if (constraints.maxWidth > 900) {
+                            columns = 3;
+                          } else if (constraints.maxWidth > 600) {
+                            columns = 2;
+                          }
 
-                      return RefreshIndicator(
-                        onRefresh: () => loadRoutes(silent: true),
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Wrap(
-                            spacing: 16,
-                            runSpacing: 8,
-                            children: filteredRoutes.map((route) {
-                              final isStarred = starredTowns.contains(
-                                route.town,
-                              );
+                          final cardWidth =
+                              (constraints.maxWidth - (16 * (columns - 1))) /
+                              columns;
 
-                              return SizedBox(
-                                width: cardWidth,
-                                child: CustomBusCard(
-                                  route: route,
-                                  starred: isStarred,
-                                  onStarTap: () => toggleTown(route),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
+                          return RefreshIndicator(
+                            onRefresh: () => loadRoutes(silent: true),
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Wrap(
+                                spacing: 16,
+                                runSpacing: 8,
+                                children: orderedRoutes.map((route) {
+                                  final isStarred = starredTowns.contains(
+                                    route.town,
+                                  );
+
+                                  return SizedBox(
+                                    width: cardWidth,
+                                    child: CustomBusCard(
+                                      route: route,
+                                      starred: isStarred,
+                                      onStarTap: () =>
+                                          StarredBusService.toggleTown(
+                                            route.town,
+                                          ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
