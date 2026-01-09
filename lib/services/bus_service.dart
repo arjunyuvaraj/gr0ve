@@ -1,59 +1,68 @@
-import 'package:csv/csv.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
+import 'package:gsheets/gsheets.dart';
 
 class BusRoute {
   final String code;
-  final List<String> towns;
+  final String town;
   final String status;
 
-  BusRoute({required this.code, required this.towns, required this.status});
+  BusRoute({required this.code, required this.town, required this.status});
 }
 
-Future<List<BusRoute>> fetchBusRoutes(String sheetUrl) async {
-  final response = await http.get(Uri.parse(sheetUrl));
+const String _spreadsheetId = '1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o';
 
-  if (response.statusCode != 200) {
-    print("ERROR: Failed to fetch bus routes CSV");
-    return [];
+const String _worksheetTitle = 'Locations';
+
+late final GSheets _gsheets;
+bool _gsheetsReady = false;
+
+Future<void> initGSheets() async {
+  if (_gsheetsReady) return;
+
+  final json = await rootBundle.loadString('assets/credentials/gsheets.json');
+
+  _gsheets = GSheets(json);
+  _gsheetsReady = true;
+}
+
+Future<List<BusRoute>> fetchBusRoutes() async {
+  List<BusRoute> finalList = [];
+  if (!_gsheetsReady) {
+    await initGSheets();
   }
 
-  final List<BusRoute> routes = [];
+  try {
+    final spreadsheet = await _gsheets.spreadsheet(_spreadsheetId);
 
-  final rows = const CsvToListConverter(eol: '\n').convert(response.body);
-  if (rows.length <= 1) return [];
+    final sheet = spreadsheet.worksheetByTitle(_worksheetTitle);
 
-  // Column pairs: [townColumn, routeColumn]
-  const columnPairs = [
-    [0, 1],
-    [2, 3],
-  ];
-
-  for (int i = 1; i < rows.length; i++) {
-    final row = rows[i];
-
-    for (final pair in columnPairs) {
-      final townCol = pair[0];
-      final routeCol = pair[1];
-
-      if (townCol >= row.length || routeCol >= row.length) continue;
-
-      final town = row[townCol]?.toString().trim() ?? "";
-      final code = row[routeCol]?.toString().trim() ?? "";
-
-      if (town.isEmpty || code.isEmpty) continue;
-
-      final towns = town
-          .split('/')
-          .map((t) => t.trim())
-          .where((t) => t.isNotEmpty)
-          .toList();
-
-      routes.add(BusRoute(code: code, towns: towns, status: "Not here yet"));
+    if (sheet == null) {
+      return [];
     }
-  }
 
-  routes.sort((a, b) => a.towns.first.compareTo(b.towns.first));
+    final rows = await sheet.values.allColumns();
+    final towns1 = rows[0].sublist(1, 24);
+    final codes1 = rows[1].sublist(1, 24);
+    final towns2 = rows[2].sublist(1, 24);
+    final codes2 = rows[3].sublist(1, 24);
 
-  print("Fetched ${routes.length} bus routes");
-  return routes;
+    for (int i = 0; i < towns1.length; i++) {
+      finalList.add(
+        BusRoute(
+          code: codes1[i],
+          town: towns1[i].toString(),
+          status: codes1[i] == "?" ? "Not here yet" : "Arrived",
+        ),
+      );
+      finalList.add(
+        BusRoute(
+          code: codes2[i],
+          town: towns2[i].toString(),
+          status: codes2[i] == "?" ? "Not here yet" : "Arrived",
+        ),
+      );
+    }
+    return finalList;
+  } catch (e) {}
+  return [];
 }

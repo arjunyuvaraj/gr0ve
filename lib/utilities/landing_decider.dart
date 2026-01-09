@@ -34,10 +34,8 @@ class _LandingDeciderState extends State<LandingDecider> {
     if (!mounted) return;
 
     if (seen) {
-      // Already seen → go straight to navigation
       Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
     } else {
-      // Not seen → show landing screen
       setState(() {
         _showLanding = true;
         _loading = false;
@@ -48,7 +46,6 @@ class _LandingDeciderState extends State<LandingDecider> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      // While checking prefs, show nothing (or a splash if you want)
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 

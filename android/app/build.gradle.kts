@@ -1,10 +1,10 @@
+import java.util.Properties
+import java.io.FileInputStream
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -13,31 +13,54 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    defaultConfig {
+        applicationId = "com.arjunyuvaraj.gr0ve"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = "1.0" //flutter.versionName
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "11"
     }
 
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.arjunyuvaraj.gr0ve"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+    signingConfigs {
+        create("release") {
+            val keyPropsFile = rootProject.file("key.properties")
+            val keyProps = Properties()
+
+            if (keyPropsFile.exists()) {
+                FileInputStream(keyPropsFile).use { keyProps.load(it) }
+                println("Loaded key.properties for release signing.")
+
+                storeFile = file(keyProps.getProperty("storeFile") ?: throw GradleException("storeFile missing in key.properties"))
+                keyAlias = keyProps.getProperty("keyAlias") ?: throw GradleException("keyAlias missing in key.properties")
+                keyPassword = keyProps.getProperty("keyPassword") ?: throw GradleException("keyPassword missing in key.properties")
+                storePassword = keyProps.getProperty("storePassword") ?: throw GradleException("storePassword missing in key.properties")
+            } else {
+                println("Warning: key.properties not found. Using debug keystore.")
+                storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+                storePassword = "android"
+            }
+        }
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        getByName("debug") {
+            // debug uses default debug keystore automatically
         }
     }
 }
@@ -45,11 +68,9 @@ android {
 flutter {
     source = "../.."
 }
-dependencies {
-    // Required for Google Sign-In on Android
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
-    // If you use Firebase Auth:
+dependencies {
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
 }

@@ -7,17 +7,17 @@ class CustomTeacherCard extends StatefulWidget {
   final String status;
   final bool starred;
   final GestureTapCallback onStarTap;
-  final bool star;
+  final bool showStar;
 
   const CustomTeacherCard({
     super.key,
+    required this.name,
     required this.department,
     required this.email,
-    required this.name,
     required this.status,
     required this.starred,
     required this.onStarTap,
-    required this.star,
+    required this.showStar,
   });
 
   @override
@@ -51,74 +51,79 @@ class _CustomTeacherCardState extends State<CustomTeacherCard>
               ),
             ],
           ),
-          child: Stack(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.name,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isAbsent
-                              ? colors.errorContainer.withAlpha(20)
-                              : colors.primary.withAlpha(20),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          widget.status,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: isAbsent
-                                    ? colors.onErrorContainer
-                                    : colors.primary,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (expanded) ...[
-                    const SizedBox(height: 10),
-                    _infoRow(context, Icons.school_rounded, widget.department),
-                    const SizedBox(height: 4),
-                    _infoRow(
-                      context,
-                      Icons.email_rounded,
-                      widget.email,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-              if (widget.star)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: widget.onStarTap,
-                    child: Icon(
-                      widget.starred
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
-                      size: 24,
-                      color: widget.starred
-                          ? colors.secondary
-                          : colors.onSurface.withAlpha(140),
-                    ),
+              if (widget.showStar)
+                GestureDetector(
+                  onTap: widget.onStarTap,
+                  child: Icon(
+                    widget.starred
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
+                    size: 28,
+                    color: widget.starred
+                        ? colors.secondary
+                        : colors.onSurface.withAlpha(140),
                   ),
                 ),
+              if (widget.showStar) const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.name,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isAbsent
+                                ? colors.errorContainer.withAlpha(20)
+                                : colors.primary.withAlpha(20),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            widget.status,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: isAbsent
+                                      ? colors.onErrorContainer
+                                      : colors.primary,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (expanded) ...[
+                      const SizedBox(height: 10),
+                      _infoRow(
+                        context,
+                        Icons.school_rounded,
+                        widget.department,
+                      ),
+                      const SizedBox(height: 4),
+                      _infoRow(
+                        context,
+                        Icons.email_rounded,
+                        widget.email,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -133,7 +138,6 @@ class _CustomTeacherCardState extends State<CustomTeacherCard>
     TextOverflow overflow = TextOverflow.visible,
   }) {
     final colors = Theme.of(context).colorScheme;
-
     return Row(
       children: [
         Icon(icon, size: 18, color: colors.onSurface.withAlpha(140)),

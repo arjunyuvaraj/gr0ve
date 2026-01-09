@@ -16,7 +16,6 @@ class CustomHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Main Title
         Text(
           title,
           style: context.text.displayLarge?.copyWith(
@@ -24,23 +23,23 @@ class CustomHeader extends StatelessWidget {
             height: 1.1,
             letterSpacing: getLetterSpacing(36, 24),
             fontWeight: FontWeight.w800,
-            color: colors.primary, // accent color for the title
+            color: colors.primary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 6), // slightly more breathing room
-        // Subtitle
+        const SizedBox(height: 6),
+
         Text(
           subtitle,
           style: context.text.displaySmall?.copyWith(
             fontSize: 15,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w600,
-            color: colors.onSurface.withAlpha(160), // subtle muted tone
+            color: colors.onSurface.withAlpha(160),
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16), // separates header from content
+        const SizedBox(height: 16),
       ],
     );
   }

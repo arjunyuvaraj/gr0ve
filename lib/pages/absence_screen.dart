@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_teacher_card.dart';
+import 'package:gr0ve/services/starred_teacher_service.dart';
+import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 import 'package:gr0ve/utilities/data/teacher_list.dart';
 
@@ -14,6 +16,9 @@ class AbsenceScreen extends StatefulWidget {
 class _AbsenceScreenState extends State<AbsenceScreen> {
   List<Map<String, dynamic>> teachers = [];
   List<Map<String, dynamic>> filteredTeachers = [];
+  Map<String, String> absenceList = {};
+
+  Set<String> starredTeachers = {};
   bool isLoading = true;
   String searchQuery = "";
   String selectedPeriod = "All";
@@ -32,38 +37,86 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     "9",
   ];
 
-  // KIM edge case
-  String getKimStatus() {
-    final kimEntries = absenceList.keys
-        .where((k) => k.toLowerCase().contains("kim"))
-        .toList();
-    if (kimEntries.isEmpty) return "Present";
-    for (final key in kimEntries) {
-      final status = absenceList[key];
-      if (status != null && status != "Present") return status;
-    }
-    return "Present";
-  }
-
   @override
   void initState() {
     super.initState();
-    loadTeachers();
+    _initializeScreen();
   }
 
-  void loadTeachers() {
+  Future<void> _initializeScreen() async {
+    await loadStarredTeachers();
+    await loadTeachers();
+    await loadAbsences();
+  }
+
+  Future<void> loadStarredTeachers() async {
+    final starred = await StarredTeacherService.getStarredTeachers();
+    if (!mounted) return;
+    setState(() => starredTeachers = starred);
+  }
+
+  Future<void> toggleTeacherStar(String fullName) async {
+    await StarredTeacherService.toggleTeacher(fullName);
+    await loadStarredTeachers();
+  }
+
+  Future<void> loadTeachers() async {
     final data = teacherList.values
         .map((t) => Map<String, dynamic>.from(t))
         .toList();
+
+    if (!mounted) return;
     setState(() {
       teachers = data;
-      filteredTeachers = data;
+      filteredTeachers = applyFilters(data);
       isLoading = false;
     });
   }
 
-  void applyFilters() {
-    List<Map<String, dynamic>> result = teachers;
+  Future<void> loadAbsences({bool silent = false}) async {
+    if (!silent) setState(() => isLoading = true);
+
+    const docId =
+        "2PACX-1vT_iK6QcUDVJoo_A6Enz5eizn4PzAWGfJBGo1vaC6T2y_0vHaYcL3ZlwcPN4H6pNCNEExNKGwxyktWC";
+    const docUrl = 'https://docs.google.com/document/d/e/$docId/pub';
+
+    try {
+      final data = await fetchGoogleDocMap(docUrl);
+      if (!mounted) return;
+
+      setState(() {
+        absenceList = data;
+        filteredTeachers = applyFilters(teachers);
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+    }
+  }
+
+  String getTeacherStatus(String fullName) {
+    final normalizedName = fullName.trim();
+
+    if (normalizedName.toLowerCase().contains("kim")) {
+      final kimEntries = absenceList.entries
+          .where((e) => e.key.toLowerCase().contains("kim"))
+          .toList();
+
+      for (final entry in kimEntries) {
+        if (entry.value != "Present") return entry.value;
+      }
+      return "Present";
+    }
+    return absenceList[normalizedName.substring(
+          0,
+          normalizedName.indexOf(","),
+        )] ??
+        "Present";
+  }
+
+  List<Map<String, dynamic>> applyFilters(List<Map<String, dynamic>> source) {
+    var result = source;
 
     if (searchQuery.isNotEmpty) {
       result = result.where((t) {
@@ -73,46 +126,41 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       }).toList();
     }
 
-    if (selectedPeriod.toLowerCase() != "all") {
+    if (selectedPeriod != "All") {
       result = result.where((t) {
-        final lastName = t['name'].toString().split(",")[0].trim();
-        final status = lastName.toLowerCase() == "kim"
-            ? getKimStatus()
-            : (absenceList[lastName] ?? "Present");
+        final status = getTeacherStatus(t['name']);
         return status.toLowerCase().contains(selectedPeriod.toLowerCase());
       }).toList();
     }
 
-    setState(() => filteredTeachers = result);
-  }
-
-  void filterTeachers(String query) {
-    searchQuery = query;
-    applyFilters();
+    return result;
   }
 
   List<Map<String, dynamic>> getOrderedTeachers() {
     return filteredTeachers.toList()..sort((a, b) {
-      final aLast = a['name'].toString().split(",")[0].trim();
-      final bLast = b['name'].toString().split(",")[0].trim();
-      final aStatus = aLast.toLowerCase() == "kim"
-          ? getKimStatus()
-          : (absenceList[aLast] ?? "Present");
-      final bStatus = bLast.toLowerCase() == "kim"
-          ? getKimStatus()
-          : (absenceList[bLast] ?? "Present");
-      final aAbsent = aStatus != "Present";
-      final bAbsent = bStatus != "Present";
+      final aName = a['name'];
+      final bName = b['name'];
+
+      final aStar = starredTeachers.contains(aName);
+      final bStar = starredTeachers.contains(bName);
+
+      if (aStar && !bStar) return -1;
+      if (!aStar && bStar) return 1;
+
+      final aAbsent = getTeacherStatus(aName) != "Present";
+      final bAbsent = getTeacherStatus(bName) != "Present";
+
       if (aAbsent && !bAbsent) return -1;
       if (!aAbsent && bAbsent) return 1;
-      return 0;
+
+      return aName.compareTo(bName);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final textTheme = context.text;
+    final orderedTeachers = getOrderedTeachers();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -120,98 +168,59 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         children: [
           CustomHeader(
             title: "Teachers".capitalized,
-            subtitle: absenceList['Date']?.toString().capitalized ?? "",
+            subtitle: absenceList['Date'] ?? "",
           ),
           const SizedBox(height: 12),
 
-          // ── SEARCH ─────────────────────────────
           TextField(
             decoration: InputDecoration(
-              hintText: 'Search teachers…',
-              prefixIcon: const Icon(Icons.search, size: 20),
+              hintText: "Search teachers…",
+              prefixIcon: const Icon(Icons.search),
               isDense: true,
               filled: true,
               fillColor: colors.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.primary, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
               ),
             ),
-            style: textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-            onChanged: filterTeachers,
+            onChanged: (value) {
+              searchQuery = value;
+              setState(() {
+                filteredTeachers = applyFilters(teachers);
+              });
+            },
           ),
+
           const SizedBox(height: 8),
 
-          // ── PERIOD DROPDOWN ───────────────────
           DropdownButtonFormField<String>(
             value: selectedPeriod,
-            decoration: InputDecoration(
-              isDense: true,
-              filled: true,
-              fillColor: colors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.onSurface.withAlpha(50)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.primary, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            style: textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-            dropdownColor: colors.surface,
             items: periodOptions
-                .map(
-                  (p) => DropdownMenuItem(
-                    value: p,
-                    child: Text(
-                      "Per: $p",
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                  ),
-                )
+                .map((p) => DropdownMenuItem(value: p, child: Text("Per: $p")))
                 .toList(),
             onChanged: (value) {
               selectedPeriod = value!;
-              applyFilters();
+              setState(() {
+                filteredTeachers = applyFilters(teachers);
+              });
             },
+            decoration: InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: colors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
+
           const SizedBox(height: 12),
 
-          // ── TEACHER LIST ──────────────────────
+          // TEACHERS
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredTeachers.isEmpty
+                : orderedTeachers.isEmpty
                 ? const Center(child: Text("No teachers found"))
                 : LayoutBuilder(
                     builder: (context, constraints) {
@@ -225,33 +234,28 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                       final cardWidth =
                           (constraints.maxWidth - (16 * (columns - 1))) /
                           columns;
-                      final ordered = getOrderedTeachers();
 
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 6),
+                      return RefreshIndicator(
+                        onRefresh: () => loadAbsences(silent: true),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           child: Wrap(
                             spacing: 16,
                             runSpacing: 12,
-                            children: ordered.map((t) {
-                              final lastName = t['name']
-                                  .toString()
-                                  .split(",")[0]
-                                  .trim();
-                              final status = lastName.toLowerCase() == "kim"
-                                  ? getKimStatus()
-                                  : (absenceList[lastName] ?? "Present");
+                            children: orderedTeachers.map((t) {
+                              final name = t['name'];
+                              final status = getTeacherStatus(name);
 
                               return SizedBox(
                                 width: cardWidth,
                                 child: CustomTeacherCard(
-                                  name: t['name'],
+                                  name: name,
                                   department: t['department'],
                                   email: t['email'],
                                   status: status,
-                                  starred: false,
-                                  star: false,
-                                  onStarTap: () {},
+                                  showStar: true,
+                                  starred: starredTeachers.contains(name),
+                                  onStarTap: () => toggleTeacherStar(name),
                                 ),
                               );
                             }).toList(),

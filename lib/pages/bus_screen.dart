@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_bus_card.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/services/bus_service.dart';
+import 'package:gr0ve/services/starred_bus_service.dart';
 
 class BusScreen extends StatefulWidget {
   const BusScreen({super.key});
@@ -14,17 +15,23 @@ class _BusScreenState extends State<BusScreen> {
   List<BusRoute> allRoutes = [];
   List<BusRoute> filteredRoutes = [];
   bool isLoading = true;
-  String searchQuery = "";
   bool isRefreshing = false;
+  String searchQuery = "";
   String? errorMessage;
-
-  final String sheetUrl =
-      "https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/gviz/tq?tqx=out:csv&gid=0";
+  Set<String> starredTowns = {};
 
   @override
   void initState() {
     super.initState();
+    loadStarredTowns();
     loadRoutes();
+  }
+
+  Future<void> loadStarredTowns() async {
+    final towns = await StarredBusService.getStarredTowns();
+    if (!mounted) return;
+
+    setState(() => starredTowns = towns);
   }
 
   Future<void> loadRoutes({bool silent = false}) async {
@@ -38,13 +45,12 @@ class _BusScreenState extends State<BusScreen> {
     }
 
     try {
-      final routes = await fetchBusRoutes(sheetUrl);
-
+      final routes = await fetchBusRoutes();
       if (!mounted) return;
 
       setState(() {
         allRoutes = routes;
-        filterRoutes(searchQuery); // preserves search state
+        filterRoutes(searchQuery);
         isLoading = false;
         errorMessage = null;
       });
@@ -54,24 +60,44 @@ class _BusScreenState extends State<BusScreen> {
       setState(() {
         isLoading = false;
         errorMessage = "Failed to update bus data";
-        // IMPORTANT: we do NOT clear existing routes
       });
     } finally {
-      isRefreshing = false;
+      if (mounted) {
+        setState(() => isRefreshing = false);
+      }
     }
   }
 
   void filterRoutes(String query) {
     searchQuery = query.toLowerCase();
 
+    final results = allRoutes.where((route) {
+      final townMatch = route.town.toLowerCase().contains(searchQuery);
+      final codeMatch = route.code.toLowerCase().contains(searchQuery);
+      return townMatch || codeMatch;
+    }).toList();
+
+    results.sort((a, b) {
+      final aStar = starredTowns.contains(a.town);
+      final bStar = starredTowns.contains(b.town);
+
+      if (aStar && !bStar) return -1;
+      if (!aStar && bStar) return 1;
+
+      return a.town.compareTo(b.town);
+    });
+
+    setState(() => filteredRoutes = results);
+  }
+
+  Future<void> toggleTown(BusRoute route) async {
+    await StarredBusService.toggleTown(route.town);
+    final updated = await StarredBusService.getStarredTowns();
+    if (!mounted) return;
+
     setState(() {
-      filteredRoutes = allRoutes.where((route) {
-        final townMatch = route.towns.any(
-          (t) => t.toLowerCase().contains(searchQuery),
-        );
-        final codeMatch = route.code.toLowerCase().contains(searchQuery);
-        return townMatch || codeMatch;
-      }).toList();
+      starredTowns = updated;
+      filterRoutes(searchQuery);
     });
   }
 
@@ -83,9 +109,7 @@ class _BusScreenState extends State<BusScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const CustomHeader(title: "BUSES", subtitle: "DISMISSAL PLACES"),
-
           const SizedBox(height: 12),
-
           TextField(
             decoration: InputDecoration(
               isDense: true,
@@ -99,7 +123,6 @@ class _BusScreenState extends State<BusScreen> {
           ),
 
           const SizedBox(height: 12),
-
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -126,12 +149,16 @@ class _BusScreenState extends State<BusScreen> {
                             spacing: 16,
                             runSpacing: 8,
                             children: filteredRoutes.map((route) {
+                              final isStarred = starredTowns.contains(
+                                route.town,
+                              );
+
                               return SizedBox(
                                 width: cardWidth,
                                 child: CustomBusCard(
                                   route: route,
-                                  starred: true,
-                                  onStarTap: () {},
+                                  starred: isStarred,
+                                  onStarTap: () => toggleTown(route),
                                 ),
                               );
                             }).toList(),

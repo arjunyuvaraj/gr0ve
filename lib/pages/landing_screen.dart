@@ -36,7 +36,7 @@ class LandingScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [colors.primary, colors.background],
+                        colors: [colors.primary, colors.surface],
                       ),
                     ),
                   ),
@@ -55,7 +55,7 @@ class LandingScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            "For BCA".capitalized,
+                            "Navigate Your Day".capitalized,
                             style: context.text.displaySmall?.copyWith(
                               color: colors.onPrimary.withAlpha(200),
                               fontWeight: FontWeight.w600,
@@ -73,7 +73,7 @@ class LandingScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Scroll button
+                  // SCROLL BUTTON
                   Positioned(
                     bottom: 50,
                     left: (MediaQuery.of(context).size.width - 52) / 2,
@@ -129,7 +129,6 @@ class LandingScreen extends StatelessWidget {
   }
 }
 
-/// --- Landing card with shadow like Bus/Teacher cards ---
 class ShadowLandingCard extends StatelessWidget {
   final String title;
   final String body;

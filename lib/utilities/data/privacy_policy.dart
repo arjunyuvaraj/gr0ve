@@ -1,47 +1,47 @@
 final List<Map<String, String>> privacyPolicySections = [
-  {"title": "Gr0ve Privacy Policy", "content": "Last Updated: January 2, 2026"},
+  {"title": "Gr0ve Privacy Policy", "content": "Last Updated: January 7, 2026"},
   {
-    "title": "01. Information",
+    "title": "01. Information Collection",
     "content":
-        "Gr0ve does not collect any personal information by default. The only data stored is what you choose to enter within the app, such as a name or nickname for display purposes. No analytics, tracking, or location data is collected.",
+        "Gr0ve does not collect personal information by default. The only data stored is limited to app functionality, such as whether the user has previously accessed the landing page.",
   },
   {
-    "title": "02. Uses",
+    "title": "02. Use of Information",
     "content":
-        "All information entered is used solely to personalize your experience within the app. Data is never sold, shared with third parties, or used for advertising or marketing.",
+        "Any information stored by the app is used solely to personalize and improve the user experience. Data is never sold, shared with third parties, or used for advertising or marketing purposes.",
   },
   {
     "title": "03. Data Sources",
     "content":
-        "All school-related information shown in Gr0ve comes from publicly accessible sources maintained by the developer. No private or internal school records are accessed or stored.",
+        "All school-related information displayed in Gr0ve is sourced from publicly accessible resources maintained by Bergen County Academies and the developer. No private, restricted, or internal school records are accessed or stored.",
   },
   {
     "title": "04. Account Management",
     "content":
-        "Currently, Gr0ve does not require an account. Any optional features or future account functionality will be clearly indicated.",
+        "Gr0ve does not currently require user accounts. Any future account-based features will be clearly disclosed before use.",
   },
   {
     "title": "05. Data Access",
     "content":
-        "The app is maintained solely by the developer. No other individuals or organizations have access to any stored information.",
+        "The app is developed and maintained solely by the developer. No other individuals or organizations have access to any locally stored data.",
   },
   {
-    "title": "06. Children's Privacy",
+    "title": "06. Children'fs Privacy",
     "content":
-        "Gr0ve is designed for Bergen County Academies students, who are generally 13 years or older. The app does not knowingly collect information from children under 13.",
+        "Gr0ve is intended for students of Bergen County Academies, who are generally 13 years of age or older. The app does not knowingly collect information from children under the age of 13.",
   },
   {
     "title": "07. Data Security",
     "content":
-        "All data is stored locally on your device. While no system can guarantee complete security, standard safeguards are used where applicable.",
+        "All data is stored locally on the user's device. While no system can guarantee absolute security, reasonable safeguards are used where applicable. The data stored is not essential or sensitive in nature.",
   },
   {
     "title": "08. Policy Updates",
     "content":
-        "Any changes to this Privacy Policy will be displayed within the app. The “Last Updated” date reflects the most recent version.",
+        "Any changes to this Privacy Policy will be displayed within the app. The “Last Updated” date reflects the most recent revision.",
   },
   {
     "title": "09. Contact Information",
-    "content": "Developer: Arjun\nEmail: arjyuvaraj@gmail.com",
+    "content": "Developer: Arjun Yuvaraj\nEmail: gr0ve.bca@gmail.com",
   },
 ];

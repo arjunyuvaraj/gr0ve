@@ -41,28 +41,18 @@ class QuickLinksScreen extends StatelessWidget {
     ),
     _QuickLink(
       title: "PRIVACY POLICY",
-      url: "/privacy_policy", // Named route instead of external URL
+      url: "/privacy_policy",
       icon: Icons.privacy_tip,
       color: Color(0xFF6A1B9A),
-    ),
-    _QuickLink(
-      title: "PRIVACY POLICY",
-      url: "/landing", // Named route instead of external URL
-      icon: Icons.privacy_tip,
-      color: Color(0xFF1F6F5B).withAlpha(30),
     ),
   ];
 
   Future<void> _openLink(BuildContext context, _QuickLink link) async {
     if (link.url.startsWith("/")) {
-      // Navigate to named route
       Navigator.pushNamed(context, link.url);
     } else {
-      // Open external URL
       final uri = Uri.parse(link.url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -78,7 +68,7 @@ class QuickLinksScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           const CustomHeader(
-            title: "QUICK LINKS",
+            title: "LINKS",
             subtitle: "Your favorite school pages, all in one place",
           ),
           const SizedBox(height: 12),
