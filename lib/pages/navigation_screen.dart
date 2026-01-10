@@ -53,7 +53,6 @@ class NavigationScreenState extends State<NavigationScreen> {
       const BusScreen(),
       const HelpScreen(),
       QuickLinksScreen(),
-      // HomeScreen(),
     ];
 
     return Scaffold(

@@ -21,7 +21,6 @@ void main() async {
     absenceList = await fetchGoogleDocMap(docUrl);
   } catch (e) {
     absenceList = {};
-    debugPrint("Failed to fetch absence list: $e");
   }
 
   runApp(const MyApp());

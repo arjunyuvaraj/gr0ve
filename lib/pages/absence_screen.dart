@@ -70,39 +70,29 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     const docUrl = 'https://docs.google.com/document/d/e/$docId/pub';
 
     try {
-      final data = await fetchGoogleDocMap(docUrl);
+      final rawData = await fetchGoogleDocMap(docUrl);
+
       if (!mounted) return;
 
       setState(() {
-        absenceList = data;
+        absenceList = rawData;
         filteredTeachers = applyFilters(teachers);
         isLoading = false;
       });
-    } catch (_) {
+    } catch (e, st) {
       if (!mounted) return;
       setState(() => isLoading = false);
     }
   }
 
   String getTeacherStatus(String fullName) {
-    final normalizedName = fullName.trim();
-
-    if (normalizedName.toLowerCase().contains("kim")) {
-      final kimEntries = absenceList.entries
-          .where((e) => e.key.toLowerCase().contains("kim"))
-          .toList();
-
-      for (final entry in kimEntries) {
-        if (entry.value != "Present") return entry.value;
+    final normalized = normalizeTeacherName(fullName);
+    for (final entry in absenceList.entries) {
+      if (matchesTeacher(entry.key, normalized)) {
+        return entry.value;
       }
-      return "Present";
     }
-
-    return absenceList[normalizedName.substring(
-          0,
-          normalizedName.indexOf(","),
-        )] ??
-        "Present";
+    return "Present";
   }
 
   List<Map<String, dynamic>> applyFilters(List<Map<String, dynamic>> source) {
@@ -160,7 +150,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
             subtitle: absenceList['Date'] ?? "",
           ),
           const SizedBox(height: 12),
-
           TextField(
             decoration: InputDecoration(
               hintText: "Search teachers…",
@@ -179,9 +168,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               });
             },
           ),
-
           const SizedBox(height: 8),
 
+          // Period Filter
           DropdownButtonFormField<String>(
             value: selectedPeriod,
             items: periodOptions
@@ -202,9 +191,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 12),
 
+          // Teacher List
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -241,6 +230,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                 runSpacing: 12,
                                 children: orderedTeachers.map((t) {
                                   final name = t['name'];
+                                  final status = getTeacherStatus(name);
 
                                   return SizedBox(
                                     width: cardWidth,
@@ -248,7 +238,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                       name: name,
                                       department: t['department'],
                                       email: t['email'],
-                                      status: getTeacherStatus(name),
+                                      status: status,
                                       showStar: true,
                                       starred: starredTeachers.contains(name),
                                       onStarTap: () =>

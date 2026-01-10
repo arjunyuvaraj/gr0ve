@@ -1,28 +1,38 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StarredBusService {
   static const _key = 'starred_towns';
 
-  class StarredBusService {
-  static final ValueNotifier<Set<String>> starredTowns =
-      ValueNotifier(<String>{});
+  static final ValueNotifier<Set<String>> starredTowns = ValueNotifier(
+    <String>{},
+  );
+
+  static bool _loaded = false;
 
   static Future<void> load() async {
-    starredTowns.value = await getStarredTowns();
+    if (_loaded) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    starredTowns.value = prefs.getStringList(_key)?.toSet() ?? {};
+    _loaded = true;
   }
 
   static Future<void> toggleTown(String town) async {
-    final current = await getStarredTowns();
+    final prefs = await SharedPreferences.getInstance();
+    final updated = {...starredTowns.value};
 
-    if (current.contains(town)) {
-      current.remove(town);
+    if (updated.contains(town)) {
+      updated.remove(town);
     } else {
-      current.add(town);
+      updated.add(town);
     }
 
-    await saveStarredTowns(current);
-    starredTowns.value = Set.from(current);
+    starredTowns.value = updated;
+    await prefs.setStringList(_key, updated.toList());
   }
-}
 
+  static bool isStarred(String town) {
+    return starredTowns.value.contains(town);
+  }
 }

@@ -24,7 +24,6 @@ class LandingScreen extends StatelessWidget {
         controller: controller,
         child: Column(
           children: [
-            // BANNER
             SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Stack(
@@ -73,7 +72,6 @@ class LandingScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // SCROLL BUTTON
                   Positioned(
                     bottom: 50,
                     left: (MediaQuery.of(context).size.width - 52) / 2,
@@ -96,7 +94,6 @@ class LandingScreen extends StatelessWidget {
               ),
             ),
 
-            // MAIN CONTENT
             SafeArea(
               top: true,
               child: Padding(

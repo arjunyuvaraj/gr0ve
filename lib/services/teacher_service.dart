@@ -21,39 +21,109 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
       final cells = row.querySelectorAll('td');
       if (cells.length < 2) continue;
 
-      String teacherRaw = cells[0].text!.trim();
-      String rawPeriod = cells[1].text!.trim();
-
-      if (teacherRaw.toLowerCase().contains('teacher') &&
-          rawPeriod.toLowerCase().contains('period'))
-        continue;
+      final teacherRaw = cells[0].text?.trim() ?? '';
+      final periodRaw = cells[1].text?.trim() ?? '';
 
       if (teacherRaw.isEmpty) continue;
+      if (teacherRaw.toLowerCase().contains('teacher')) continue;
 
-      final teacher = _normalizeTeacherName(teacherRaw);
-      final formattedPeriod = _formatPeriods(rawPeriod);
-      absenceMap[teacher] = formattedPeriod;
+      final teacherKey = googleDocTeacherKey(teacherRaw);
+      final period = formatPeriods(periodRaw);
+
+      absenceMap[teacherKey] = period.isEmpty ? 'Present' : period;
     }
   }
 
   return absenceMap;
 }
 
-String _normalizeTeacherName(String raw) {
+String googleDocTeacherKey(String raw) {
   raw = raw.trim();
-
-  if (raw.contains('Kim') && raw.contains('Ms')) return 'Kim, Rosalyn';
-
-  final parts = raw.split(' ').where((p) => p.isNotEmpty).toList();
-  if (parts.length >= 2) {
-    final first = parts.sublist(0, parts.length - 1).join(' ');
-    final last = parts.last;
-    return '$last, $first';
-  }
+  raw = raw.replaceAllMapped(RegExp(r'\(\s*(.*?)\s*\)'), (m) => '(${m[1]})');
   return raw;
 }
 
-String _formatPeriods(String input) {
+String? handleEdgeCases(String name) {
+  const map = {
+    'kim(mr)': 'kim, deok-yang',
+    'kim(ms)': 'lee, rosalyn',
+    'smith(ms)': 'smith, ericka',
+    'smith(mr)': 'smith, michael',
+  };
+
+  final normalized = name
+      .toLowerCase()
+      .replaceAll(RegExp(r'\s+'), '')
+      .replaceAll('.', '');
+
+  return map[normalized];
+}
+
+bool haveSameCharacters(String str1, String str2) {
+  if (str1.length != str2.length) {
+    return false;
+  }
+
+  List<int> list1 = str1.codeUnits.toList();
+  List<int> list2 = str2.codeUnits.toList();
+
+  list1.sort();
+  list2.sort();
+
+  for (int i = 0; i < list1.length; i++) {
+    if (list1[i] != list2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+String normalizeTeacherName(String raw) {
+  raw = raw.trim();
+  raw = raw.replaceAll(RegExp(r'\(.*?\)'), ''); // remove titles in parentheses
+  final titles = ['Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Mr', 'Ms', 'Mrs', 'Dr'];
+  for (var t in titles) {
+    if (raw.startsWith(t)) raw = raw.replaceFirst(t, '').trim();
+  }
+
+  if (raw.contains(',') && raw.split(',').length == 2) return raw.trim();
+
+  final parts = raw.split(' ').where((p) => p.isNotEmpty).toList();
+  if (parts.length >= 2) return '${parts.last}, ${parts.first}';
+
+  return raw;
+}
+
+String _cleanKey(String key) {
+  return key
+      .replaceAll(RegExp(r'\s+'), '')
+      .replaceAll(RegExp(r'\(.*?\)'), '')
+      .toLowerCase();
+}
+
+bool matchesTeacher(String docKey, String teacherKey) {
+  if (docKey == 'Date') return false;
+
+  final edgeCase = handleEdgeCases(docKey);
+  final docName = edgeCase ?? docKey;
+  final normalizedTeacher = normalizeTeacherName(teacherKey);
+
+  final docClean = _cleanKey(docName);
+  final teacherClean = _cleanKey(normalizedTeacher);
+
+  if (docClean == teacherClean) return true;
+
+  if (!docClean.contains(',') && teacherClean.contains(',')) {
+    final docLast = docClean;
+    final teacherLast = teacherClean.split(',').first;
+    return docLast == teacherLast;
+  }
+
+  return false;
+}
+
+String formatPeriods(String input) {
   final hasIGS = input.contains('IGS');
 
   final singlePeriodMatch = RegExp(
@@ -75,7 +145,7 @@ String _formatPeriods(String input) {
       .replaceAll('Only', '')
       .trim();
 
-  final expanded = _expandRange(cleaned);
+  final expanded = expandRange(cleaned);
 
   if (expanded.isEmpty) return hasIGS ? 'IGS' : 'Present';
   return expanded == "All"
@@ -85,7 +155,7 @@ String _formatPeriods(String input) {
       : 'Periods $expanded';
 }
 
-String _expandRange(String range) {
+String expandRange(String range) {
   if (!range.contains('-')) return range;
 
   final parts = range.split('-').map((e) => e.trim()).toList();
