@@ -13,6 +13,11 @@ class LandingDecider extends StatefulWidget {
     required this.navigationRoute,
   });
 
+  static Future<void> markLandingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('landing_seen', true);
+  }
+
   @override
   State<LandingDecider> createState() => _LandingDeciderState();
 }
@@ -34,8 +39,12 @@ class _LandingDeciderState extends State<LandingDecider> {
     if (!mounted) return;
 
     if (seen) {
-      Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
+      // Already seen → go straight to the main app
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
+      });
     } else {
+      // First time → show landing page
       setState(() {
         _showLanding = true;
         _loading = false;

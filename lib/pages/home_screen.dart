@@ -60,19 +60,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   String getTeacherStatus(String fullName) {
-    return findAbsenceForTeacher(absenceList, fullName) ?? "Present";
-  }
+    for (final entry in absenceList.entries) {
+      final docKey = entry.key;
+      final period = entry.value;
 
-  String? findAbsenceForTeacher(
-    Map<String, String> absenceMap,
-    String teacherName,
-  ) {
-    for (final entry in absenceMap.entries) {
-      if (matchesTeacher(entry.key, teacherName)) {
-        return entry.value;
+      if (matchesTeacher(docKey, fullName)) {
+        return period;
       }
     }
-    return null;
+
+    return "Present";
   }
 
   @override

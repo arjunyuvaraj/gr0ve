@@ -81,7 +81,7 @@ bool haveSameCharacters(String str1, String str2) {
 
 String normalizeTeacherName(String raw) {
   raw = raw.trim();
-  raw = raw.replaceAll(RegExp(r'\(.*?\)'), ''); // remove titles in parentheses
+  raw = raw.replaceAll(RegExp(r'\(.*?\)'), '');
   final titles = ['Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Mr', 'Ms', 'Mrs', 'Dr'];
   for (var t in titles) {
     if (raw.startsWith(t)) raw = raw.replaceFirst(t, '').trim();

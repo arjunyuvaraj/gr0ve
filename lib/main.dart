@@ -3,12 +3,15 @@ import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
 import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
+import 'package:gr0ve/pages/landing_screen_web.dart';
 import 'package:gr0ve/pages/navigation_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
 import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/theme/dark_theme.dart';
+import 'package:gr0ve/theme/light_theme.dart';
 import 'package:gr0ve/utilities/data/teacher_list.dart';
 import 'package:gr0ve/utilities/landing_decider.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,12 +36,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Gr0ve',
-      theme: darkTheme,
+      darkTheme: darkTheme,
+      theme: lightTheme,
+      themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
-      home: LandingDecider(
-        landingPage: const LandingScreen(),
-        navigationRoute: '/navigation',
+
+      home: Builder(
+        builder: (context) => LandingDecider(
+          landingPage: kIsWeb
+              ? const LandingWebsiteScreen()
+              : const LandingScreen(),
+          navigationRoute: '/navigation',
+        ),
       ),
+
       routes: {
         '/home': (context) => const HomeScreen(),
         '/teacher_absence': (context) => const AbsenceScreen(),

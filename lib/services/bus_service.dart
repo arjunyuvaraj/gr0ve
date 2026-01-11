@@ -1,5 +1,5 @@
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:gsheets/gsheets.dart';
 
 @immutable
@@ -59,7 +59,11 @@ Future<List<BusRoute>> fetchBusRoutes() async {
       _addRoute(routes, towns1[i], codes1[i]);
       _addRoute(routes, towns2[i], codes2[i]);
     }
-  } catch (e) {}
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error fetching bus routes: $e');
+    }
+  }
 
   return routes;
 }

@@ -79,7 +79,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         filteredTeachers = applyFilters(teachers);
         isLoading = false;
       });
-    } catch (e, st) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
     }
@@ -170,7 +170,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Period Filter
           DropdownButtonFormField<String>(
             value: selectedPeriod,
             items: periodOptions
@@ -193,7 +192,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Teacher List
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -226,7 +224,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                             child: SingleChildScrollView(
                               physics: const AlwaysScrollableScrollPhysics(),
                               child: Wrap(
-                                spacing: 16,
+                                spacing: 12,
                                 runSpacing: 12,
                                 children: orderedTeachers.map((t) {
                                   final name = t['name'];

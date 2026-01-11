@@ -36,7 +36,7 @@ class CustomBusCard extends StatelessWidget {
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(
-              starred ? Icons.star : Icons.star_border,
+              starred ? Icons.star_rounded : Icons.star_border_rounded,
               color: starred ? colors.primary : colors.onSurface.withAlpha(120),
             ),
             onPressed: onStarTap,

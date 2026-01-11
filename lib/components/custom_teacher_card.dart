@@ -63,7 +63,7 @@ class _CustomTeacherCardState extends State<CustomTeacherCard>
                         : Icons.star_border_rounded,
                     size: 28,
                     color: widget.starred
-                        ? colors.secondary
+                        ? colors.primary
                         : colors.onSurface.withAlpha(140),
                   ),
                 ),
