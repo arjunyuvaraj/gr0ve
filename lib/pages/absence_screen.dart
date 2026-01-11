@@ -228,7 +228,8 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                 runSpacing: 12,
                                 children: orderedTeachers.map((t) {
                                   final name = t['name'];
-                                  final status = getTeacherStatus(name);
+                                  final rawStatus = getTeacherStatus(name);
+                                  final status = formatStatusString(rawStatus);
 
                                   return SizedBox(
                                     width: cardWidth,

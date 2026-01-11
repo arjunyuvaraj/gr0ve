@@ -167,3 +167,90 @@ String expandRange(String range) {
 
   return List.generate(end - start + 1, (i) => start + i).join(', ');
 }
+
+String formatStatusString(String status) {
+  if (!status.startsWith("Periods ") && !status.startsWith("Period ")) {
+    return status;
+  }
+
+  // Extract the periods part (everything after "Period(s) " and before any other text)
+  final match = RegExp(r'Period[s]?\s+(.+)').firstMatch(status);
+  if (match == null) return status;
+
+  final periodsString = match.group(1)!;
+
+  // Split by common separators
+  final parts = periodsString
+      .split(RegExp(r'[,&]'))
+      .map((e) => e.trim())
+      .toList();
+
+  List<dynamic> items = []; // Can be int or String (for "IGS")
+
+  for (final part in parts) {
+    if (part.toUpperCase() == "IGS") {
+      items.add("IGS");
+    } else {
+      final num = int.tryParse(part);
+      if (num != null) items.add(num);
+    }
+  }
+
+  if (items.isEmpty) return status;
+
+  // Separate numbers and IGS
+  List<int> numbers = items.whereType<int>().toList()..sort();
+  bool hasIGS = items.contains("IGS");
+
+  // Group consecutive numbers
+  List<String> groups = [];
+  if (numbers.isNotEmpty) {
+    int rangeStart = numbers[0];
+    int rangeEnd = numbers[0];
+
+    for (int i = 1; i < numbers.length; i++) {
+      if (numbers[i] == rangeEnd + 1) {
+        rangeEnd = numbers[i];
+      } else {
+        // End current range
+        if (rangeStart == rangeEnd) {
+          groups.add(rangeStart.toString());
+        } else {
+          groups.add("$rangeStart-$rangeEnd");
+        }
+        rangeStart = numbers[i];
+        rangeEnd = numbers[i];
+      }
+    }
+
+    // Add the last range
+    if (rangeStart == rangeEnd) {
+      groups.add(rangeStart.toString());
+    } else {
+      groups.add("$rangeStart-$rangeEnd");
+    }
+  }
+
+  // Add IGS to groups
+  if (hasIGS) {
+    groups.add("IGS");
+  }
+
+  // Format the output
+  if (groups.isEmpty) return status;
+
+  String result;
+  if (groups.length == 1) {
+    // Single period or range
+    if (groups[0] == "IGS" || groups[0].contains("-")) {
+      result = "Periods ${groups[0]}";
+    } else {
+      result = "Period ${groups[0]}";
+    }
+  } else {
+    // Multiple groups - use "Periods" and join with " & "
+    result = "Periods ${groups.join(' & ')}";
+  }
+
+  return result;
+}
