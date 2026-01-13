@@ -46,7 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await _authService.signUpWithEmail(email, password);
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/landing');
+        Navigator.of(context).pushReplacementNamed('/navigation');
       }
     } catch (e) {
       setState(() {
@@ -366,16 +366,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
 
                       const Spacer(),
-
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Text(
-                          "@bergen.org users get BCA features",
-                          style: text.bodySmall?.copyWith(
-                            color: colors.onSurface.withAlpha(140),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

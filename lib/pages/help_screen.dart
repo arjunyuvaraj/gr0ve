@@ -19,7 +19,7 @@ class HelpScreen extends StatelessWidget {
     final text = context.text;
 
     final currentAnnouncement =
-        "Welcome to gr0ve! Check out the latest updates and features.";
+        "Welcome to gr0ve! Please update the app and login to make the most of the app! ";
 
     return SingleChildScrollView(
       child: Center(
@@ -125,7 +125,6 @@ class HelpScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Announcement Card
                 const SizedBox(height: 16),
 
                 ChangelogPager(changelogEntries: changelogEntries),

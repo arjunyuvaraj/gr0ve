@@ -6,25 +6,20 @@ class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Get current user
   User? get currentUser => _auth.currentUser;
 
-  // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Check if email is from BCA domain
   bool _isBCAEmail(String email) {
     return email.toLowerCase().endsWith('@bergen.org');
   }
 
-  // Create or update user document in Firestore
   Future<void> _createUserDocument(User user, {String? email}) async {
     final userEmail = email ?? user.email ?? '';
     final isBCA = userEmail.isNotEmpty ? _isBCAEmail(userEmail) : false;
     final userDoc = _firestore.collection('users').doc(user.uid);
     final docSnapshot = await userDoc.get();
     if (!docSnapshot.exists) {
-      // Create new user document
       await userDoc.set({
         'uid': user.uid,
         'email': userEmail,
@@ -34,12 +29,10 @@ class AuthenticationService {
         'lastLoginAt': FieldValue.serverTimestamp(),
       });
     } else {
-      // Update existing user document
       await userDoc.update({'lastLoginAt': FieldValue.serverTimestamp()});
     }
   }
 
-  // Sign up with email and password
   Future<User?> signUpWithEmail(String email, String password) async {
     try {
       final trimmedEmail = email.trim();
@@ -61,7 +54,6 @@ class AuthenticationService {
     }
   }
 
-  // Sign in with email and password
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       final trimmedEmail = email.trim();
@@ -83,7 +75,6 @@ class AuthenticationService {
     }
   }
 
-  // Sign in anonymously
   Future<User?> signInAnonymously() async {
     try {
       final UserCredential userCredential = await _auth.signInAnonymously();
@@ -109,7 +100,6 @@ class AuthenticationService {
     }
   }
 
-  // Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
@@ -120,7 +110,6 @@ class AuthenticationService {
     }
   }
 
-  // Get user data from Firestore
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
@@ -130,7 +119,6 @@ class AuthenticationService {
     }
   }
 
-  // Check if current user is BCA
   Future<bool> isCurrentUserBCA() async {
     if (currentUser == null) return false;
 
@@ -142,7 +130,6 @@ class AuthenticationService {
     }
   }
 
-  // Link anonymous account to email/password
   Future<User?> linkAnonymousToEmailPassword(
     String email,
     String password,
@@ -160,7 +147,6 @@ class AuthenticationService {
       final userCredential = await currentUser!.linkWithCredential(credential);
 
       if (userCredential.user != null) {
-        // Update user document with email and BCA status
         final trimmedEmail = email.trim();
         await _firestore
             .collection('users')
@@ -180,7 +166,6 @@ class AuthenticationService {
     }
   }
 
-  // Delete current user account
   Future<void> deleteAccount() async {
     if (currentUser == null) return;
 
@@ -193,7 +178,6 @@ class AuthenticationService {
     }
   }
 
-  // Handle Firebase Auth exceptions
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'weak-password':

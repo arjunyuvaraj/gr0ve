@@ -61,12 +61,10 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ---- Loading ----
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // ---- Error ----
     if (error != null) {
       return Center(
         child: Column(
@@ -83,7 +81,6 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
       );
     }
 
-    // ---- Content ----
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
       child: ListView(
@@ -133,9 +130,6 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
     );
   }
 }
-// ------------------------
-// Models
-// ------------------------
 
 class DayMenu {
   final String date;

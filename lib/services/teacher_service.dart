@@ -35,7 +35,6 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       return {};
     }
 
-    // Check first row for date
     if (rows.isNotEmpty) {
       final firstRowText = rows[0].join(' ');
       final dateRegex = RegExp(
@@ -47,7 +46,6 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       }
     }
 
-    // Process teacher rows
     int processedCount = 0;
     for (final row in rows) {
       if (row.length < 2) continue;

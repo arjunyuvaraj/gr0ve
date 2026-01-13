@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,29 +33,24 @@ class _LandingDeciderState extends State<LandingDecider> {
   }
 
   Future<void> _checkAuthAndLandingStatus() async {
-    // Check if user is logged in
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      // Not logged in → show landing page (not login)
       if (!mounted) return;
       setState(() => _loading = false);
       return;
     }
 
-    // User is logged in → check if they've seen landing
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool('landing_seen') ?? false;
 
     if (!mounted) return;
 
     if (seen) {
-      // Logged in and seen landing → go to main app
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
       });
     } else {
-      // Logged in but first time → show landing page
       setState(() => _loading = false);
     }
   }

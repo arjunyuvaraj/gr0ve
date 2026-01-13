@@ -20,7 +20,6 @@ class StarredTeacherService {
         .doc('starredTeachers');
   }
 
-  /// Load starred teachers from Firestore
   static Future<void> load() async {
     if (_loaded) return;
 
@@ -36,7 +35,6 @@ class StarredTeacherService {
         starredTeachers.value = teachers.cast<String>().toSet();
       }
     } else {
-      // Ensure doc exists for future writes
       await _docRef(user.uid).set({'teachers': []});
       starredTeachers.value = {};
     }
@@ -44,7 +42,6 @@ class StarredTeacherService {
     _loaded = true;
   }
 
-  /// Toggle teacher star state
   static Future<void> toggleTeacher(String fullName) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -68,7 +65,6 @@ class StarredTeacherService {
     return starredTeachers.value.contains(name);
   }
 
-  /// Call this on sign-out
   static void reset() {
     starredTeachers.value = {};
     _loaded = false;

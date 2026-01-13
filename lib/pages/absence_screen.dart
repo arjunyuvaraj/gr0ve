@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_teacher_card.dart';
@@ -22,7 +23,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   String searchQuery = "";
   String selectedPeriod = "All";
 
-  // Update these with your actual spreadsheet details
   static const _teacherSpreadsheetId =
       '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _teacherWorksheetTitle = 'Absences';
@@ -141,8 +141,63 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     });
   }
 
+  Widget _buildVerifyEmailState(BuildContext context, User? user) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.mark_email_unread, size: 64),
+            const SizedBox(height: 16),
+            const Text(
+              "Verify your email",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "You need to verify your email before viewing teacher absences.",
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+
+            ElevatedButton(
+              onPressed: user == null
+                  ? null
+                  : () async {
+                      await user.sendEmailVerification();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Verification email sent"),
+                        ),
+                      );
+                    },
+              child: const Text("Send verification email"),
+            ),
+
+            const SizedBox(height: 12),
+
+            TextButton(
+              onPressed: () async {
+                await user?.reload();
+                setState(() {}); // re-check emailVerified
+              },
+              child: const Text("I've verified — refresh"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null || !user.emailVerified) {
+      return _buildVerifyEmailState(context, user);
+    }
+
     final colors = context.colors;
 
     return Padding(

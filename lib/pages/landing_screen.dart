@@ -168,7 +168,6 @@ class LandingScreen extends StatelessWidget {
             ),
           ),
 
-          // Login button in top right (only if not logged in)
           if (!isLoggedIn)
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,

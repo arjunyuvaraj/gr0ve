@@ -20,7 +20,6 @@ class StarredBusService {
         .doc('starredTowns');
   }
 
-  /// Load starred towns from Firestore
   static Future<void> load() async {
     if (_loaded) return;
 
@@ -36,7 +35,6 @@ class StarredBusService {
         starredTowns.value = towns.cast<String>().toSet();
       }
     } else {
-      // Create doc for first-time users
       await _docRef(user.uid).set({'towns': []});
       starredTowns.value = {};
     }
@@ -44,7 +42,6 @@ class StarredBusService {
     _loaded = true;
   }
 
-  /// Toggle a town's starred state
   static Future<void> toggleTown(String town) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -68,7 +65,6 @@ class StarredBusService {
     return starredTowns.value.contains(town);
   }
 
-  /// Call on sign-out
   static void reset() {
     starredTowns.value = {};
     _loaded = false;

@@ -20,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Map<String, String> absenceList = {};
   List<BusRoute> allBuses = [];
 
-  // Update these with your actual spreadsheet details
   static const _teacherSpreadsheetId =
       '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _teacherWorksheetTitle = 'Absences';
@@ -90,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           children: [
             const CustomHeader(title: "GR0VE", subtitle: "FOR BCA"),
             const SizedBox(height: 24),
-
+            // ()
             const Text(
               "STARRED TEACHERS",
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -110,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 24),
                       child: Text(
-                        "Nothing here",
+                        "No starred teachers yet... try heading to the teachers absense page!",
                         style: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -158,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 24),
                       child: Text(
-                        "Nothing here",
+                        "No starred buses yet... try heading to the buses page!",
                         style: TextStyle(color: Colors.grey),
                       ),
                     ),

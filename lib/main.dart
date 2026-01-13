@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:gr0ve/pages/account_deletion_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
 import 'package:gr0ve/pages/home_screen.dart';
@@ -20,14 +21,11 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Replace with your private Google Sheet ID
   const teacherAbsenceSpreadsheetId =
       '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
-  const teacherAbsenceWorksheetTitle =
-      'Absences'; // or whatever your sheet is named
+  const teacherAbsenceWorksheetTitle = 'Absences';
 
   try {
     absenceList = await fetchGoogleSheetAbsences(
@@ -75,6 +73,7 @@ class MyApp extends StatelessWidget {
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
         '/help': (context) => const HelpScreen(),
+        '/account_deletion': (context) => const AccountDeletionInfoScreen(),
       },
     );
   }

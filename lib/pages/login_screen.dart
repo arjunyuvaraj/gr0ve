@@ -321,16 +321,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       const Spacer(),
-
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Text(
-                          "@bergen.org users get BCA features",
-                          style: text.bodySmall?.copyWith(
-                            color: colors.onSurface.withAlpha(140),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

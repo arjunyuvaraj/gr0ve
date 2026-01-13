@@ -1,4 +1,6 @@
 final Map<String, String> changelogEntries = {
+  "v1.2.1":
+      "Apologies for the last update! An unexpected error occured when users attempted to add a link. Thankfully, that problem is fully patched! Thank you so much for your active feedback!",
   "v1.2.0":
       "Completely overhauled the login system with an updated backend for faster and more secure sign-ins. Plus, brand-new Quick Links management: easily add and remove your favorite links directly in the app for a fully personalized experience.",
   "v1.1.3":

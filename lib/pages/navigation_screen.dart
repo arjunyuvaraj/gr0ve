@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/pages/account_screen.dart';
 import 'package:gr0ve/pages/bus_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
-import 'package:gr0ve/pages/absence_screen.dart';
+import 'package:gr0ve/pages/absence_screen.dart'; // Treat as Teacher/Absence
 import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
 
@@ -12,19 +13,64 @@ class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key, this.initialIndex = 0});
 
   @override
-  NavigationScreenState createState() => NavigationScreenState();
+  State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
-class NavigationScreenState extends State<NavigationScreen> {
+class _NavigationScreenState extends State<NavigationScreen> {
   late int _selectedIndex;
+  User? user;
+  late List<Widget> screens;
+  late List<IconData> icons;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    user = FirebaseAuth.instance.currentUser;
+    _setupScreens();
   }
 
-  void changeIndex(int index) {
+  void _setupScreens() {
+    final email = user?.email ?? '';
+    if (user == null) {
+      screens = const [BusScreen(), HelpScreen(), AccountScreen()];
+      icons = [
+        Icons.bus_alert_rounded,
+        Icons.help_outline_rounded,
+        Icons.person_rounded,
+      ];
+    } else if (email.endsWith('@bergen.org')) {
+      screens = const [
+        HomeScreen(),
+        AbsenceScreen(),
+        BusScreen(),
+        HelpScreen(),
+        AccountScreen(),
+      ];
+      icons = [
+        Icons.home_rounded,
+        Icons.person_remove_alt_1_outlined,
+        Icons.bus_alert_rounded,
+        Icons.help_outline_rounded,
+        Icons.person_rounded,
+      ];
+    } else {
+      screens = const [
+        HomeScreen(),
+        BusScreen(),
+        HelpScreen(),
+        AccountScreen(),
+      ];
+      icons = [
+        Icons.home_rounded,
+        Icons.bus_alert_rounded,
+        Icons.help_outline_rounded,
+        Icons.person_rounded,
+      ];
+    }
+  }
+
+  void _changeIndex(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -32,9 +78,8 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   Widget _buildNavIcon(IconData icon, int index) {
     final isSelected = _selectedIndex == index;
-
     return IconButton(
-      onPressed: () => changeIndex(index),
+      onPressed: () => _changeIndex(index),
       icon: Icon(
         icon,
         size: 28,
@@ -47,22 +92,13 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final children = <Widget>[
-      const HomeScreen(),
-      const AbsenceScreen(),
-      const BusScreen(),
-      const HelpScreen(),
-      AccountScreen(),
-    ];
-
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: IndexedStack(index: _selectedIndex, children: children),
+          child: IndexedStack(index: _selectedIndex, children: screens),
         ),
       ),
-
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: context.colors.surface,
@@ -86,13 +122,10 @@ class NavigationScreenState extends State<NavigationScreen> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavIcon(Icons.home_rounded, 0),
-            _buildNavIcon(Icons.person_remove_alt_1_outlined, 1),
-            _buildNavIcon(Icons.bus_alert_rounded, 2),
-            _buildNavIcon(Icons.help_outline_rounded, 3),
-            _buildNavIcon(Icons.person_rounded, 4),
-          ],
+          children: List.generate(
+            icons.length,
+            (index) => _buildNavIcon(icons[index], index),
+          ),
         ),
       ),
     );

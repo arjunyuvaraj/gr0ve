@@ -3,9 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/components/custom_secondary_button.dart';
 import 'package:gr0ve/components/custom_text_field.dart';
+import 'package:gr0ve/components/custom_header.dart';
+import 'package:gr0ve/components/empty_link_dialog.dart';
+import 'package:gr0ve/components/not_logged_in.dart';
+import 'package:gr0ve/services/authentication_service.dart';
 import 'package:gr0ve/services/link_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:gr0ve/components/custom_header.dart';
+
+// Import the new components
+import 'package:gr0ve/components/user_card.dart';
+import 'package:gr0ve/components/link_card.dart';
+import 'package:gr0ve/components/add_link_dialog.dart';
+import 'package:gr0ve/components/confirm_dialog.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -38,171 +47,210 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _removeLink(QuickLink link) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ConfirmDialog(
+        title: 'Remove Link',
+        message: 'Are you sure you want to remove "${link.title}"?',
+        confirmLabel: 'Remove',
+      ),
+    );
+
+    if (confirmed != true) return;
+
     setState(() {
       links = List<QuickLink>.from(links)..removeWhere((l) => l.id == link.id);
     });
     await LinkService.saveUserLinks(links);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Link removed'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    if (user == null) return;
+
+    if (user!.isAnonymous) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => ConfirmDialog(
+          title: 'Delete Account',
+          message:
+              'Are you sure you want to delete your guest account? This cannot be undone.',
+          confirmLabel: 'Delete',
+          isDangerous: true,
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      try {
+        await AuthenticationService().deleteAccount();
+        if (mounted) Navigator.pushReplacementNamed(context, '/login');
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        }
+      }
+    } else {
+      await _deleteAccountWithPassword();
+    }
+  }
+
+  Future<void> _deleteAccountWithPassword() async {
+    String password = '';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Account'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This action cannot be undone. All your data will be permanently deleted.',
+            ),
+            const SizedBox(height: 20),
+            CustomTextField(
+              hintText: 'Enter your password to confirm',
+              obscureText: true,
+              controller: TextEditingController(),
+              onChange: (val) => password = val,
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomSecondaryButton(
+                  label: 'Cancel',
+                  onTap: () => Navigator.pop(ctx, false),
+                ),
+                const SizedBox(height: 12),
+                CustomPrimaryButton(
+                  label: 'Delete Account',
+                  onTap: () => Navigator.pop(ctx, true),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || password.trim().isEmpty) return;
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: user!.email!,
+        password: password,
+      );
+      await user!.reauthenticateWithCredential(credential);
+      await AuthenticationService().deleteAccount();
+
+      if (mounted) Navigator.pushReplacementNamed(context, '/login');
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.message ?? 'Authentication failed'}'),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _addLink() async {
     if (links.length >= maxLinks) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Maximum of 10 links reached")),
+        SnackBar(
+          content: Text("Maximum of $maxLinks links reached"),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
 
-    String title = '';
-    String url = '';
-    Color selectedColor = Colors.blue;
-    IconData selectedIcon = Icons.link;
-
-    final availableColors = [
-      Colors.blue,
-      Colors.red,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-    ];
-
-    final availableIcons = [
-      Icons.link, // generic web link
-      Icons.school, // classes / teachers
-      Icons.book, // documents / notes
-      Icons.directions_bus, // transportation
-      Icons.event_available, // events / deadlines
-    ];
-
     await showDialog(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            return AlertDialog(
-              title: const Text('Add New Link'),
-              content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomTextField(
-                      hintText: 'Title',
-                      controller: TextEditingController(),
-                      onChange: (v) => title = v,
-                      obscureText: false,
-                    ),
-                    const SizedBox(height: 12),
-                    CustomTextField(
-                      hintText: 'Link',
-                      controller: TextEditingController(),
-                      onChange: (v) => url = v,
-                      obscureText: false,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text("Pick a color:"),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: availableColors.map((c) {
-                        final isSelected = c == selectedColor;
-                        return GestureDetector(
-                          onTap: () => setState(() => selectedColor = c),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: c,
-                              shape: BoxShape.circle,
-                            ),
-                            child: isSelected
-                                ? const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 20,
-                                  )
-                                : null,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text("Pick an icon:"),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 12,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      // crossAxisAlignment: WrapMainAlignment.center,
-                      children: availableIcons.map((i) {
-                        final isSelected = i == selectedIcon;
-                        return GestureDetector(
-                          onTap: () => setState(() => selectedIcon = i),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? selectedColor.withOpacity(0.15)
-                                  : Colors.grey[200],
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              i,
-                              color: isSelected
-                                  ? selectedColor
-                                  : Colors.grey[600],
-                              size: 24,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                CustomPrimaryButton(
-                  label: "Add",
-                  onTap: () {
-                    if (title.isNotEmpty && url.isNotEmpty) {
-                      Navigator.pop(ctx);
-                      final newLink = QuickLink(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        title: title,
-                        url: url,
-                        icon: selectedIcon,
-                        color: selectedColor,
-                      );
-                      setState(() => links.add(newLink));
-                      LinkService.saveUserLinks(links);
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-                CustomSecondaryButton(
-                  onTap: () => Navigator.pop(ctx),
-                  label: 'Cancel',
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (ctx) => AddLinkDialog(
+        onAdd: (title, url, icon, color) {
+          final newLink = QuickLink(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            title: title,
+            url: url,
+            icon: icon,
+            color: color,
+          );
+
+          setState(() {
+            links.add(newLink);
+          });
+
+          LinkService.saveUserLinks(links);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Link added successfully'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      ),
     );
   }
 
   Future<void> _openLink(QuickLink link) async {
-    if (link.url.startsWith("/")) {
-      Navigator.pushNamed(context, link.url);
-    } else {
-      final uri = Uri.parse(link.url);
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      if (link.url.startsWith("/")) {
+        Navigator.pushNamed(context, link.url);
+      } else {
+        final uri = Uri.parse(link.url);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open link: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ConfirmDialog(
+        title: 'Logout',
+        message: 'Are you sure you want to logout?',
+        confirmLabel: 'Logout',
+      ),
+    );
+
+    if (confirmed != true) return;
+
     await FirebaseAuth.instance.signOut();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login'); // adjust route
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -212,174 +260,95 @@ class _AccountScreenState extends State<AccountScreen> {
     final colors = theme.colorScheme;
 
     if (loading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: colors.primary),
+            const SizedBox(height: 16),
+            Text(
+              'Loading your gr0ve...',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurface.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const CustomHeader(
-            title: "ACCOUNT",
-            subtitle: "Manage your info and favorite links",
-          ),
-          const SizedBox(height: 16),
+    if (user == null) {
+      return NotLoggedIn(
+        onSignIn: () => Navigator.pushReplacementNamed(context, '/login'),
+      );
+    }
 
-          // ---- User Info + Logout ----
-          if (user != null)
-            Container(
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
               padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.onSurface.withAlpha(15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.center, // <-- center vertically
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar
-                  CircleAvatar(
-                    radius: 30,
-                    child: Text(
-                      user!.email?[0].toUpperCase() ?? '?',
-                      style: const TextStyle(fontSize: 24),
-                    ),
+                  const CustomHeader(
+                    title: "ACCOUNT",
+                    subtitle: "Manage your info and favorite links",
                   ),
-                  const SizedBox(width: 16),
-
-                  // Name + Email
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment
-                          .center, // <-- vertically center text
-                      children: [
-                        Text(
-                          user!.email ?? 'Anonymous',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          user!.isAnonymous ? 'Anonymous account' : 'Logged In',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Buttons stacked vertically and centered
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: _addLink,
-                        tooltip: "Add new link",
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.logout),
-                        onPressed: _logout,
-                        tooltip: "Logout",
-                      ),
-                    ],
+                  const SizedBox(height: 20),
+                  UserCard(
+                    user: user!,
+                    onAddLink: _addLink,
+                    onLogout: _logout,
+                    onDeleteAccount: _confirmDeleteAccount,
                   ),
                 ],
               ),
-            ),
-
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                int columns = 1;
-                if (constraints.maxWidth > 900) {
-                  columns = 3;
-                } else if (constraints.maxWidth > 600) {
-                  columns = 2;
-                }
-
-                final cardWidth =
-                    (constraints.maxWidth - (16 * (columns - 1))) / columns;
-
-                return SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: links.map((link) {
-                      return SizedBox(
-                        width: cardWidth,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () => _openLink(link),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 20,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.surface,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.onSurface.withAlpha(12),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: link.color.withOpacity(0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    link.icon,
-                                    color: link.color,
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(
-                                    link.title,
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 16,
-                                        ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => _removeLink(link),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
             ),
           ),
+          _buildLinksGrid(theme, colors),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLinksGrid(ThemeData theme, ColorScheme colors) {
+    if (links.isEmpty) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: EmptyLinksView(),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(16),
+      sliver: SliverLayoutBuilder(
+        builder: (context, constraints) {
+          int columns = 1;
+          if (constraints.crossAxisExtent > 900) {
+            columns = 3;
+          } else if (constraints.crossAxisExtent > 600) {
+            columns = 2;
+          }
+
+          return SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 3,
+            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final link = links[index];
+              return LinkCard(
+                link: link,
+                onTap: () => _openLink(link),
+                onRemove: () => _removeLink(link),
+              );
+            }, childCount: links.length),
+          );
+        },
       ),
     );
   }
