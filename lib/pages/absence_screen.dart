@@ -22,6 +22,11 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   String searchQuery = "";
   String selectedPeriod = "All";
 
+  // Update these with your actual spreadsheet details
+  static const _teacherSpreadsheetId =
+      '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
+  static const _teacherWorksheetTitle = 'Absences';
+
   final List<String> periodOptions = [
     "All",
     "IGS",
@@ -65,12 +70,11 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   Future<void> loadAbsences({bool silent = false}) async {
     if (!silent) setState(() => isLoading = true);
 
-    const docId =
-        "2PACX-1vT_iK6QcUDVJoo_A6Enz5eizn4PzAWGfJBGo1vaC6T2y_0vHaYcL3ZlwcPN4H6pNCNEExNKGwxyktWC";
-    const docUrl = 'https://docs.google.com/document/d/e/$docId/pub';
-
     try {
-      final rawData = await fetchGoogleDocMap(docUrl);
+      final rawData = await fetchGoogleSheetAbsences(
+        spreadsheetId: _teacherSpreadsheetId,
+        worksheetTitle: _teacherWorksheetTitle,
+      );
 
       if (!mounted) return;
 

@@ -1,15 +1,18 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LandingDecider extends StatefulWidget {
   final Widget landingPage;
+  final Widget loginPage;
   final String navigationRoute;
 
   const LandingDecider({
     super.key,
     required this.landingPage,
+    required this.loginPage,
     required this.navigationRoute,
   });
 
@@ -24,38 +27,52 @@ class LandingDecider extends StatefulWidget {
 
 class _LandingDeciderState extends State<LandingDecider> {
   bool _loading = true;
-  bool _showLanding = true;
 
   @override
   void initState() {
     super.initState();
-    _checkLandingStatus();
+    _checkAuthAndLandingStatus();
   }
 
-  Future<void> _checkLandingStatus() async {
+  Future<void> _checkAuthAndLandingStatus() async {
+    // Check if user is logged in
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      // Not logged in → show landing page (not login)
+      if (!mounted) return;
+      setState(() => _loading = false);
+      return;
+    }
+
+    // User is logged in → check if they've seen landing
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool('landing_seen') ?? false;
 
     if (!mounted) return;
 
     if (seen) {
-      // Already seen → go straight to the main app
+      // Logged in and seen landing → go to main app
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
       });
     } else {
-      // First time → show landing page
-      setState(() {
-        _showLanding = true;
-        _loading = false;
-      });
+      // Logged in but first time → show landing page
+      setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      );
     }
 
     return widget.landingPage;

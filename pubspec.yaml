@@ -46,6 +46,9 @@ dependencies:
   csv: ^6.0.0
   shared_preferences: ^2.5.4
   gsheets: ^0.5.0
+  firebase_auth: ^6.1.3
+  firebase_core: ^4.3.0
+  cloud_firestore: ^6.1.1
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:gr0ve/services/corss_platform_storage_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StarredBusService {
-  static const _key = 'starred_towns';
+  static final _auth = FirebaseAuth.instance;
+  static final _firestore = FirebaseFirestore.instance;
 
   static final ValueNotifier<Set<String>> starredTowns = ValueNotifier(
     <String>{},
@@ -10,14 +12,43 @@ class StarredBusService {
 
   static bool _loaded = false;
 
+  static DocumentReference<Map<String, dynamic>> _docRef(String uid) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('preferences')
+        .doc('starredTowns');
+  }
+
+  /// Load starred towns from Firestore
   static Future<void> load() async {
     if (_loaded) return;
 
-    starredTowns.value = await CrossPlatformStorage.getStringSet(_key);
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final doc = await _docRef(user.uid).get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      final List<dynamic>? towns = data?['towns'];
+      if (towns != null) {
+        starredTowns.value = towns.cast<String>().toSet();
+      }
+    } else {
+      // Create doc for first-time users
+      await _docRef(user.uid).set({'towns': []});
+      starredTowns.value = {};
+    }
+
     _loaded = true;
   }
 
+  /// Toggle a town's starred state
   static Future<void> toggleTown(String town) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
     final updated = {...starredTowns.value};
 
     if (updated.contains(town)) {
@@ -27,10 +58,19 @@ class StarredBusService {
     }
 
     starredTowns.value = updated;
-    await CrossPlatformStorage.setStringSet(_key, updated);
+
+    await _docRef(
+      user.uid,
+    ).set({'towns': updated.toList()}, SetOptions(merge: true));
   }
 
   static bool isStarred(String town) {
     return starredTowns.value.contains(town);
+  }
+
+  /// Call on sign-out
+  static void reset() {
+    starredTowns.value = {};
+    _loaded = false;
   }
 }

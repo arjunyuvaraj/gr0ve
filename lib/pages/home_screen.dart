@@ -20,6 +20,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Map<String, String> absenceList = {};
   List<BusRoute> allBuses = [];
 
+  // Update these with your actual spreadsheet details
+  static const _teacherSpreadsheetId =
+      '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
+  static const _teacherWorksheetTitle = 'Absences';
+
   @override
   void initState() {
     super.initState();
@@ -47,8 +52,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> fetchAbsences() async {
     try {
-      absenceList = await fetchGoogleDocMap(
-        'https://docs.google.com/document/d/e/2PACX-1vT_iK6QcUDVJoo_A6Enz5eizn4PzAWGfJBGo1vaC6T2y_0vHaYcL3ZlwcPN4H6pNCNEExNKGwxyktWC/pub',
+      absenceList = await fetchGoogleSheetAbsences(
+        spreadsheetId: _teacherSpreadsheetId,
+        worksheetTitle: _teacherWorksheetTitle,
       );
     } catch (_) {
       absenceList = {};

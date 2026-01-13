@@ -1,28 +1,59 @@
-import 'package:http/http.dart' as http;
-import 'package:universal_html/parsing.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:gsheets/gsheets.dart';
 
-Future<Map<String, String>> fetchGoogleDocMap(String url) async {
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) return {};
+late final GSheets _gsheets;
+Future<void>? _initFuture;
 
-  final document = parseHtmlDocument(response.body);
+Future<void> _initGSheets() {
+  _initFuture ??= _loadGSheets();
+  return _initFuture!;
+}
+
+Future<void> _loadGSheets() async {
+  final json = await rootBundle.loadString('assets/credentials/gsheets.json');
+  _gsheets = GSheets(json);
+}
+
+Future<Map<String, String>> fetchGoogleSheetAbsences({
+  required String spreadsheetId,
+  String worksheetTitle = 'Absences',
+}) async {
+  await _initGSheets();
   final Map<String, String> absenceMap = {};
 
-  final dateRegex = RegExp(
-    r'(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}',
-  );
-  final dateMatch = dateRegex.firstMatch(document.body?.text ?? '');
-  if (dateMatch != null) {
-    absenceMap['Date'] = dateMatch.group(0)!;
-  }
+  try {
+    final spreadsheet = await _gsheets.spreadsheet(spreadsheetId);
 
-  for (final table in document.querySelectorAll('table')) {
-    for (final row in table.querySelectorAll('tr')) {
-      final cells = row.querySelectorAll('td');
-      if (cells.length < 2) continue;
+    final sheet = spreadsheet.worksheetByTitle(worksheetTitle);
+    if (sheet == null) {
+      return {};
+    }
+    final rows = await sheet.values.allRows();
+    if (rows.isEmpty) {
+      if (kDebugMode) print('Worksheet is empty');
+      return {};
+    }
 
-      final teacherRaw = cells[0].text?.trim() ?? '';
-      final periodRaw = cells[1].text?.trim() ?? '';
+    // Check first row for date
+    if (rows.isNotEmpty) {
+      final firstRowText = rows[0].join(' ');
+      final dateRegex = RegExp(
+        r'(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}',
+      );
+      final dateMatch = dateRegex.firstMatch(firstRowText);
+      if (dateMatch != null) {
+        absenceMap['Date'] = dateMatch.group(0)!;
+      }
+    }
+
+    // Process teacher rows
+    int processedCount = 0;
+    for (final row in rows) {
+      if (row.length < 2) continue;
+
+      final teacherRaw = row[0].toString().trim();
+      final periodRaw = row[1].toString().trim();
 
       if (teacherRaw.isEmpty) continue;
       if (teacherRaw.toLowerCase().contains('teacher')) continue;
@@ -31,6 +62,15 @@ Future<Map<String, String>> fetchGoogleDocMap(String url) async {
       final period = formatPeriods(periodRaw);
 
       absenceMap[teacherKey] = period.isEmpty ? 'Present' : period;
+      processedCount++;
+    }
+
+    if (kDebugMode) {
+      print('Processed $processedCount teacher entries');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error fetching teacher absences: $e');
     }
   }
 
@@ -173,19 +213,17 @@ String formatStatusString(String status) {
     return status;
   }
 
-  // Extract the periods part (everything after "Period(s) " and before any other text)
   final match = RegExp(r'Period[s]?\s+(.+)').firstMatch(status);
   if (match == null) return status;
 
   final periodsString = match.group(1)!;
 
-  // Split by common separators
   final parts = periodsString
       .split(RegExp(r'[,&]'))
       .map((e) => e.trim())
       .toList();
 
-  List<dynamic> items = []; // Can be int or String (for "IGS")
+  List<dynamic> items = [];
 
   for (final part in parts) {
     if (part.toUpperCase() == "IGS") {
@@ -198,11 +236,9 @@ String formatStatusString(String status) {
 
   if (items.isEmpty) return status;
 
-  // Separate numbers and IGS
   List<int> numbers = items.whereType<int>().toList()..sort();
   bool hasIGS = items.contains("IGS");
 
-  // Group consecutive numbers
   List<String> groups = [];
   if (numbers.isNotEmpty) {
     int rangeStart = numbers[0];
@@ -212,7 +248,6 @@ String formatStatusString(String status) {
       if (numbers[i] == rangeEnd + 1) {
         rangeEnd = numbers[i];
       } else {
-        // End current range
         if (rangeStart == rangeEnd) {
           groups.add(rangeStart.toString());
         } else {
@@ -223,7 +258,6 @@ String formatStatusString(String status) {
       }
     }
 
-    // Add the last range
     if (rangeStart == rangeEnd) {
       groups.add(rangeStart.toString());
     } else {
@@ -231,24 +265,20 @@ String formatStatusString(String status) {
     }
   }
 
-  // Add IGS to groups
   if (hasIGS) {
     groups.add("IGS");
   }
 
-  // Format the output
   if (groups.isEmpty) return status;
 
   String result;
   if (groups.length == 1) {
-    // Single period or range
     if (groups[0] == "IGS" || groups[0].contains("-")) {
       result = "Periods ${groups[0]}";
     } else {
       result = "Period ${groups[0]}";
     }
   } else {
-    // Multiple groups - use "Periods" and join with " & "
     result = "Periods ${groups.join(' & ')}";
   }
 
