@@ -5,12 +5,14 @@ class CustomBusCard extends StatelessWidget {
   final BusRoute route;
   final bool starred;
   final GestureTapCallback onStarTap;
+  final bool isLoggedIn; // Add this parameter
 
   const CustomBusCard({
     super.key,
     required this.route,
     required this.starred,
     required this.onStarTap,
+    required this.isLoggedIn, // Make it required
   });
 
   @override
@@ -33,15 +35,19 @@ class CustomBusCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            icon: Icon(
-              starred ? Icons.star_rounded : Icons.star_border_rounded,
-              color: starred ? colors.primary : colors.onSurface.withAlpha(120),
+          if (isLoggedIn) ...[
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
+                starred ? Icons.star_rounded : Icons.star_border_rounded,
+                color: starred
+                    ? colors.primary
+                    : colors.onSurface.withAlpha(120),
+              ),
+              onPressed: onStarTap,
             ),
-            onPressed: onStarTap,
-          ),
-          const SizedBox(width: 8),
+            const SizedBox(width: 8),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

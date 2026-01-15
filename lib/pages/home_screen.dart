@@ -25,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   static const _teacherSpreadsheetId =
       '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _teacherWorksheetTitle = 'Absences';
-
   @override
   void initState() {
     super.initState();
@@ -88,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     if (isLoading) return const Center(child: CircularProgressIndicator());
 
     return Scaffold(
@@ -183,6 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           route: b,
                           starred: true,
                           onStarTap: () => StarredBusService.toggleTown(b.town),
+                          isLoggedIn: isLoggedIn,
                         ),
                       );
                     }).toList(),

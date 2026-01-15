@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_bus_card.dart';
 import 'package:gr0ve/components/custom_header.dart';
+import 'package:gr0ve/services/authentication_service.dart';
 import 'package:gr0ve/services/bus_service.dart';
 import 'package:gr0ve/services/starred_bus_service.dart';
 import 'package:gr0ve/utilities/context_extensions.dart';
@@ -124,6 +126,7 @@ class _BusScreenState extends State<BusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Column(
@@ -201,6 +204,7 @@ class _BusScreenState extends State<BusScreen> {
                                           StarredBusService.toggleTown(
                                             route.town,
                                           ),
+                                      isLoggedIn: isLoggedIn,
                                     ),
                                   );
                                 }).toList(),
