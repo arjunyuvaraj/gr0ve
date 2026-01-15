@@ -168,7 +168,13 @@ class LandingWebsiteScreen extends StatelessWidget {
                                             child: DownloadButton(
                                               label: "iOS",
                                               icon: Icons.apple,
-                                              onTap: () {},
+                                              onTap: () {
+                                                launchUrl(
+                                                  Uri.parse(
+                                                    'https://apps.apple.com/us/app/gr0ve/id6755570512',
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ),
                                         ),
