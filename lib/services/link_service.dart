@@ -6,23 +6,24 @@ class QuickLink {
   final String id;
   final String title;
   final String url;
-  final IconData icon;
+  final String iconKey;
   final Color color;
 
   const QuickLink({
     required this.id,
     required this.title,
     required this.url,
-    required this.icon,
+    required this.iconKey,
     required this.color,
   });
+
+  IconData get icon => _iconMap[iconKey] ?? Icons.link;
 
   Map<String, dynamic> toMap() => {
     'id': id,
     'title': title,
     'url': url,
-    'iconCodePoint': icon.codePoint,
-    'iconFontFamily': icon.fontFamily,
+    'iconKey': iconKey,
     'color': color.value,
   };
 
@@ -31,13 +32,35 @@ class QuickLink {
       id: map['id'] ?? 'unknown',
       title: map['title'] ?? '',
       url: map['url'] ?? '',
-      icon: IconData(
-        map['iconCodePoint'] ?? Icons.link.codePoint,
-        fontFamily: map['iconFontFamily'] ?? 'MaterialIcons',
-      ),
+      iconKey: map['iconKey'] ?? 'link',
       color: map['color'] != null ? Color(map['color']) : Colors.blue,
     );
   }
+
+  // Icon mapping - all const IconData references
+  static const Map<String, IconData> _iconMap = {
+    'school': Icons.school,
+    'book': Icons.book,
+    'description': Icons.description,
+    'directions_bus': Icons.directions_bus,
+    'event_available': Icons.event_available,
+    'privacy_tip': Icons.privacy_tip,
+    'link': Icons.link,
+    'home': Icons.home,
+    'settings': Icons.settings,
+    'favorite': Icons.favorite,
+    'email': Icons.email,
+    'phone': Icons.phone,
+    'calendar': Icons.calendar_today,
+    'map': Icons.map,
+    'shopping': Icons.shopping_cart,
+    'sports': Icons.sports,
+    'music': Icons.music_note,
+    'video': Icons.video_library,
+    'games': Icons.games,
+    'work': Icons.work,
+    // Add more icons as needed
+  };
 }
 
 class LinkService {
@@ -49,47 +72,46 @@ class LinkService {
       id: 'schoology',
       title: 'SCHOOLOGY',
       url: 'https://bca.schoology.com/home',
-      icon: Icons.school,
+      iconKey: 'school',
       color: Color(0xFF3B5998),
     ),
     QuickLink(
       id: 'gradebook',
       title: 'GRADEBOOK',
       url: 'https://bcts.powerschool.com/public/',
-      icon: Icons.book,
+      iconKey: 'book',
       color: Color(0xFF00AEEF),
     ),
-    // ...repeat for other links
     QuickLink(
       id: 'teacher_absence',
       title: 'TEACHER ABSENCE',
       url:
           'https://docs.google.com/document/d/e/2PACX-1vRkhySmwAiTtY88tcshckpV4F0vRrULccaGrYl_Sf2ubWpyyXA4l8c-KAOuMzSwFe-qyAQhLqXzVsbA/pub',
-      icon: Icons.description,
-      color: const Color(0xFF4285F4),
+      iconKey: 'description',
+      color: Color(0xFF4285F4),
     ),
     QuickLink(
       id: 'bus_locations',
       title: 'BUS LOCATIONS',
       url:
           'https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/edit?gid=0#gid=0',
-      icon: Icons.directions_bus,
-      color: const Color(0xFF0F9D58),
+      iconKey: 'directions_bus',
+      color: Color(0xFF0F9D58),
     ),
     QuickLink(
       id: 'counselor_booking',
       title: 'COUNSELOR BOOKING',
       url:
           'https://outlook.office365.com/book/CounselorBookings@bergen.org/?ismsaljsauthenabled=true',
-      icon: Icons.event_available,
-      color: const Color(0xFFFFB900),
+      iconKey: 'event_available',
+      color: Color(0xFFFFB900),
     ),
     QuickLink(
       id: 'privacy_policy',
       title: 'PRIVACY POLICY',
       url: '/privacy_policy',
-      icon: Icons.privacy_tip,
-      color: const Color(0xFF6A1B9A),
+      iconKey: 'privacy_tip',
+      color: Color(0xFF6A1B9A),
     ),
   ];
 

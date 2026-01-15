@@ -27,108 +27,166 @@ class LandingWebsiteScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 48),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 600;
 
-                    Text(
-                      "gr0ve".capitalized,
-                      style: text.displayLarge?.copyWith(
-                        color: colors.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Navigate Your Day".capitalized,
-                      style: text.displaySmall?.copyWith(
-                        color: colors.onPrimary.withAlpha(210),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        letterSpacing: getLetterSpacing(14, 10),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 480),
-                      child: Text(
-                        "Gr0ve simplifies your school day by showing teacher absences, class coverage, bus locations, and quick links in one clean, fast interface. Star favorite teachers, get daily updates, and plan your day without digging through messy docs.",
-                        textAlign: TextAlign.center,
-                        style: text.bodyMedium?.copyWith(
-                          color: colors.onPrimary.withAlpha(230),
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 48),
+                        Text(
+                          "gr0ve".capitalized,
+                          style: text.displayLarge?.copyWith(
+                            color: colors.onPrimary,
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    SizedBox(
-                      width: 360,
-                      child: Column(
-                        children: [
-                          Material(
-                            elevation: 8,
-                            shadowColor: colors.primary.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(16),
-                            child: CustomPrimaryButton(
-                              label: "Get Started",
-                              onTap: () =>
-                                  Navigator.pushNamed(context, '/navigation'),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Navigate Your Day".capitalized,
+                          style: text.displaySmall?.copyWith(
+                            color: colors.onPrimary.withAlpha(210),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            letterSpacing: getLetterSpacing(14, 10),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: isMobile ? 360 : 480,
+                          ),
+                          child: Text(
+                            "Gr0ve simplifies your school day by showing teacher absences, class coverage, bus locations, and quick links in one clean, fast interface. Star favorite teachers, get daily updates, and plan your day without digging through messy docs.",
+                            textAlign: TextAlign.center,
+                            style: text.bodyMedium?.copyWith(
+                              color: colors.onPrimary.withAlpha(230),
+                              height: 1.5,
+                              fontWeight: FontWeight.w400,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
+                        ),
+                        const SizedBox(height: 28),
+                        SizedBox(
+                          width: isMobile ? double.infinity : 360,
+                          child: Column(
                             children: [
-                              Expanded(
-                                child: Material(
-                                  elevation: 4,
-                                  shadowColor: colors.surface.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: DownloadButton(
-                                    label: "Android",
-                                    icon: Icons.android,
-                                    onTap: () {
-                                      launchUrl(
-                                        Uri.parse(
-                                          'https://play.google.com/apps/testing/com.arjunyuvaraj.gr0ve',
-                                        ),
-                                      );
-                                    },
+                              Material(
+                                elevation: 8,
+                                shadowColor: colors.primary.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(16),
+                                child: CustomPrimaryButton(
+                                  label: "Get Started",
+                                  onTap: () => Navigator.pushNamed(
+                                    context,
+                                    '/navigation',
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Material(
-                                  elevation: 4,
-                                  shadowColor: colors.surface.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: DownloadButton(
-                                    label: "iOS",
-                                    icon: Icons.apple,
-                                    onTap: () {},
-                                  ),
-                                ),
+                              const SizedBox(height: 16),
+                              isMobile
+                                  ? Column(
+                                      children: [
+                                        Material(
+                                          elevation: 4,
+                                          shadowColor: colors.surface
+                                              .withOpacity(0.3),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child: DownloadButton(
+                                            label: "Android",
+                                            icon: Icons.android,
+                                            onTap: () {
+                                              launchUrl(
+                                                Uri.parse(
+                                                  'https://play.google.com/apps/testing/com.arjunyuvaraj.gr0ve',
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Material(
+                                          elevation: 4,
+                                          shadowColor: colors.surface
+                                              .withOpacity(0.3),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child: DownloadButton(
+                                            label: "iOS",
+                                            icon: Icons.apple,
+                                            onTap: () {
+                                              launchUrl(
+                                                Uri.parse(
+                                                  'https://apps.apple.com/us/app/gr0ve/id6755570512',
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Row(
+                                      children: [
+                                        Expanded(
+                                          child: Material(
+                                            elevation: 4,
+                                            shadowColor: colors.surface
+                                                .withOpacity(0.3),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: DownloadButton(
+                                              label: "Android",
+                                              icon: Icons.android,
+                                              onTap: () {
+                                                launchUrl(
+                                                  Uri.parse(
+                                                    'https://play.google.com/apps/testing/com.arjunyuvaraj.gr0ve',
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Material(
+                                            elevation: 4,
+                                            shadowColor: colors.surface
+                                                .withOpacity(0.3),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: DownloadButton(
+                                              label: "iOS",
+                                              icon: Icons.apple,
+                                              onTap: () {},
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              const SizedBox(height: 12),
+                              ChangelogPager(
+                                changelogEntries: changelogEntries,
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    ChangelogPager(changelogEntries: changelogEntries),
-                  ],
+                  ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

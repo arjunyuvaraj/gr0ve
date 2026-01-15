@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
@@ -23,6 +24,8 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   String searchQuery = "";
   String selectedPeriod = "All";
 
+  Timer? _refreshTimer;
+
   static const _teacherSpreadsheetId =
       '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _teacherWorksheetTitle = 'Absences';
@@ -41,16 +44,74 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     "9",
   ];
 
+  // Schedule times in minutes from midnight
+  static const List<int> _refreshTimes = [
+    // 7:30-8:00 every 5 minutes
+    450, 455, 460, 465, 470, 475, 480,
+    // Individual times
+    530, 534, 538, 542, // 8:50, 8:54, 8:58, 9:02
+    592, 596, // 9:52, 9:56
+    646, 650, // 10:46, 10:50
+    700, 704, // 11:40, 11:44
+    754, 758, // 12:34, 12:38
+    808, 812, // 1:28, 1:32
+    802, // 1:22
+    866, // 2:26
+    916, 920, // 3:16, 3:20
+    970, // 4:10
+    990, // 4:30
+  ];
+
   @override
   void initState() {
     super.initState();
     _initializeScreen();
   }
 
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initializeScreen() async {
     await StarredTeacherService.load();
     await loadTeachers();
     await loadAbsences();
+    _scheduleNextRefresh();
+  }
+
+  void _scheduleNextRefresh() {
+    _refreshTimer?.cancel();
+
+    final now = DateTime.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+
+    // Find the next scheduled refresh time
+    int? nextRefreshMinutes;
+    for (final time in _refreshTimes) {
+      if (time > currentMinutes) {
+        nextRefreshMinutes = time;
+        break;
+      }
+    }
+
+    // If no time today, schedule for first time tomorrow
+    if (nextRefreshMinutes == null) {
+      nextRefreshMinutes = _refreshTimes.first + (24 * 60);
+    }
+
+    // Calculate duration until next refresh
+    final minutesUntilRefresh = nextRefreshMinutes - currentMinutes;
+    final duration = Duration(
+      minutes: minutesUntilRefresh,
+      seconds: -now.second, // Align to start of minute
+    );
+
+    _refreshTimer = Timer(duration, () {
+      loadAbsences(silent: true);
+      _scheduleNextRefresh(); // Schedule the next one
+    });
   }
 
   Future<void> loadTeachers() async {
@@ -209,23 +270,29 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
             subtitle: absenceList['Date'] ?? "",
           ),
           const SizedBox(height: 12),
-          TextField(
-            decoration: InputDecoration(
-              hintText: "Search teachers…",
-              prefixIcon: const Icon(Icons.search),
-              isDense: true,
-              filled: true,
-              fillColor: colors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+          Material(
+            elevation: 4,
+            shadowColor: context.colors.onSurface.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            child: TextField(
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: 'Search buses or parking spot...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                filled: true,
+                fillColor: context.colors.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
               ),
+              onChanged: (value) {
+                searchQuery = value;
+                setState(() {
+                  filteredTeachers = applyFilters(teachers);
+                });
+              },
             ),
-            onChanged: (value) {
-              searchQuery = value;
-              setState(() {
-                filteredTeachers = applyFilters(teachers);
-              });
-            },
           ),
           const SizedBox(height: 8),
 

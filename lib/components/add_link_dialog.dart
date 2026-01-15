@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/components/custom_secondary_button.dart';
 import 'package:gr0ve/components/custom_text_field.dart';
+import 'package:gr0ve/services/link_service.dart';
 
 class AddLinkDialog extends StatefulWidget {
-  final Function(String title, String url, IconData icon, Color color) onAdd;
+  final Function(String title, String url, String iconKey, Color color) onAdd;
+  final QuickLink? editingLink; // Add this for editing
 
-  const AddLinkDialog({super.key, required this.onAdd});
+  const AddLinkDialog({super.key, required this.onAdd, this.editingLink});
 
   @override
   State<AddLinkDialog> createState() => _AddLinkDialogState();
 }
 
 class _AddLinkDialogState extends State<AddLinkDialog> {
-  String title = '';
-  String url = '';
-  Color selectedColor = Colors.blue;
-  IconData selectedIcon = Icons.link;
+  late TextEditingController titleController;
+  late TextEditingController urlController;
+  late Color selectedColor;
+  late String selectedIconKey;
 
   final availableColors = [
     Colors.red,
@@ -27,24 +29,76 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
     Colors.teal,
   ];
 
-  final availableIcons = [
-    Icons.link,
-    Icons.school,
-    Icons.code,
-    Icons.calendar_today,
-    Icons.map,
-    Icons.restaurant,
+  final List<String> availableIconKeys = [
+    'link',
+    'school',
+    'book',
+    'calendar',
+    'map',
+    'shopping',
+    'home',
+    'favorite',
+    'email',
+    'phone',
+    'music',
+    'video',
+    'games',
+    'work',
+    'sports',
+    'description',
+    'directions_bus',
+    'event_available',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with existing values if editing
+    if (widget.editingLink != null) {
+      titleController = TextEditingController(text: widget.editingLink!.title);
+      final url = widget.editingLink!.url;
+      // Remove https://www. prefix for display
+      final displayUrl = url.startsWith('https://www.')
+          ? url.substring(12)
+          : url;
+      urlController = TextEditingController(text: displayUrl);
+      selectedColor = widget.editingLink!.color;
+      selectedIconKey = widget.editingLink!.iconKey;
+    } else {
+      titleController = TextEditingController();
+      urlController = TextEditingController();
+      selectedColor = Colors.blue;
+      selectedIconKey = 'link';
+    }
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    urlController.dispose();
+    super.dispose();
+  }
+
+  IconData _getIconData(String key) {
+    return QuickLink(
+      id: 'temp',
+      title: '',
+      url: '',
+      iconKey: key,
+      color: Colors.blue,
+    ).icon;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isEditing = widget.editingLink != null;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Text(
-        'Add New Link',
-        style: TextStyle(fontWeight: FontWeight.bold),
+      title: Text(
+        isEditing ? 'Edit Link' : 'Add New Link',
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -53,15 +107,13 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
           children: [
             CustomTextField(
               hintText: 'Title',
-              controller: TextEditingController(),
-              onChange: (v) => title = v,
+              controller: titleController,
               obscureText: false,
             ),
             const SizedBox(height: 16),
             CustomTextField(
-              hintText: 'URL',
-              controller: TextEditingController(),
-              onChange: (v) => url = v,
+              hintText: 'URL (https://www. already included)',
+              controller: urlController,
               obscureText: false,
             ),
             const SizedBox(height: 24),
@@ -128,15 +180,15 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              width: 156,
+              width: 250,
               child: Wrap(
                 alignment: WrapAlignment.center,
                 spacing: 12,
                 runSpacing: 12,
-                children: availableIcons.map((i) {
-                  final isSelected = i == selectedIcon;
+                children: availableIconKeys.map((iconKey) {
+                  final isSelected = iconKey == selectedIconKey;
                   return GestureDetector(
-                    onTap: () => setState(() => selectedIcon = i),
+                    onTap: () => setState(() => selectedIconKey = iconKey),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       width: 44,
@@ -154,7 +206,7 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
                         ),
                       ),
                       child: Icon(
-                        i,
+                        _getIconData(iconKey),
                         color: isSelected ? selectedColor : Colors.grey[600],
                         size: 24,
                       ),
@@ -176,8 +228,10 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               CustomPrimaryButton(
-                label: "Add Link",
+                label: isEditing ? "Save Changes" : "Add Link",
                 onTap: () {
+                  String title = titleController.text;
+                  String url = urlController.text;
                   if (title.trim().isEmpty || url.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -190,8 +244,10 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
 
                   widget.onAdd(
                     title.trim(),
-                    url.trim(),
-                    selectedIcon,
+                    url.startsWith('http')
+                        ? url.trim()
+                        : "https://www.${url.trim()}",
+                    selectedIconKey,
                     selectedColor,
                   );
                   Navigator.pop(context);

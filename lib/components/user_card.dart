@@ -26,7 +26,7 @@ class UserCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             colors.primaryContainer.withOpacity(0.3),
-            colors.secondaryContainer.withOpacity(0.2),
+            colors.primaryContainer.withOpacity(0.2),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -75,18 +75,14 @@ class UserCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: user.isAnonymous
-                        ? colors.secondaryContainer
-                        : colors.primaryContainer,
+                    color: colors.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     user.isAnonymous ? 'Guest' : 'User',
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: user.isAnonymous
-                          ? colors.onSecondaryContainer
-                          : colors.onPrimaryContainer,
+                      color: colors.onPrimaryContainer,
                     ),
                   ),
                 ),

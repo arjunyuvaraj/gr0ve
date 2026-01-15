@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_bus_card.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/services/bus_service.dart';
 import 'package:gr0ve/services/starred_bus_service.dart';
+import 'package:gr0ve/utilities/context_extensions.dart';
 
 class BusScreen extends StatefulWidget {
   const BusScreen({super.key});
@@ -20,11 +22,47 @@ class _BusScreenState extends State<BusScreen> {
   String searchQuery = "";
   String? errorMessage;
 
+  Timer? _refreshTimer;
+
   @override
   void initState() {
     super.initState();
     StarredBusService.load();
     loadRoutes();
+    _scheduleRefresh();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleRefresh() {
+    _refreshTimer?.cancel();
+
+    final now = DateTime.now();
+    Duration nextRefresh;
+
+    // Check if we're in the 3:45-4:45 window (every minute)
+    final dismissalStart = DateTime(now.year, now.month, now.day, 15, 45);
+    final dismissalEnd = DateTime(now.year, now.month, now.day, 16, 45);
+
+    if (now.isAfter(dismissalStart) && now.isBefore(dismissalEnd)) {
+      // Refresh every minute during dismissal
+      nextRefresh = Duration(seconds: 60 - now.second);
+    } else {
+      // Refresh every hour
+      nextRefresh = Duration(
+        minutes: 60 - now.minute,
+        seconds: 60 - now.second,
+      );
+    }
+
+    _refreshTimer = Timer(nextRefresh, () {
+      loadRoutes(silent: true);
+      _scheduleRefresh(); // Schedule the next refresh
+    });
   }
 
   Future<void> loadRoutes({bool silent = false}) async {
@@ -92,20 +130,27 @@ class _BusScreenState extends State<BusScreen> {
         children: [
           const CustomHeader(title: "BUSES", subtitle: "DISMISSAL PLACES"),
           const SizedBox(height: 12),
-
-          TextField(
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: "Search town or bus code…",
-              prefixIcon: const Icon(Icons.search, size: 20),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+          Material(
+            elevation: 4,
+            shadowColor: context.colors.onSurface.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            child: TextField(
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: 'Search buses or parking spot...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                filled: true,
+                fillColor: context.colors.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
               ),
+              onChanged: (value) {
+                searchQuery = value;
+                applyFilters();
+              },
             ),
-            onChanged: (value) {
-              searchQuery = value;
-              applyFilters();
-            },
           ),
 
           const SizedBox(height: 12),

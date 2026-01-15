@@ -7,6 +7,7 @@ import 'package:gr0ve/pages/home_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
 import 'package:gr0ve/pages/landing_screen_web.dart';
 import 'package:gr0ve/pages/login_screen.dart';
+import 'package:gr0ve/pages/lunch_menu_screen.dart';
 import 'package:gr0ve/pages/register_screen.dart';
 import 'package:gr0ve/pages/navigation_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
@@ -74,6 +75,7 @@ class MyApp extends StatelessWidget {
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
         '/help': (context) => const HelpScreen(),
         '/account_deletion': (context) => const AccountDeletionInfoScreen(),
+        '/lunch_menu': (context) => const LunchMenuScreen(),
       },
     );
   }

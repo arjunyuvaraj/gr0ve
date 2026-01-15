@@ -8,6 +8,9 @@ import 'package:gr0ve/components/empty_link_dialog.dart';
 import 'package:gr0ve/components/not_logged_in.dart';
 import 'package:gr0ve/services/authentication_service.dart';
 import 'package:gr0ve/services/link_service.dart';
+import 'package:gr0ve/services/starred_bus_service.dart';
+import 'package:gr0ve/services/starred_teacher_service.dart';
+import 'package:gr0ve/utilities/context_extensions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Import the new components
@@ -25,9 +28,9 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   bool loading = true;
+  bool isReordering = false;
   List<QuickLink> links = [];
   User? user;
-
   static const int maxLinks = 10;
 
   @override
@@ -43,6 +46,67 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       links = List<QuickLink>.from(userLinks);
       loading = false;
+    });
+  }
+
+  Future<void> _editLink(QuickLink link) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => AddLinkDialog(
+        editingLink: link,
+        onAdd: (String title, String url, String iconKey, Color color) {
+          final updatedLink = QuickLink(
+            id: link.id,
+            title: title,
+            url: url,
+            iconKey: iconKey,
+            color: color,
+          );
+
+          setState(() {
+            final index = links.indexWhere((l) => l.id == link.id);
+            if (index != -1) {
+              links[index] = updatedLink;
+            }
+          });
+
+          LinkService.saveUserLinks(links);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Link updated successfully'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _toggleReordering() {
+    setState(() {
+      isReordering = !isReordering;
+    });
+
+    if (!isReordering) {
+      // Save the new order when exiting reorder mode
+      LinkService.saveUserLinks(links);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Link order saved'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _reorderLinks(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final item = links.removeAt(oldIndex);
+      links.insert(newIndex, item);
     });
   }
 
@@ -190,12 +254,12 @@ class _AccountScreenState extends State<AccountScreen> {
     await showDialog(
       context: context,
       builder: (ctx) => AddLinkDialog(
-        onAdd: (title, url, icon, color) {
+        onAdd: (String title, String url, String iconKey, Color color) {
           final newLink = QuickLink(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             title: title,
             url: url,
-            icon: icon,
+            iconKey: iconKey,
             color: color,
           );
 
@@ -249,6 +313,8 @@ class _AccountScreenState extends State<AccountScreen> {
     if (confirmed != true) return;
 
     await FirebaseAuth.instance.signOut();
+    StarredBusService.reset();
+    StarredTeacherService.reset();
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -290,19 +356,40 @@ class _AccountScreenState extends State<AccountScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const CustomHeader(
                     title: "ACCOUNT",
                     subtitle: "Manage your info and favorite links",
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                   UserCard(
                     user: user!,
                     onAddLink: _addLink,
                     onLogout: _logout,
                     onDeleteAccount: _confirmDeleteAccount,
                   ),
+
+                  // Reorder button
+                  if (links.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: TextButton.icon(
+                        onPressed: _toggleReordering,
+                        icon: Icon(
+                          isReordering ? Icons.check : Icons.swap_vert,
+                          size: 20,
+                        ),
+                        label: Text(
+                          isReordering
+                              ? 'Done Reordering'.capitalized
+                              : 'Reorder Links'.capitalized,
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: colors.primary,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -321,6 +408,33 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     }
 
+    if (isReordering) {
+      // Use ReorderableListView when in reorder mode
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+          child: ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            onReorder: _reorderLinks,
+            itemCount: links.length,
+            itemBuilder: (context, index) {
+              final link = links[index];
+              return Padding(
+                key: ValueKey(link.id),
+                padding: const EdgeInsets.only(bottom: 16),
+                child: LinkCard(
+                  link: link,
+                  onTap: () {},
+                  onRemove: () => _removeLink(link),
+                  isReordering: true,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
     return SliverPadding(
       padding: const EdgeInsets.all(16),
       sliver: SliverLayoutBuilder(
@@ -345,6 +459,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 link: link,
                 onTap: () => _openLink(link),
                 onRemove: () => _removeLink(link),
+                onEdit: () => _editLink(link),
+                isReordering: false,
               );
             }, childCount: links.length),
           );

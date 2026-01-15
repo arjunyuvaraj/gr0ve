@@ -1,4 +1,8 @@
 final Map<String, String> changelogEntries = {
+  "v1.4.0":
+      "Added a calendar page to view BCA events and add your own personal events. Improved quick links with edit and reorder functionality for better customization.",
+  "v1.3.0":
+      "Improved auto-refresh behavior across the app to keep information up to date without unnecessary reloads. Introducing the brand-new Lunch page. Now its featuring today's menu alongside common allergens and detailed nutrition facts.",
   "v1.2.1":
       "Apologies for the last update! An unexpected error occured when users attempted to add a link. Thankfully, that problem is fully patched! Thank you so much for your active feedback!",
   "v1.2.0":
