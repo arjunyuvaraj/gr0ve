@@ -118,11 +118,13 @@ class _AddEventDialogState extends State<AddEventDialog> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryGreen = Color(0xFF2D6A4F);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(28),
@@ -132,12 +134,11 @@ class _AddEventDialogState extends State<AddEventDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Add Event',
-                  style: TextStyle(
+                  style: textTheme.headlineMedium?.copyWith(
                     fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: primaryGreen,
+                    color: colors.primary,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -148,23 +149,25 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: colors.errorContainer.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
+                      border: Border.all(
+                        color: colors.errorContainer.withOpacity(0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.error_outline,
-                          color: Colors.red.shade700,
+                          color: colors.onErrorContainer,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            style: TextStyle(
-                              color: Colors.red.shade700,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colors.onErrorContainer,
                               fontSize: 14,
                             ),
                           ),
@@ -181,32 +184,33 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   decoration: InputDecoration(
                     hintText: 'Title',
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colors.surface,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 16,
                     ),
-                    hintStyle: const TextStyle(
+                    hintStyle: textTheme.bodyMedium?.copyWith(
                       fontSize: 16,
-                      color: Colors.grey,
+                      color: colors.onSurface.withOpacity(0.5),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(
+                        color: colors.onSurface.withOpacity(0.2),
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(
+                        color: colors.onSurface.withOpacity(0.2),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: colors.primary, width: 2),
                     ),
                   ),
-                  style: const TextStyle(fontSize: 16),
+                  style: textTheme.bodyMedium?.copyWith(fontSize: 16),
                   onChanged: (_) {
                     if (_errorMessage != null) {
                       setState(() => _errorMessage = null);
@@ -221,43 +225,43 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   decoration: InputDecoration(
                     hintText: 'Description (optional)',
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colors.surface,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 16,
                     ),
-                    hintStyle: const TextStyle(
+                    hintStyle: textTheme.bodyMedium?.copyWith(
                       fontSize: 16,
-                      color: Colors.grey,
+                      color: colors.onSurface.withOpacity(0.5),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(
+                        color: colors.onSurface.withOpacity(0.2),
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(
+                        color: colors.onSurface.withOpacity(0.2),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: colors.primary, width: 2),
                     ),
                   ),
-                  style: const TextStyle(fontSize: 16),
+                  style: textTheme.bodyMedium?.copyWith(fontSize: 16),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 20),
 
                 // Category Label
-                const Text(
+                Text(
                   'Category',
-                  style: TextStyle(
+                  style: textTheme.labelLarge?.copyWith(
                     fontSize: 14,
-                    color: primaryGreen,
-                    fontWeight: FontWeight.w600,
+                    color: colors.primary,
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -266,9 +270,11 @@ class _AddEventDialogState extends State<AddEventDialog> {
                 // Category Dropdown
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(
+                      color: colors.onSurface.withOpacity(0.2),
+                    ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: DropdownButtonFormField<String>(
@@ -281,9 +287,13 @@ class _AddEventDialogState extends State<AddEventDialog> {
                       focusedBorder: InputBorder.none,
                       disabledBorder: InputBorder.none,
                     ),
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
-                    icon: const Icon(Icons.arrow_drop_down, size: 28),
+                    dropdownColor: colors.surface,
+                    style: textTheme.bodyMedium?.copyWith(fontSize: 16),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      size: 28,
+                      color: colors.onSurface,
+                    ),
                     items: _categories.map((cat) {
                       return DropdownMenuItem<String>(
                         value: cat['value'] as String,
@@ -292,7 +302,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
                             Icon(
                               cat['icon'] as IconData,
                               size: 20,
-                              color: Colors.black87,
+                              color: colors.onSurface,
                             ),
                             const SizedBox(width: 12),
                             Text(cat['label'] as String),
@@ -313,9 +323,9 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'All Day',
-                        style: TextStyle(
+                        style: textTheme.bodyMedium?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -330,7 +340,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
                               _errorMessage = null;
                             });
                           },
-                          activeColor: primaryGreen,
+                          activeColor: colors.primary,
                         ),
                       ),
                     ],
@@ -350,7 +360,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: primaryGreen,
+                                color: colors.primary,
                                 width: 1.5,
                               ),
                               borderRadius: BorderRadius.circular(14),
@@ -358,9 +368,9 @@ class _AddEventDialogState extends State<AddEventDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.access_time,
-                                  color: primaryGreen,
+                                  color: colors.primary,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
@@ -368,9 +378,9 @@ class _AddEventDialogState extends State<AddEventDialog> {
                                   _startTime != null
                                       ? _startTime!.format(context)
                                       : 'Start Time',
-                                  style: const TextStyle(
+                                  style: textTheme.bodyMedium?.copyWith(
                                     fontSize: 15,
-                                    color: primaryGreen,
+                                    color: colors.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -388,7 +398,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: primaryGreen,
+                                color: colors.primary,
                                 width: 1.5,
                               ),
                               borderRadius: BorderRadius.circular(14),
@@ -396,9 +406,9 @@ class _AddEventDialogState extends State<AddEventDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.access_time,
-                                  color: primaryGreen,
+                                  color: colors.primary,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
@@ -406,9 +416,9 @@ class _AddEventDialogState extends State<AddEventDialog> {
                                   _endTime != null
                                       ? _endTime!.format(context)
                                       : 'End Time',
-                                  style: const TextStyle(
+                                  style: textTheme.bodyMedium?.copyWith(
                                     fontSize: 15,
-                                    color: primaryGreen,
+                                    color: colors.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -435,11 +445,11 @@ class _AddEventDialogState extends State<AddEventDialog> {
                           vertical: 12,
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Cancel',
-                        style: TextStyle(
+                        style: textTheme.bodyMedium?.copyWith(
                           fontSize: 16,
-                          color: primaryGreen,
+                          color: colors.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -448,8 +458,8 @@ class _AddEventDialogState extends State<AddEventDialog> {
                     ElevatedButton(
                       onPressed: _saveEvent,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryGreen,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 28,
                           vertical: 14,
@@ -459,11 +469,12 @@ class _AddEventDialogState extends State<AddEventDialog> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Save',
-                        style: TextStyle(
+                        style: textTheme.bodyMedium?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
+                          color: colors.onPrimary,
                         ),
                       ),
                     ),
