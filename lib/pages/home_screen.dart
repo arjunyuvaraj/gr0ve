@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  Future<void> _initialLoad() async {
+  void _initialLoad() async {
     await Future.wait([
       StarredTeacherService.load(),
       StarredBusService.load(),
