@@ -54,7 +54,6 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-
       home: Builder(
         builder: (context) => LandingDecider(
           landingPage: kIsWeb

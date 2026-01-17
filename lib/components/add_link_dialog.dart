@@ -7,7 +7,6 @@ import 'package:gr0ve/services/link_service.dart';
 class AddLinkDialog extends StatefulWidget {
   final Function(String title, String url, String iconKey, Color color) onAdd;
   final QuickLink? editingLink; // Add this for editing
-
   const AddLinkDialog({super.key, required this.onAdd, this.editingLink});
 
   @override
