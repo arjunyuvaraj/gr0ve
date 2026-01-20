@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isPlatformAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/platformAdmins/$(request.auth.uid));
+    }
+    
+    function isGroupAdmin(groupId) {
+      return isAuthenticated() && 
+             request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.adminIds;
+    }
+    
+    function isGroupMember(groupId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));
+    }
+    
+    function isActiveGroup(groupId) {
+      return get(/databases/$(database)/documents/groups/$(groupId)).data.status == 'active';
+    }
+    
+    // ============================================================================
+    // GROUPS SYSTEM - Secure rules for clubs/academies feature
+    // ============================================================================
+    
+    // Platform admins collection (only platform admins can read)
+    match /platformAdmins/{userId} {
+      allow read: if isPlatformAdmin();
+      allow write: if false; // Managed server-side only
+    }
+    
+    // Group creation requests
+    match /groupCreationRequests/{requestId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.requesterId == request.auth.uid &&
+                       request.resource.data.status == 'pending';
+      
+      allow read: if isPlatformAdmin() || 
+                     (isAuthenticated() && resource.data.requesterId == request.auth.uid);
+      
+      allow update: if isPlatformAdmin() && 
+                       request.resource.data.status in ['approved', 'rejected'] &&
+                       resource.data.status == 'pending';
+      
+      allow delete: if isPlatformAdmin();
+    }
+    
+    // Groups collection
+    match /groups/{groupId} {
+      allow read: if isAuthenticated();
+      
+      allow create: if false; // Created via approval process only
+      
+      allow update: if isPlatformAdmin() || 
+                       (isGroupAdmin(groupId) && 
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['joinCode', 'description', 'metadata']));
+      
+      allow delete: if isPlatformAdmin();
+      
+      // Members subcollection
+      match /members/{userId} {
+        allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+        
+        allow create: if false; // Created via approval process only
+        
+        allow delete: if isGroupAdmin(groupId) || 
+                         (isAuthenticated() && request.auth.uid == userId);
+      }
+      
+      // Join requests subcollection
+      match /joinRequests/{userId} {
+        allow create: if isAuthenticated() && 
+                         request.auth.uid == userId &&
+                         request.resource.data.status == 'pending' &&
+                         isActiveGroup(groupId) &&
+                         !isGroupMember(groupId);
+        
+        allow read: if isGroupAdmin(groupId) || 
+                       (isAuthenticated() && request.auth.uid == userId);
+        
+        allow update: if isGroupAdmin(groupId) && 
+                         resource.data.status == 'pending' &&
+                         request.resource.data.status in ['approved', 'rejected'];
+        
+        allow delete: if isGroupAdmin(groupId);
+      }
+      
+      // Announcements subcollection
+      match /announcements/{announcementId} {
+        allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+        
+        allow create: if isGroupAdmin(groupId) && 
+                         request.resource.data.authorId == request.auth.uid &&
+                         isActiveGroup(groupId);
+        
+        allow update, delete: if isGroupAdmin(groupId) && isActiveGroup(groupId);
+      }
+    }
+    
+    // ============================================================================
+    // ALL OTHER COLLECTIONS - Open to authenticated users
+    // ============================================================================
+    
+    // Default rule: All authenticated users can read/write everything else
+    // This maintains your existing app behavior for teachers, starred items, etc.
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
