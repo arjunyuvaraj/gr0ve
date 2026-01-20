@@ -137,6 +137,83 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _updateNickname() async {
+    String newNickname = user?.displayName ?? '';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Update Nickname'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Enter your new display name'),
+            const SizedBox(height: 20),
+            CustomTextField(
+              hintText: 'Nickname',
+              controller: TextEditingController(text: newNickname),
+              onChange: (val) => newNickname = val,
+              obscureText: false,
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomSecondaryButton(
+                  label: 'Cancel',
+                  onTap: () => Navigator.pop(ctx, false),
+                ),
+                const SizedBox(height: 12),
+                CustomPrimaryButton(
+                  label: 'Update',
+                  onTap: () => Navigator.pop(ctx, true),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || newNickname.trim().isEmpty) return;
+
+    try {
+      await user?.updateDisplayName(newNickname.trim());
+      await user?.reload();
+
+      setState(() {
+        user = FirebaseAuth.instance.currentUser;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nickname updated successfully'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _confirmDeleteAccount() async {
     if (user == null) return;
 
@@ -312,9 +389,13 @@ class _AccountScreenState extends State<AccountScreen> {
 
     if (confirmed != true) return;
 
-    await FirebaseAuth.instance.signOut();
+    // Reset services BEFORE signing out to prevent permission errors
     StarredBusService.reset();
     StarredTeacherService.reset();
+
+    // Sign out from Firebase
+    await FirebaseAuth.instance.signOut();
+
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -368,6 +449,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     onAddLink: _addLink,
                     onLogout: _logout,
                     onDeleteAccount: _confirmDeleteAccount,
+                    onUpdateNickname: _updateNickname,
                   ),
 
                   // Reorder button

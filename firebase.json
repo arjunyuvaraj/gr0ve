@@ -1,1 +1,51 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"gr0ve-bca","appId":"1:354104126282:android:15f9f15cc0b25e0c3d2fb3","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"gr0ve-bca","appId":"1:354104126282:ios:d649644b81b548dd3d2fb3","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"gr0ve-bca","configurations":{"android":"1:354104126282:android:15f9f15cc0b25e0c3d2fb3","ios":"1:354104126282:ios:d649644b81b548dd3d2fb3","web":"1:354104126282:web:d1a68662557f6df63d2fb3"}}}}},"hosting":{"public":"build/web","ignore":["firebase.json","**/.*","**/node_modules/**"],"rewrites":[{"source":"**","destination":"/index.html"}]}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "gr0ve-bca",
+          "appId": "1:354104126282:android:15f9f15cc0b25e0c3d2fb3",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "gr0ve-bca",
+          "appId": "1:354104126282:ios:d649644b81b548dd3d2fb3",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "gr0ve-bca",
+          "configurations": {
+            "android": "1:354104126282:android:15f9f15cc0b25e0c3d2fb3",
+            "ios": "1:354104126282:ios:d649644b81b548dd3d2fb3",
+            "web": "1:354104126282:web:d1a68662557f6df63d2fb3"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

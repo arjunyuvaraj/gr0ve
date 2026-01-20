@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gr0ve/services/group_service.dart';
+import '../models/group.dart';
 
 @immutable
 class CalendarEvent {
@@ -86,8 +89,7 @@ class CalendarEvent {
 }
 
 class CalendarService {
-  static const _spreadsheetId =
-      '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk'; // Replace with your actual ID
+  static const _spreadsheetId = '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _worksheetTitle = 'Calendar';
 
   static final _auth = FirebaseAuth.instance;
@@ -99,7 +101,14 @@ class CalendarService {
   static final ValueNotifier<List<CalendarEvent>> bcaEvents = ValueNotifier([]);
   static final ValueNotifier<List<CalendarEvent>> personalEvents =
       ValueNotifier([]);
+  static final ValueNotifier<List<CalendarEvent>> clubEvents = ValueNotifier(
+    [],
+  );
   static final ValueNotifier<bool> isLoading = ValueNotifier(false);
+
+  // Stream subscriptions for club events
+  static StreamSubscription<List<Group>>? _userGroupsSubscription;
+  static final Map<String, StreamSubscription> _clubEventSubscriptions = {};
 
   static Future<void> _initGSheets() {
     _initFuture ??= _loadGSheets();
@@ -298,10 +307,17 @@ class CalendarService {
         final eventDate = DateTime(e.date.year, e.date.month, e.date.day);
         return eventDate.isAtSameMomentAs(normalizedDate);
       }),
+      ...clubEvents.value.where((e) {
+        final eventDate = DateTime(e.date.year, e.date.month, e.date.day);
+        return eventDate.isAtSameMomentAs(normalizedDate);
+      }),
     ]..sort((a, b) {
-      // BCA events first, then sort by time if available
+      // BCA events first, then club, then personal, then sort by time if available
       if (a.category != b.category) {
-        return a.category == 'bca' ? -1 : 1;
+        if (a.category == 'bca') return -1;
+        if (b.category == 'bca') return 1;
+        if (a.category == 'club') return -1;
+        if (b.category == 'club') return 1;
       }
       if (a.startTime != null && b.startTime != null) {
         return a.startTime!.compareTo(b.startTime!);
@@ -317,7 +333,11 @@ class CalendarService {
   ) {
     final Map<DateTime, List<CalendarEvent>> eventsByDate = {};
 
-    final allEvents = [...bcaEvents.value, ...personalEvents.value];
+    final allEvents = [
+      ...bcaEvents.value,
+      ...personalEvents.value,
+      ...clubEvents.value,
+    ];
 
     for (final event in allEvents) {
       if (event.date.year == year && event.date.month == month) {
@@ -337,17 +357,316 @@ class CalendarService {
     return eventsByDate;
   }
 
-  /// Load all events (BCA + personal)
+  /// Load all events (BCA + personal + club)
   static Future<void> loadAllEvents() async {
     isLoading.value = true;
     await Future.wait([fetchBCAEvents(), loadPersonalEvents()]);
+    _startListeningToClubEvents();
     isLoading.value = false;
+  }
+
+  /// Start listening to club events from all groups user is a member of
+  static void _startListeningToClubEvents() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      clubEvents.value = [];
+      return;
+    }
+
+    // Cancel existing subscriptions
+    _stopListeningToClubEvents();
+
+    final groupService = GroupService();
+
+    // Listen to user groups and set up event listeners for each group
+    _userGroupsSubscription = groupService.getUserGroups().listen((groups) {
+      // Update subscriptions for each group
+      final currentGroupIds = groups.map((g) => g.id).toSet();
+
+      // Remove subscriptions for groups user is no longer a member of
+      _clubEventSubscriptions.removeWhere((groupId, subscription) {
+        if (!currentGroupIds.contains(groupId)) {
+          subscription.cancel();
+          return true;
+        }
+        return false;
+      });
+
+      // Add subscriptions for new groups
+      for (final group in groups) {
+        if (!_clubEventSubscriptions.containsKey(group.id)) {
+          _clubEventSubscriptions[group.id] = _firestore
+              .collection('groups')
+              .doc(group.id)
+              .collection('calendar')
+              .doc('events')
+              .collection('items')
+              .orderBy('date')
+              .snapshots()
+              .listen((snapshot) {
+                _updateClubEvents();
+              });
+        }
+      }
+
+      // Initial load
+      _updateClubEvents();
+    });
+  }
+
+  /// Stop listening to club events
+  static void _stopListeningToClubEvents() {
+    _userGroupsSubscription?.cancel();
+    _userGroupsSubscription = null;
+
+    for (final subscription in _clubEventSubscriptions.values) {
+      subscription.cancel();
+    }
+    _clubEventSubscriptions.clear();
+  }
+
+  /// Update club events from all subscribed groups
+  static Future<void> _updateClubEvents() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      clubEvents.value = [];
+      return;
+    }
+
+    try {
+      // Get all groups user is a member of
+      final groupsSnapshot = await _firestore
+          .collection('groups')
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      final List<CalendarEvent> allClubEvents = [];
+
+      for (final groupDoc in groupsSnapshot.docs) {
+        final groupId = groupDoc.id;
+
+        // Check if user is a member
+        final memberDoc = await _firestore
+            .collection('groups')
+            .doc(groupId)
+            .collection('members')
+            .doc(user.uid)
+            .get();
+
+        if (!memberDoc.exists) continue;
+
+        // Get all events for this group
+        final eventsSnapshot = await _firestore
+            .collection('groups')
+            .doc(groupId)
+            .collection('calendar')
+            .doc('events')
+            .collection('items')
+            .orderBy('date')
+            .get();
+
+        for (final eventDoc in eventsSnapshot.docs) {
+          final data = eventDoc.data();
+          try {
+            final event = CalendarEvent(
+              id: data['id'] ?? eventDoc.id,
+              title: data['title'] ?? '',
+              date: (data['date'] as Timestamp).toDate(),
+              description: data['description'] as String?,
+              category: 'club',
+              isAllDay: data['isAllDay'] as bool? ?? true,
+              startTime: data['startTime'] != null
+                  ? (data['startTime'] as Timestamp).toDate()
+                  : null,
+              endTime: data['endTime'] != null
+                  ? (data['endTime'] as Timestamp).toDate()
+                  : null,
+            );
+            allClubEvents.add(event);
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error parsing club event ${eventDoc.id}: $e');
+            }
+          }
+        }
+      }
+
+      clubEvents.value = allClubEvents;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating club events: $e');
+      }
+      clubEvents.value = [];
+    }
   }
 
   /// Reset all data
   static void reset() {
+    _stopListeningToClubEvents();
     bcaEvents.value = [];
     personalEvents.value = [];
+    clubEvents.value = [];
     isLoading.value = false;
+  }
+
+  /// Add a club event (visible to all group members)
+  static Future<void> addClubEvent(String groupId, CalendarEvent event) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    final doc = _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('calendar')
+        .doc('events')
+        .collection('items')
+        .doc();
+
+    await doc.set({
+      'id': doc.id,
+      'groupId': groupId,
+      'title': event.title,
+      'description': event.description,
+      'date': Timestamp.fromDate(event.date),
+      'isAllDay': event.isAllDay,
+      'startTime': event.startTime != null
+          ? Timestamp.fromDate(event.startTime!)
+          : null,
+      'endTime': event.endTime != null
+          ? Timestamp.fromDate(event.endTime!)
+          : null,
+      'createdBy': user.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'visibility': 'club',
+    });
+  }
+
+  /// Submit a public event request (requires admin approval)
+  static Future<void> requestPublicEvent({
+    required String groupId,
+    required String groupName,
+    required CalendarEvent event,
+    bool bypassApproval = false,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    final doc = _firestore.collection('public_event_requests').doc();
+
+    await doc.set({
+      'id': doc.id,
+      'groupId': groupId,
+      'groupName': groupName,
+      'title': event.title,
+      'description': event.description,
+      'date': Timestamp.fromDate(event.date),
+      'isAllDay': event.isAllDay,
+      'startTime': event.startTime != null
+          ? Timestamp.fromDate(event.startTime!)
+          : null,
+      'endTime': event.endTime != null
+          ? Timestamp.fromDate(event.endTime!)
+          : null,
+      'status': bypassApproval ? 'approved' : 'pending',
+      'requestedBy': user.uid,
+      'requestedAt': FieldValue.serverTimestamp(),
+    });
+
+    // If bypassing approval, immediately add to BCA calendar
+    if (bypassApproval) {
+      await _addToBCACalendar(doc.id, event);
+    }
+  }
+
+  /// Stream public event requests (for admin screen)
+  static Stream<QuerySnapshot> streamPublicEventRequests() {
+    return _firestore
+        .collection('public_event_requests')
+        .orderBy('requestedAt', descending: true)
+        .snapshots();
+  }
+
+  /// Approve a public event request
+  static Future<void> approvePublicEventRequest(
+    String groupId,
+    String requestId,
+    Map<String, dynamic> eventData,
+  ) async {
+    // Update request status
+    await _firestore.collection('public_event_requests').doc(requestId).update({
+      'status': 'approved',
+      'approvedAt': FieldValue.serverTimestamp(),
+      'approvedBy': _auth.currentUser?.uid,
+    });
+
+    // Add to BCA calendar (Google Sheets)
+    final event = CalendarEvent(
+      id: requestId,
+      title: eventData['title'] as String,
+      date: (eventData['date'] as Timestamp).toDate(),
+      description: eventData['description'] as String?,
+      category: 'bca',
+      isAllDay: eventData['isAllDay'] as bool? ?? true,
+      startTime: eventData['startTime'] != null
+          ? (eventData['startTime'] as Timestamp).toDate()
+          : null,
+      endTime: eventData['endTime'] != null
+          ? (eventData['endTime'] as Timestamp).toDate()
+          : null,
+    );
+
+    await _addToBCACalendar(requestId, event);
+
+    // Refresh BCA events to show the new event
+    await fetchBCAEvents();
+  }
+
+  /// Reject a public event request
+  static Future<void> rejectPublicEventRequest(
+    String groupId,
+    String requestId,
+  ) async {
+    await _firestore.collection('public_event_requests').doc(requestId).update({
+      'status': 'rejected',
+      'rejectedAt': FieldValue.serverTimestamp(),
+      'rejectedBy': _auth.currentUser?.uid,
+    });
+  }
+
+  /// Add event to BCA Google Sheets calendar
+  static Future<void> _addToBCACalendar(
+    String eventId,
+    CalendarEvent event,
+  ) async {
+    await _initGSheets();
+
+    try {
+      final spreadsheet = await _gsheets.spreadsheet(_spreadsheetId);
+      final sheet = spreadsheet.worksheetByTitle(_worksheetTitle);
+
+      if (sheet == null) {
+        throw Exception('Calendar worksheet not found');
+      }
+
+      // Format date as MM/DD/YYYY
+      final dateStr =
+          '${event.date.month}/${event.date.day}/${event.date.year}';
+
+      // Append row to sheet
+      await sheet.values.appendRow([
+        dateStr,
+        event.title,
+        event.description ?? '',
+      ]);
+
+      if (kDebugMode) {
+        print('Successfully added event to BCA calendar: ${event.title}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error adding to BCA calendar: $e');
+      }
+      rethrow;
+    }
   }
 }

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/services/calendar_service.dart';
+import 'package:gr0ve/services/group_service.dart';
+import '../models/group.dart';
 
 class AddEventDialog extends StatefulWidget {
   final DateTime selectedDate;
+  final bool isPlatformAdmin;
 
-  const AddEventDialog({super.key, required this.selectedDate});
+  const AddEventDialog({
+    super.key,
+    required this.selectedDate,
+    this.isPlatformAdmin = false,
+  });
 
   @override
   State<AddEventDialog> createState() => _AddEventDialogState();
@@ -16,10 +25,20 @@ class _AddEventDialogState extends State<AddEventDialog> {
   final _descriptionController = TextEditingController();
 
   String _selectedCategory = 'homework';
+  String _eventScope = 'personal'; // personal, club, public
   bool _isAllDay = true;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
   String? _errorMessage;
+
+  Group? _userClub;
+  bool _isClubAdmin = false;
+  bool _isLoadingClubInfo = true;
+
+  // For group selection dropdown
+  List<Group> _adminGroups = [];
+  Group? _selectedGroup;
+  bool _isLoadingAdminGroups = false;
 
   final List<Map<String, dynamic>> _categories = [
     {'value': 'test', 'label': 'Test', 'icon': Icons.assignment},
@@ -29,6 +48,79 @@ class _AddEventDialogState extends State<AddEventDialog> {
     {'value': 'social', 'label': 'Social', 'icon': Icons.people},
     {'value': 'other', 'label': 'Other', 'icon': Icons.event},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserClubStatus();
+  }
+
+  Future<void> _loadUserClubStatus() async {
+    final groupService = GroupService();
+    final club = await groupService.getUserClub();
+
+    if (club != null) {
+      final isAdmin = await groupService.isGroupAdmin(club.id);
+      if (mounted) {
+        setState(() {
+          _userClub = club;
+          _isClubAdmin = isAdmin;
+          _isLoadingClubInfo = false;
+        });
+      }
+    } else {
+      if (mounted) setState(() => _isLoadingClubInfo = false);
+    }
+  }
+
+  Future<void> _loadAdminGroups() async {
+    if (_isLoadingAdminGroups) return;
+
+    setState(() => _isLoadingAdminGroups = true);
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        setState(() {
+          _adminGroups = [];
+          _isLoadingAdminGroups = false;
+        });
+        return;
+      }
+
+      // Get all active groups
+      final groupsSnapshot = await FirebaseFirestore.instance
+          .collection('groups')
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      final adminGroups = <Group>[];
+      for (final doc in groupsSnapshot.docs) {
+        final group = Group.fromFirestore(doc);
+        if (group.isAdmin(user.uid)) {
+          adminGroups.add(group);
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _adminGroups = adminGroups;
+          _isLoadingAdminGroups = false;
+          // Auto-select first group if available and none selected
+          if (_selectedGroup == null && adminGroups.isNotEmpty) {
+            _selectedGroup = adminGroups.first;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _adminGroups = [];
+          _isLoadingAdminGroups = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -42,20 +134,18 @@ class _AddEventDialogState extends State<AddEventDialog> {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-
     if (time != null) {
       setState(() {
-        if (isStart) {
+        if (isStart)
           _startTime = time;
-        } else {
+        else
           _endTime = time;
-        }
         _errorMessage = null;
       });
     }
   }
 
-  void _saveEvent() {
+  Future<void> _saveEvent() async {
     setState(() => _errorMessage = null);
 
     if (_titleController.text.trim().isEmpty) {
@@ -82,7 +172,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
         _startTime!.hour,
         _startTime!.minute,
       );
-
       if (_endTime != null) {
         endTime = DateTime(
           eventDate.year,
@@ -95,25 +184,83 @@ class _AddEventDialogState extends State<AddEventDialog> {
     }
 
     final event = CalendarEvent(
-      id: 'personal_${now.millisecondsSinceEpoch}',
+      id: 'temp_${now.millisecondsSinceEpoch}',
       title: _titleController.text.trim(),
       date: eventDate,
       description: _descriptionController.text.trim().isEmpty
           ? null
           : _descriptionController.text.trim(),
-      category: 'personal',
+      category: _eventScope == 'personal' ? 'personal' : 'club',
       personalCategory: _selectedCategory,
       isAllDay: _isAllDay,
       startTime: startTime,
       endTime: endTime,
     );
 
-    CalendarService.addPersonalEvent(event);
-    Navigator.of(context).pop();
+    try {
+      if (_eventScope == 'personal') {
+        await CalendarService.addPersonalEvent(event);
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Personal event added successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else if (_eventScope == 'club') {
+        if (_selectedGroup == null) {
+          setState(() => _errorMessage = 'Please select a group');
+          return;
+        }
+        await CalendarService.addClubEvent(_selectedGroup!.id, event);
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Club event added successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else if (_eventScope == 'public') {
+        // Request public event (requires admin approval unless platform admin)
+        final groupId = _selectedGroup?.id ?? _userClub?.id ?? 'platform';
+        final groupName =
+            _selectedGroup?.name ?? _userClub?.name ?? 'Platform Admin';
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Event added successfully')));
+        await CalendarService.requestPublicEvent(
+          groupId: groupId,
+          groupName: groupName,
+          event: event,
+          bypassApproval: widget.isPlatformAdmin,
+        );
+
+        if (mounted) {
+          Navigator.of(context).pop();
+          if (widget.isPlatformAdmin) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Public event added to BCA calendar'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Public event request submitted for admin approval',
+                ),
+                backgroundColor: Colors.blue,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) setState(() => _errorMessage = 'Error: $e');
+    }
   }
 
   @override
@@ -144,8 +291,136 @@ class _AddEventDialogState extends State<AddEventDialog> {
                 ),
                 const SizedBox(height: 28),
 
-                // Error Message
-                if (_errorMessage != null) ...[
+                // Event Scope Selector (only for admins or club admins)
+                if ((widget.isPlatformAdmin || _isClubAdmin) &&
+                    !_isLoadingClubInfo) ...[
+                  Text(
+                    'Event Visibility',
+                    style: textTheme.labelLarge?.copyWith(
+                      fontSize: 14,
+                      color: colors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SegmentedButton<String>(
+                    segments: [
+                      ButtonSegment(
+                        value: 'personal',
+                        label: Text('Personal', style: TextStyle(fontSize: 12)),
+                        icon: Icon(Icons.person, size: 16),
+                      ),
+                      ButtonSegment(
+                        value: 'club',
+                        label: Text('Group', style: TextStyle(fontSize: 12)),
+                        icon: Icon(Icons.group, size: 16),
+                      ),
+                      ButtonSegment(
+                        value: 'public',
+                        label: Text('Public', style: TextStyle(fontSize: 12)),
+                        icon: Icon(Icons.public, size: 16),
+                      ),
+                    ],
+                    selected: {_eventScope},
+                    onSelectionChanged: (Set<String> newSelection) {
+                      setState(() {
+                        _eventScope = newSelection.first;
+                        // Load admin groups when group scope is selected
+                        if (_eventScope == 'club' &&
+                            _adminGroups.isEmpty &&
+                            !_isLoadingAdminGroups) {
+                          _loadAdminGroups();
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Info banner for public events
+                  if (_eventScope == 'public' && !widget.isPlatformAdmin)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colors.primaryContainer.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: colors.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 20,
+                            color: colors.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Public events require admin approval before appearing on BCA calendar',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colors.onPrimaryContainer,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+
+                  // Group dropdown when group scope is selected
+                  if (_eventScope == 'club') ...[
+                    if (_isLoadingAdminGroups)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_adminGroups.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colors.errorContainer.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: colors.errorContainer.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          'You are not an admin of any groups',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colors.onErrorContainer,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    else ...[
+                      DropdownButtonFormField<Group>(
+                        value: _selectedGroup,
+                        decoration: InputDecoration(
+                          labelText: 'Select Group',
+                          filled: true,
+                          fillColor: colors.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        items: _adminGroups.map((group) {
+                          return DropdownMenuItem<Group>(
+                            value: group,
+                            child: Text(group.name),
+                          );
+                        }).toList(),
+                        onChanged: (Group? value) {
+                          setState(() => _selectedGroup = value);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ],
+                  const SizedBox(height: 20),
+                ],
+
+                if (_errorMessage != null)
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -155,327 +430,125 @@ class _AddEventDialogState extends State<AddEventDialog> {
                         color: colors.errorContainer.withOpacity(0.3),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: colors.onErrorContainer,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colors.onErrorContainer,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      _errorMessage!,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colors.onErrorContainer,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                ],
 
-                // Title Field
+                const SizedBox(height: 16),
+
+                // Title
                 TextField(
                   controller: _titleController,
                   decoration: InputDecoration(
                     hintText: 'Title',
                     filled: true,
                     fillColor: colors.surface,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 16,
-                    ),
-                    hintStyle: textTheme.bodyMedium?.copyWith(
-                      fontSize: 16,
-                      color: colors.onSurface.withOpacity(0.5),
-                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: colors.onSurface.withOpacity(0.2),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: colors.onSurface.withOpacity(0.2),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: colors.primary, width: 2),
                     ),
                   ),
-                  style: textTheme.bodyMedium?.copyWith(fontSize: 16),
                   onChanged: (_) {
-                    if (_errorMessage != null) {
+                    if (_errorMessage != null)
                       setState(() => _errorMessage = null);
-                    }
                   },
                 ),
                 const SizedBox(height: 16),
 
-                // Description Field
+                // Description
                 TextField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     hintText: 'Description (optional)',
                     filled: true,
                     fillColor: colors.surface,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 16,
-                    ),
-                    hintStyle: textTheme.bodyMedium?.copyWith(
-                      fontSize: 16,
-                      color: colors.onSurface.withOpacity(0.5),
-                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: colors.onSurface.withOpacity(0.2),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: colors.onSurface.withOpacity(0.2),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: colors.primary, width: 2),
                     ),
                   ),
-                  style: textTheme.bodyMedium?.copyWith(fontSize: 16),
                   maxLines: 3,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Category Label
-                Text(
-                  'Category',
-                  style: textTheme.labelLarge?.copyWith(
-                    fontSize: 14,
-                    color: colors.primary,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // Category Dropdown
-                Container(
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: colors.onSurface.withOpacity(0.2),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: DropdownButtonFormField<String>(
+                // Category for personal events
+                if (_eventScope == 'personal') ...[
+                  DropdownButtonFormField<String>(
                     value: _selectedCategory,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8),
-                      errorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                    ),
-                    dropdownColor: colors.surface,
-                    style: textTheme.bodyMedium?.copyWith(fontSize: 16),
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      size: 28,
-                      color: colors.onSurface,
-                    ),
                     items: _categories.map((cat) {
                       return DropdownMenuItem<String>(
                         value: cat['value'] as String,
                         child: Row(
                           children: [
-                            Icon(
-                              cat['icon'] as IconData,
-                              size: 20,
-                              color: colors.onSurface,
-                            ),
-                            const SizedBox(width: 12),
+                            Icon(cat['icon'] as IconData),
+                            const SizedBox(width: 8),
                             Text(cat['label'] as String),
                           ],
                         ),
                       );
                     }).toList(),
-                    onChanged: (value) {
-                      setState(() => _selectedCategory = value!);
-                    },
+                    onChanged: (value) =>
+                        setState(() => _selectedCategory = value!),
                   ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                ],
 
-                // All Day Toggle
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'All Day',
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Transform.scale(
-                        scale: 0.9,
-                        child: Switch(
-                          value: _isAllDay,
-                          onChanged: (value) {
-                            setState(() {
-                              _isAllDay = value;
-                              _errorMessage = null;
-                            });
-                          },
-                          activeColor: colors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
+                // All Day toggle
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('All Day'),
+                    Switch(
+                      value: _isAllDay,
+                      onChanged: (v) => setState(() {
+                        _isAllDay = v;
+                        _errorMessage = null;
+                      }),
+                    ),
+                  ],
                 ),
 
-                // Time Pickers
-                if (!_isAllDay) ...[
-                  const SizedBox(height: 20),
+                // Start/End times if not all day
+                if (!_isAllDay)
                   Row(
                     children: [
                       Expanded(
-                        child: InkWell(
-                          onTap: () => _selectTime(context, true),
-                          borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: colors.primary,
-                                width: 1.5,
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  color: colors.primary,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _startTime != null
-                                      ? _startTime!.format(context)
-                                      : 'Start Time',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    fontSize: 15,
-                                    color: colors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
+                        child: ElevatedButton(
+                          onPressed: () => _selectTime(context, true),
+                          child: Text(
+                            _startTime?.format(context) ?? 'Start Time',
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: InkWell(
-                          onTap: () => _selectTime(context, false),
-                          borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: colors.primary,
-                                width: 1.5,
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  color: colors.primary,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _endTime != null
-                                      ? _endTime!.format(context)
-                                      : 'End Time',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    fontSize: 15,
-                                    color: colors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        child: ElevatedButton(
+                          onPressed: () => _selectTime(context, false),
+                          child: Text(_endTime?.format(context) ?? 'End Time'),
                         ),
                       ),
                     ],
                   ),
-                ],
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
 
-                // Action Buttons
+                // Action buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontSize: 16,
-                          color: colors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: const Text('Cancel'),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: _saveEvent,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        foregroundColor: colors.onPrimary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 28,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
                       child: Text(
-                        'Save',
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: colors.onPrimary,
-                        ),
+                        _eventScope == 'public' && !widget.isPlatformAdmin
+                            ? 'Submit Request'
+                            : 'Save',
                       ),
                     ),
                   ],

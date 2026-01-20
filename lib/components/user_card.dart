@@ -6,6 +6,7 @@ class UserCard extends StatelessWidget {
   final VoidCallback onAddLink;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
+  final VoidCallback onUpdateNickname;
 
   const UserCard({
     super.key,
@@ -13,6 +14,7 @@ class UserCard extends StatelessWidget {
     required this.onAddLink,
     required this.onLogout,
     required this.onDeleteAccount,
+    required this.onUpdateNickname,
   });
 
   @override
@@ -47,7 +49,9 @@ class UserCard extends StatelessWidget {
             radius: 24,
             backgroundColor: colors.surface,
             child: Text(
-              user.email?[0].toUpperCase() ?? '?',
+              user.displayName?.isNotEmpty == true
+                  ? user.displayName![0].toUpperCase()
+                  : (user.email?[0].toUpperCase() ?? '?'),
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -62,7 +66,9 @@ class UserCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  user.email ?? 'Anonymous',
+                  user.displayName ??
+                      user.email ??
+                      'Anonymous', // Show display name if available
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -110,12 +116,26 @@ class UserCard extends StatelessWidget {
                     onLogout();
                   } else if (value == 'delete') {
                     onDeleteAccount();
+                  } else if (value == 'nickname') {
+                    // Add this
+                    onUpdateNickname();
                   }
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 itemBuilder: (context) => [
+                  PopupMenuItem(
+                    // Add this menu item
+                    value: 'nickname',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, size: 20, color: colors.onSurface),
+                        const SizedBox(width: 12),
+                        const Text('Update Nickname'),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
                     value: 'logout',
                     child: Row(

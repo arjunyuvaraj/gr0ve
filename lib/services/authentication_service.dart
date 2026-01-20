@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:gr0ve/services/starred_teacher_service.dart';
+import 'package:universal_html/js.dart';
 
 class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -33,7 +35,11 @@ class AuthenticationService {
     }
   }
 
-  Future<User?> signUpWithEmail(String email, String password) async {
+  Future<User?> signUpWithEmail(
+    String email,
+    String password,
+    String name,
+  ) async {
     try {
       final trimmedEmail = email.trim();
       final trimmedPassword = password.trim();
@@ -46,6 +52,8 @@ class AuthenticationService {
       if (userCredential.user != null) {
         await _createUserDocument(userCredential.user!, email: trimmedEmail);
       }
+      await userCredential.user?.updateDisplayName(name);
+      await userCredential.user?.reload();
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -54,6 +62,7 @@ class AuthenticationService {
     }
   }
 
+  // UH7WJT
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       final trimmedEmail = email.trim();
@@ -93,8 +102,11 @@ class AuthenticationService {
 
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      // Reset services BEFORE signing out
       StarredTeacherService.reset();
+      // Add any other service resets here
+
+      await _auth.signOut();
     } catch (e) {
       throw Exception('Failed to sign out. Please try again.');
     }

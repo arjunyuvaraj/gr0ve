@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:gr0ve/pages/account_deletion_screen.dart';
+import 'package:gr0ve/pages/admin_panel_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
 import 'package:gr0ve/pages/absence_screen.dart';
 import 'package:gr0ve/pages/home_screen.dart';
+import 'package:gr0ve/pages/join_requests_screen.dart';
 import 'package:gr0ve/pages/landing_screen.dart';
 import 'package:gr0ve/pages/landing_screen_web.dart';
 import 'package:gr0ve/pages/login_screen.dart';
@@ -14,15 +16,25 @@ import 'package:gr0ve/pages/privacy_policy_screen.dart';
 import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/theme/dark_theme.dart';
 import 'package:gr0ve/theme/light_theme.dart';
-import 'package:gr0ve/utilities/data/teacher_list.dart';
 import 'package:gr0ve/utilities/landing_decider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gr0ve/utilities/teacher_utils.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await initGSheets();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  try {
+    teacherList = await fetchTeacherListFromFirebase();
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error loading teachers: $e');
+    }
+    teacherList = {};
+  }
 
   const teacherAbsenceSpreadsheetId =
       '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
@@ -69,12 +81,23 @@ class MyApp extends StatelessWidget {
         '/teacher_absence': (context) => const AbsenceScreen(),
         '/landing': (context) => const LandingScreen(),
         '/login': (context) => const LoginScreen(),
+        '/admin': (context) => AdminPanelScreen(),
         '/register': (context) => const RegisterScreen(),
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
         '/help': (context) => const HelpScreen(),
         '/account_deletion': (context) => const AccountDeletionInfoScreen(),
         '/lunch_menu': (context) => const LunchMenuScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/club/join-requests') {
+          final groupId = settings.arguments as String;
+
+          return MaterialPageRoute(
+            builder: (context) => JoinRequestsScreen(groupId: groupId),
+          );
+        }
+        return null;
       },
     );
   }

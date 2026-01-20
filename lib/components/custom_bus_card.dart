@@ -5,14 +5,14 @@ class CustomBusCard extends StatelessWidget {
   final BusRoute route;
   final bool starred;
   final GestureTapCallback onStarTap;
-  final bool isLoggedIn; // Add this parameter
+  final bool isLoggedIn;
 
   const CustomBusCard({
     super.key,
     required this.route,
     required this.starred,
     required this.onStarTap,
-    required this.isLoggedIn, // Make it required
+    required this.isLoggedIn,
   });
 
   @override

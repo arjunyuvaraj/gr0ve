@@ -13,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -27,6 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nicknameController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
@@ -43,7 +45,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
-      await _authService.signUpWithEmail(email, password);
+      await _authService.signUpWithEmail(
+        email,
+        password,
+        _nicknameController.text,
+      );
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/navigation');
@@ -151,6 +157,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  TextFormField(
+                                    controller: _nicknameController,
+                                    keyboardType: TextInputType.name,
+                                    enabled: !_isLoading,
+                                    decoration: InputDecoration(
+                                      labelText: "Nickname",
+                                      prefixIcon: const Icon(Icons.person),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      filled: true,
+                                      fillColor: colors.surfaceContainerHighest
+                                          .withAlpha(100),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return 'Please enter a what you want to be called';
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                   TextFormField(
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,

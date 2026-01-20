@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gsheets/gsheets.dart';
@@ -5,7 +6,7 @@ import 'package:gsheets/gsheets.dart';
 late final GSheets _gsheets;
 Future<void>? _initFuture;
 
-Future<void> _initGSheets() {
+Future<void> initGSheets() {
   _initFuture ??= _loadGSheets();
   return _initFuture!;
 }
@@ -17,36 +18,28 @@ Future<void> _loadGSheets() async {
 
 Future<Map<String, String>> fetchGoogleSheetAbsences({
   required String spreadsheetId,
-  String worksheetTitle = 'Absences',
+  required String worksheetTitle,
 }) async {
-  await _initGSheets();
   final Map<String, String> absenceMap = {};
 
   try {
     final spreadsheet = await _gsheets.spreadsheet(spreadsheetId);
-
     final sheet = spreadsheet.worksheetByTitle(worksheetTitle);
-    if (sheet == null) {
-      return {};
-    }
+
+    if (sheet == null) return {};
+
     final rows = await sheet.values.allRows();
-    if (rows.isEmpty) {
-      if (kDebugMode) print('Worksheet is empty');
-      return {};
+    if (rows.isEmpty) return {};
+
+    final firstRowText = rows.first.join(' ');
+    final dateRegex = RegExp(
+      r'(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}',
+    );
+    final dateMatch = dateRegex.firstMatch(firstRowText);
+    if (dateMatch != null) {
+      absenceMap['Date'] = dateMatch.group(0)!;
     }
 
-    if (rows.isNotEmpty) {
-      final firstRowText = rows[0].join(' ');
-      final dateRegex = RegExp(
-        r'(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}',
-      );
-      final dateMatch = dateRegex.firstMatch(firstRowText);
-      if (dateMatch != null) {
-        absenceMap['Date'] = dateMatch.group(0)!;
-      }
-    }
-
-    int processedCount = 0;
     for (final row in rows) {
       if (row.length < 2) continue;
 
@@ -60,19 +53,49 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       final period = formatPeriods(periodRaw);
 
       absenceMap[teacherKey] = period.isEmpty ? 'Present' : period;
-      processedCount++;
-    }
-
-    if (kDebugMode) {
-      print('Processed $processedCount teacher entries');
     }
   } catch (e) {
     if (kDebugMode) {
-      print('Error fetching teacher absences: $e');
+      print('Error fetching Google Sheet absences: $e');
     }
   }
 
   return absenceMap;
+}
+
+Future<List<Map<String, dynamic>>> fetchAllTeachersFromFirebase() async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('teachers')
+        .get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'name': data['name'] ?? doc.id,
+        'department': data['department'] ?? '',
+        'email': data['email'] ?? '',
+      };
+    }).toList();
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error fetching teachers from Firebase: $e');
+    }
+    return [];
+  }
+}
+
+String resolveTeacherStatus({
+  required String teacherName,
+  required Map<String, String> absenceMap,
+}) {
+  for (final entry in absenceMap.entries) {
+    if (matchesTeacher(entry.key, teacherName)) {
+      return entry.value;
+    }
+  }
+
+  return 'Present';
 }
 
 String googleDocTeacherKey(String raw) {
@@ -83,16 +106,39 @@ String googleDocTeacherKey(String raw) {
 
 String? handleEdgeCases(String name) {
   const map = {
-    'kim(mr)': 'kim, deok-yang',
-    'kim(ms)': 'lee, rosalyn',
+    'kim(dr)': 'kim, deok-yang',
+    'drkim': 'kim, deok-yang',
+    'dr.kim': 'kim, deok-yang',
+    'kim(ms)': 'kim, rosalyn',
+    'mskim': 'kim, rosalyn',
+    'ms.kim': 'kim, rosalyn',
+
     'smith(ms)': 'smith, ericka',
+    'mssmith': 'smith, ericka',
+    'ms.smith': 'smith, ericka',
     'smith(mr)': 'smith, michael',
+    'mrsmith': 'smith, michael',
+    'mr.smith': 'smith, michael',
+
+    'crane(ms)': 'crane, laura',
+    'mscrane': 'crane, laura',
+    'ms.crane': 'crane, laura',
+    'crane(mr)': 'crane, todd',
+    'mrcrane': 'crane, todd',
+    'mr.crane': 'crane, todd',
+
+    // Map common misspelling (without 'y') to correct spelling (with 'y')
+    'drapcznski': 'drapczynski, anna',
+    'msdrapcznski': 'drapczynski, anna',
+    'ms.drapcznski': 'drapczynski, anna',
+    'drapcznski(ms)': 'drapczynski, anna',
   };
 
   final normalized = name
       .toLowerCase()
       .replaceAll(RegExp(r'\s+'), '')
-      .replaceAll('.', '');
+      .replaceAll('.', '')
+      .replaceAll(',', '');
 
   return map[normalized];
 }
@@ -120,9 +166,13 @@ bool haveSameCharacters(String str1, String str2) {
 String normalizeTeacherName(String raw) {
   raw = raw.trim();
   raw = raw.replaceAll(RegExp(r'\(.*?\)'), '');
-  final titles = ['Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Mr', 'Ms', 'Mrs', 'Dr'];
+
+  // Remove titles only if followed by space or period (to avoid matching "Drapczynski")
+  final titles = ['Dr.', 'Mr.', 'Ms.', 'Mrs.'];
   for (var t in titles) {
-    if (raw.startsWith(t)) raw = raw.replaceFirst(t, '').trim();
+    if (raw.startsWith(t + ' ') || raw == t) {
+      raw = raw.replaceFirst(t, '').trim();
+    }
   }
 
   if (raw.contains(',') && raw.split(',').length == 2) return raw.trim();
@@ -150,12 +200,17 @@ bool matchesTeacher(String docKey, String teacherKey) {
   final docClean = _cleanKey(docName);
   final teacherClean = _cleanKey(normalizedTeacher);
 
-  if (docClean == teacherClean) return true;
+  if (docClean == teacherClean) {
+    return true;
+  }
 
   if (!docClean.contains(',') && teacherClean.contains(',')) {
     final docLast = docClean;
     final teacherLast = teacherClean.split(',').first;
-    return docLast == teacherLast;
+
+    if (docLast == teacherLast) {
+      return true;
+    }
   }
 
   return false;
@@ -281,4 +336,33 @@ String formatStatusString(String status) {
   }
 
   return result;
+}
+
+Future<Map<String, Map<String, dynamic>>> fetchTeacherListFromFirebase() async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('teachers')
+        .get();
+
+    final Map<String, Map<String, dynamic>> result = {};
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+
+      final String name = (data['name'] ?? doc.id).toString();
+
+      result[name] = {
+        'name': name,
+        'department': data['department'] ?? '',
+        'email': data['email'] ?? '',
+      };
+    }
+
+    return result;
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error fetching teacher list from Firebase: $e');
+    }
+    return {};
+  }
 }
