@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/components/create_club_form.dart';
 import 'package:gr0ve/components/requests_list.dart';
 import '../services/group_service.dart';
-import '../models/group_creation_request.dart';
 
 class ClubCreateTab extends StatefulWidget {
   const ClubCreateTab({super.key});
@@ -71,14 +70,14 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
         children: [
           /// Header
           Text(
-            'Request a New Club',
+            'Request New Group',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            'Submit a request to create a new club. An admin will take a look.',
+            'Submit a request to create a new group.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.65),
             ),

@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gr0ve/components/post_announcement_dialog.dart';
 import '../services/group_service.dart';
 import '../models/group.dart';
@@ -19,20 +18,23 @@ class ClubDetailScreen extends StatefulWidget {
 class _ClubDetailScreenState extends State<ClubDetailScreen>
     with SingleTickerProviderStateMixin {
   final GroupService _groupService = GroupService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late TabController _tabController;
 
   Group? _group;
   bool _isAdmin = false;
+  bool _isModOrAdmin = false;
   bool _isMember = false;
   bool _isLoading = true;
 
-  static const primaryGreen = Color(0xFF2D6A4F);
+  // Cache for user profiles to reduce Firestore reads
+  final Map<String, Map<String, dynamic>> _userProfileCache = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() => setState(() {})); // dynamic FAB
+    _tabController.addListener(() => setState(() {}));
     _loadGroupData();
   }
 
@@ -40,12 +42,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     try {
       final group = await _groupService.getGroup(widget.groupId);
       final isAdmin = await _groupService.isGroupAdmin(widget.groupId);
+      final isModOrAdmin = await _groupService.isGroupModOrAdmin(
+        widget.groupId,
+      );
       final isMember = await _groupService.isGroupMember(widget.groupId);
 
       if (!mounted) return;
       setState(() {
         _group = group;
         _isAdmin = isAdmin;
+        _isModOrAdmin = isModOrAdmin;
         _isMember = isMember;
         _isLoading = false;
       });
@@ -58,15 +64,47 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     }
   }
 
-  // ---------------------- HEADER ACTIONS ----------------------
+  /// Get user profile from cache or Firestore
+  Future<Map<String, dynamic>> _getUserProfile(String userId) async {
+    // Check cache first
+    if (_userProfileCache.containsKey(userId)) {
+      return _userProfileCache[userId]!;
+    }
 
-  Future<void> _copyJoinCode() async {
-    if (_group == null) return;
-    await Clipboard.setData(ClipboardData(text: _group!.joinCode));
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Join code copied')));
+    // Fetch from Firestore
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        final profile = userDoc.data()!;
+        _userProfileCache[userId] = profile;
+        return profile;
+      }
+    } catch (e) {
+      // Fallback to empty profile
+    }
+
+    return {'displayName': 'Unknown', 'email': ''};
+  }
+
+  /// Sync member profile with latest user data
+  Future<void> _syncMemberProfile(GroupMember member) async {
+    final profile = await _getUserProfile(member.userId);
+    final latestName = profile['displayName'] ?? member.displayName;
+    final latestEmail = profile['email'] ?? member.email;
+
+    // Only update if there's a difference
+    if (latestName != member.displayName || latestEmail != member.email) {
+      try {
+        await _firestore
+            .collection('groups')
+            .doc(widget.groupId)
+            .collection('members')
+            .doc(member.userId)
+            .update({'displayName': latestName, 'email': latestEmail});
+      } catch (e) {
+        // Silently fail - not critical
+      }
+    }
   }
 
   Future<void> _regenerateJoinCode() async {
@@ -150,8 +188,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
-  // ---------------------- UI ----------------------
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading)
@@ -180,10 +216,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
-  // ---------------------- FAB ----------------------
-
   Widget? _dynamicFAB() {
-    if (!_isAdmin) return null;
+    // Moderators and admins can post announcements
+    if (!_isModOrAdmin) return null;
     if (_tabController.index == 0) {
       return FloatingActionButton(
         onPressed: _showPostAnnouncementDialog,
@@ -194,16 +229,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     return null;
   }
 
-  // ---------------------- HEADER ----------------------
-  // ---------------------- HEADER ----------------------
-
   Widget _clubHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back button
           IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
@@ -211,7 +242,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
           const SizedBox(width: 4),
 
-          // Title & subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,14 +262,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             ),
           ),
 
-          // Admin menu or leave button
           _isAdmin ? _adminHeaderMenu() : _leaveButton(),
         ],
       ),
     );
   }
 
-  // ---------------------- LEAVE BUTTON ----------------------
   Widget _leaveButton() {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -260,7 +288,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       icon: const Icon(Icons.more_vert),
       onSelected: (value) {
         if (value == 'show_code') {
-          // Show dialog with join code
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -292,7 +319,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
-  // ---------------------- TABS ----------------------
   Widget _tabSelector() {
     final colors = Theme.of(context).colorScheme;
 
@@ -346,10 +372,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget _membersOnlyView() {
-    return _emptyView('Members only\nYou’re not on the list. Yet.');
+    return _emptyView('Members only You\'re not on the list. Yet.');
   }
-
-  // ---------------------- ANNOUNCEMENTS ----------------------
 
   Widget _announcementsTab() {
     return StreamBuilder<List<Announcement>>(
@@ -373,94 +397,258 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: announcements.length,
-          itemBuilder: (context, i) => AnnouncementCard(
-            announcement: announcements[i],
-            isAdmin: _isAdmin,
-            onDelete: () => _groupService.deleteAnnouncement(
-              widget.groupId,
-              announcements[i].id,
-            ),
-            onTogglePin: () => _groupService.toggleAnnouncementPin(
-              widget.groupId,
-              announcements[i].id,
-              !announcements[i].isPinned,
-            ),
+          itemBuilder: (context, i) => _buildAnnouncementCard(announcements[i]),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnnouncementCard(Announcement announcement) {
+    // Use StreamBuilder to get real-time user profile updates
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore
+          .collection('users')
+          .doc(announcement.authorId)
+          .snapshots(),
+      builder: (context, userSnapshot) {
+        String authorName = announcement.authorName;
+
+        // Update author name if we have fresh data from user profile
+        if (userSnapshot.hasData && userSnapshot.data!.exists) {
+          final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+          authorName = userData['displayName'] ?? announcement.authorName;
+        }
+
+        return AnnouncementCard(
+          announcement: announcement,
+          authorName: authorName, // Use real-time author name
+          isAdmin: _isAdmin,
+          onDelete: () =>
+              _groupService.deleteAnnouncement(widget.groupId, announcement.id),
+          onTogglePin: () => _groupService.toggleAnnouncementPin(
+            widget.groupId,
+            announcement.id,
+            !announcement.isPinned,
           ),
         );
       },
     );
   }
 
-  // ---------------------- MEMBERS ----------------------
+  // Add this as a state variable in your StatefulWidget
+  String _memberSearchQuery = '';
 
   Widget _membersTab() {
-    return StreamBuilder<List<GroupMember>>(
-      stream: _groupService.getGroupMembers(widget.groupId),
-      builder: (context, snapshot) {
-        if (snapshot.hasError)
-          return Center(child: Text('Error: ${snapshot.error}'));
-        if (snapshot.connectionState == ConnectionState.waiting)
-          return const Center(child: CircularProgressIndicator());
-
-        final members = snapshot.data ?? [];
-        return ListView.builder(
+    return Column(
+      children: [
+        // Search bar
+        Padding(
           padding: const EdgeInsets.all(16),
-          itemCount: members.length,
-          itemBuilder: (context, i) => _memberTile(members[i]),
+          child: TextField(
+            onChanged: (value) {
+              setState(() {
+                _memberSearchQuery = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search members...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _memberSearchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _memberSearchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(128),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(128),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // Members list
+        Expanded(
+          child: StreamBuilder<List<GroupMember>>(
+            stream: _groupService.getGroupMembers(widget.groupId),
+            builder: (context, snapshot) {
+              if (snapshot.hasError)
+                return Center(child: Text('Error: ${snapshot.error}'));
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return const Center(child: CircularProgressIndicator());
+
+              final members = snapshot.data ?? [];
+
+              // Filter members based on search query
+              final filteredMembers = members.where((member) {
+                if (_memberSearchQuery.isEmpty) return true;
+                final query = _memberSearchQuery.toLowerCase();
+                return member.displayName.toLowerCase().contains(query) ||
+                    member.email.toLowerCase().contains(query);
+              }).toList();
+
+              // Sort members: ADMIN first, then MODERATOR, then alphabetically
+              final sortedMembers = List<GroupMember>.from(filteredMembers)
+                ..sort((a, b) {
+                  // Define role priority: admin = 0, moderator = 1, member = 2
+                  int getRolePriority(MemberRole role) {
+                    if (role == MemberRole.admin) return 0;
+                    if (role == MemberRole.moderator) return 1;
+                    return 2;
+                  }
+
+                  final aPriority = getRolePriority(a.role);
+                  final bPriority = getRolePriority(b.role);
+
+                  // If roles are different, sort by priority
+                  if (aPriority != bPriority) {
+                    return aPriority.compareTo(bPriority);
+                  }
+
+                  // If same role, sort alphabetically by displayName (case-insensitive)
+                  return a.displayName.toLowerCase().compareTo(
+                    b.displayName.toLowerCase(),
+                  );
+                });
+
+              if (sortedMembers.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _memberSearchQuery.isEmpty
+                            ? 'No members found'
+                            : 'No members match "$_memberSearchQuery"',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: sortedMembers.length,
+                itemBuilder: (context, i) => _memberTile(sortedMembers[i]),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _memberTile(GroupMember member) {
+    // Use StreamBuilder to get real-time user profile updates
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.collection('users').doc(member.userId).snapshots(),
+      builder: (context, userSnapshot) {
+        String displayName = member.displayName;
+        String email = member.email;
+
+        // Update with fresh data if available
+        if (userSnapshot.hasData && userSnapshot.data!.exists) {
+          final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+          displayName = userData['displayName'] ?? member.displayName;
+          email = userData['email'] ?? member.email;
+
+          // Sync the member profile in the background if changed
+          if (displayName != member.displayName || email != member.email) {
+            _syncMemberProfile(member);
+          }
+        }
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              child: Text(
+                displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+              ),
+            ),
+            title: Row(
+              children: [
+                Expanded(child: Text(displayName)),
+                if (member.isAdmin)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'ADMIN',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                if (member.isMod)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'MOD',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: Text(email),
+            trailing: _isAdmin ? _memberActions(member, displayName) : null,
+          ),
         );
       },
     );
   }
 
-  Widget _memberTile(GroupMember member) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(child: Text(member.displayName[0].toUpperCase())),
-        title: Row(
-          children: [
-            Expanded(child: Text(member.displayName)),
-            if (member.isAdmin)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'ADMIN',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
-              ),
-            if (member.isMod)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'MOD',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        subtitle: Text(member.email),
-        trailing: _isAdmin ? _memberActions(member) : null,
-      ),
-    );
-  }
-
-  Widget _memberActions(GroupMember member) {
+  Widget _memberActions(GroupMember member, String displayName) {
     final isOriginalAdmin =
         _group?.adminIds.isNotEmpty == true &&
         _group!.adminIds.first == member.userId;
@@ -476,7 +664,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               context: context,
               builder: (_) => AlertDialog(
                 title: const Text('Remove Member?'),
-                content: Text('Kick ${member.displayName} from the club?'),
+                content: Text('Kick $displayName from the club?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
@@ -505,9 +693,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           }
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Action completed for ${member.displayName}'),
-            ),
+            SnackBar(content: Text('Action completed for $displayName')),
           );
         } catch (e) {
           if (!mounted) return;
@@ -519,16 +705,31 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       itemBuilder: (_) {
         final items = <PopupMenuEntry<String>>[];
 
+        // Kick option - available for non-original-admin members
         if (!isOriginalAdmin)
           items.add(const PopupMenuItem(value: 'kick', child: Text('Kick')));
+
+        // Moderator options
         if (!member.isAdmin) {
-          items.add(
-            const PopupMenuItem(
-              value: 'make_mod',
-              child: Text('Make Moderator'),
-            ),
-          );
-        } else if (member.isMod) {
+          // Can make moderator if they're not already
+          if (!member.isMod) {
+            items.add(
+              const PopupMenuItem(
+                value: 'make_mod',
+                child: Text('Make Moderator'),
+              ),
+            );
+          } else {
+            // Can remove moderator status
+            items.add(
+              const PopupMenuItem(
+                value: 'remove_mod',
+                child: Text('Remove Moderator'),
+              ),
+            );
+          }
+        } else if (member.isMod && member.isAdmin) {
+          // Admin who is also a mod - can remove mod status
           items.add(
             const PopupMenuItem(
               value: 'remove_mod',
@@ -536,45 +737,35 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             ),
           );
         }
+
+        // Admin options - only original admin can manage other admins
         if (_group != null &&
             _group!.adminIds.first == FirebaseAuth.instance.currentUser?.uid) {
-          if (!member.isAdmin)
+          if (!member.isAdmin) {
             items.add(
               const PopupMenuItem(
                 value: 'make_admin',
                 child: Text('Make Admin'),
               ),
             );
-          else if (!isOriginalAdmin)
+          } else if (!isOriginalAdmin) {
             items.add(
               const PopupMenuItem(
                 value: 'remove_admin',
                 child: Text('Remove Admin'),
               ),
             );
+          }
         }
         return items;
       },
     );
   }
-
-  // ---------------------- UTIL ----------------------
-
-  String _formatDate(DateTime date) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inDays == 0)
-      return diff.inHours > 0
-          ? '${diff.inHours}h ago'
-          : '${diff.inMinutes}m ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${date.month}/${date.day}/${date.year}';
-  }
 }
-
-// ---------------------- ANNOUNCEMENT CARD ----------------------
 
 class AnnouncementCard extends StatelessWidget {
   final Announcement announcement;
+  final String authorName; // Real-time author name
   final bool isAdmin;
   final VoidCallback onDelete;
   final VoidCallback onTogglePin;
@@ -582,6 +773,7 @@ class AnnouncementCard extends StatelessWidget {
   const AnnouncementCard({
     super.key,
     required this.announcement,
+    required this.authorName,
     required this.isAdmin,
     required this.onDelete,
     required this.onTogglePin,
@@ -655,7 +847,7 @@ class AnnouncementCard extends StatelessWidget {
                 const Icon(Icons.person, size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
-                  announcement.authorName,
+                  authorName, // Use real-time author name
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 const SizedBox(width: 16),

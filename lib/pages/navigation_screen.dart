@@ -30,6 +30,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   List<NavigationItem> navigationItems = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isPlatformAdmin = false;
+  // ignore: unused_field
   bool _isLoading = true;
 
   @override

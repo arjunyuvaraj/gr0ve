@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
@@ -187,8 +188,12 @@ class _AccountScreenState extends State<AccountScreen> {
     if (confirmed != true || newNickname.trim().isEmpty) return;
 
     try {
-      await user?.updateDisplayName(newNickname.trim());
-      await user?.reload();
+      if (user == null) return;
+      FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
+        'displayName': newNickname.trim(),
+      }, SetOptions(merge: true));
+      await user!.updateDisplayName(newNickname.trim());
+      await user!.reload();
 
       setState(() {
         user = FirebaseAuth.instance.currentUser;

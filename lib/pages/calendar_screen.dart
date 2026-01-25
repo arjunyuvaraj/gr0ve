@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/add_event_dialog.dart';
 import 'package:gr0ve/components/custom_header.dart';
@@ -61,6 +62,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     await CalendarService.loadAllEvents();
     if (mounted) {
       setState(() => isLoading = false);
+
+      // Debug output to verify all events are loaded
+      if (kDebugMode) {
+        print('=== Calendar Events Summary ===');
+        print('BCA Events: ${CalendarService.bcaEvents.value.length}');
+        print(
+          'Personal Events: ${CalendarService.personalEvents.value.length}',
+        );
+        print('Club Events: ${CalendarService.clubEvents.value.length}');
+        print(
+          'Total: ${CalendarService.bcaEvents.value.length + CalendarService.personalEvents.value.length + CalendarService.clubEvents.value.length}',
+        );
+      }
     }
     _scheduleNextRefresh();
   }

@@ -178,6 +178,9 @@ class CalendarService {
       }
 
       bcaEvents.value = events;
+      if (kDebugMode) {
+        print('Loaded ${events.length} BCA events');
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching BCA events: $e');
@@ -235,6 +238,9 @@ class CalendarService {
               .map((e) => CalendarEvent.fromJson(e as Map<String, dynamic>))
               .toList();
           personalEvents.value = events;
+          if (kDebugMode) {
+            print('Loaded ${events.length} personal events');
+          }
         } else {
           personalEvents.value = [];
         }
@@ -360,8 +366,16 @@ class CalendarService {
   /// Load all events (BCA + personal + club)
   static Future<void> loadAllEvents() async {
     isLoading.value = true;
+
+    // Load BCA and personal events in parallel
     await Future.wait([fetchBCAEvents(), loadPersonalEvents()]);
+
+    // Start listening to club events and do initial load
     _startListeningToClubEvents();
+
+    // Do an initial manual load of club events to ensure they're fetched
+    await _updateClubEvents();
+
     isLoading.value = false;
   }
 
@@ -380,6 +394,10 @@ class CalendarService {
 
     // Listen to user groups and set up event listeners for each group
     _userGroupsSubscription = groupService.getUserGroups().listen((groups) {
+      if (kDebugMode) {
+        print('User is member of ${groups.length} groups');
+      }
+
       // Update subscriptions for each group
       final currentGroupIds = groups.map((g) => g.id).toSet();
 
@@ -404,6 +422,11 @@ class CalendarService {
               .orderBy('date')
               .snapshots()
               .listen((snapshot) {
+                if (kDebugMode) {
+                  print(
+                    'Group ${group.id} events updated: ${snapshot.docs.length} events',
+                  );
+                }
                 _updateClubEvents();
               });
         }
@@ -434,64 +457,93 @@ class CalendarService {
     }
 
     try {
-      // Get all groups user is a member of
+      // Get all active groups
       final groupsSnapshot = await _firestore
           .collection('groups')
           .where('status', isEqualTo: 'active')
           .get();
 
+      if (kDebugMode) {
+        print('Found ${groupsSnapshot.docs.length} active groups');
+      }
+
       final List<CalendarEvent> allClubEvents = [];
 
+      // Check each group to see if user is a member
       for (final groupDoc in groupsSnapshot.docs) {
         final groupId = groupDoc.id;
 
-        // Check if user is a member
-        final memberDoc = await _firestore
-            .collection('groups')
-            .doc(groupId)
-            .collection('members')
-            .doc(user.uid)
-            .get();
+        try {
+          // Check if user is a member of this group
+          final memberDoc = await _firestore
+              .collection('groups')
+              .doc(groupId)
+              .collection('members')
+              .doc(user.uid)
+              .get();
 
-        if (!memberDoc.exists) continue;
+          if (!memberDoc.exists) {
+            continue; // User is not a member of this group
+          }
 
-        // Get all events for this group
-        final eventsSnapshot = await _firestore
-            .collection('groups')
-            .doc(groupId)
-            .collection('calendar')
-            .doc('events')
-            .collection('items')
-            .orderBy('date')
-            .get();
+          if (kDebugMode) {
+            print('User is member of group: $groupId');
+          }
 
-        for (final eventDoc in eventsSnapshot.docs) {
-          final data = eventDoc.data();
-          try {
-            final event = CalendarEvent(
-              id: data['id'] ?? eventDoc.id,
-              title: data['title'] ?? '',
-              date: (data['date'] as Timestamp).toDate(),
-              description: data['description'] as String?,
-              category: 'club',
-              isAllDay: data['isAllDay'] as bool? ?? true,
-              startTime: data['startTime'] != null
-                  ? (data['startTime'] as Timestamp).toDate()
-                  : null,
-              endTime: data['endTime'] != null
-                  ? (data['endTime'] as Timestamp).toDate()
-                  : null,
+          // Get all events for this group
+          final eventsSnapshot = await _firestore
+              .collection('groups')
+              .doc(groupId)
+              .collection('calendar')
+              .doc('events')
+              .collection('items')
+              .orderBy('date')
+              .get();
+
+          if (kDebugMode) {
+            print(
+              'Found ${eventsSnapshot.docs.length} events for group $groupId',
             );
-            allClubEvents.add(event);
-          } catch (e) {
-            if (kDebugMode) {
-              print('Error parsing club event ${eventDoc.id}: $e');
+          }
+
+          for (final eventDoc in eventsSnapshot.docs) {
+            final data = eventDoc.data();
+            try {
+              final event = CalendarEvent(
+                id: data['id'] ?? eventDoc.id,
+                title: data['title'] ?? '',
+                date: (data['date'] as Timestamp).toDate(),
+                description: data['description'] as String?,
+                category: 'club',
+                isAllDay: data['isAllDay'] as bool? ?? true,
+                startTime: data['startTime'] != null
+                    ? (data['startTime'] as Timestamp).toDate()
+                    : null,
+                endTime: data['endTime'] != null
+                    ? (data['endTime'] as Timestamp).toDate()
+                    : null,
+              );
+              allClubEvents.add(event);
+            } catch (e) {
+              if (kDebugMode) {
+                print('Error parsing club event ${eventDoc.id}: $e');
+              }
             }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print(
+              'Error checking membership or fetching events for group $groupId: $e',
+            );
           }
         }
       }
 
       clubEvents.value = allClubEvents;
+
+      if (kDebugMode) {
+        print('Total club events loaded: ${allClubEvents.length}');
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error updating club events: $e');
@@ -539,6 +591,9 @@ class CalendarService {
       'createdAt': FieldValue.serverTimestamp(),
       'visibility': 'club',
     });
+
+    // Manually trigger update after adding event
+    await _updateClubEvents();
   }
 
   /// Submit a public event request (requires admin approval)

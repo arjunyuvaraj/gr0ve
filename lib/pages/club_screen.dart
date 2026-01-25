@@ -18,6 +18,7 @@ class _ClubScreenState extends State<ClubScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GroupService _groupService = GroupService();
+  // ignore: unused_field
   bool _isPlatformAdmin = false;
 
   @override

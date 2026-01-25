@@ -239,7 +239,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
           DropdownButtonFormField<String>(
             value: selectedPeriod,
             items: periodOptions
-                .map((p) => DropdownMenuItem(value: p, child: Text("Per: $p")))
+                .map(
+                  (p) => DropdownMenuItem(value: p, child: Text("Period: $p")),
+                )
                 .toList(),
             onChanged: (v) {
               selectedPeriod = v!;

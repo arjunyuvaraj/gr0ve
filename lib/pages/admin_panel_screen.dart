@@ -85,11 +85,7 @@ class _AdminRequestCard extends StatefulWidget {
   final GroupCreationRequest request;
   final GroupService groupService;
 
-  const _AdminRequestCard({
-    required this.request,
-    required this.groupService,
-    super.key,
-  });
+  const _AdminRequestCard({required this.request, required this.groupService});
 
   @override
   State<_AdminRequestCard> createState() => _AdminRequestCardState();

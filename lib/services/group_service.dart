@@ -14,6 +14,136 @@ class GroupService {
   // Platform admin email
   static const String platformAdminEmail = 'gr0ve.bca.manager@gmail.com';
 
+  // ========== PROFILE SYNC OPERATIONS ==========
+
+  /// Helper to sync a single member's data from Firebase Auth
+  Future<void> _syncMemberDataFromAuth(String groupId, String userId) async {
+    // Get the user's current profile from a users collection or Auth
+    // This assumes you have a users collection in Firestore
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+
+    if (userDoc.exists) {
+      final userData = userDoc.data()!;
+      final displayName = userData['displayName'] ?? '';
+      final email = userData['email'] ?? '';
+
+      // Update member in this group
+      await _firestore
+          .collection('groups')
+          .doc(groupId)
+          .collection('members')
+          .doc(userId)
+          .update({'displayName': displayName, 'email': email});
+    }
+  }
+
+  /// Sync user profile across all groups they're a member of
+  /// Call this whenever user updates their profile (displayName, email, etc.)
+  Future<void> syncUserProfileAcrossGroups({
+    required String userId,
+    required String displayName,
+    required String email,
+  }) async {
+    // Get all groups
+    final groupsSnapshot = await _firestore.collection('groups').get();
+
+    final batch = _firestore.batch();
+    int operationCount = 0;
+
+    for (final groupDoc in groupsSnapshot.docs) {
+      // Check if user is a member of this group
+      final memberRef = _firestore
+          .collection('groups')
+          .doc(groupDoc.id)
+          .collection('members')
+          .doc(userId);
+
+      final memberDoc = await memberRef.get();
+      if (memberDoc.exists) {
+        // Update member info
+        batch.update(memberRef, {'displayName': displayName, 'email': email});
+        operationCount++;
+
+        // If we're approaching the 500 operation limit, commit and start new batch
+        if (operationCount >= 450) {
+          await batch.commit();
+          operationCount = 0;
+        }
+      }
+
+      // Also update join requests if any exist
+      final joinRequestRef = _firestore
+          .collection('groups')
+          .doc(groupDoc.id)
+          .collection('joinRequests')
+          .doc(userId);
+
+      final joinRequestDoc = await joinRequestRef.get();
+      if (joinRequestDoc.exists) {
+        batch.update(joinRequestRef, {
+          'displayName': displayName,
+          'email': email,
+        });
+        operationCount++;
+
+        if (operationCount >= 450) {
+          await batch.commit();
+          operationCount = 0;
+        }
+      }
+    }
+
+    // Commit any remaining operations
+    if (operationCount > 0) {
+      await batch.commit();
+    }
+
+    // Also update announcements where user is author
+    await _syncAnnouncementAuthorInfo(userId, displayName);
+
+    // Update group creation requests
+    final creationRequestsSnapshot = await _firestore
+        .collection('groupCreationRequests')
+        .where('requesterId', isEqualTo: userId)
+        .get();
+
+    if (creationRequestsSnapshot.docs.isNotEmpty) {
+      final updateBatch = _firestore.batch();
+      for (final doc in creationRequestsSnapshot.docs) {
+        updateBatch.update(doc.reference, {
+          'requesterName': displayName,
+          'requesterEmail': email,
+        });
+      }
+      await updateBatch.commit();
+    }
+  }
+
+  /// Helper to sync announcement author info across all groups
+  Future<void> _syncAnnouncementAuthorInfo(
+    String userId,
+    String displayName,
+  ) async {
+    final groupsSnapshot = await _firestore.collection('groups').get();
+
+    for (final groupDoc in groupsSnapshot.docs) {
+      final announcementsSnapshot = await _firestore
+          .collection('groups')
+          .doc(groupDoc.id)
+          .collection('announcements')
+          .where('authorId', isEqualTo: userId)
+          .get();
+
+      if (announcementsSnapshot.docs.isNotEmpty) {
+        final batch = _firestore.batch();
+        for (final announcementDoc in announcementsSnapshot.docs) {
+          batch.update(announcementDoc.reference, {'authorName': displayName});
+        }
+        await batch.commit();
+      }
+    }
+  }
+
   // ========== PLATFORM ADMIN OPERATIONS ==========
 
   /// Check if current user is platform admin
@@ -111,7 +241,7 @@ class GroupService {
           'userId': requestData.requesterId,
           'displayName': requestData.requesterName,
           'email': requestData.requesterEmail,
-          'role': 'admin',
+          'role': MemberRole.admin.toJson(),
           'joinedAt': FieldValue.serverTimestamp(),
           'addedBy': user.uid,
         });
@@ -180,6 +310,7 @@ class GroupService {
 
     await batch.commit();
   }
+
   // ------------------------- MOD/ADMIN OPERATIONS -------------------------
 
   /// Promote a member to moderator (admin only)
@@ -206,7 +337,10 @@ class GroupService {
     final memberDoc = await memberRef.get();
     if (!memberDoc.exists) throw Exception('Member not found');
 
-    await memberRef.update({'role': 'moderator'});
+    await memberRef.update({'role': MemberRole.moderator.toJson()});
+
+    // Reload member data to sync with user profile
+    await _syncMemberDataFromAuth(groupId, memberId);
   }
 
   /// Remove moderator status (admin only)
@@ -229,12 +363,13 @@ class GroupService {
     final memberDoc = await memberRef.get();
     if (!memberDoc.exists) throw Exception('Member not found');
 
-    final role = memberDoc.get('role');
-    if (role != 'moderator') {
+    final roleStr = memberDoc.get('role');
+    final role = MemberRole.fromJson(roleStr);
+    if (role != MemberRole.moderator) {
       throw Exception('Member is not a moderator');
     }
 
-    await memberRef.update({'role': 'member'});
+    await memberRef.update({'role': MemberRole.member.toJson()});
   }
 
   /// Promote member to admin (original admin only)
@@ -259,7 +394,7 @@ class GroupService {
     final memberDoc = await memberRef.get();
     if (!memberDoc.exists) throw Exception('Member not found');
 
-    await memberRef.update({'role': 'admin'});
+    await memberRef.update({'role': MemberRole.admin.toJson()});
 
     // Update group's adminIds
     final updatedAdmins = List<String>.from(group.adminIds);
@@ -295,12 +430,13 @@ class GroupService {
     final memberDoc = await memberRef.get();
     if (!memberDoc.exists) throw Exception('Member not found');
 
-    final role = memberDoc.get('role');
-    if (role != 'admin') {
+    final roleStr = memberDoc.get('role');
+    final role = MemberRole.fromJson(roleStr);
+    if (role != MemberRole.admin) {
       throw Exception('Member is not an admin');
     }
 
-    await memberRef.update({'role': 'member'});
+    await memberRef.update({'role': MemberRole.member.toJson()});
 
     // Update group's adminIds
     final updatedAdmins = List<String>.from(group.adminIds)..remove(memberId);
@@ -311,7 +447,7 @@ class GroupService {
 
   /// Remove member with rules:
   /// - Admins can remove anyone except the original admin (first creator)
-  /// - Mods can remove themselves
+  /// - Mods can remove regular members
   /// - Members cannot remove anyone else
   Future<void> removeMember(String groupId, String userId) async {
     final user = _auth.currentUser;
@@ -329,13 +465,23 @@ class GroupService {
     final memberDoc = await memberRef.get();
     if (!memberDoc.exists) throw Exception('Member not found');
 
-    final role = memberDoc.get('role') ?? 'member';
+    final targetRoleStr = memberDoc.get('role') ?? 'member';
+    final targetRole = MemberRole.fromJson(targetRoleStr);
+
+    final requesterMemberRef = _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('members')
+        .doc(user.uid);
+
+    final requesterDoc = await requesterMemberRef.get();
+    final requesterRoleStr = requesterDoc.exists
+        ? (requesterDoc.get('role') ?? 'member')
+        : 'member';
+    final requesterRole = MemberRole.fromJson(requesterRoleStr);
 
     final isRequesterAdmin = group.isAdmin(user.uid);
-    final isRequesterMod =
-        !isRequesterAdmin &&
-        role == 'moderator' &&
-        user.uid == userId; // can remove self
+    final isRequesterMod = requesterRole == MemberRole.moderator;
     final isSelf = user.uid == userId;
 
     // Cannot remove original admin
@@ -343,14 +489,28 @@ class GroupService {
         group.adminIds.isNotEmpty && group.adminIds.first == userId;
     if (isOriginalAdmin) throw Exception('Cannot remove the original admin');
 
-    if (!isRequesterAdmin && !(isRequesterMod && isSelf)) {
-      throw Exception('Not authorized to remove this member');
+    // Permission checks:
+    // - Admins can remove anyone (except original admin)
+    // - Mods can only remove regular members or themselves
+    // - Members can only remove themselves
+    if (!isRequesterAdmin) {
+      if (isRequesterMod) {
+        // Mods can only remove regular members or themselves
+        if (targetRole != MemberRole.member && !isSelf) {
+          throw Exception('Moderators can only remove regular members');
+        }
+      } else {
+        // Regular members can only remove themselves
+        if (!isSelf) {
+          throw Exception('Not authorized to remove this member');
+        }
+      }
     }
 
     await memberRef.delete();
 
     // Remove from adminIds if needed
-    if (role == 'admin') {
+    if (targetRole == MemberRole.admin) {
       final updatedAdmins = List<String>.from(group.adminIds)..remove(userId);
       await _firestore.collection('groups').doc(groupId).update({
         'adminIds': updatedAdmins,
@@ -471,6 +631,25 @@ class GroupService {
     return group?.isAdmin(user.uid) ?? false;
   }
 
+  /// Check if user is moderator or admin of a group
+  Future<bool> isGroupModOrAdmin(String groupId) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+
+    final doc = await _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('members')
+        .doc(user.uid)
+        .get();
+
+    if (!doc.exists) return false;
+
+    final roleStr = doc.get('role') ?? 'member';
+    final role = MemberRole.fromJson(roleStr);
+    return role == MemberRole.admin || role == MemberRole.moderator;
+  }
+
   /// Check if user is member of a group
   Future<bool> isGroupMember(String groupId) async {
     final user = _auth.currentUser;
@@ -554,7 +733,7 @@ class GroupService {
         });
   }
 
-  /// Get pending join requests for a group (admin only)
+  /// Get pending join requests for a group (admin or moderator)
   Stream<List<JoinRequest>> getPendingJoinRequests(String groupId) {
     return _firestore
         .collection('groups')
@@ -570,13 +749,13 @@ class GroupService {
         );
   }
 
-  /// Approve join request (admin only)
+  /// Approve join request (admin or moderator)
   Future<void> approveJoinRequest(String groupId, String userId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    final isAdmin = await isGroupAdmin(groupId);
-    if (!isAdmin) throw Exception('Not authorized');
+    final isModOrAdmin = await isGroupModOrAdmin(groupId);
+    if (!isModOrAdmin) throw Exception('Not authorized');
 
     final requestDoc = await _firestore
         .collection('groups')
@@ -599,7 +778,7 @@ class GroupService {
           'userId': userId,
           'displayName': request.displayName,
           'email': request.email,
-          'role': 'member',
+          'role': MemberRole.member.toJson(),
           'joinedAt': FieldValue.serverTimestamp(),
           'addedBy': user.uid,
         });
@@ -613,13 +792,13 @@ class GroupService {
         .update({'status': 'approved'});
   }
 
-  /// Reject join request (admin only)
+  /// Reject join request (admin or moderator)
   Future<void> rejectJoinRequest(String groupId, String userId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    final isAdmin = await isGroupAdmin(groupId);
-    if (!isAdmin) throw Exception('Not authorized');
+    final isModOrAdmin = await isGroupModOrAdmin(groupId);
+    if (!isModOrAdmin) throw Exception('Not authorized');
 
     await _firestore
         .collection('groups')
@@ -646,8 +825,6 @@ class GroupService {
         );
   }
 
-  /// Remove member from group (admin only, or self)
-
   /// Leave group (convenience method for current user)
   Future<void> leaveGroup(String groupId) async {
     final user = _auth.currentUser;
@@ -673,7 +850,7 @@ class GroupService {
         );
   }
 
-  /// Post announcement (admin only)
+  /// Post announcement (admin or moderator)
   Future<void> postAnnouncement({
     required String groupId,
     required String title,
@@ -683,8 +860,8 @@ class GroupService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    final isAdmin = await isGroupAdmin(groupId);
-    if (!isAdmin) throw Exception('Not authorized');
+    final isModOrAdmin = await isGroupModOrAdmin(groupId);
+    if (!isModOrAdmin) throw Exception('Not authorized');
 
     await _firestore
         .collection('groups')

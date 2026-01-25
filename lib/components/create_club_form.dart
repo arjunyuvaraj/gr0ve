@@ -29,7 +29,7 @@ class CreateClubForm extends StatelessWidget {
               TextFormField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Club name',
+                  labelText: 'Group name',
                   hintText: 'e.g. Robotics Club',
                 ),
                 validator: (v) => v == null || v.trim().length < 3
@@ -42,7 +42,7 @@ class CreateClubForm extends StatelessWidget {
                 maxLines: 4,
                 decoration: const InputDecoration(
                   labelText: 'Description',
-                  hintText: 'What is this club about?',
+                  hintText: 'What is this group about?',
                   alignLabelWithHint: true,
                 ),
                 validator: (v) => v == null || v.trim().length < 10
