@@ -106,9 +106,18 @@ class CalendarService {
   );
   static final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
+  // Single notifier to trigger rebuilds - more efficient than triple nesting
+  static final ValueNotifier<int> eventsVersion = ValueNotifier(0);
+
+  // Cache for monthly events
+  static final Map<String, Map<DateTime, List<CalendarEvent>>> _monthCache = {};
+
   // Stream subscriptions for club events
   static StreamSubscription<List<Group>>? _userGroupsSubscription;
   static final Map<String, StreamSubscription> _clubEventSubscriptions = {};
+
+  // Debounce timer for club events
+  static Timer? _clubEventsDebounceTimer;
 
   static Future<void> _initGSheets() {
     _initFuture ??= _loadGSheets();
@@ -128,6 +137,17 @@ class CalendarService {
         .doc('events');
   }
 
+  /// Notify listeners that events have changed
+  static void _notifyEventsChanged() {
+    eventsVersion.value++;
+    _clearMonthCache();
+  }
+
+  /// Clear the monthly events cache
+  static void _clearMonthCache() {
+    _monthCache.clear();
+  }
+
   /// Fetch BCA events from Google Sheets
   static Future<void> fetchBCAEvents() async {
     await _initGSheets();
@@ -138,11 +158,13 @@ class CalendarService {
       final sheet = spreadsheet.worksheetByTitle(_worksheetTitle);
       if (sheet == null) {
         bcaEvents.value = [];
+        _notifyEventsChanged();
         return;
       }
       final rows = await sheet.values.allRows();
       if (rows.isEmpty || rows.length < 2) {
         bcaEvents.value = [];
+        _notifyEventsChanged();
         return;
       }
       // Skip header row
@@ -178,6 +200,7 @@ class CalendarService {
       }
 
       bcaEvents.value = events;
+      _notifyEventsChanged();
       if (kDebugMode) {
         print('Loaded ${events.length} BCA events');
       }
@@ -186,6 +209,7 @@ class CalendarService {
         print('Error fetching BCA events: $e');
       }
       bcaEvents.value = [];
+      _notifyEventsChanged();
     }
   }
 
@@ -223,6 +247,7 @@ class CalendarService {
     final user = _auth.currentUser;
     if (user == null) {
       personalEvents.value = [];
+      _notifyEventsChanged();
       return;
     }
 
@@ -238,21 +263,25 @@ class CalendarService {
               .map((e) => CalendarEvent.fromJson(e as Map<String, dynamic>))
               .toList();
           personalEvents.value = events;
+          _notifyEventsChanged();
           if (kDebugMode) {
             print('Loaded ${events.length} personal events');
           }
         } else {
           personalEvents.value = [];
+          _notifyEventsChanged();
         }
       } else {
         await _userEventsRef(user.uid).set({'events': []});
         personalEvents.value = [];
+        _notifyEventsChanged();
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error loading personal events: $e');
       }
       personalEvents.value = [];
+      _notifyEventsChanged();
     }
   }
 
@@ -263,6 +292,7 @@ class CalendarService {
 
     final updated = [...personalEvents.value, event];
     personalEvents.value = updated;
+    _notifyEventsChanged();
 
     await _savePersonalEvents(user.uid, updated);
   }
@@ -277,6 +307,7 @@ class CalendarService {
         .toList();
 
     personalEvents.value = updated;
+    _notifyEventsChanged();
     await _savePersonalEvents(user.uid, updated);
   }
 
@@ -288,6 +319,7 @@ class CalendarService {
     final updated = personalEvents.value.where((e) => e.id != eventId).toList();
 
     personalEvents.value = updated;
+    _notifyEventsChanged();
     await _savePersonalEvents(user.uid, updated);
   }
 
@@ -300,43 +332,56 @@ class CalendarService {
     }, SetOptions(merge: true));
   }
 
-  /// Get all events for a specific date
-  static List<CalendarEvent> getEventsForDate(DateTime date) {
-    final normalizedDate = DateTime(date.year, date.month, date.day);
-
-    return [
-      ...bcaEvents.value.where((e) {
-        final eventDate = DateTime(e.date.year, e.date.month, e.date.day);
-        return eventDate.isAtSameMomentAs(normalizedDate);
-      }),
-      ...personalEvents.value.where((e) {
-        final eventDate = DateTime(e.date.year, e.date.month, e.date.day);
-        return eventDate.isAtSameMomentAs(normalizedDate);
-      }),
-      ...clubEvents.value.where((e) {
-        final eventDate = DateTime(e.date.year, e.date.month, e.date.day);
-        return eventDate.isAtSameMomentAs(normalizedDate);
-      }),
-    ]..sort((a, b) {
-      // BCA events first, then club, then personal, then sort by time if available
-      if (a.category != b.category) {
-        if (a.category == 'bca') return -1;
-        if (b.category == 'bca') return 1;
-        if (a.category == 'club') return -1;
-        if (b.category == 'club') return 1;
-      }
-      if (a.startTime != null && b.startTime != null) {
-        return a.startTime!.compareTo(b.startTime!);
-      }
-      return 0;
-    });
+  /// Compare two events for sorting
+  static int _compareEvents(CalendarEvent a, CalendarEvent b) {
+    // BCA events first, then club, then personal
+    if (a.category != b.category) {
+      if (a.category == 'bca') return -1;
+      if (b.category == 'bca') return 1;
+      if (a.category == 'club') return -1;
+      if (b.category == 'club') return 1;
+    }
+    // Then sort by time if available
+    if (a.startTime != null && b.startTime != null) {
+      return a.startTime!.compareTo(b.startTime!);
+    }
+    return 0;
   }
 
-  /// Get events for a month
+  /// Get all events for a specific date (optimized)
+  static List<CalendarEvent> getEventsForDate(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final normalizedTime = normalizedDate.millisecondsSinceEpoch;
+
+    bool matchesDate(CalendarEvent e) {
+      final eventTime = DateTime(
+        e.date.year,
+        e.date.month,
+        e.date.day,
+      ).millisecondsSinceEpoch;
+      return eventTime == normalizedTime;
+    }
+
+    return [
+      ...bcaEvents.value.where(matchesDate),
+      ...personalEvents.value.where(matchesDate),
+      ...clubEvents.value.where(matchesDate),
+    ]..sort(_compareEvents);
+  }
+
+  /// Get events for a month (with caching)
   static Map<DateTime, List<CalendarEvent>> getEventsForMonth(
     int year,
     int month,
   ) {
+    final cacheKey = '$year-$month';
+
+    // Check cache first
+    if (_monthCache.containsKey(cacheKey)) {
+      return _monthCache[cacheKey]!;
+    }
+
+    // Build events map
     final Map<DateTime, List<CalendarEvent>> eventsByDate = {};
 
     final allEvents = [
@@ -360,21 +405,29 @@ class CalendarService {
       }
     }
 
+    // Cache the result
+    _monthCache[cacheKey] = eventsByDate;
     return eventsByDate;
   }
 
-  /// Load all events (BCA + personal + club)
+  /// Load all events (BCA + personal + club) - optimized order
   static Future<void> loadAllEvents() async {
     isLoading.value = true;
 
-    // Load BCA and personal events in parallel
-    await Future.wait([fetchBCAEvents(), loadPersonalEvents()]);
+    // Load personal events first (fastest - single Firestore doc)
+    await loadPersonalEvents();
 
-    // Start listening to club events and do initial load
+    // Start listening to club events (sets up streams)
     _startListeningToClubEvents();
 
-    // Do an initial manual load of club events to ensure they're fetched
-    await _updateClubEvents();
+    // Load club events immediately (parallel with BCA)
+    final clubFuture = _updateClubEvents();
+
+    // Load BCA events in background (can be slow)
+    final bcaFuture = fetchBCAEvents();
+
+    // Wait for both to complete
+    await Future.wait([clubFuture, bcaFuture]);
 
     isLoading.value = false;
   }
@@ -384,6 +437,7 @@ class CalendarService {
     final user = _auth.currentUser;
     if (user == null) {
       clubEvents.value = [];
+      _notifyEventsChanged();
       return;
     }
 
@@ -398,41 +452,55 @@ class CalendarService {
         print('User is member of ${groups.length} groups');
       }
 
-      // Update subscriptions for each group
-      final currentGroupIds = groups.map((g) => g.id).toSet();
+      // Debounce updates to avoid excessive rebuilds
+      _clubEventsDebounceTimer?.cancel();
+      _clubEventsDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+        // Update subscriptions for each group
+        final currentGroupIds = groups.map((g) => g.id).toSet();
 
-      // Remove subscriptions for groups user is no longer a member of
-      _clubEventSubscriptions.removeWhere((groupId, subscription) {
-        if (!currentGroupIds.contains(groupId)) {
-          subscription.cancel();
-          return true;
+        // Remove subscriptions for groups user is no longer a member of
+        _clubEventSubscriptions.removeWhere((groupId, subscription) {
+          if (!currentGroupIds.contains(groupId)) {
+            subscription.cancel();
+            return true;
+          }
+          return false;
+        });
+
+        // Add subscriptions for new groups
+        for (final group in groups) {
+          if (!_clubEventSubscriptions.containsKey(group.id)) {
+            _clubEventSubscriptions[group.id] = _firestore
+                .collection('groups')
+                .doc(group.id)
+                .collection('calendar')
+                .doc('events')
+                .collection('items')
+                .orderBy('date')
+                .snapshots()
+                .listen((snapshot) {
+                  if (kDebugMode) {
+                    print(
+                      'Group ${group.id} events updated: ${snapshot.docs.length} events',
+                    );
+                  }
+                  // Debounce event updates
+                  _debouncedUpdateClubEvents();
+                });
+          }
         }
-        return false;
+
+        // Initial load
+        _updateClubEvents();
       });
+    });
+  }
 
-      // Add subscriptions for new groups
-      for (final group in groups) {
-        if (!_clubEventSubscriptions.containsKey(group.id)) {
-          _clubEventSubscriptions[group.id] = _firestore
-              .collection('groups')
-              .doc(group.id)
-              .collection('calendar')
-              .doc('events')
-              .collection('items')
-              .orderBy('date')
-              .snapshots()
-              .listen((snapshot) {
-                if (kDebugMode) {
-                  print(
-                    'Group ${group.id} events updated: ${snapshot.docs.length} events',
-                  );
-                }
-                _updateClubEvents();
-              });
-        }
-      }
-
-      // Initial load
+  /// Debounced version of _updateClubEvents
+  static Timer? _updateClubEventsTimer;
+  static void _debouncedUpdateClubEvents() {
+    _updateClubEventsTimer?.cancel();
+    _updateClubEventsTimer = Timer(const Duration(milliseconds: 500), () {
       _updateClubEvents();
     });
   }
@@ -441,6 +509,10 @@ class CalendarService {
   static void _stopListeningToClubEvents() {
     _userGroupsSubscription?.cancel();
     _userGroupsSubscription = null;
+    _clubEventsDebounceTimer?.cancel();
+    _clubEventsDebounceTimer = null;
+    _updateClubEventsTimer?.cancel();
+    _updateClubEventsTimer = null;
 
     for (final subscription in _clubEventSubscriptions.values) {
       subscription.cancel();
@@ -448,65 +520,52 @@ class CalendarService {
     _clubEventSubscriptions.clear();
   }
 
-  /// Update club events from all subscribed groups
+  /// Update club events from all subscribed groups (OPTIMIZED)
   static Future<void> _updateClubEvents() async {
     final user = _auth.currentUser;
     if (user == null) {
       clubEvents.value = [];
+      _notifyEventsChanged();
       return;
     }
 
     try {
-      // Get all active groups
-      final groupsSnapshot = await _firestore
-          .collection('groups')
-          .where('status', isEqualTo: 'active')
-          .get();
+      // OPTIMIZATION: Query groups where user is a member directly
+      // This requires a 'memberIds' array field in the groups collection
+      // If you don't have this field, you'll need to add it to your Firestore schema
 
-      if (kDebugMode) {
-        print('Found ${groupsSnapshot.docs.length} active groups');
-      }
+      // Try the optimized query first
+      try {
+        final userGroupsSnapshot = await _firestore
+            .collection('groups')
+            .where('memberIds', arrayContains: user.uid)
+            .where('status', isEqualTo: 'active')
+            .get();
 
-      final List<CalendarEvent> allClubEvents = [];
+        if (kDebugMode) {
+          print(
+            'Found ${userGroupsSnapshot.docs.length} groups user is member of',
+          );
+        }
 
-      // Check each group to see if user is a member
-      for (final groupDoc in groupsSnapshot.docs) {
-        final groupId = groupDoc.id;
-
-        try {
-          // Check if user is a member of this group
-          final memberDoc = await _firestore
+        // Fetch all events in parallel
+        final eventFutures = userGroupsSnapshot.docs.map((groupDoc) {
+          return _firestore
               .collection('groups')
-              .doc(groupId)
-              .collection('members')
-              .doc(user.uid)
-              .get();
-
-          if (!memberDoc.exists) {
-            continue; // User is not a member of this group
-          }
-
-          if (kDebugMode) {
-            print('User is member of group: $groupId');
-          }
-
-          // Get all events for this group
-          final eventsSnapshot = await _firestore
-              .collection('groups')
-              .doc(groupId)
+              .doc(groupDoc.id)
               .collection('calendar')
               .doc('events')
               .collection('items')
               .orderBy('date')
               .get();
+        }).toList();
 
-          if (kDebugMode) {
-            print(
-              'Found ${eventsSnapshot.docs.length} events for group $groupId',
-            );
-          }
+        final eventSnapshots = await Future.wait(eventFutures);
 
-          for (final eventDoc in eventsSnapshot.docs) {
+        final List<CalendarEvent> allClubEvents = [];
+
+        for (var i = 0; i < eventSnapshots.length; i++) {
+          for (final eventDoc in eventSnapshots[i].docs) {
             final data = eventDoc.data();
             try {
               final event = CalendarEvent(
@@ -530,16 +589,97 @@ class CalendarService {
               }
             }
           }
-        } catch (e) {
-          if (kDebugMode) {
-            print(
-              'Error checking membership or fetching events for group $groupId: $e',
+        }
+
+        clubEvents.value = allClubEvents;
+        _notifyEventsChanged();
+
+        if (kDebugMode) {
+          print('Total club events loaded: ${allClubEvents.length}');
+        }
+        return;
+      } catch (e) {
+        if (kDebugMode) {
+          print('Optimized query failed, falling back to old method: $e');
+        }
+      }
+
+      // FALLBACK: Original method if memberIds field doesn't exist
+      final groupsSnapshot = await _firestore
+          .collection('groups')
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      if (kDebugMode) {
+        print(
+          'Found ${groupsSnapshot.docs.length} active groups (fallback method)',
+        );
+      }
+
+      // Check membership in parallel
+      final membershipFutures = groupsSnapshot.docs.map((groupDoc) {
+        return _firestore
+            .collection('groups')
+            .doc(groupDoc.id)
+            .collection('members')
+            .doc(user.uid)
+            .get()
+            .then((doc) => doc.exists ? groupDoc.id : null);
+      }).toList();
+
+      final memberGroupIds = (await Future.wait(
+        membershipFutures,
+      )).where((id) => id != null).cast<String>().toList();
+
+      if (kDebugMode) {
+        print('User is member of ${memberGroupIds.length} groups');
+      }
+
+      // Fetch events for member groups in parallel
+      final eventFutures = memberGroupIds.map((groupId) {
+        return _firestore
+            .collection('groups')
+            .doc(groupId)
+            .collection('calendar')
+            .doc('events')
+            .collection('items')
+            .orderBy('date')
+            .get();
+      }).toList();
+
+      final eventSnapshots = await Future.wait(eventFutures);
+
+      final List<CalendarEvent> allClubEvents = [];
+
+      for (final eventsSnapshot in eventSnapshots) {
+        for (final eventDoc in eventsSnapshot.docs) {
+          final data = eventDoc.data();
+          try {
+            final event = CalendarEvent(
+              id: data['id'] ?? eventDoc.id,
+              title: data['title'] ?? '',
+              date: (data['date'] as Timestamp).toDate(),
+              description: data['description'] as String?,
+              category: 'club',
+              isAllDay: data['isAllDay'] as bool? ?? true,
+              startTime: data['startTime'] != null
+                  ? (data['startTime'] as Timestamp).toDate()
+                  : null,
+              endTime: data['endTime'] != null
+                  ? (data['endTime'] as Timestamp).toDate()
+                  : null,
             );
+            allClubEvents.add(event);
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error parsing club event ${eventDoc.id}: $e');
+            }
           }
         }
       }
 
       clubEvents.value = allClubEvents;
+      _notifyEventsChanged();
 
       if (kDebugMode) {
         print('Total club events loaded: ${allClubEvents.length}');
@@ -549,6 +689,7 @@ class CalendarService {
         print('Error updating club events: $e');
       }
       clubEvents.value = [];
+      _notifyEventsChanged();
     }
   }
 
@@ -559,6 +700,8 @@ class CalendarService {
     personalEvents.value = [];
     clubEvents.value = [];
     isLoading.value = false;
+    eventsVersion.value = 0;
+    _clearMonthCache();
   }
 
   /// Add a club event (visible to all group members)
