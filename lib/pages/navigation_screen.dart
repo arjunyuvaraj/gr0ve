@@ -97,7 +97,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         const LunchMenuScreen(),
         const CalendarScreen(),
         const ClubScreen(),
-        const MapScreen(),
+        // const MapScreen(),
         const HelpScreen(),
         const AccountScreen(),
       ];
@@ -112,7 +112,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         NavigationItem(icon: Icons.lunch_dining_rounded, label: 'Lunch Menu'),
         NavigationItem(icon: Icons.calendar_month, label: 'Calendar'),
         NavigationItem(icon: Icons.group, label: 'Clubs'),
-        NavigationItem(icon: Icons.map_rounded, label: 'Maps'),
+        // NavigationItem(icon: Icons.map_rounded, label: 'Maps'),
         NavigationItem(icon: Icons.help_outline_rounded, label: 'Help'),
         NavigationItem(icon: Icons.person_rounded, label: 'Account'),
       ];

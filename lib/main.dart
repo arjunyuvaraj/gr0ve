@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:gr0ve/pages/account_deletion_screen.dart';
@@ -13,6 +14,7 @@ import 'package:gr0ve/pages/lunch_menu_screen.dart';
 import 'package:gr0ve/pages/register_screen.dart';
 import 'package:gr0ve/pages/navigation_screen.dart';
 import 'package:gr0ve/pages/privacy_policy_screen.dart';
+import 'package:gr0ve/services/notification_service.dart';
 import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/theme/dark_theme.dart';
 import 'package:gr0ve/theme/light_theme.dart';
@@ -24,9 +26,9 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await initGSheets();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Load teacher list from Firestore
   try {
     teacherList = await fetchTeacherListFromFirebase();
   } catch (e) {
@@ -36,27 +38,40 @@ void main() async {
     teacherList = {};
   }
 
-  const teacherAbsenceSpreadsheetId =
-      '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
-  const teacherAbsenceWorksheetTitle = 'Absences';
+  // NO MORE GOOGLE SHEETS CALLS AT STARTUP!
+  // Absences are now loaded from Firestore when the user opens the absence screen
+  // This fixes the security vulnerability
+  absenceList = {};
 
-  try {
-    absenceList = await fetchGoogleSheetAbsences(
-      spreadsheetId: teacherAbsenceSpreadsheetId,
-      worksheetTitle: teacherAbsenceWorksheetTitle,
-    );
-  } catch (e) {
-    if (kDebugMode) {
-      print('Error loading teacher absences: $e');
-    }
-    absenceList = {};
-  }
+  // Initialize notification service
+  await NotificationService().initialize();
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Listen for auth state changes
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        // User logged in - start listening for notifications
+        NotificationService().startListening();
+      } else {
+        // User logged out - stop listening
+        NotificationService().stopListening();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,13 +90,12 @@ class MyApp extends StatelessWidget {
           navigationRoute: '/navigation',
         ),
       ),
-
       routes: {
         '/home': (context) => const HomeScreen(),
         '/teacher_absence': (context) => const AbsenceScreen(),
         '/landing': (context) => const LandingScreen(),
         '/login': (context) => const LoginScreen(),
-        '/admin': (context) => AdminPanelScreen(),
+        '/admin': (context) => const AdminPanelScreen(),
         '/register': (context) => const RegisterScreen(),
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),

@@ -86,7 +86,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   }
 
   Future<void> _init() async {
-    await initGSheets(); // <-- make sure GSheets is loaded first
     await StarredTeacherService.load();
     teachers = teacherList.values
         .map((t) => Map<String, dynamic>.from(t))

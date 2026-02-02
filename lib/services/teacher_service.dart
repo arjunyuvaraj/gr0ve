@@ -1,20 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:gsheets/gsheets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-late final GSheets _gsheets;
-Future<void>? _initFuture;
-
-Future<void> initGSheets() {
-  _initFuture ??= _loadGSheets();
-  return _initFuture!;
-}
-
-Future<void> _loadGSheets() async {
-  final json = await rootBundle.loadString('assets/credentials/gsheets.json');
-  _gsheets = GSheets(json);
-}
+// SECURITY FIX: No more Google Sheets or external APIs
+// All data is now stored and read directly from Firestore
+// Absences are uploaded by admins using the Python upload script
 
 Future<Map<String, String>> fetchGoogleSheetAbsences({
   required String spreadsheetId,
@@ -22,41 +12,58 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
 }) async {
   final Map<String, String> absenceMap = {};
 
+  // SECURITY: Verify user is authenticated and has verified bergen.org email
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null || !user.emailVerified) {
+    if (kDebugMode) {
+      print('User not authenticated or email not verified');
+    }
+    return {};
+  }
+
+  if (!user.email!.toLowerCase().endsWith('@bergen.org')) {
+    if (kDebugMode) {
+      print('User does not have a valid bergen.org email');
+    }
+    return {};
+  }
+
   try {
-    final spreadsheet = await _gsheets.spreadsheet(spreadsheetId);
-    final sheet = spreadsheet.worksheetByTitle(worksheetTitle);
+    // Read from Firestore instead of Google Sheets
+    final doc = await FirebaseFirestore.instance
+        .collection('public_data')
+        .doc('teacher_absences')
+        .get();
 
-    if (sheet == null) return {};
-
-    final rows = await sheet.values.allRows();
-    if (rows.isEmpty) return {};
-
-    final firstRowText = rows.first.join(' ');
-    final dateRegex = RegExp(
-      r'(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}',
-    );
-    final dateMatch = dateRegex.firstMatch(firstRowText);
-    if (dateMatch != null) {
-      absenceMap['Date'] = dateMatch.group(0)!;
+    if (!doc.exists) {
+      if (kDebugMode) {
+        print('No absence data found in Firestore');
+      }
+      return {};
     }
 
-    for (final row in rows) {
-      if (row.length < 2) continue;
+    final data = doc.data();
+    if (data == null) return {};
 
-      final teacherRaw = row[0].toString().trim();
-      final periodRaw = row[1].toString().trim();
+    // Get the date
+    if (data.containsKey('date')) {
+      absenceMap['Date'] = data['date'].toString();
+    }
 
-      if (teacherRaw.isEmpty) continue;
-      if (teacherRaw.toLowerCase().contains('teacher')) continue;
+    // Get teacher absences
+    if (data.containsKey('teachers')) {
+      final teachers = data['teachers'] as Map<String, dynamic>;
+      teachers.forEach((key, value) {
+        absenceMap[key] = value.toString();
+      });
+    }
 
-      final teacherKey = googleDocTeacherKey(teacherRaw);
-      final period = formatPeriods(periodRaw);
-
-      absenceMap[teacherKey] = period.isEmpty ? 'Present' : period;
+    if (kDebugMode) {
+      print('Loaded ${absenceMap.length} absence records from Firestore');
     }
   } catch (e) {
     if (kDebugMode) {
-      print('Error fetching Google Sheet absences: $e');
+      print('Error fetching absences from Firestore: $e');
     }
   }
 

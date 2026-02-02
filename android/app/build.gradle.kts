@@ -22,9 +22,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Enable core library desugaring
+        multiDexEnabled = true
     }
 
     compileOptions {
+        // Enable desugaring
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -76,4 +81,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
+    
+    // Add desugaring library
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

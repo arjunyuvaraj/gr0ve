@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_teacher_card.dart';
 import 'package:gr0ve/components/custom_bus_card.dart';
 import 'package:gr0ve/services/starred_teacher_service.dart';
-import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/services/starred_bus_service.dart';
+import 'package:gr0ve/services/teacher_service.dart';
 import 'package:gr0ve/services/bus_service.dart';
 import 'package:gr0ve/utilities/teacher_utils.dart';
+import 'package:gr0ve/utilities/context_extensions.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,171 +18,137 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   Map<String, String> absenceList = {};
+  Map<String, Map<String, dynamic>> allTeachers = {};
   List<BusRoute> allBuses = [];
-  User? user;
-  String? email;
 
-  static const _spreadsheetId = '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
-  static const _worksheetTitle = 'Absences';
+  User? user;
 
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    email = user?.email ?? '';
-    WidgetsBinding.instance.addObserver(this);
-    _load();
+    _loadData();
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
+  Future<void> _loadData() async {
+    setState(() => isLoading = true);
 
-  Future<void> _load() async {
-    await Future.wait([
-      StarredTeacherService.load(),
-      StarredBusService.load(),
-      initGSheets(), // <-- ensure GSheets is initialized
-      _loadAbsences(),
-      _loadBuses(),
-    ]);
-
-    if (mounted) setState(() => isLoading = false);
-  }
-
-  Future<void> _refresh() async {
-    await Future.wait([_loadAbsences(), _loadBuses()]);
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _loadAbsences() async {
+    // Load teacher absences
     absenceList = await fetchGoogleSheetAbsences(
-      spreadsheetId: _spreadsheetId,
-      worksheetTitle: _worksheetTitle,
+      spreadsheetId: '', // ignored now
+      worksheetTitle: '', // ignored now
     );
-  }
 
-  Future<void> _loadBuses() async {
+    // Load all teachers
+    allTeachers = await fetchTeacherListFromFirebase();
+
+    // Load buses (assuming you have BusService.fetchBusRoutes)
     allBuses = await fetchBusRoutes();
+
+    // Load starred data
+    await Future.wait([StarredTeacherService.load(), StarredBusService.load()]);
+
+    setState(() => isLoading = false);
   }
 
-  String _statusFor(String name) {
-    return resolveTeacherStatus(teacherName: name, absenceMap: absenceList);
-  }
+  String _statusFor(String name) =>
+      resolveTeacherStatus(teacherName: name, absenceMap: absenceList);
 
   @override
   Widget build(BuildContext context) {
-    final loggedIn = FirebaseAuth.instance.currentUser != null;
-
     if (isLoading) return const Center(child: CircularProgressIndicator());
 
     return RefreshIndicator(
-      onRefresh: _refresh,
-      child: Padding(
+      onRefresh: _loadData,
+      child: ListView(
         padding: const EdgeInsets.all(16),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            const CustomHeader(title: "GR0VE", subtitle: "FOR BCA"),
+        children: [
+          const CustomHeader(title: "GR0VE", subtitle: "FOR BCA"),
 
-            // Starred Teachers
-            if (email!.contains("@bergen.org")) ...[
-              const SizedBox(height: 24),
-              const Text(
-                "STARRED TEACHERS",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              ValueListenableBuilder<Set<String>>(
-                valueListenable: StarredTeacherService.starredTeachers,
-                builder: (_, starred, __) {
-                  final teachers = teacherList.values
-                      .map((t) => Map<String, dynamic>.from(t))
-                      .where((t) => starred.contains(t['name']))
-                      .toList();
+          // STARRED TEACHERS
+          const SizedBox(height: 24),
+          const Text(
+            "STARRED TEACHERS",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          ValueListenableBuilder<Set<String>>(
+            valueListenable: StarredTeacherService.starredTeachers,
+            builder: (_, starred, __) {
+              final teachers = allTeachers.values
+                  .where((t) => starred.contains(t['name']))
+                  .toList();
 
-                  if (teachers.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(
-                        child: Text(
-                          "No starred teachers yet... try heading to the teachers absence page!",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                    );
-                  }
+              if (teachers.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: Text("No starred teachers yet.")),
+                );
+              }
 
-                  return Column(
-                    children: teachers.map((t) {
-                      final name = t['name'];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: CustomTeacherCard(
-                          name: name,
-                          department: t['department'],
-                          email: t['email'],
-                          status: _statusFor(name),
-                          showStar: true,
-                          starred: true,
-                          onStarTap: () =>
-                              StarredTeacherService.toggleTeacher(name),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-            ],
-
-            // Starred Buses
-            const SizedBox(height: 32),
-            const Text(
-              "FAVORITE BUSES",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            ValueListenableBuilder<Set<String>>(
-              valueListenable: StarredBusService.starredTowns,
-              builder: (_, starred, __) {
-                final buses = allBuses
-                    .where((b) => starred.contains(b.town))
-                    .toList();
-
-                if (buses.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(
-                      child: Text(
-                        "No starred buses yet... try heading to the buses page!",
-                        style: TextStyle(color: Colors.grey),
-                      ),
+              return Column(
+                children: teachers.map((t) {
+                  final name = t['name']!;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: CustomTeacherCard(
+                      name: name,
+                      department: t['department'],
+                      email: t['email'],
+                      status: _statusFor(name),
+                      showStar: true,
+                      starred: true,
+                      onStarTap: () =>
+                          StarredTeacherService.toggleTeacher(name),
                     ),
                   );
-                }
+                }).toList(),
+              );
+            },
+          ),
 
-                return Column(
-                  children: buses.map((b) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: CustomBusCard(
-                        route: b,
-                        starred: true,
-                        onStarTap: () => StarredBusService.toggleTown(b.town),
-                        isLoggedIn: loggedIn,
-                      ),
-                    );
-                  }).toList(),
+          // STARRED BUSES
+          const SizedBox(height: 32),
+          const Text(
+            "FAVORITE BUSES",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          ValueListenableBuilder<Set<String>>(
+            valueListenable: StarredBusService.starredTowns,
+            builder: (_, starred, __) {
+              final buses = allBuses
+                  .where((b) => starred.contains(b.town))
+                  .toList();
+
+              if (buses.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: Text("No starred buses yet.")),
                 );
-              },
-            ),
-          ],
-        ),
+              }
+
+              return Column(
+                children: buses
+                    .map(
+                      (b) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: CustomBusCard(
+                          route: b,
+                          starred: true,
+                          onStarTap: () => StarredBusService.toggleTown(b.town),
+                          isLoggedIn: user != null,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

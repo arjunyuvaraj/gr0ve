@@ -51,4 +51,4 @@ lib/utilities/data/teacher_list.dart
 android/app/google-services.json
 
 # Assets
-assets/credentials/gsheets.json
+assets/credentials/gsheets.jsonassets/credentials/*.json

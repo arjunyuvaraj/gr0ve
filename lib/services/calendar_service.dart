@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:gsheets/gsheets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/services/group_service.dart';
@@ -89,14 +87,12 @@ class CalendarEvent {
 }
 
 class CalendarService {
-  static const _spreadsheetId = '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
-  static const _worksheetTitle = 'Calendar';
+  // SECURITY FIX: No more Google Sheets
+  // BCA events are now stored directly in Firestore
+  // Admins upload events using the Python upload script
 
   static final _auth = FirebaseAuth.instance;
   static final _firestore = FirebaseFirestore.instance;
-
-  static late final GSheets _gsheets;
-  static Future<void>? _initFuture;
 
   static final ValueNotifier<List<CalendarEvent>> bcaEvents = ValueNotifier([]);
   static final ValueNotifier<List<CalendarEvent>> personalEvents =
@@ -119,16 +115,6 @@ class CalendarService {
   // Debounce timer for club events
   static Timer? _clubEventsDebounceTimer;
 
-  static Future<void> _initGSheets() {
-    _initFuture ??= _loadGSheets();
-    return _initFuture!;
-  }
-
-  static Future<void> _loadGSheets() async {
-    final json = await rootBundle.loadString('assets/credentials/gsheets.json');
-    _gsheets = GSheets(json);
-  }
-
   static DocumentReference<Map<String, dynamic>> _userEventsRef(String uid) {
     return _firestore
         .collection('users')
@@ -148,53 +134,54 @@ class CalendarService {
     _monthCache.clear();
   }
 
-  /// Fetch BCA events from Google Sheets
+  /// Fetch BCA events from Firestore
   static Future<void> fetchBCAEvents() async {
-    await _initGSheets();
+    // SECURITY: Verify user authentication and bergen.org email
+    final user = _auth.currentUser;
+    if (user == null || !user.emailVerified) {
+      bcaEvents.value = [];
+      _notifyEventsChanged();
+      return;
+    }
+
+    if (!user.email!.toLowerCase().endsWith('@bergen.org')) {
+      bcaEvents.value = [];
+      _notifyEventsChanged();
+      return;
+    }
+
     final List<CalendarEvent> events = [];
 
     try {
-      final spreadsheet = await _gsheets.spreadsheet(_spreadsheetId);
-      final sheet = spreadsheet.worksheetByTitle(_worksheetTitle);
-      if (sheet == null) {
-        bcaEvents.value = [];
-        _notifyEventsChanged();
-        return;
-      }
-      final rows = await sheet.values.allRows();
-      if (rows.isEmpty || rows.length < 2) {
-        bcaEvents.value = [];
-        _notifyEventsChanged();
-        return;
-      }
-      // Skip header row
-      for (int i = 1; i < rows.length; i++) {
-        final row = rows[i];
-        if (row.isEmpty) continue;
+      // Read BCA events from Firestore
+      final snapshot = await _firestore
+          .collection('public_data')
+          .doc('bca_events')
+          .collection('items')
+          .orderBy('date')
+          .get();
 
+      for (final doc in snapshot.docs) {
         try {
-          final dateStr = row.length > 0 ? row[0].toString().trim() : '';
-          final title = row.length > 1 ? row[1].toString().trim() : '';
-          final description = row.length > 2 ? row[2].toString().trim() : '';
-
-          if (dateStr.isEmpty || title.isEmpty) continue;
-
-          final date = _parseDate(dateStr);
-          if (date == null) continue;
-
-          events.add(
-            CalendarEvent(
-              id: 'bca_${date.millisecondsSinceEpoch}_$i',
-              title: title,
-              date: date,
-              description: description.isEmpty ? null : description,
-              category: 'bca',
-              isAllDay: true,
-            ),
+          final data = doc.data();
+          final event = CalendarEvent(
+            id: data['id'] ?? doc.id,
+            title: data['title'] ?? '',
+            date: (data['date'] as Timestamp).toDate(),
+            description: data['description'] as String?,
+            category: 'bca',
+            isAllDay: data['isAllDay'] as bool? ?? true,
+            startTime: data['startTime'] != null
+                ? (data['startTime'] as Timestamp).toDate()
+                : null,
+            endTime: data['endTime'] != null
+                ? (data['endTime'] as Timestamp).toDate()
+                : null,
           );
+          events.add(event);
         } catch (e) {
           if (kDebugMode) {
-            print('Error parsing row $i: $e');
+            print('Error parsing BCA event ${doc.id}: $e');
           }
         }
       }
@@ -202,43 +189,14 @@ class CalendarService {
       bcaEvents.value = events;
       _notifyEventsChanged();
       if (kDebugMode) {
-        print('Loaded ${events.length} BCA events');
+        print('Loaded ${events.length} BCA events from Firestore');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error fetching BCA events: $e');
+        print('Error fetching BCA events from Firestore: $e');
       }
       bcaEvents.value = [];
       _notifyEventsChanged();
-    }
-  }
-
-  /// Parse date string in various formats
-  static DateTime? _parseDate(String dateStr) {
-    try {
-      // Try parsing as Excel/Sheets serial number
-      final serialNumber = int.tryParse(dateStr);
-      if (serialNumber != null) {
-        // Excel/Sheets epoch: December 30, 1899
-        final epoch = DateTime(1899, 12, 30);
-        return epoch.add(Duration(days: serialNumber));
-      }
-
-      // Try MM/DD/YYYY format
-      final parts = dateStr.split('/');
-      if (parts.length == 3) {
-        final month = int.tryParse(parts[0]);
-        final day = int.tryParse(parts[1]);
-        final year = int.tryParse(parts[2]);
-        if (month != null && day != null && year != null) {
-          return DateTime(year, month, day);
-        }
-      }
-
-      // Try parsing as ISO format
-      return DateTime.tryParse(dateStr);
-    } catch (e) {
-      return null;
     }
   }
 
@@ -423,7 +381,7 @@ class CalendarService {
     // Load club events immediately (parallel with BCA)
     final clubFuture = _updateClubEvents();
 
-    // Load BCA events in background (can be slow)
+    // Load BCA events from Firestore
     final bcaFuture = fetchBCAEvents();
 
     // Wait for both to complete
@@ -531,10 +489,6 @@ class CalendarService {
 
     try {
       // OPTIMIZATION: Query groups where user is a member directly
-      // This requires a 'memberIds' array field in the groups collection
-      // If you don't have this field, you'll need to add it to your Firestore schema
-
-      // Try the optimized query first
       try {
         final userGroupsSnapshot = await _firestore
             .collection('groups')
@@ -769,11 +723,6 @@ class CalendarService {
       'requestedBy': user.uid,
       'requestedAt': FieldValue.serverTimestamp(),
     });
-
-    // If bypassing approval, immediately add to BCA calendar
-    if (bypassApproval) {
-      await _addToBCACalendar(doc.id, event);
-    }
   }
 
   /// Stream public event requests (for admin screen)
@@ -784,38 +733,45 @@ class CalendarService {
         .snapshots();
   }
 
-  /// Approve a public event request
+  /// Approve a public event request (adds to BCA calendar)
   static Future<void> approvePublicEventRequest(
     String groupId,
     String requestId,
     Map<String, dynamic> eventData,
   ) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
     // Update request status
     await _firestore.collection('public_event_requests').doc(requestId).update({
       'status': 'approved',
       'approvedAt': FieldValue.serverTimestamp(),
-      'approvedBy': _auth.currentUser?.uid,
+      'approvedBy': user.uid,
     });
 
-    // Add to BCA calendar (Google Sheets)
-    final event = CalendarEvent(
-      id: requestId,
-      title: eventData['title'] as String,
-      date: (eventData['date'] as Timestamp).toDate(),
-      description: eventData['description'] as String?,
-      category: 'bca',
-      isAllDay: eventData['isAllDay'] as bool? ?? true,
-      startTime: eventData['startTime'] != null
-          ? (eventData['startTime'] as Timestamp).toDate()
-          : null,
-      endTime: eventData['endTime'] != null
-          ? (eventData['endTime'] as Timestamp).toDate()
-          : null,
-    );
+    // Add to BCA calendar
+    final eventDoc = _firestore
+        .collection('public_data')
+        .doc('bca_events')
+        .collection('items')
+        .doc();
 
-    await _addToBCACalendar(requestId, event);
+    final eventDate = (eventData['date'] as Timestamp).toDate();
 
-    // Refresh BCA events to show the new event
+    await eventDoc.set({
+      'id': eventDoc.id,
+      'title': eventData['title'],
+      'description': eventData['description'],
+      'date': Timestamp.fromDate(eventDate),
+      'isAllDay': eventData['isAllDay'] ?? true,
+      'startTime': eventData['startTime'],
+      'endTime': eventData['endTime'],
+      'approvedBy': user.uid,
+      'approvedAt': FieldValue.serverTimestamp(),
+      'requestId': requestId,
+    });
+
+    // Refresh BCA events
     await fetchBCAEvents();
   }
 
@@ -829,42 +785,5 @@ class CalendarService {
       'rejectedAt': FieldValue.serverTimestamp(),
       'rejectedBy': _auth.currentUser?.uid,
     });
-  }
-
-  /// Add event to BCA Google Sheets calendar
-  static Future<void> _addToBCACalendar(
-    String eventId,
-    CalendarEvent event,
-  ) async {
-    await _initGSheets();
-
-    try {
-      final spreadsheet = await _gsheets.spreadsheet(_spreadsheetId);
-      final sheet = spreadsheet.worksheetByTitle(_worksheetTitle);
-
-      if (sheet == null) {
-        throw Exception('Calendar worksheet not found');
-      }
-
-      // Format date as MM/DD/YYYY
-      final dateStr =
-          '${event.date.month}/${event.date.day}/${event.date.year}';
-
-      // Append row to sheet
-      await sheet.values.appendRow([
-        dateStr,
-        event.title,
-        event.description ?? '',
-      ]);
-
-      if (kDebugMode) {
-        print('Successfully added event to BCA calendar: ${event.title}');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error adding to BCA calendar: $e');
-      }
-      rethrow;
-    }
   }
 }
