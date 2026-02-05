@@ -43,23 +43,50 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
     }
 
     final data = doc.data();
-    if (data == null) return {};
+    if (data == null) {
+      if (kDebugMode) {
+        print('Absence document exists but data is null');
+      }
+      return {};
+    }
 
-    // Get the date
+    if (kDebugMode) {
+      print('Firestore data keys: ${data.keys.toList()}');
+      print('Full data: $data');
+    }
+
+    // Get the date - store with lowercase 'date' key to match Firestore
     if (data.containsKey('date')) {
-      absenceMap['Date'] = data['date'].toString();
+      absenceMap['date'] = data['date'].toString();
+      if (kDebugMode) {
+        print('Date found: ${absenceMap['date']}');
+      }
+    } else {
+      if (kDebugMode) {
+        print('WARNING: No date field found in Firestore document');
+      }
     }
 
     // Get teacher absences
     if (data.containsKey('teachers')) {
       final teachers = data['teachers'] as Map<String, dynamic>;
+      if (kDebugMode) {
+        print('Teachers map has ${teachers.length} entries');
+      }
       teachers.forEach((key, value) {
         absenceMap[key] = value.toString();
+        if (kDebugMode) {
+          print('  - $key: $value');
+        }
       });
+    } else {
+      if (kDebugMode) {
+        print('WARNING: No teachers field found in Firestore document');
+      }
     }
 
     if (kDebugMode) {
-      print('Loaded ${absenceMap.length} absence records from Firestore');
+      print('Successfully loaded ${absenceMap.length} records from Firestore');
     }
   } catch (e) {
     if (kDebugMode) {
@@ -198,7 +225,7 @@ String _cleanKey(String key) {
 }
 
 bool matchesTeacher(String docKey, String teacherKey) {
-  if (docKey == 'Date') return false;
+  if (docKey == 'date' || docKey == 'Date') return false;
 
   final edgeCase = handleEdgeCases(docKey);
   final docName = edgeCase ?? docKey;

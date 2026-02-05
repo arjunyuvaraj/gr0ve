@@ -26,6 +26,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
   Timer? _refreshTimer;
 
+  // These aren't used anymore but kept for backwards compatibility
   static const _spreadsheetId = '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _worksheetTitle = 'Absences';
 
@@ -214,7 +215,8 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         children: [
           CustomHeader(
             title: "Teachers".capitalized,
-            subtitle: absenceList['Date'] ?? "",
+            // FIXED: Changed from 'Date' to 'date' to match Firestore structure
+            subtitle: absenceList['date'] ?? "",
           ),
           const SizedBox(height: 12),
           TextField(
