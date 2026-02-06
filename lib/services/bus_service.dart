@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gsheets/gsheets.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gr0ve/services/calendar_service.dart';
 
 @immutable
 class BusRoute {
@@ -31,9 +33,83 @@ Future<void> _loadGSheets() async {
   _gsheets = GSheets(json);
 }
 
+/// Check if today is a minimum day by looking at calendar events
+Future<bool> _isMinimumDay() async {
+  try {
+    final today = DateTime.now();
+    final todayEvents = CalendarService.getEventsForDate(today);
+
+    // Check if any event title contains "minimum day" (case insensitive)
+    return todayEvents.any(
+      (event) =>
+          event.title.toLowerCase().contains('minimum day') ||
+          event.description?.toLowerCase().contains('minimum day') == true,
+    );
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error checking minimum day: $e');
+    }
+    return false;
+  }
+}
+
+/// Get the bus arrival time from Firestore override or calculate based on schedule
+Future<DateTime> _getBusArrivalTime() async {
+  try {
+    // Check for Firestore override
+    final doc = await FirebaseFirestore.instance
+        .collection('config')
+        .doc('bus_schedule')
+        .get();
+
+    if (doc.exists) {
+      final overrideTime = doc.data()?['override_arrival_time'] as Timestamp?;
+      if (overrideTime != null) {
+        final overrideDate = overrideTime.toDate();
+        final now = DateTime.now();
+
+        // Combine today's date with the override time
+        return DateTime(
+          now.year,
+          now.month,
+          now.day,
+          overrideDate.hour,
+          overrideDate.minute,
+        );
+      }
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error reading bus schedule override: $e');
+    }
+  }
+
+  // No override - use default schedule
+  final isMinDay = await _isMinimumDay();
+  final now = DateTime.now();
+
+  if (isMinDay) {
+    // Minimum day: buses arrive at 12:30 PM
+    return DateTime(now.year, now.month, now.day, 12, 30);
+  } else {
+    // Regular day: buses arrive at 3:45 PM
+    return DateTime(now.year, now.month, now.day, 15, 45);
+  }
+}
+
+/// Check if buses should be marked as arrived
+Future<bool> areBusesArriving() async {
+  final arrivalTime = await _getBusArrivalTime();
+  final now = DateTime.now();
+  return now.isAfter(arrivalTime);
+}
+
 Future<List<BusRoute>> fetchBusRoutes() async {
   await _initGSheets();
   final List<BusRoute> routes = [];
+
+  // Check if buses are arriving yet
+  final busesArriving = await areBusesArriving();
 
   try {
     final spreadsheet = await _gsheets.spreadsheet(_spreadsheetId);
@@ -56,8 +132,8 @@ Future<List<BusRoute>> fetchBusRoutes() async {
     ].reduce((a, b) => a < b ? a : b);
 
     for (int i = 0; i < length; i++) {
-      _addRoute(routes, towns1[i], codes1[i]);
-      _addRoute(routes, towns2[i], codes2[i]);
+      _addRoute(routes, towns1[i], codes1[i], busesArriving);
+      _addRoute(routes, towns2[i], codes2[i], busesArriving);
     }
   } catch (e) {
     if (kDebugMode) {
@@ -68,8 +144,23 @@ Future<List<BusRoute>> fetchBusRoutes() async {
   return routes;
 }
 
-void _addRoute(List<BusRoute> routes, Object town, Object rawCode) {
+void _addRoute(
+  List<BusRoute> routes,
+  Object town,
+  Object rawCode,
+  bool busesArriving,
+) {
   final code = rawCode.toString().trim();
+
+  // If buses haven't started arriving, mark everything as missing
+  if (!busesArriving) {
+    routes.add(
+      BusRoute(code: '?', town: town.toString(), status: 'Not here yet'),
+    );
+    return;
+  }
+
+  // Buses are arriving - use actual status
   final resolved = code.isEmpty ? '?' : code;
 
   routes.add(

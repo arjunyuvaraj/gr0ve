@@ -21,7 +21,11 @@ import 'package:gr0ve/theme/light_theme.dart';
 import 'package:gr0ve/utilities/landing_decider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gr0ve/utilities/teacher_utils.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
+
+// Global navigator key for handling notification taps
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +41,6 @@ void main() async {
     }
     teacherList = {};
   }
-
-  // NO MORE GOOGLE SHEETS CALLS AT STARTUP!
-  // Absences are now loaded from Firestore when the user opens the absence screen
-  // This fixes the security vulnerability
   absenceList = {};
 
   // Initialize notification service
@@ -71,12 +71,75 @@ class _MyAppState extends State<MyApp> {
         NotificationService().stopListening();
       }
     });
+
+    // Set up notification tap handler
+    _setupNotificationTapHandler();
+  }
+
+  void _setupNotificationTapHandler() {
+    // Set the notification tap callback in the NotificationService
+    NotificationService().setNotificationTapCallback(_handleNotificationTap);
+  }
+
+  void _handleNotificationTap(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null) {
+      print('[MAIN] Notification tapped with no payload');
+      return;
+    }
+
+    print('[MAIN] Notification tapped with payload: $payload');
+
+    // Wait a bit to ensure navigation is ready
+    Future.delayed(const Duration(milliseconds: 300), () {
+      final context = navigatorKey.currentContext;
+      if (context == null) {
+        print('[MAIN] No navigation context available');
+        return;
+      }
+
+      // Parse payload and navigate
+      if (payload.startsWith('bus:')) {
+        // Bus notification - navigate to bus screen (index 2 for @bergen.org users)
+        print('[MAIN] Navigating to bus screen');
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const NavigationScreen(initialIndex: 2),
+          ),
+          (route) => false,
+        );
+      } else if (payload.startsWith('announcement:')) {
+        // Announcement notification - navigate to clubs screen
+        // final groupId = payload.substring('announcement:'.length);
+        print('[MAIN] Navigating to home/clubs');
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const NavigationScreen(initialIndex: 0),
+          ),
+          (route) => false,
+        );
+      } else if (payload.startsWith('join_request:')) {
+        // Join request - navigate to join requests screen
+        final groupId = payload.substring('join_request:'.length);
+        print('[MAIN] Navigating to join requests for group: $groupId');
+        Navigator.of(
+          context,
+        ).pushNamed('/club/join-requests', arguments: groupId);
+      } else if (payload.startsWith('club_request:')) {
+        // Club creation request - navigate to admin panel
+        print('[MAIN] Navigating to admin panel');
+        Navigator.of(context).pushNamed('/admin');
+      } else {
+        print('[MAIN] Unknown payload type: $payload');
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Gr0ve',
+      navigatorKey: navigatorKey, // Set the global navigator key
       darkTheme: darkTheme,
       theme: lightTheme,
       themeMode: ThemeMode.system,

@@ -2,6 +2,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/services/bus_service.dart';
+import 'package:gr0ve/services/starred_bus_service.dart';
 import 'dart:async';
 
 // Top-level function to handle background messages
@@ -22,6 +24,21 @@ class NotificationService {
 
   final List<StreamSubscription> _subscriptions = [];
   final Set<String> _processedIds = {}; // Prevent duplicate notifications
+
+  // Track which buses have already triggered notifications
+  final Set<String> _notifiedBuses = {};
+  Timer? _busCheckTimer;
+
+  // Callback for notification taps
+  void Function(NotificationResponse)? _onNotificationTapCallback;
+
+  /// Set the callback for when notifications are tapped
+  void setNotificationTapCallback(
+    void Function(NotificationResponse) callback,
+  ) {
+    _onNotificationTapCallback = callback;
+    print('[NOTIF] Notification tap callback registered');
+  }
 
   /// Initialize the notification service
   Future<void> initialize() async {
@@ -148,6 +165,13 @@ class NotificationService {
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
     print('[NOTIF] Notification tapped: ${response.payload}');
+
+    // Call the registered callback if it exists
+    if (_onNotificationTapCallback != null) {
+      _onNotificationTapCallback!(response);
+    } else {
+      print('[NOTIF] No tap callback registered');
+    }
   }
 
   /// Start listening for notifications
@@ -162,10 +186,12 @@ class NotificationService {
 
     await stopListening();
     _processedIds.clear();
+    _notifiedBuses.clear();
 
     await _listenForAnnouncements(user.uid);
     await _listenForJoinRequests(user.uid);
     await _listenForClubCreationRequests(user.uid);
+    _startBusArrivalMonitoring();
 
     print(
       '[NOTIF] All listeners started. Active subscriptions: ${_subscriptions.length}',
@@ -181,7 +207,60 @@ class NotificationService {
     }
     _subscriptions.clear();
 
+    _busCheckTimer?.cancel();
+    _busCheckTimer = null;
+
     print('[NOTIF] All listeners stopped');
+  }
+
+  /// Start monitoring for starred bus arrivals
+  void _startBusArrivalMonitoring() {
+    print('[NOTIF] Starting bus arrival monitoring...');
+
+    // Check every 30 seconds for bus arrivals
+    _busCheckTimer?.cancel();
+    _busCheckTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _checkStarredBusArrivals();
+    });
+
+    // Do an immediate check
+    _checkStarredBusArrivals();
+  }
+
+  /// Check if any starred buses have arrived
+  Future<void> _checkStarredBusArrivals() async {
+    try {
+      final starredTowns = StarredBusService.starredTowns.value;
+      if (starredTowns.isEmpty) {
+        print('[NOTIF] No starred buses to monitor');
+        return;
+      }
+
+      print('[NOTIF] Checking ${starredTowns.length} starred buses...');
+      final routes = await fetchBusRoutes();
+
+      for (final route in routes) {
+        // Check if this bus is starred and has arrived
+        if (starredTowns.contains(route.town) &&
+            route.status == 'Arrived' &&
+            !_notifiedBuses.contains(route.town)) {
+          // Mark as notified
+          _notifiedBuses.add(route.town);
+
+          // Send notification
+          await _showNotification(
+            id: route.town.hashCode,
+            title: '🚌 ${route.town}',
+            body: 'Parking spot: ${route.code}',
+            payload: 'bus:${route.town}',
+          );
+
+          print('[NOTIF] Bus arrival notification sent for ${route.town}');
+        }
+      }
+    } catch (e) {
+      print('[NOTIF] Error checking starred bus arrivals: $e');
+    }
   }
 
   /// Listen for new announcements
