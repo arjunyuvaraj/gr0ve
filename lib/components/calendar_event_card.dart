@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/services/calendar_service.dart';
-import 'package:gr0ve/utilities/context_extensions.dart';
+import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
 
 class CalendarEventCard extends StatelessWidget {
   final CalendarEvent event;

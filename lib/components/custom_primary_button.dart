@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/utilities/context_extensions.dart';
+import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
 
 class CustomPrimaryButton extends StatelessWidget {
   final String label;

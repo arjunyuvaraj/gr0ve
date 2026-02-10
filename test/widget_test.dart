@@ -9,7 +9,7 @@ import 'package:gr0ve/components/custom_secondary_button.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_text_field.dart';
 import 'package:gr0ve/components/not_logged_in.dart';
-import 'package:gr0ve/theme/light_theme.dart';
+import 'package:gr0ve/core/theme/light_theme.dart';
 
 void main() {
   group('Custom Components Tests', () {

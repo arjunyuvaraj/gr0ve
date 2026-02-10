@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/utilities/context_extensions.dart';
-import 'package:gr0ve/utilities/helper_functions.dart';
+import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/core/utilities/helper/helper_functions.dart';
+import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
 
 class LandingCard extends StatelessWidget {
   final String title;

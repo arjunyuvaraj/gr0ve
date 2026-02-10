@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/services/calendar_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gr0ve/utilities/context_extensions.dart';
+import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
 
 class EventDetailsDialog extends StatefulWidget {
   final CalendarEvent event;
