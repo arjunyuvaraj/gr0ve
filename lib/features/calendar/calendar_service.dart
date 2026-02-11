@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gr0ve/services/group_service.dart';
-import '../models/group.dart';
+import 'package:gr0ve/features/club/group_service.dart';
+import 'package:gr0ve/features/club/group.dart';
 
 @immutable
 class CalendarEvent {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/group_service.dart';
+import 'package:gr0ve/features/club/group_service.dart';
 
 class PostAnnouncementDialog extends StatefulWidget {
   final String groupId;

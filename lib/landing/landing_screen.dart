@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/components/changelog_pager.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/components/landing_card.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/features/changelog/changelog_entries.dart';
 import 'package:gr0ve/core/constants/landing_content.dart';
-import 'package:gr0ve/core/utilities/helper/helper_functions.dart';
+import 'package:gr0ve/core/helper/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});

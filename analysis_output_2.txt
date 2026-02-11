@@ -1,0 +1,91 @@
+Analyzing gr0ve...                                              
+
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/club_detail_screen.dart' • lib/components/club_my_clubs_tab.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/components/club_my_clubs_tab.dart:5:8 • uri_does_not_exist
+  error • The method 'NotificationService' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:24:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:91:17 • undefined_method
+  error • The method 'ClubDetailScreen' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:96:43 • undefined_method
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/join_code_dialog.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/join_code_dialog.dart:12:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_JoinCodeDialogState' • lib/components/join_code_dialog.dart:12:38 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/components/my_club_card.dart:2:8 • uri_does_not_exist
+  error • The method 'NotificationService' isn't defined for the type '_MyClubCardState' • lib/components/my_club_card.dart:34:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_MyClubCardState' • lib/components/my_club_card.dart:54:22 • undefined_method
+  error • Target of URI doesn't exist: '../components/custom_header.dart' • lib/features/admin/admin_panel_screen.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../core/extensions/context_extensions.dart' • lib/features/admin/admin_panel_screen.dart:5:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:14:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:15:26 • undefined_getter
+  error • The method 'CustomHeader' isn't defined for the type 'AdminPanelScreen' • lib/features/admin/admin_panel_screen.dart:25:15 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:177:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:178:26 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/services/authentication_service.dart' • lib/features/authentication/login_screen.dart:2:8 • uri_does_not_exist
+  error • The method 'AuthenticationService' isn't defined for the type '_LoginScreenState' • lib/features/authentication/login_screen.dart:19:24 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/authentication_service.dart' • lib/features/authentication/register_screen.dart:3:8 • uri_does_not_exist
+  error • The method 'AuthenticationService' isn't defined for the type '_RegisterScreenState' • lib/features/authentication/register_screen.dart:21:24 • undefined_method
+   info • The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/features/calendar/calendar_screen.dart:4:8 • unnecessary_import
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/features/club/club_detail_screen.dart:5:8 • uri_does_not_exist
+  error • The method 'NotificationService' isn't defined for the type '_ClubDetailScreenState' • lib/features/club/club_detail_screen.dart:45:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_ClubDetailScreenState' • lib/features/club/club_detail_screen.dart:51:9 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/features/club/club_screen.dart:7:8 • uri_does_not_exist
+warning • The value of the field '_isPlatformAdmin' isn't used • lib/features/club/club_screen.dart:22:8 • unused_field
+  error • The method 'NotificationService' isn't defined for the type '_ClubScreenState' • lib/features/club/club_screen.dart:37:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_ClubScreenState' • lib/features/club/club_screen.dart:58:11 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/teacher_service.dart' • lib/features/home/home_screen.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/bus_service.dart' • lib/features/home/home_screen.dart:10:8 • uri_does_not_exist
+  error • The name 'BusRoute' isn't a type, so it can't be used as a type argument • lib/features/home/home_screen.dart:25:8 • non_type_as_type_argument
+  error • The method 'fetchGoogleSheetAbsences' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:40:25 • undefined_method
+  error • The method 'fetchTeacherListFromFirebase' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:46:25 • undefined_method
+  error • The method 'fetchBusRoutes' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:49:22 • undefined_method
+  error • The method 'resolveTeacherStatus' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:58:7 • undefined_method
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/home/home_screen.dart:124:52 • unchecked_use_of_nullable_value
+  error • The argument type 'Object?' can't be assigned to the parameter type 'BusRoute'.  • lib/features/home/home_screen.dart:140:34 • argument_type_not_assignable
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/home/home_screen.dart:142:75 • unchecked_use_of_nullable_value
+  error • The named parameter 'constraints' isn't defined • lib/features/navigation/custom_navigation_drawer.dart:180:17 • undefined_named_parameter
+  error • The named parameter 'child' isn't defined • lib/features/navigation/custom_navigation_drawer.dart:181:17 • undefined_named_parameter
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/admin_panel_screen.dart' • lib/features/navigation/navigation_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/bus_screen.dart' • lib/features/navigation/navigation_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/calendar_screen.dart' • lib/features/navigation/navigation_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/club_screen.dart' • lib/features/navigation/navigation_screen.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/absence_screen.dart' • lib/features/navigation/navigation_screen.dart:10:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/home_screen.dart' • lib/features/navigation/navigation_screen.dart:11:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/lunch_menu_screen.dart' • lib/features/navigation/navigation_screen.dart:12:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/map_screen.dart' • lib/features/navigation/navigation_screen.dart:13:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/admin_calendar_requests_screen.dart' • lib/features/navigation/navigation_screen.dart:14:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/features/navigation/navigation_screen.dart:17:8 • uri_does_not_exist
+warning • The value of the field '_isLoading' isn't used • lib/features/navigation/navigation_screen.dart:42:8 • unused_field
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:68:32 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:95:23 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:97:11 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:137:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:161:9 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:166:9 • undefined_method
+  error • Undefined name 'ClubScreen' • lib/features/navigation/navigation_screen.dart:177:40 • undefined_identifier
+  error • Undefined name 'AdminPanelScreen' • lib/features/navigation/navigation_screen.dart:188:46 • undefined_identifier
+  error • Undefined name 'BusScreen' • lib/features/navigation/navigation_screen.dart:199:39 • undefined_identifier
+  error • The method 'BusScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:256:24 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:256:24 • non_constant_list_element
+  error • The name 'HomeScreen' isn't a class • lib/features/navigation/navigation_screen.dart:265:15 • creation_with_non_type
+  error • The name 'AbsenceScreen' isn't a class • lib/features/navigation/navigation_screen.dart:266:15 • creation_with_non_type
+  error • The name 'BusScreen' isn't a class • lib/features/navigation/navigation_screen.dart:267:15 • creation_with_non_type
+  error • The name 'LunchMenuScreen' isn't a class • lib/features/navigation/navigation_screen.dart:268:15 • creation_with_non_type
+  error • The name 'CalendarScreen' isn't a class • lib/features/navigation/navigation_screen.dart:269:15 • creation_with_non_type
+  error • The name 'ClubScreen' isn't a class • lib/features/navigation/navigation_screen.dart:271:15 • creation_with_non_type
+  error • The name 'MapScreen' isn't a class • lib/features/navigation/navigation_screen.dart:272:15 • creation_with_non_type
+  error • The name 'AdminCalendarRequestsScreen' isn't a class • lib/features/navigation/navigation_screen.dart:299:33 • creation_with_non_type
+  error • The name 'AdminPanelScreen' isn't a class • lib/features/navigation/navigation_screen.dart:300:33 • creation_with_non_type
+  error • The method 'HomeScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:321:9 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:321:9 • non_constant_list_element
+  error • The method 'BusScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:322:9 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:322:9 • non_constant_list_element
+  error • The method 'LunchMenuScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:323:9 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:323:9 • non_constant_list_element
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:341:7 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:346:7 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/navigation_screen.dart' • lib/services/notifications/notification_handler.dart:2:8 • uri_does_not_exist
+  error • The name 'NavigationScreen' isn't a class • lib/services/notifications/notification_handler.dart:50:37 • creation_with_non_type
+  error • Target of URI doesn't exist: 'package:gr0ve/services/bus_service.dart' • lib/services/notifications/notification_service.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/starred_bus_service.dart' • lib/services/notifications/notification_service.dart:6:8 • uri_does_not_exist
+  error • Undefined name 'StarredBusService' • lib/services/notifications/notification_service.dart:407:28 • undefined_identifier
+  error • The method 'fetchBusRoutes' isn't defined for the type 'NotificationService' • lib/services/notifications/notification_service.dart:410:28 • undefined_method
+warning • Unused import: 'package:gr0ve/landing/landing_screen.dart' • test/widget_test.dart:3:8 • unused_import
+

@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/add_event_dialog.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/calendar_event_card.dart';
 import 'package:gr0ve/components/event_details_dialog.dart';
-import 'package:gr0ve/services/calendar_service.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/features/calendar/calendar_service.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});

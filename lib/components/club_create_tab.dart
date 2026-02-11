@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/create_club_form.dart';
 import 'package:gr0ve/components/requests_list.dart';
-import '../services/group_service.dart';
+import '../features/club/group_service.dart';
 
 class ClubCreateTab extends StatefulWidget {
   const ClubCreateTab({super.key});

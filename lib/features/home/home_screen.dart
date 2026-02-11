@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_teacher_card.dart';
 import 'package:gr0ve/components/custom_bus_card.dart';
-import 'package:gr0ve/services/starred_teacher_service.dart';
-import 'package:gr0ve/services/starred_bus_service.dart';
-import 'package:gr0ve/services/teacher_service.dart';
-import 'package:gr0ve/services/bus_service.dart';
+import 'package:gr0ve/services/starred/starred_teacher_service.dart';
+import 'package:gr0ve/services/starred/starred_bus_service.dart';
+import 'package:gr0ve/features/absence/teacher_service.dart';
+import 'package:gr0ve/features/bus/bus_service.dart';
 
+// SCREEN: Dashboard displaying starred items and relevant school info
+// LOGIC: Aggregates teachers, buses, and absences into a unified view
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 

@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/post_announcement_dialog.dart';
-import 'package:gr0ve/features/club/group.dart';
-import 'package:gr0ve/features/club/group_member.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
-import 'group_service.dart';
-import '../../../models/announcement.dart';
+import 'package:gr0ve/features/club/group_service.dart';
+import 'package:gr0ve/features/club/group.dart';
+import 'package:gr0ve/models/announcement.dart';
+import 'package:gr0ve/features/club/group_member.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final String groupId;

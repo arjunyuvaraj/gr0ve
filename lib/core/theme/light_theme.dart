@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gr0ve/core/utilities/helper/helper_functions.dart';
+import 'package:gr0ve/core/helper/helper_functions.dart';
 
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 
+// SERVICE: Handles Firebase Authentication and user profile management
 class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -10,15 +11,19 @@ class AuthenticationService {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  // METHOD: specific validation for BCA emails
   bool _isBCAEmail(String email) {
     return email.toLowerCase().endsWith('@bergen.org');
   }
 
+  // METHOD: Creates or updates user document in Firestore on login
+  // LOGIC: Updates lastLoginAt if document exists, otherwise creates new user profile
   Future<void> _createUserDocument(User user, {String? email}) async {
     final userEmail = email ?? user.email ?? '';
     final isBCA = userEmail.isNotEmpty ? _isBCAEmail(userEmail) : false;
     final userDoc = _firestore.collection('users').doc(user.uid);
     final docSnapshot = await userDoc.get();
+
     if (!docSnapshot.exists) {
       await userDoc.set({
         'uid': user.uid,
@@ -33,6 +38,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Signs up a new user with email and password
   Future<User?> signUpWithEmail(
     String email,
     String password,
@@ -47,11 +53,12 @@ class AuthenticationService {
             email: trimmedEmail,
             password: trimmedPassword,
           );
+      
       if (userCredential.user != null) {
         await _createUserDocument(userCredential.user!, email: trimmedEmail);
+        await userCredential.user?.updateDisplayName(name);
+        await userCredential.user?.reload();
       }
-      await userCredential.user?.updateDisplayName(name);
-      await userCredential.user?.reload();
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -60,7 +67,7 @@ class AuthenticationService {
     }
   }
 
-  // UH7WJT
+  // METHOD: Signs in existing user
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       final trimmedEmail = email.trim();
@@ -71,6 +78,7 @@ class AuthenticationService {
             email: trimmedEmail,
             password: trimmedPassword,
           );
+
       if (userCredential.user != null) {
         await _createUserDocument(userCredential.user!, email: trimmedEmail);
       }
@@ -82,6 +90,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Signs in anonymously
   Future<User?> signInAnonymously() async {
     try {
       final UserCredential userCredential = await _auth.signInAnonymously();
@@ -98,18 +107,20 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Signs out user and resets app state
+  // LOGIC: Explicitly resets StarredTeacherService to prevent state leakage
   Future<void> signOut() async {
     try {
       // Reset services BEFORE signing out
       StarredTeacherService.reset();
-      // Add any other service resets here
-
+      
       await _auth.signOut();
     } catch (e) {
       throw Exception('Failed to sign out. Please try again.');
     }
   }
 
+  // METHOD: Sends password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
@@ -120,6 +131,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Fetches user data from Firestore
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
@@ -129,6 +141,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Checks if current user is from BCA domain
   Future<bool> isCurrentUserBCA() async {
     if (currentUser == null) return false;
 
@@ -140,6 +153,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Upgrades anonymous account to permanent account
   Future<User?> linkAnonymousToEmailPassword(
     String email,
     String password,
@@ -176,6 +190,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Deletes user account and profile
   Future<void> deleteAccount() async {
     if (currentUser == null) return;
 
@@ -188,6 +203,7 @@ class AuthenticationService {
     }
   }
 
+  // METHOD: Maps Firebase exceptions to user-friendly messages
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'weak-password':

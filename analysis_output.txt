@@ -1,0 +1,396 @@
+Analyzing gr0ve...                                              
+
+  error • Target of URI doesn't exist: 'package:gr0ve/services/calendar_service.dart' • lib/components/add_event_dialog.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/group_service.dart' • lib/components/add_event_dialog.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group.dart' • lib/components/add_event_dialog.dart:6:8 • uri_does_not_exist
+  error • Undefined class 'Group' • lib/components/add_event_dialog.dart:34:3 • undefined_class
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/components/add_event_dialog.dart:39:8 • non_type_as_type_argument
+  error • Undefined class 'Group' • lib/components/add_event_dialog.dart:40:3 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_AddEventDialogState' • lib/components/add_event_dialog.dart:59:26 • undefined_method
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/components/add_event_dialog.dart:97:28 • non_type_as_type_argument
+  error • Undefined name 'Group' • lib/components/add_event_dialog.dart:99:23 • undefined_identifier
+  error • The method 'CalendarEvent' isn't defined for the type '_AddEventDialogState' • lib/components/add_event_dialog.dart:186:19 • undefined_method
+  error • Undefined name 'CalendarService' • lib/components/add_event_dialog.dart:202:15 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/components/add_event_dialog.dart:217:15 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/components/add_event_dialog.dart:233:15 • undefined_identifier
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/components/add_event_dialog.dart:397:47 • non_type_as_type_argument
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/components/add_event_dialog.dart:408:51 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/components/add_event_dialog.dart:410:47 • unchecked_use_of_nullable_value
+  error • Undefined class 'Group' • lib/components/add_event_dialog.dart:413:37 • undefined_class
+  error • Target of URI doesn't exist: 'package:gr0ve/services/link_service.dart' • lib/components/add_link_dialog.dart:5:8 • uri_does_not_exist
+  error • Undefined class 'QuickLink' • lib/components/add_link_dialog.dart:9:9 • undefined_class
+  error • The method 'QuickLink' isn't defined for the type '_AddLinkDialogState' • lib/components/add_link_dialog.dart:82:12 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/calendar_service.dart' • lib/components/calendar_event_card.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/calendar_event_card.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'CalendarEvent' • lib/components/calendar_event_card.dart:6:9 • undefined_class
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/calendar_event_card.dart:17:28 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/calendar_event_card.dart:99:28 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/changelog_pager.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/components/changelog_pager.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/components/changelog_pager.dart:4:8 • uri_does_not_exist
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/changelog_pager.dart:28:26 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/changelog_pager.dart:29:28 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/components/changelog_pager.dart:54:35 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type 'ChangelogPagerState' • lib/components/changelog_pager.dart:58:40 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/club_browse_tab.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group.dart' • lib/components/club_browse_tab.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/club_browse_tab.dart:7:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/club_browse_tab.dart:18:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_ClubBrowseTabState' • lib/components/club_browse_tab.dart:18:38 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/club_browse_tab.dart:33:28 • undefined_getter
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/components/club_browse_tab.dart:35:31 • non_type_as_type_argument
+  error • Undefined name 'GroupType' • lib/components/club_browse_tab.dart:36:51 • undefined_identifier
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/club_browse_tab.dart:42:30 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/club_browse_tab.dart:75:32 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/club_browse_tab.dart:81:32 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/club_browse_tab.dart:88:32 • undefined_getter
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/components/club_browse_tab.dart:98:32 • unchecked_use_of_nullable_value
+  error • The property 'description' can't be unconditionally accessed because the receiver can be 'null' • lib/components/club_browse_tab.dart:99:39 • unchecked_use_of_nullable_value
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/club_create_tab.dart:4:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/club_create_tab.dart:14:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_ClubCreateTabState' • lib/components/club_create_tab.dart:14:38 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/club_detail_screen.dart' • lib/components/club_my_clubs_tab.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/components/club_my_clubs_tab.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group.dart' • lib/components/club_my_clubs_tab.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/club_my_clubs_tab.dart:7:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/club_my_clubs_tab.dart:17:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:17:38 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:24:5 • undefined_method
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/components/club_my_clubs_tab.dart:33:31 • non_type_as_type_argument
+  error • The method 'NotificationService' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:91:17 • undefined_method
+  error • The method 'ClubDetailScreen' isn't defined for the type '_ClubMyClubsTabState' • lib/components/club_my_clubs_tab.dart:96:43 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/bus_service.dart' • lib/components/custom_bus_card.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'BusRoute' • lib/components/custom_bus_card.dart:5:9 • undefined_class
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/custom_contact_card.dart:2:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/custom_contact_card.dart:22:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_contact_card.dart:56:38 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_contact_card.dart:64:38 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/custom_group_card.dart:2:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/custom_group_card.dart:18:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_group_card.dart:44:32 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_group_card.dart:53:32 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/custom_header.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/components/custom_header.dart:3:8 • uri_does_not_exist
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_header.dart:21:26 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type 'CustomHeader' • lib/components/custom_header.dart:24:28 • undefined_method
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_header.dart:34:26 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/custom_primary_button.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/components/custom_primary_button.dart:3:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/custom_primary_button.dart:19:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_primary_button.dart:20:32 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/components/custom_primary_button.dart:34:23 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/custom_secondary_button.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/components/custom_secondary_button.dart:3:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/custom_secondary_button.dart:19:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/custom_secondary_button.dart:20:32 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/components/custom_secondary_button.dart:36:23 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/download_button.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/components/download_button.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/components/download_button.dart:4:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/download_button.dart:19:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/download_button.dart:20:26 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/components/download_button.dart:36:23 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type 'DownloadButton' • lib/components/download_button.dart:40:34 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/calendar_service.dart' • lib/components/event_details_dialog.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/event_details_dialog.dart:5:8 • uri_does_not_exist
+  error • Undefined class 'CalendarEvent' • lib/components/event_details_dialog.dart:8:9 • undefined_class
+  error • Undefined name 'CalendarService' • lib/components/event_details_dialog.dart:129:15 • undefined_identifier
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/event_details_dialog.dart:167:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/event_details_dialog.dart:168:26 • undefined_getter
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/join_code_dialog.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/join_code_dialog.dart:12:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_JoinCodeDialogState' • lib/components/join_code_dialog.dart:12:38 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/join_with_code_card.dart:3:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/join_with_code_card.dart:19:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/join_with_code_card.dart:39:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/join_with_code_card.dart:46:28 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/components/landing_card.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/components/landing_card.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/components/landing_card.dart:4:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/components/landing_card.dart:20:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/components/landing_card.dart:21:32 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/components/landing_card.dart:41:19 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type 'LandingCard' • lib/components/landing_card.dart:45:30 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/link_service.dart' • lib/components/link_card.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'QuickLink' • lib/components/link_card.dart:5:9 • undefined_class
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/components/my_club_card.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group.dart' • lib/components/my_club_card.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/my_club_card.dart:4:8 • uri_does_not_exist
+  error • Undefined class 'Group' • lib/components/my_club_card.dart:7:9 • undefined_class
+  error • Undefined class 'GroupService' • lib/components/my_club_card.dart:8:9 • undefined_class
+  error • The method 'NotificationService' isn't defined for the type '_MyClubCardState' • lib/components/my_club_card.dart:34:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_MyClubCardState' • lib/components/my_club_card.dart:54:22 • undefined_method
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/components/post_announcement_dialog.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/post_announcement_dialog.dart:14:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_PostAnnouncementDialogState' • lib/components/post_announcement_dialog.dart:14:38 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/models/group_creation_request.dart' • lib/components/request_card.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'GroupCreationRequest' • lib/components/request_card.dart:5:9 • undefined_class
+  error • Target of URI doesn't exist: 'package:gr0ve/models/group_creation_request.dart' • lib/components/requests_list.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/group_service.dart' • lib/components/requests_list.dart:4:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/components/requests_list.dart:7:9 • undefined_class
+  error • The name 'GroupCreationRequest' isn't a type, so it can't be used as a type argument • lib/components/requests_list.dart:15:31 • non_type_as_type_argument
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/core/helper/helper_functions.dart:2:8 • uri_does_not_exist
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/core/helper/helper_functions.dart:14:24 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/core/theme/light_theme.dart:3:8 • uri_does_not_exist
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:24:22 • undefined_function
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:30:22 • undefined_function
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:37:22 • undefined_function
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:43:22 • undefined_function
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:49:22 • undefined_function
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:56:22 • undefined_function
+  error • The function 'getLetterSpacing' isn't defined • lib/core/theme/light_theme.dart:63:22 • undefined_function
+  error • Target of URI doesn't exist: 'package:gr0ve/services/starred_teacher_service.dart' • lib/features/absence/absence_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/teacher_service.dart' • lib/features/absence/absence_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/absence/absence_screen.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/teacher_utils.dart' • lib/features/absence/absence_screen.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/absence/absence_screen.dart:10:8 • uri_does_not_exist
+  error • Undefined name 'StarredTeacherService' • lib/features/absence/absence_screen.dart:91:11 • undefined_identifier
+  error • Undefined name 'teacherList' • lib/features/absence/absence_screen.dart:92:16 • undefined_identifier
+  error • The method 'fetchGoogleSheetAbsences' isn't defined for the type '_AbsenceScreenState' • lib/features/absence/absence_screen.dart:120:25 • undefined_method
+  error • The method 'resolveTeacherStatus' isn't defined for the type '_AbsenceScreenState' • lib/features/absence/absence_screen.dart:134:12 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/absence/absence_screen.dart:211:28 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/absence/absence_screen.dart:218:31 • undefined_getter
+  error • Undefined name 'StarredTeacherService' • lib/features/absence/absence_screen.dart:258:38 • undefined_identifier
+  error • The method 'formatStatusString' isn't defined for the type '_AbsenceScreenState' • lib/features/absence/absence_screen.dart:274:41 • undefined_method
+  error • Undefined name 'StarredTeacherService' • lib/features/absence/absence_screen.dart:278:37 • undefined_identifier
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/account/account_screen.dart:15:8 • uri_does_not_exist
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/account/account_screen.dart:471:51 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/account/account_screen.dart:472:49 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/services/calendar_service.dart' • lib/features/admin/admin_calendar_requests_screen.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/admin/admin_calendar_requests_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/admin/admin_calendar_requests_screen.dart:7:8 • uri_does_not_exist
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/admin/admin_calendar_requests_screen.dart:26:41 • undefined_getter
+  error • Undefined name 'CalendarService' • lib/features/admin/admin_calendar_requests_screen.dart:32:27 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/features/admin/admin_calendar_requests_screen.dart:107:15 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/features/admin/admin_calendar_requests_screen.dart:121:15 • undefined_identifier
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/admin/admin_calendar_requests_screen.dart:147:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/admin/admin_calendar_requests_screen.dart:148:26 • undefined_getter
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/features/admin/admin_panel_screen.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group_creation_request.dart' • lib/features/admin/admin_panel_screen.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../components/custom_header.dart' • lib/features/admin/admin_panel_screen.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../core/utilities/extensions/context_extensions.dart' • lib/features/admin/admin_panel_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/admin/admin_panel_screen.dart:6:8 • uri_does_not_exist
+  error • The method 'GroupService' isn't defined for the type 'AdminPanelScreen' • lib/features/admin/admin_panel_screen.dart:13:26 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:14:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:15:26 • undefined_getter
+  error • The method 'CustomHeader' isn't defined for the type 'AdminPanelScreen' • lib/features/admin/admin_panel_screen.dart:25:15 • undefined_method
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/admin/admin_panel_screen.dart:26:41 • undefined_getter
+  error • The name 'GroupCreationRequest' isn't a type, so it can't be used as a type argument • lib/features/admin/admin_panel_screen.dart:31:43 • non_type_as_type_argument
+  error • Undefined class 'GroupCreationRequest' • lib/features/admin/admin_panel_screen.dart:86:9 • undefined_class
+  error • Undefined class 'GroupService' • lib/features/admin/admin_panel_screen.dart:87:9 • undefined_class
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:177:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/admin/admin_panel_screen.dart:178:26 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/services/starred_teacher_service.dart' • lib/features/authentication/authentication_service.dart:3:8 • uri_does_not_exist
+  error • Undefined name 'StarredTeacherService' • lib/features/authentication/authentication_service.dart:115:7 • undefined_identifier
+  error • Target of URI doesn't exist: 'package:gr0ve/services/authentication_service.dart' • lib/features/authentication/login_screen.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/authentication/login_screen.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/features/authentication/login_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/authentication/login_screen.dart:6:8 • uri_does_not_exist
+  error • The method 'AuthenticationService' isn't defined for the type '_LoginScreenState' • lib/features/authentication/login_screen.dart:19:24 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/authentication/login_screen.dart:84:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/authentication/login_screen.dart:85:26 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/login_screen.dart:117:37 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/login_screen.dart:125:44 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type '_LoginScreenState' • lib/features/authentication/login_screen.dart:129:46 • undefined_method
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/login_screen.dart:261:55 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/login_screen.dart:307:59 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/authentication/login_screen.dart:346:44 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/authentication/login_screen.dart:347:46 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/authentication/register_screen.dart:1:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/authentication_service.dart' • lib/features/authentication/register_screen.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/authentication/register_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/features/authentication/register_screen.dart:6:8 • uri_does_not_exist
+  error • The method 'AuthenticationService' isn't defined for the type '_RegisterScreenState' • lib/features/authentication/register_screen.dart:21:24 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/authentication/register_screen.dart:93:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/authentication/register_screen.dart:94:26 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/register_screen.dart:126:37 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/register_screen.dart:134:46 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type '_RegisterScreenState' • lib/features/authentication/register_screen.dart:138:46 • undefined_method
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/register_screen.dart:337:55 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/authentication/register_screen.dart:383:59 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/authentication/register_screen.dart:422:44 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/authentication/register_screen.dart:423:46 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/services/bus_service.dart' • lib/features/bus/bus_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/starred_bus_service.dart' • lib/features/bus/bus_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/bus/bus_screen.dart:8:8 • uri_does_not_exist
+  error • The name 'BusRoute' isn't a type, so it can't be used as a type argument • lib/features/bus/bus_screen.dart:18:8 • non_type_as_type_argument
+  error • The name 'BusRoute' isn't a type, so it can't be used as a type argument • lib/features/bus/bus_screen.dart:19:8 • non_type_as_type_argument
+  error • Undefined name 'StarredBusService' • lib/features/bus/bus_screen.dart:31:5 • undefined_identifier
+  error • The method 'getBusArrivalTime' isn't defined for the type '_BusScreenState' • lib/features/bus/bus_screen.dart:50:33 • undefined_method
+  error • The method 'fetchBusRoutes' isn't defined for the type '_BusScreenState' • lib/features/bus/bus_screen.dart:92:28 • undefined_method
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:119:20 • unchecked_use_of_nullable_value
+  error • The property 'code' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:120:17 • unchecked_use_of_nullable_value
+  error • The name 'BusRoute' isn't a type, so it can't be used as a type argument • lib/features/bus/bus_screen.dart:126:8 • non_type_as_type_argument
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:128:45 • unchecked_use_of_nullable_value
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:129:45 • unchecked_use_of_nullable_value
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:134:16 • unchecked_use_of_nullable_value
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:134:33 • unchecked_use_of_nullable_value
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/bus/bus_screen.dart:149:34 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/bus/bus_screen.dart:157:36 • undefined_getter
+  error • Undefined name 'StarredBusService' • lib/features/bus/bus_screen.dart:176:38 • undefined_identifier
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:206:43 • unchecked_use_of_nullable_value
+  error • Undefined name 'StarredBusService' • lib/features/bus/bus_screen.dart:215:43 • undefined_identifier
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/bus/bus_screen.dart:216:51 • unchecked_use_of_nullable_value
+  error • Target of URI doesn't exist: 'package:gr0ve/services/calendar_service.dart' • lib/features/bus/bus_service.dart:5:8 • uri_does_not_exist
+  error • Undefined name 'CalendarService' • lib/features/bus/bus_service.dart:40:25 • undefined_identifier
+  error • Target of URI doesn't exist: 'package:gr0ve/services/calendar_service.dart' • lib/features/calendar/calendar_screen.dart:10:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/calendar/calendar_screen.dart:11:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/calendar/calendar_screen.dart:13:8 • uri_does_not_exist
+  error • Undefined name 'CalendarService' • lib/features/calendar/calendar_screen.dart:43:11 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/features/calendar/calendar_screen.dart:54:14 • undefined_identifier
+  error • Undefined class 'CalendarEvent' • lib/features/calendar/calendar_screen.dart:79:26 • undefined_class
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/calendar/calendar_screen.dart:89:28 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/calendar/calendar_screen.dart:96:31 • undefined_getter
+  error • Undefined name 'CalendarService' • lib/features/calendar/calendar_screen.dart:103:30 • undefined_identifier
+  error • The name 'CalendarEvent' isn't a type, so it can't be used as a type argument • lib/features/calendar/calendar_screen.dart:131:44 • non_type_as_type_argument
+  error • Undefined name 'CalendarService' • lib/features/calendar/calendar_screen.dart:138:38 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/features/calendar/calendar_screen.dart:274:32 • undefined_identifier
+  error • Undefined name 'CalendarService' • lib/features/calendar/calendar_screen.dart:277:32 • undefined_identifier
+  error • Target of URI doesn't exist: 'package:gr0ve/services/group_service.dart' • lib/features/calendar/calendar_service.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group.dart' • lib/features/calendar/calendar_service.dart:6:8 • uri_does_not_exist
+  error • The name 'Group' isn't a type, so it can't be used as a type argument • lib/features/calendar/calendar_service.dart:112:34 • non_type_as_type_argument
+  error • The method 'GroupService' isn't defined for the type 'CalendarService' • lib/features/calendar/calendar_service.dart:405:26 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/features/club/club_detail_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/features/club/club_detail_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group.dart' • lib/features/club/club_detail_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/announcement.dart' • lib/features/club/club_detail_screen.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../models/group_member.dart' • lib/features/club/club_detail_screen.dart:9:8 • uri_does_not_exist
+  error • Undefined class 'GroupService' • lib/features/club/club_detail_screen.dart:21:9 • undefined_class
+  error • The method 'GroupService' isn't defined for the type '_ClubDetailScreenState' • lib/features/club/club_detail_screen.dart:21:38 • undefined_method
+  error • Undefined class 'Group' • lib/features/club/club_detail_screen.dart:25:3 • undefined_class
+  error • The method 'NotificationService' isn't defined for the type '_ClubDetailScreenState' • lib/features/club/club_detail_screen.dart:45:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_ClubDetailScreenState' • lib/features/club/club_detail_screen.dart:51:9 • undefined_method
+  error • Undefined class 'GroupMember' • lib/features/club/club_detail_screen.dart:105:35 • undefined_class
+  error • The name 'Announcement' isn't a type, so it can't be used as a type argument • lib/features/club/club_detail_screen.dart:394:31 • non_type_as_type_argument
+  error • Undefined class 'Announcement' • lib/features/club/club_detail_screen.dart:421:33 • undefined_class
+  error • The name 'GroupMember' isn't a type, so it can't be used as a type argument • lib/features/club/club_detail_screen.dart:505:37 • non_type_as_type_argument
+  error • The property 'displayName' can't be unconditionally accessed because the receiver can be 'null' • lib/features/club/club_detail_screen.dart:519:31 • unchecked_use_of_nullable_value
+  error • The property 'email' can't be unconditionally accessed because the receiver can be 'null' • lib/features/club/club_detail_screen.dart:520:28 • unchecked_use_of_nullable_value
+  error • The name 'GroupMember' isn't a type, so it can't be used as a type argument • lib/features/club/club_detail_screen.dart:524:42 • non_type_as_type_argument
+  error • Undefined class 'MemberRole' • lib/features/club/club_detail_screen.dart:527:39 • undefined_class
+  error • Undefined name 'MemberRole' • lib/features/club/club_detail_screen.dart:528:33 • undefined_identifier
+  error • Undefined name 'MemberRole' • lib/features/club/club_detail_screen.dart:529:33 • undefined_identifier
+  error • The property 'role' can't be unconditionally accessed because the receiver can be 'null' • lib/features/club/club_detail_screen.dart:533:55 • unchecked_use_of_nullable_value
+  error • The property 'role' can't be unconditionally accessed because the receiver can be 'null' • lib/features/club/club_detail_screen.dart:534:55 • unchecked_use_of_nullable_value
+  error • The property 'displayName' can't be unconditionally accessed because the receiver can be 'null' • lib/features/club/club_detail_screen.dart:542:28 • unchecked_use_of_nullable_value
+  error • The property 'displayName' can't be unconditionally accessed because the receiver can be 'null' • lib/features/club/club_detail_screen.dart:543:23 • unchecked_use_of_nullable_value
+  error • Undefined class 'GroupMember' • lib/features/club/club_detail_screen.dart:584:22 • undefined_class
+  error • Undefined class 'GroupMember' • lib/features/club/club_detail_screen.dart:663:25 • undefined_class
+  error • Undefined class 'Announcement' • lib/features/club/club_detail_screen.dart:785:9 • undefined_class
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/features/club/club_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/club/club_screen.dart:8:8 • uri_does_not_exist
+warning • The value of the field '_isPlatformAdmin' isn't used • lib/features/club/club_screen.dart:22:8 • unused_field
+  error • The method 'NotificationService' isn't defined for the type '_ClubScreenState' • lib/features/club/club_screen.dart:37:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_ClubScreenState' • lib/features/club/club_screen.dart:58:11 • undefined_method
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/club/club_screen.dart:93:29 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/services/teacher_service.dart' • lib/features/home/home_screen.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/bus_service.dart' • lib/features/home/home_screen.dart:10:8 • uri_does_not_exist
+  error • The name 'BusRoute' isn't a type, so it can't be used as a type argument • lib/features/home/home_screen.dart:25:8 • non_type_as_type_argument
+  error • The method 'fetchGoogleSheetAbsences' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:40:25 • undefined_method
+  error • The method 'fetchTeacherListFromFirebase' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:46:25 • undefined_method
+  error • The method 'fetchBusRoutes' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:49:22 • undefined_method
+  error • The method 'resolveTeacherStatus' isn't defined for the type '_HomeScreenState' • lib/features/home/home_screen.dart:58:7 • undefined_method
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/home/home_screen.dart:124:52 • unchecked_use_of_nullable_value
+  error • The property 'town' can't be unconditionally accessed because the receiver can be 'null' • lib/features/home/home_screen.dart:142:75 • unchecked_use_of_nullable_value
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/lunch_menu/lunch_menu_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/lunch_menu/lunch_menu_screen.dart:7:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/lunch_menu/lunch_menu_screen.dart:124:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/lunch_menu/lunch_menu_screen.dart:125:26 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/lunch_menu/lunch_menu_screen.dart:165:28 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/navigation/custom_navigation_drawer.dart:2:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/navigation/custom_navigation_drawer.dart:3:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:41:42 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/navigation/custom_navigation_drawer.dart:60:29 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:61:36 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:69:30 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:119:31 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:120:31 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:133:40 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:146:32 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:154:34 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:168:31 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:169:31 • undefined_getter
+  error • The named parameter 'constraints' isn't defined • lib/features/navigation/custom_navigation_drawer.dart:180:17 • undefined_named_parameter
+  error • The named parameter 'child' isn't defined • lib/features/navigation/custom_navigation_drawer.dart:181:17 • undefined_named_parameter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/custom_navigation_drawer.dart:195:34 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/navigation/navigation_screen.dart:1:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/admin_panel_screen.dart' • lib/features/navigation/navigation_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/bus_screen.dart' • lib/features/navigation/navigation_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/calendar_screen.dart' • lib/features/navigation/navigation_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/club_screen.dart' • lib/features/navigation/navigation_screen.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/absence_screen.dart' • lib/features/navigation/navigation_screen.dart:10:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/home_screen.dart' • lib/features/navigation/navigation_screen.dart:11:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/lunch_menu_screen.dart' • lib/features/navigation/navigation_screen.dart:12:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/map_screen.dart' • lib/features/navigation/navigation_screen.dart:13:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/admin_calendar_requests_screen.dart' • lib/features/navigation/navigation_screen.dart:14:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/navigation/navigation_screen.dart:15:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/notification_service.dart' • lib/features/navigation/navigation_screen.dart:17:8 • uri_does_not_exist
+warning • The value of the field '_isLoading' isn't used • lib/features/navigation/navigation_screen.dart:42:8 • unused_field
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:68:32 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:95:23 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:97:11 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:137:5 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:161:9 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:166:9 • undefined_method
+  error • Undefined name 'ClubScreen' • lib/features/navigation/navigation_screen.dart:177:40 • undefined_identifier
+  error • Undefined name 'AdminPanelScreen' • lib/features/navigation/navigation_screen.dart:188:46 • undefined_identifier
+  error • Undefined name 'BusScreen' • lib/features/navigation/navigation_screen.dart:199:39 • undefined_identifier
+  error • The method 'BusScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:256:24 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:256:24 • non_constant_list_element
+  error • The name 'HomeScreen' isn't a class • lib/features/navigation/navigation_screen.dart:265:15 • creation_with_non_type
+  error • The name 'AbsenceScreen' isn't a class • lib/features/navigation/navigation_screen.dart:266:15 • creation_with_non_type
+  error • The name 'BusScreen' isn't a class • lib/features/navigation/navigation_screen.dart:267:15 • creation_with_non_type
+  error • The name 'LunchMenuScreen' isn't a class • lib/features/navigation/navigation_screen.dart:268:15 • creation_with_non_type
+  error • The name 'CalendarScreen' isn't a class • lib/features/navigation/navigation_screen.dart:269:15 • creation_with_non_type
+  error • The name 'ClubScreen' isn't a class • lib/features/navigation/navigation_screen.dart:271:15 • creation_with_non_type
+  error • The name 'MapScreen' isn't a class • lib/features/navigation/navigation_screen.dart:272:15 • creation_with_non_type
+  error • The name 'AdminCalendarRequestsScreen' isn't a class • lib/features/navigation/navigation_screen.dart:299:33 • creation_with_non_type
+  error • The name 'AdminPanelScreen' isn't a class • lib/features/navigation/navigation_screen.dart:300:33 • creation_with_non_type
+  error • The method 'HomeScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:321:9 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:321:9 • non_constant_list_element
+  error • The method 'BusScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:322:9 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:322:9 • non_constant_list_element
+  error • The method 'LunchMenuScreen' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:323:9 • undefined_method
+  error • The values in a const list literal must be constants • lib/features/navigation/navigation_screen.dart:323:9 • non_constant_list_element
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:341:7 • undefined_method
+  error • The method 'NotificationService' isn't defined for the type '_NavigationScreenState' • lib/features/navigation/navigation_screen.dart:346:7 • undefined_method
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/navigation_screen.dart:394:38 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/features/navigation/navigation_screen.dart:415:44 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/features/privacy/privacy_policy_screen.dart:1:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/features/privacy/privacy_policy_screen.dart:4:8 • uri_does_not_exist
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/features/privacy/privacy_policy_screen.dart:32:32 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/privacy/privacy_policy_screen.dart:67:44 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/features/privacy/privacy_policy_screen.dart:76:44 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/landing/landing_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/helper/helper_functions.dart' • lib/landing/landing_screen.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/string_extensions.dart' • lib/landing/landing_screen.dart:11:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/landing/landing_screen.dart:19:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/landing/landing_screen.dart:20:26 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/landing/landing_screen.dart:63:41 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/landing/landing_screen.dart:71:53 • undefined_getter
+  error • The method 'getLetterSpacing' isn't defined for the type 'LandingScreen' • lib/landing/landing_screen.dart:75:50 • undefined_method
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/landing/landing_screen.dart:103:58 • undefined_getter
+  error • The getter 'capitalized' isn't defined for the type 'String' • lib/landing/landing_screen.dart:158:54 • undefined_getter
+  error • Target of URI doesn't exist: 'package:gr0ve/core/utilities/extensions/context_extensions.dart' • lib/pages/help_screen.dart:4:8 • uri_does_not_exist
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/pages/help_screen.dart:18:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/pages/help_screen.dart:19:26 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/pages/help_screen.dart:51:44 • undefined_getter
+  error • The getter 'colors' isn't defined for the type 'BuildContext' • lib/pages/help_screen.dart:159:28 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'BuildContext' • lib/pages/help_screen.dart:160:26 • undefined_getter
+  error • Target of URI doesn't exist: '../services/group_service.dart' • lib/pages/join_requests_screen.dart:2:8 • uri_does_not_exist
+  error • The method 'GroupService' isn't defined for the type 'JoinRequestsScreen' • lib/pages/join_requests_screen.dart:12:26 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/navigation_screen.dart' • lib/services/notifications/notification_handler.dart:2:8 • uri_does_not_exist
+  error • The name 'NavigationScreen' isn't a class • lib/services/notifications/notification_handler.dart:50:37 • creation_with_non_type
+  error • Target of URI doesn't exist: 'package:gr0ve/services/bus_service.dart' • lib/services/notifications/notification_service.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/services/starred_bus_service.dart' • lib/services/notifications/notification_service.dart:6:8 • uri_does_not_exist
+  error • Undefined name 'StarredBusService' • lib/services/notifications/notification_service.dart:407:28 • undefined_identifier
+  error • The method 'fetchBusRoutes' isn't defined for the type 'NotificationService' • lib/services/notifications/notification_service.dart:410:28 • undefined_method
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/landing_screen.dart' • test/widget_test.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/privacy_policy_screen.dart' • test/widget_test.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:gr0ve/pages/account_deletion_screen.dart' • test/widget_test.dart:6:8 • uri_does_not_exist
+  error • The name 'PrivacyPolicyScreen' isn't a class • test/widget_test.dart:208:52 • creation_with_non_type
+  error • The name 'PrivacyPolicyScreen' isn't a class • test/widget_test.dart:221:52 • creation_with_non_type
+  error • The name 'AccountDeletionInfoScreen' isn't a class • test/widget_test.dart:235:52 • creation_with_non_type
+  error • The name 'AccountDeletionInfoScreen' isn't a class • test/widget_test.dart:251:52 • creation_with_non_type
+  error • The name 'AccountDeletionInfoScreen' isn't a class • test/widget_test.dart:619:52 • creation_with_non_type
+

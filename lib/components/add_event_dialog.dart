@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gr0ve/services/calendar_service.dart';
-import 'package:gr0ve/services/group_service.dart';
-import '../models/group.dart';
+import 'package:gr0ve/features/calendar/calendar_service.dart';
+import 'package:gr0ve/features/club/group_service.dart';
+import 'package:gr0ve/features/club/group.dart';
 
 class AddEventDialog extends StatefulWidget {
   final DateTime selectedDate;

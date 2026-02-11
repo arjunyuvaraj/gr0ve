@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/group_service.dart';
+import '../features/beta/groups/group_service.dart';
 
 class JoinCodeDialog extends StatefulWidget {
   const JoinCodeDialog({super.key});
@@ -39,7 +39,9 @@ class _JoinCodeDialogState extends State<JoinCodeDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Join request submitted! Waiting for admin approval.'),
+            content: Text(
+              'Join request submitted! Waiting for admin approval.',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -47,10 +49,7 @@ class _JoinCodeDialogState extends State<JoinCodeDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {

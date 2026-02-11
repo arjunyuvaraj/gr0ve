@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/group_service.dart';
-import '../models/group_creation_request.dart';
-import '../components/custom_header.dart';
-import '../core/utilities/extensions/context_extensions.dart';
-import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
+import 'package:gr0ve/features/club/group_service.dart';
+import 'package:gr0ve/features/club/group_creation_request.dart';
+import 'package:gr0ve/components/custom_header.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 
 class AdminPanelScreen extends StatelessWidget {
   const AdminPanelScreen({super.key});

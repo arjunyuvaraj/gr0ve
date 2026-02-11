@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gr0ve/pages/landing_screen.dart';
+import 'package:gr0ve/features/authentication/account_deletion_screen.dart';
 import 'package:gr0ve/pages/help_screen.dart';
-import 'package:gr0ve/pages/privacy_policy_screen.dart';
-import 'package:gr0ve/pages/account_deletion_screen.dart';
+import 'package:gr0ve/features/privacy/privacy_policy_screen.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/components/custom_secondary_button.dart';
 import 'package:gr0ve/components/custom_header.dart';

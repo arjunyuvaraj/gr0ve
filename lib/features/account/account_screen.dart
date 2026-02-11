@@ -7,7 +7,7 @@ import 'package:gr0ve/components/custom_text_field.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/empty_link_dialog.dart';
 import 'package:gr0ve/components/not_logged_in.dart';
-import 'package:gr0ve/features/authentication/authentication/authentication_service.dart';
+import 'package:gr0ve/features/authentication/authentication_service.dart';
 import 'package:gr0ve/features/links/link_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';

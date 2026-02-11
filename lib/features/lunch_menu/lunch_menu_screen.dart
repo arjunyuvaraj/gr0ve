@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:icons_plus/icons_plus.dart';
 import 'package:gr0ve/components/custom_header.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
-import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 
 class LunchMenuScreen extends StatefulWidget {
   const LunchMenuScreen({super.key});

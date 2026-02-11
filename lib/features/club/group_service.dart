@@ -1,12 +1,13 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gr0ve/features/club/group.dart';
-import 'package:gr0ve/features/club/group_creation_request.dart';
-import 'package:gr0ve/features/club/group_member.dart';
-import '../../../models/join_request.dart';
-import '../../../models/announcement.dart';
+import 'group.dart';
+import 'group_member.dart';
+import '../../models/join_request.dart';
+import '../../models/announcement.dart';
+import 'group_creation_request.dart';
 
+// SERVICE: Manages group creation, membership, and administration
 class GroupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -16,10 +17,9 @@ class GroupService {
 
   // ========== PROFILE SYNC OPERATIONS ==========
 
-  /// Helper to sync a single member's data from Firebase Auth
+  // METHOD: Helper to sync a single member's data from Firebase Auth
   Future<void> _syncMemberDataFromAuth(String groupId, String userId) async {
     // Get the user's current profile from a users collection or Auth
-    // This assumes you have a users collection in Firestore
     final userDoc = await _firestore.collection('users').doc(userId).get();
 
     if (userDoc.exists) {
@@ -37,8 +37,8 @@ class GroupService {
     }
   }
 
-  /// Sync user profile across all groups they're a member of
-  /// Call this whenever user updates their profile (displayName, email, etc.)
+  // METHOD: Sync user profile across all groups they're a member of
+  // LOGIC: Handles Firestore batch limits (sets of 450 to be safe)
   Future<void> syncUserProfileAcrossGroups({
     required String userId,
     required String displayName,
@@ -119,7 +119,7 @@ class GroupService {
     }
   }
 
-  /// Helper to sync announcement author info across all groups
+  // METHOD: Helper to sync announcement author info across all groups
   Future<void> _syncAnnouncementAuthorInfo(
     String userId,
     String displayName,
@@ -146,7 +146,7 @@ class GroupService {
 
   // ========== PLATFORM ADMIN OPERATIONS ==========
 
-  /// Check if current user is platform admin
+  // METHOD: Check if current user is platform admin
   Future<bool> isPlatformAdmin() async {
     final user = _auth.currentUser;
     if (user == null) return false;
@@ -162,7 +162,7 @@ class GroupService {
     }
   }
 
-  /// Get the user's primary club (Phase 1: first active club membership)
+  // METHOD: Get the user's primary club (Phase 1: first active club membership)
   Future<Group?> getUserClub() async {
     final user = _auth.currentUser;
     if (user == null) return null;
@@ -190,7 +190,7 @@ class GroupService {
     return null;
   }
 
-  /// Get all pending group creation requests (platform admin only)
+  // METHOD: Get all pending group creation requests (platform admin only)
   Stream<List<GroupCreationRequest>> getPendingCreationRequests() {
     return _firestore
         .collection('groupCreationRequests')
@@ -204,7 +204,7 @@ class GroupService {
         );
   }
 
-  /// Approve group creation request and create the group (platform admin only)
+  // METHOD: Approve group creation request and create the group (platform admin only)
   Future<void> approveGroupCreation(String requestId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -254,7 +254,7 @@ class GroupService {
     });
   }
 
-  /// Reject group creation request (platform admin only)
+  // METHOD: Reject group creation request (platform admin only)
   Future<void> rejectGroupCreation(String requestId, String reason) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -267,7 +267,8 @@ class GroupService {
     });
   }
 
-  /// Delete entire group (platform admin only)
+  // METHOD: Delete entire group and subcollections (platform admin only)
+  // LOGIC: Deletes all subcollections manually before deleting group doc
   Future<void> deleteGroup(String groupId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -313,7 +314,7 @@ class GroupService {
 
   // ------------------------- MOD/ADMIN OPERATIONS -------------------------
 
-  /// Promote a member to moderator (admin only)
+  // METHOD: Promote a member to moderator (admin only)
   Future<void> makeModerator(String groupId, String memberId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -343,7 +344,7 @@ class GroupService {
     await _syncMemberDataFromAuth(groupId, memberId);
   }
 
-  /// Remove moderator status (admin only)
+  // METHOD: Remove moderator status (admin only)
   Future<void> removeModerator(String groupId, String memberId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -372,7 +373,7 @@ class GroupService {
     await memberRef.update({'role': MemberRole.member.toJson()});
   }
 
-  /// Promote member to admin (original admin only)
+  // METHOD: Promote member to admin (original admin only)
   Future<void> makeAdmin(String groupId, String memberId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -405,7 +406,7 @@ class GroupService {
     });
   }
 
-  /// Remove admin status (original admin cannot remove themselves)
+  // METHOD: Remove admin status (original admin cannot remove themselves)
   Future<void> removeAdmin(String groupId, String memberId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -445,10 +446,8 @@ class GroupService {
     });
   }
 
-  /// Remove member with rules:
-  /// - Admins can remove anyone except the original admin (first creator)
-  /// - Mods can remove regular members
-  /// - Members cannot remove anyone else
+  // METHOD: Remove member with permission checks
+  // LOGIC: Enforces hierarchy: Admin > Mod > Member. Original Admin > All.
   Future<void> removeMember(String groupId, String userId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -520,7 +519,7 @@ class GroupService {
 
   // ========== USER OPERATIONS ==========
 
-  /// Request to create a new group (club in Phase 1)
+  // METHOD: Request to create a new group (club in Phase 1)
   Future<void> requestGroupCreation({
     required String name,
     required String description,
@@ -546,7 +545,7 @@ class GroupService {
     });
   }
 
-  /// Get user's creation requests
+  // METHOD: Get user's creation requests
   Stream<List<GroupCreationRequest>> getUserCreationRequests() {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
@@ -563,7 +562,7 @@ class GroupService {
         );
   }
 
-  /// Get all active groups (filtered by type if needed)
+  // METHOD: Get all active groups (filtered by type if needed)
   Stream<List<Group>> getActiveGroups({GroupType? type}) {
     Query query = _firestore
         .collection('groups')
@@ -579,7 +578,9 @@ class GroupService {
     );
   }
 
-  /// Get groups where user is a member
+  // METHOD: Get groups where user is a member
+  // LOGIC: Performs client-side filtering of group membership.
+  // OPTIMIZE: Consider denormalizing 'memberIds' array in group doc for efficient querying if groups are small.
   Stream<List<Group>> getUserGroups({GroupType? type}) {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
@@ -602,14 +603,14 @@ class GroupService {
     });
   }
 
-  /// Get single group by ID
+  // METHOD: Get single group by ID
   Future<Group?> getGroup(String groupId) async {
     final doc = await _firestore.collection('groups').doc(groupId).get();
     if (!doc.exists) return null;
     return Group.fromFirestore(doc);
   }
 
-  /// Get group by join code
+  // METHOD: Get group by join code
   Future<Group?> getGroupByJoinCode(String joinCode) async {
     final query = await _firestore
         .collection('groups')
@@ -622,7 +623,7 @@ class GroupService {
     return Group.fromFirestore(query.docs.first);
   }
 
-  /// Check if user is admin of a group
+  // METHOD: Check if user is admin of a group
   Future<bool> isGroupAdmin(String groupId) async {
     final user = _auth.currentUser;
     if (user == null) return false;
@@ -631,7 +632,7 @@ class GroupService {
     return group?.isAdmin(user.uid) ?? false;
   }
 
-  /// Check if user is moderator or admin of a group
+  // METHOD: Check if user is moderator or admin of a group
   Future<bool> isGroupModOrAdmin(String groupId) async {
     final user = _auth.currentUser;
     if (user == null) return false;
@@ -650,7 +651,7 @@ class GroupService {
     return role == MemberRole.admin || role == MemberRole.moderator;
   }
 
-  /// Check if user is member of a group
+  // METHOD: Check if user is member of a group
   Future<bool> isGroupMember(String groupId) async {
     final user = _auth.currentUser;
     if (user == null) return false;
@@ -667,7 +668,7 @@ class GroupService {
 
   // ========== JOIN CODE & JOIN REQUEST OPERATIONS ==========
 
-  /// Generate a new 6-character join code
+  // METHOD: Generate a new 6-character join code
   String _generateJoinCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
@@ -677,7 +678,7 @@ class GroupService {
     ).join();
   }
 
-  /// Regenerate join code (admin only)
+  // METHOD: Regenerate join code (admin only)
   Future<void> regenerateJoinCode(String groupId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -690,7 +691,7 @@ class GroupService {
     });
   }
 
-  /// Request to join a group using join code
+  // METHOD: Request to join a group using join code
   Future<void> requestToJoin(String joinCode) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -733,7 +734,7 @@ class GroupService {
         });
   }
 
-  /// Get pending join requests for a group (admin or moderator)
+  // METHOD: Get pending join requests for a group (admin or moderator)
   Stream<List<JoinRequest>> getPendingJoinRequests(String groupId) {
     return _firestore
         .collection('groups')
@@ -749,7 +750,7 @@ class GroupService {
         );
   }
 
-  /// Approve join request (admin or moderator)
+  // METHOD: Approve join request (admin or moderator)
   Future<void> approveJoinRequest(String groupId, String userId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -792,7 +793,7 @@ class GroupService {
         .update({'status': 'approved'});
   }
 
-  /// Reject join request (admin or moderator)
+  // METHOD: Reject join request (admin or moderator)
   Future<void> rejectJoinRequest(String groupId, String userId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -810,7 +811,7 @@ class GroupService {
 
   // ========== MEMBER OPERATIONS ==========
 
-  /// Get all members of a group
+  // METHOD: Get all members of a group
   Stream<List<GroupMember>> getGroupMembers(String groupId) {
     return _firestore
         .collection('groups')
@@ -825,7 +826,7 @@ class GroupService {
         );
   }
 
-  /// Leave group (convenience method for current user)
+  // METHOD: Leave group (convenience method for current user)
   Future<void> leaveGroup(String groupId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -834,7 +835,7 @@ class GroupService {
 
   // ========== ANNOUNCEMENT OPERATIONS ==========
 
-  /// Get announcements for a group
+  // METHOD: Get announcements for a group
   Stream<List<Announcement>> getAnnouncements(String groupId) {
     return _firestore
         .collection('groups')
@@ -850,7 +851,7 @@ class GroupService {
         );
   }
 
-  /// Post announcement (admin or moderator)
+  // METHOD: Post announcement (admin or moderator)
   Future<void> postAnnouncement({
     required String groupId,
     required String title,
@@ -877,7 +878,7 @@ class GroupService {
         });
   }
 
-  /// Delete announcement (admin only)
+  // METHOD: Delete announcement (admin only)
   Future<void> deleteAnnouncement(String groupId, String announcementId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -893,7 +894,7 @@ class GroupService {
         .delete();
   }
 
-  /// Toggle pin status (admin only)
+  // METHOD: Toggle pin status (admin only)
   Future<void> toggleAnnouncementPin(
     String groupId,
     String announcementId,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/request_card.dart';
-import 'package:gr0ve/models/group_creation_request.dart';
-import 'package:gr0ve/services/group_service.dart';
+import 'package:gr0ve/features/club/group_creation_request.dart';
+import 'package:gr0ve/features/club/group_service.dart';
 
 class RequestsList extends StatelessWidget {
   final GroupService groupService;

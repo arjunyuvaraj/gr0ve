@@ -1,5 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:gr0ve/pages/navigation_screen.dart';
+import 'package:gr0ve/features/navigation/navigation_screen.dart';
 import 'package:flutter/material.dart';
 
 /// Handle notification taps and navigate to appropriate screens

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gr0ve/services/calendar_service.dart';
+import 'package:gr0ve/features/calendar/calendar_service.dart';
 
 @immutable
 class BusRoute {

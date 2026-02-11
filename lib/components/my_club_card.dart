@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/services/notification_service.dart';
-import '../models/group.dart';
-import '../services/group_service.dart';
+import 'package:gr0ve/services/notifications/notification_service.dart';
+import 'package:gr0ve/features/club/group.dart';
+import 'package:gr0ve/features/club/group_service.dart';
 
 class MyClubCard extends StatefulWidget {
   final Group club;

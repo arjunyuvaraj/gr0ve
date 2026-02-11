@@ -2,18 +2,20 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gr0ve/services/bus_service.dart';
-import 'package:gr0ve/services/starred_bus_service.dart';
+import 'package:gr0ve/features/bus/bus_service.dart';
+import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 
-// Top-level function to handle background messages
+// LOGIC: Top-level function to handle background messages (required by Firebase)
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('[NOTIF] Background message received: ${message.messageId}');
 }
 
+// SERVICE: Manages local and push notifications for the app
+// LOGIC: Singleton pattern to ensure single notification manager instance
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -25,7 +27,8 @@ class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final List<StreamSubscription> _subscriptions = [];
-  final Set<String> _processedIds = {}; // Prevent duplicate notifications
+  // LOGIC: Tracks processed IDs to prevent duplicate notifications during ongoing session
+  final Set<String> _processedIds = {};
 
   // Track which buses have already triggered notifications with dates
   final Map<String, DateTime> _notifiedBuses = {};
@@ -55,7 +58,7 @@ class NotificationService {
   Map<String, int> get unreadAnnouncementsByClub =>
       Map.from(_unreadAnnouncementsByClub);
 
-  /// Set the callback for when notifications are tapped
+  // METHOD: Set the callback for when notifications are tapped
   void setNotificationTapCallback(
     void Function(NotificationResponse) callback,
   ) {
@@ -63,11 +66,12 @@ class NotificationService {
     print('[NOTIF] Notification tap callback registered');
   }
 
-  /// Initialize the notification service
+  // METHOD: Initialize the notification service
+  // LOGIC: Sets up local notification settings and requests permissions
   Future<void> initialize() async {
     print('[NOTIF] Initializing notification service...');
 
-    // Load previously notified buses from storage
+    // Load previously notified buses and unread counts from storage
     await _loadNotifiedBuses();
     await _loadUnreadCounts();
 
@@ -94,7 +98,7 @@ class NotificationService {
     print('[NOTIF] Notification service initialized');
   }
 
-  /// Load unread counts from storage
+  // METHOD: Load unread counts from shared preferences
   Future<void> _loadUnreadCounts() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -122,7 +126,7 @@ class NotificationService {
     }
   }
 
-  /// Save unread counts to storage
+  // METHOD: Save unread counts to shared preferences
   Future<void> _saveUnreadCounts() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -147,7 +151,7 @@ class NotificationService {
     }
   }
 
-  /// Notify listeners of unread count changes
+  // METHOD: Notify listeners of unread count changes
   void _notifyUnreadCountUpdate() {
     if (!_unreadCountController.isClosed) {
       _unreadCountController.add({
@@ -157,13 +161,13 @@ class NotificationService {
     }
   }
 
-  /// Increment unread count for a type
+  // METHOD: Increment unread count for a type
   void _incrementUnreadCount(String type) {
     _unreadCounts[type] = (_unreadCounts[type] ?? 0) + 1;
     _saveUnreadCounts();
   }
 
-  /// Increment unread announcement count for a specific club
+  // METHOD: Increment unread announcement count for a specific club
   void _incrementClubAnnouncementCount(String groupId) {
     _unreadAnnouncementsByClub[groupId] =
         (_unreadAnnouncementsByClub[groupId] ?? 0) + 1;
@@ -173,32 +177,32 @@ class NotificationService {
     );
   }
 
-  /// Clear unread count for a type
+  // METHOD: Clear unread count for a type
   Future<void> clearUnreadCount(String type) async {
     _unreadCounts[type] = 0;
     await _saveUnreadCounts();
   }
 
-  /// Clear unread announcements for a specific club
+  // METHOD: Clear unread announcements for a specific club
   Future<void> clearClubAnnouncementCount(String groupId) async {
     _unreadAnnouncementsByClub[groupId] = 0;
     await _saveUnreadCounts();
     print('[NOTIF] Cleared announcement count for $groupId');
   }
 
-  /// Clear all announcement counts (when user views "My Clubs" tab)
+  // METHOD: Clear all announcement counts (e.g. when user views "My Clubs" tab)
   Future<void> clearAllAnnouncementCounts() async {
     _unreadAnnouncementsByClub.clear();
     await _saveUnreadCounts();
     print('[NOTIF] Cleared all announcement counts');
   }
 
-  /// Get unread count for a specific club
+  // METHOD: Get unread count for a specific club
   int getClubUnreadCount(String groupId) {
     return _unreadAnnouncementsByClub[groupId] ?? 0;
   }
 
-  /// Load notified buses from persistent storage
+  // METHOD: Load notified buses from persistent storage
   Future<void> _loadNotifiedBuses() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -226,7 +230,7 @@ class NotificationService {
     }
   }
 
-  /// Save notified buses to persistent storage
+  // METHOD: Save notified buses to persistent storage
   Future<void> _saveNotifiedBuses() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -242,7 +246,7 @@ class NotificationService {
     }
   }
 
-  /// Initialize Firebase Cloud Messaging
+  // METHOD: Initialize Firebase Cloud Messaging
   Future<void> _initializeFCM() async {
     print('[NOTIF] Initializing FCM...');
 
@@ -253,8 +257,6 @@ class NotificationService {
       if (token != null) {
         print('[NOTIF] FCM Token obtained: ${token.substring(0, 20)}...');
         await _saveFCMToken(token);
-      } else {
-        print('[NOTIF] FCM Token is null, waiting for refresh...');
       }
     } catch (e) {
       print('[NOTIF] Error getting FCM token: $e');
@@ -271,7 +273,7 @@ class NotificationService {
     print('[NOTIF] FCM initialized');
   }
 
-  /// Save FCM token to Firestore
+  // METHOD: Save FCM token to Firestore for the current user
   Future<void> _saveFCMToken(String token) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -290,7 +292,7 @@ class NotificationService {
     }
   }
 
-  /// Handle foreground messages
+  // METHOD: Handle foreground messages
   void _handleForegroundMessage(RemoteMessage message) {
     print(
       '[NOTIF] Foreground message received: ${message.notification?.title}',
@@ -306,12 +308,12 @@ class NotificationService {
     }
   }
 
-  /// Handle message when app is opened from notification
+  // METHOD: Handle message when app is opened from notification
   void _handleMessageOpenedApp(RemoteMessage message) {
     print('[NOTIF] App opened from notification: ${message.data}');
   }
 
-  /// Request notification permissions
+  // METHOD: Request notification permissions
   Future<void> _requestPermissions() async {
     print('[NOTIF] Requesting permissions...');
 
@@ -337,19 +339,17 @@ class NotificationService {
         ?.requestNotificationsPermission();
   }
 
-  /// Handle notification tap
+  // METHOD: Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
     print('[NOTIF] Notification tapped: ${response.payload}');
 
     // Call the registered callback if it exists
     if (_onNotificationTapCallback != null) {
       _onNotificationTapCallback!(response);
-    } else {
-      print('[NOTIF] No tap callback registered');
     }
   }
 
-  /// Start listening for notifications
+  // METHOD: Start listening for notifications (announcements, requests, etc.)
   Future<void> startListening() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -373,7 +373,7 @@ class NotificationService {
     );
   }
 
-  /// Stop all listeners
+  // METHOD: Stop all listeners and timers
   Future<void> stopListening() async {
     print('[NOTIF] Stopping all listeners...');
 
@@ -388,11 +388,10 @@ class NotificationService {
     print('[NOTIF] All listeners stopped');
   }
 
-  /// Start monitoring for starred bus arrivals
+  // METHOD: Start monitoring for starred bus arrivals
   void _startBusArrivalMonitoring() {
     print('[NOTIF] Starting bus arrival monitoring...');
 
-    // Check every 30 seconds for bus arrivals
     _busCheckTimer?.cancel();
     _busCheckTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       _checkStarredBusArrivals();
@@ -402,16 +401,12 @@ class NotificationService {
     _checkStarredBusArrivals();
   }
 
-  /// Check if any starred buses have arrived
+  // METHOD: Check if any starred buses have arrived
   Future<void> _checkStarredBusArrivals() async {
     try {
       final starredTowns = StarredBusService.starredTowns.value;
-      if (starredTowns.isEmpty) {
-        print('[NOTIF] No starred buses to monitor');
-        return;
-      }
+      if (starredTowns.isEmpty) return;
 
-      print('[NOTIF] Checking ${starredTowns.length} starred buses...');
       final routes = await fetchBusRoutes();
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -434,10 +429,6 @@ class NotificationService {
               body: 'Parking spot: ${route.code}',
               payload: 'bus:${route.town}',
             );
-
-            print('[NOTIF] Bus arrival notification sent for ${route.town}');
-          } else {
-            print('[NOTIF] Already notified about ${route.town} today');
           }
         }
       }
@@ -446,20 +437,15 @@ class NotificationService {
     }
   }
 
-  /// Listen for new announcements
+  // METHOD: Listen for new announcements from groups the user is in
+  // LOGIC: Handles complex membership check before setting up listeners
   Future<void> _listenForAnnouncements(String userId) async {
-    print('[NOTIF] Setting up announcement listeners for user: $userId');
-
     try {
       // Get all active groups first
       final groupsSnapshot = await _firestore
           .collection('groups')
           .where('status', isEqualTo: 'active')
           .get();
-
-      print(
-        '[NOTIF] Found ${groupsSnapshot.docs.length} active groups, checking membership...',
-      );
 
       // Check which groups the user is a member of
       final memberGroups = <String>[];
@@ -477,11 +463,7 @@ class NotificationService {
         }
       }
 
-      print('[NOTIF] User is member of ${memberGroups.length} groups');
-
       for (var groupId in memberGroups) {
-        print('[NOTIF] Setting up announcement listener for group: $groupId');
-
         final sub = _firestore
             .collection('groups')
             .doc(groupId)
@@ -490,70 +472,32 @@ class NotificationService {
             .limit(1)
             .snapshots()
             .listen((snapshot) {
-              print(
-                '[NOTIF] Announcement snapshot for group $groupId - docs: ${snapshot.docs.length}',
-              );
-
-              if (snapshot.docs.isEmpty) {
-                print('[NOTIF] No announcements in group $groupId');
-                return;
-              }
-
-              if (snapshot.docs.first.metadata.isFromCache) {
-                print('[NOTIF] Announcement is from cache, skipping');
-                return;
-              }
+              if (snapshot.docs.isEmpty) return;
+              if (snapshot.docs.first.metadata.isFromCache) return;
 
               final doc = snapshot.docs.first;
               final docId = doc.id;
 
-              if (_processedIds.contains(docId)) {
-                print(
-                  '[NOTIF] Announcement $docId already processed, skipping',
-                );
-                return;
-              }
-
+              if (_processedIds.contains(docId)) return;
               _processedIds.add(docId);
 
               final data = doc.data();
               final authorId = data['authorId'] as String?;
               final createdAt = data['createdAt'] as Timestamp?;
 
-              print(
-                '[NOTIF] New announcement: $docId, author: $authorId, createdAt: $createdAt',
-              );
-
-              if (authorId == userId) {
-                print('[NOTIF] Skipping own announcement');
-                return;
-              }
-
-              if (createdAt == null) {
-                print('[NOTIF] Announcement has no createdAt timestamp');
-                return;
-              }
+              if (authorId == userId) return; // Skip own announcements
+              if (createdAt == null) return;
 
               final age = DateTime.now()
                   .difference(createdAt.toDate())
                   .inSeconds;
-              print('[NOTIF] Announcement age: $age seconds');
 
-              if (age > 10) {
-                print('[NOTIF] Announcement too old, skipping');
-                return;
-              }
-
-              print('[NOTIF] Fetching group name for notification...');
+              if (age > 10) return; // Skip old announcements
 
               _firestore.collection('groups').doc(groupId).get().then((
                 groupDoc,
               ) {
                 final groupName = groupDoc.data()?['name'] ?? 'Group';
-                print(
-                  '[NOTIF] Showing announcement notification for group: $groupName',
-                );
-
                 _incrementClubAnnouncementCount(groupId);
                 _showNotification(
                   id: doc.id.hashCode,
@@ -571,20 +515,14 @@ class NotificationService {
     }
   }
 
-  /// Listen for join requests
+  // METHOD: Listen for join requests (admin/mod only)
   Future<void> _listenForJoinRequests(String userId) async {
-    print('[NOTIF] Setting up join request listeners for user: $userId');
-
     try {
       // Get all active groups
       final groupsSnapshot = await _firestore
           .collection('groups')
           .where('status', isEqualTo: 'active')
           .get();
-
-      print(
-        '[NOTIF] Found ${groupsSnapshot.docs.length} active groups, checking admin/mod status...',
-      );
 
       // Check which groups the user is admin/moderator of
       final adminGroups = <String>[];
@@ -605,11 +543,7 @@ class NotificationService {
         }
       }
 
-      print('[NOTIF] User is admin/mod of ${adminGroups.length} groups');
-
       for (var groupId in adminGroups) {
-        print('[NOTIF] Setting up join request listener for group: $groupId');
-
         final sub = _firestore
             .collection('groups')
             .doc(groupId)
@@ -617,65 +551,29 @@ class NotificationService {
             .where('status', isEqualTo: 'pending')
             .snapshots()
             .listen((snapshot) {
-              print(
-                '[NOTIF] Join request snapshot for group $groupId - changes: ${snapshot.docChanges.length}',
-              );
-
               for (var change in snapshot.docChanges) {
-                if (change.type != DocumentChangeType.added) {
-                  print('[NOTIF] Join request change is not added, skipping');
-                  continue;
-                }
-
-                if (change.doc.metadata.isFromCache) {
-                  print('[NOTIF] Join request is from cache, skipping');
-                  continue;
-                }
+                if (change.type != DocumentChangeType.added) continue;
+                if (change.doc.metadata.isFromCache) continue;
 
                 final docId = change.doc.id;
-                if (_processedIds.contains(docId)) {
-                  print(
-                    '[NOTIF] Join request $docId already processed, skipping',
-                  );
-                  continue;
-                }
-
+                if (_processedIds.contains(docId)) continue;
                 _processedIds.add(docId);
 
                 final data = change.doc.data()!;
                 final requestedAt = data['requestedAt'] as Timestamp?;
 
-                print(
-                  '[NOTIF] New join request: $docId, requestedAt: $requestedAt',
-                );
-
-                if (requestedAt == null) {
-                  print('[NOTIF] Join request has no requestedAt timestamp');
-                  continue;
-                }
+                if (requestedAt == null) continue;
 
                 final age = DateTime.now()
                     .difference(requestedAt.toDate())
                     .inSeconds;
-                print('[NOTIF] Join request age: $age seconds');
 
-                if (age > 10) {
-                  print('[NOTIF] Join request too old, skipping');
-                  continue;
-                }
-
-                print(
-                  '[NOTIF] Fetching group name for join request notification...',
-                );
+                if (age > 10) continue;
 
                 _firestore.collection('groups').doc(groupId).get().then((
                   groupDoc,
                 ) {
                   final groupName = groupDoc.data()?['name'] ?? 'Group';
-                  print(
-                    '[NOTIF] Showing join request notification for group: $groupName',
-                  );
-
                   _incrementUnreadCount('join_requests');
                   _showNotification(
                     id: change.doc.id.hashCode,
@@ -695,76 +593,35 @@ class NotificationService {
     }
   }
 
-  /// Listen for club creation requests
+  // METHOD: Listen for club creation requests (platform admin only)
   Future<void> _listenForClubCreationRequests(String userId) async {
-    print('[NOTIF] Checking if user is platform admin...');
-
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
-      if (userDoc.data()?['isPlatformAdmin'] != true) {
-        print(
-          '[NOTIF] User is not platform admin, skipping club creation listener',
-        );
-        return;
-      }
-
-      print('[NOTIF] Setting up club creation request listener');
+      if (userDoc.data()?['isPlatformAdmin'] != true) return;
 
       final sub = _firestore
           .collection('groupCreationRequests')
           .where('status', isEqualTo: 'pending')
           .snapshots()
           .listen((snapshot) {
-            print(
-              '[NOTIF] Club creation request snapshot - changes: ${snapshot.docChanges.length}',
-            );
-
             for (var change in snapshot.docChanges) {
-              if (change.type != DocumentChangeType.added) {
-                print('[NOTIF] Club creation change is not added, skipping');
-                continue;
-              }
-
-              if (change.doc.metadata.isFromCache) {
-                print('[NOTIF] Club creation request is from cache, skipping');
-                continue;
-              }
+              if (change.type != DocumentChangeType.added) continue;
+              if (change.doc.metadata.isFromCache) continue;
 
               final docId = change.doc.id;
-              if (_processedIds.contains(docId)) {
-                print(
-                  '[NOTIF] Club creation request $docId already processed, skipping',
-                );
-                continue;
-              }
-
+              if (_processedIds.contains(docId)) continue;
               _processedIds.add(docId);
 
               final data = change.doc.data()!;
               final requestedAt = data['requestedAt'] as Timestamp?;
 
-              print(
-                '[NOTIF] New club creation request: $docId, requestedAt: $requestedAt',
-              );
-
-              if (requestedAt == null) {
-                print(
-                  '[NOTIF] Club creation request has no requestedAt timestamp',
-                );
-                continue;
-              }
+              if (requestedAt == null) continue;
 
               final age = DateTime.now()
                   .difference(requestedAt.toDate())
                   .inSeconds;
-              print('[NOTIF] Club creation request age: $age seconds');
 
-              if (age > 10) {
-                print('[NOTIF] Club creation request too old, skipping');
-                continue;
-              }
-
-              print('[NOTIF] Showing club creation request notification');
+              if (age > 10) continue;
 
               _incrementUnreadCount('club_requests');
               _showNotification(
@@ -783,7 +640,7 @@ class NotificationService {
     }
   }
 
-  /// Show a local notification
+  // METHOD: Show a local notification
   Future<void> _showNotification({
     required int id,
     required String title,
@@ -820,7 +677,7 @@ class NotificationService {
     }
   }
 
-  /// Test notification
+  // METHOD: Trigger a test notification
   Future<void> testNotification() async {
     print('[NOTIF] Triggering test notification');
 
@@ -832,6 +689,7 @@ class NotificationService {
     );
   }
 
+  // METHOD: Dispose resources
   void dispose() {
     _unreadCountController.close();
   }

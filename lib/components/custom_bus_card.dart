@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/services/bus_service.dart';
+import 'package:gr0ve/features/bus/bus_service.dart';
 
 class CustomBusCard extends StatelessWidget {
   final BusRoute route;

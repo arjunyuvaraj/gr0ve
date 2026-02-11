@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/components/my_club_card.dart';
-import 'package:gr0ve/pages/club_detail_screen.dart';
-import 'package:gr0ve/services/notification_service.dart';
-import '../models/group.dart';
-import '../services/group_service.dart';
+import 'package:gr0ve/features/club/club_detail_screen.dart';
+import 'package:gr0ve/services/notifications/notification_service.dart';
+import 'package:gr0ve/features/club/group.dart';
+import 'package:gr0ve/features/club/group_service.dart';
 
 class ClubMyClubsTab extends StatefulWidget {
   const ClubMyClubsTab({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/models/group_creation_request.dart';
+import 'package:gr0ve/features/club/group_creation_request.dart';
 
 class RequestCard extends StatelessWidget {
   final GroupCreationRequest request;

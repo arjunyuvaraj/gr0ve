@@ -1,7 +1,7 @@
-import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/features/privacy/privacy_policy.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {

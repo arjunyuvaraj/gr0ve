@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 
 double getLetterSpacing(int fontSize, double percentage) {
   return fontSize * (percentage / 100);

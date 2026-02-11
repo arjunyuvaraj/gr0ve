@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_bus_card.dart';
 import 'package:gr0ve/components/custom_header.dart';
-import 'package:gr0ve/services/bus_service.dart';
-import 'package:gr0ve/services/starred_bus_service.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/features/bus/bus_service.dart';
+import 'package:gr0ve/services/starred/starred_bus_service.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 
 class BusScreen extends StatefulWidget {
   const BusScreen({super.key});

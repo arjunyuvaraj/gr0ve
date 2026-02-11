@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/features/authentication/authentication/authentication_service.dart';
+import 'package:gr0ve/features/authentication/authentication_service.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/helper/helper_functions.dart';

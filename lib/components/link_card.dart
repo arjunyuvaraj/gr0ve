@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/services/link_service.dart';
+import 'package:gr0ve/features/links/link_service.dart';
 
 class LinkCard extends StatelessWidget {
   final QuickLink link;

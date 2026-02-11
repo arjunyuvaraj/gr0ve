@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// ENUM: Defines the type of group (Club or Academy)
 enum GroupType {
   club,
   academy;
@@ -11,6 +12,7 @@ enum GroupType {
   }
 }
 
+// ENUM: Defines the current status of the group
 enum GroupStatus {
   pending,
   active,
@@ -23,6 +25,7 @@ enum GroupStatus {
   }
 }
 
+// MODEL: Represents a user group with metadata and status
 class Group {
   final String id;
   final String name;

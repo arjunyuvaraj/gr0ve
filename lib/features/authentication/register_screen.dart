@@ -1,35 +1,40 @@
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:gr0ve/features/authentication/authentication/authentication_service.dart';
+import 'package:gr0ve/features/authentication/authentication_service.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/helper/helper_functions.dart';
-import 'package:gr0ve/core/extensions/string_extensions.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _authService = AuthenticationService();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _errorMessage;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nicknameController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -41,7 +46,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
-      await _authService.signInWithEmail(email, password);
+      await _authService.signUpWithEmail(
+        email,
+        password,
+        _nicknameController.text,
+      );
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/navigation');
@@ -122,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            "Welcome Back".capitalized,
+                            "Create Account".capitalized,
                             style: text.titleLarge?.copyWith(
                               color: colors.onPrimary.withAlpha(210),
                               fontWeight: FontWeight.w700,
@@ -149,6 +158,28 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  TextFormField(
+                                    controller: _nicknameController,
+                                    keyboardType: TextInputType.name,
+                                    enabled: !_isLoading,
+                                    decoration: InputDecoration(
+                                      labelText: "Nickname",
+                                      prefixIcon: const Icon(Icons.person),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      filled: true,
+                                      fillColor: colors.surfaceContainerHighest
+                                          .withAlpha(100),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return 'Please enter a what you want to be called';
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                   TextFormField(
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
@@ -212,6 +243,51 @@ class _LoginScreenState extends State<LoginScreen> {
                                           value.trim().isEmpty) {
                                         return 'Please enter your password';
                                       }
+                                      if (value.length < 6) {
+                                        return 'Password must be at least 6 characters';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  TextFormField(
+                                    controller: _confirmPasswordController,
+                                    obscureText: _obscureConfirmPassword,
+                                    enabled: !_isLoading,
+                                    decoration: InputDecoration(
+                                      labelText: "Confirm Password",
+                                      prefixIcon: const Icon(
+                                        Icons.lock_rounded,
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _obscureConfirmPassword
+                                              ? Icons.visibility_rounded
+                                              : Icons.visibility_off_rounded,
+                                        ),
+                                        onPressed: () {
+                                          setState(
+                                            () => _obscureConfirmPassword =
+                                                !_obscureConfirmPassword,
+                                          );
+                                        },
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      filled: true,
+                                      fillColor: colors.surfaceContainerHighest
+                                          .withAlpha(100),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return 'Please confirm your password';
+                                      }
+                                      if (value != _passwordController.text) {
+                                        return 'Passwords do not match';
+                                      }
                                       return null;
                                     },
                                   ),
@@ -258,8 +334,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     child: CustomPrimaryButton(
                                       label: _isLoading
                                           ? "Loading..."
-                                          : "Sign In".capitalized,
-                                      onTap: _handleLogin,
+                                          : "Sign Up".capitalized,
+                                      onTap: _handleRegister,
                                     ),
                                   ),
 
@@ -325,10 +401,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         : () {
                                             Navigator.of(
                                               context,
-                                            ).pushReplacementNamed('/register');
+                                            ).pushReplacementNamed('/login');
                                           },
                                     child: Text(
-                                      "Don't have an account? Sign Up",
+                                      "Already have an account? Sign In",
                                       style: text.bodyMedium?.copyWith(
                                         color: colors.primary,
                                         fontWeight: FontWeight.w600,
@@ -342,7 +418,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           const Spacer(),
                           Text(
-                            "Sign in with a @bergen.org email access more.",
+                            "Register with a @bergen.org email access more.",
                             style: context.text.labelSmall?.copyWith(
                               color: context.colors.onSurface.withAlpha(100),
                               fontSize: 12,

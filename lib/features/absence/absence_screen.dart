@@ -3,11 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_header.dart';
 import 'package:gr0ve/components/custom_teacher_card.dart';
-import 'package:gr0ve/services/starred_teacher_service.dart';
-import 'package:gr0ve/services/teacher_service.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
-import 'package:gr0ve/core/utilities/helper/teacher_utils.dart';
-import 'package:gr0ve/core/utilities/extensions/string_extensions.dart';
+import 'package:gr0ve/services/starred/starred_teacher_service.dart';
+import 'package:gr0ve/features/absence/teacher_service.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
+import 'package:gr0ve/core/helper/teacher_utils.dart';
+import 'package:gr0ve/core/extensions/string_extensions.dart';
 
 class AbsenceScreen extends StatefulWidget {
   const AbsenceScreen({super.key});

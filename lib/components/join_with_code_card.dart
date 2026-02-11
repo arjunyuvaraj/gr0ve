@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/components/custom_primary_button.dart';
-import 'package:gr0ve/core/utilities/extensions/context_extensions.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 
 class JoinWithCodeCard extends StatelessWidget {
   final TextEditingController controller;
