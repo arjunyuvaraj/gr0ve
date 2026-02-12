@@ -1,21 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:gr0ve/features/authentication/account_deletion_screen.dart';
-import 'package:gr0ve/features/admin/admin_panel_screen.dart';
-import 'package:gr0ve/pages/help_screen.dart';
-import 'package:gr0ve/features/absence/absence_screen.dart';
-import 'package:gr0ve/features/home/home_screen.dart';
-import 'package:gr0ve/pages/join_requests_screen.dart';
-import 'package:gr0ve/landing/landing_screen.dart';
-import 'package:gr0ve/landing/landing_screen_web.dart';
-import 'package:gr0ve/features/authentication/login_screen.dart';
-import 'package:gr0ve/features/lunch_menu/lunch_menu_screen.dart';
-import 'package:gr0ve/features/authentication/register_screen.dart';
-import 'package:gr0ve/features/navigation/navigation_screen.dart';
-import 'package:gr0ve/features/privacy/privacy_policy_screen.dart';
+import 'package:gr0ve/features/authentication/screens/account_deletion_screen.dart';
+import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
+import 'package:gr0ve/features/help/screens/help_screen.dart';
+import 'package:gr0ve/features/absence/screens/absence_screen.dart';
+import 'package:gr0ve/features/home/screens/home_screen.dart';
+import 'package:gr0ve/features/club/screens/join_requests_screen.dart';
+import 'package:gr0ve/features/landing/screens/landing_screen.dart';
+import 'package:gr0ve/features/landing/screens/landing_screen_web.dart';
+import 'package:gr0ve/features/authentication/screens/login_screen.dart';
+import 'package:gr0ve/features/lunch_menu/screens/lunch_menu_screen.dart';
+import 'package:gr0ve/features/authentication/screens/register_screen.dart';
+import 'package:gr0ve/features/navigation/screens/navigation_screen.dart';
+import 'package:gr0ve/features/privacy/screens/privacy_policy_screen.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
-import 'package:gr0ve/features/absence/teacher_service.dart';
+import 'package:gr0ve/features/absence/services/teacher_service.dart';
 import 'package:gr0ve/core/theme/dark_theme.dart';
 import 'package:gr0ve/core/theme/light_theme.dart';
 import 'package:gr0ve/core/helper/landing_decider.dart';
@@ -163,7 +163,7 @@ class _MyAppState extends State<MyApp> {
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
         '/help': (context) => const HelpScreen(),
-        '/account_deletion': (context) => const AccountDeletionInfoScreen(),
+        '/account_deletion': (context) => const AccountDeletionScreen(),
         '/lunch_menu': (context) => const LunchMenuScreen(),
       },
       onGenerateRoute: (settings) {

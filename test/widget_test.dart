@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gr0ve/features/authentication/account_deletion_screen.dart';
-import 'package:gr0ve/pages/help_screen.dart';
-import 'package:gr0ve/features/privacy/privacy_policy_screen.dart';
-import 'package:gr0ve/components/custom_primary_button.dart';
-import 'package:gr0ve/components/custom_secondary_button.dart';
-import 'package:gr0ve/components/custom_header.dart';
-import 'package:gr0ve/components/custom_text_field.dart';
-import 'package:gr0ve/components/not_logged_in.dart';
+import 'package:gr0ve/features/authentication/screens/account_deletion_screen.dart';
+import 'package:gr0ve/features/help/screens/help_screen.dart';
+import 'package:gr0ve/features/privacy/screens/privacy_policy_screen.dart';
+import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
+import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
+import 'package:gr0ve/core/widgets/misc/custom_header.dart';
+import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
+import 'package:gr0ve/core/widgets/misc/not_logged_in.dart';
 import 'package:gr0ve/core/theme/light_theme.dart';
 
 void main() {
@@ -227,11 +227,11 @@ void main() {
   });
 
   group('Account Deletion Screen Tests', () {
-    testWidgets('AccountDeletionInfoScreen displays deletion information', (
+    testWidgets('AccountDeletionScreen displays deletion information', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: const AccountDeletionInfoScreen()),
+        MaterialApp(theme: lightTheme, home: const AccountDeletionScreen()),
       );
 
       await tester.pumpAndSettle();
@@ -243,11 +243,11 @@ void main() {
       expect(find.text('Deletion timeline'), findsOneWidget);
     });
 
-    testWidgets('AccountDeletionInfoScreen has scrollable content', (
+    testWidgets('AccountDeletionScreen has scrollable content', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: const AccountDeletionInfoScreen()),
+        MaterialApp(theme: lightTheme, home: const AccountDeletionScreen()),
       );
 
       await tester.pumpAndSettle();
@@ -611,11 +611,11 @@ void main() {
       expect(find.byType(CustomHeader), findsOneWidget);
     });
 
-    testWidgets('AccountDeletionInfoScreen has proper layout structure', (
+    testWidgets('AccountDeletionScreen has proper layout structure', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: const AccountDeletionInfoScreen()),
+        MaterialApp(theme: lightTheme, home: const AccountDeletionScreen()),
       );
 
       await tester.pumpAndSettle();

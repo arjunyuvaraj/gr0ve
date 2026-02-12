@@ -2,7 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gr0ve/features/bus/bus_service.dart';
+import 'package:gr0ve/features/bus/services/bus_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
