@@ -1,8 +1,6 @@
-name: Update Bus Routes
+name: Update Bus Routes (Debug)
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -12,6 +10,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Check if script exists
+        run: |
+          echo "Checking for scripts/bus.py..."
+          ls -la scripts/ || echo "scripts/ directory not found"
+          if [ -f "scripts/bus.py" ]; then
+            echo "✓ scripts/bus.py found"
+          else
+            echo "✗ scripts/bus.py NOT found"
+            echo "Current directory contents:"
+            ls -la
+          fi
+
+      - name: Check secrets
+        run: |
+          if [ -n "${{ secrets.GSHEETS_CREDS }}" ]; then
+            echo "✓ GSHEETS_CREDS secret is set"
+          else
+            echo "✗ GSHEETS_CREDS secret is NOT set"
+          fi
+
+          if [ -n "${{ secrets.FIREBASE_CREDS }}" ]; then
+            echo "✓ FIREBASE_CREDS secret is set"
+          else
+            echo "✗ FIREBASE_CREDS secret is NOT set"
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,6 +50,8 @@ jobs:
         run: |
           echo '${{ secrets.GSHEETS_CREDS }}' > gsheets.json
           echo '${{ secrets.FIREBASE_CREDS }}' > firebase.json
+          echo "Credentials files created"
+          ls -la *.json
 
       - name: Run bus routes update script
         run: |
