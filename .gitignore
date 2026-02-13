@@ -53,4 +53,5 @@ android/app/google-services.json
 # Assets
 assets/credentials/gsheets.jsonassets/credentials/*.json
 
-scripts/
+scripts/firebase.json
+scripts/gsheets.json
