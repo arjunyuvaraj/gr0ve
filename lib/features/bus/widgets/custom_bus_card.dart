@@ -24,11 +24,11 @@ class CustomBusCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colors.onSurface.withAlpha(12),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -39,10 +39,10 @@ class CustomBusCard extends StatelessWidget {
             IconButton(
               visualDensity: VisualDensity.compact,
               icon: Icon(
-                starred ? Icons.star_rounded : Icons.star_border_rounded,
+                starred ? Icons.star_rounded : Icons.star_outline_rounded,
                 color: starred
                     ? colors.primary
-                    : colors.onSurface.withAlpha(120),
+                    : colors.onSurface.withOpacity(0.3),
               ),
               onPressed: onStarTap,
             ),
@@ -57,34 +57,47 @@ class CustomBusCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurface,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  route.status,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface.withAlpha(120),
-                  ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        route.status,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurface.withOpacity(0.4),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: route.code == "?"
-                  ? colors.error.withAlpha(24)
-                  : colors.primary.withAlpha(24),
-              borderRadius: BorderRadius.circular(18),
+              color: colors.primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              route.code,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: route.code == "?" ? colors.error : colors.primary,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  route.code,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

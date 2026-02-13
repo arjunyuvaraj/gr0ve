@@ -52,7 +52,7 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
         final clubs = snapshot.data ?? [];
 
         return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           children: [
             /// Optional explicit join card
             JoinWithCodeCard(

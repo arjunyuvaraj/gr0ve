@@ -7,6 +7,8 @@ import 'package:gr0ve/features/club/services/group_service.dart';
 import 'package:gr0ve/models/group.dart';
 import 'package:gr0ve/models/announcement.dart';
 import 'package:gr0ve/models/group_member.dart';
+import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final String groupId;
@@ -206,7 +208,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading)
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: PremiumLoadingIndicator());
     if (_group == null) return _emptyView('This club does not exist.');
     if (!_isMember) return _membersOnlyView();
 
@@ -218,7 +220,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             _clubHeader(),
             const SizedBox(height: 16),
             _tabSelector(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -245,38 +247,40 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget _clubHeader() {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(32, 24, 32, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
             onPressed: () => Navigator.of(context).pop(),
+            color: colors.onSurface,
+            iconSize: 20,
           ),
-
           const SizedBox(width: 4),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   _group!.name,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   'Announcements, members, and mild chaos',
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurface.withOpacity(0.5),
+                  ),
                 ),
               ],
             ),
           ),
-
           _isAdmin ? _adminHeaderMenu() : _leaveButton(),
         ],
       ),
@@ -284,36 +288,93 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget _leaveButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
       ),
-      onPressed: _leaveClub,
-      child: const Text(
-        'Leave',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      child: IconButton(
+        icon: const Icon(Icons.logout_rounded, color: Colors.red),
+        onPressed: _leaveClub,
+        tooltip: 'Leave Club',
       ),
     );
   }
 
   Widget _adminHeaderMenu() {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
+      icon: Icon(Icons.more_vert_rounded, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
       onSelected: (value) {
         if (value == 'show_code') {
           showDialog(
             context: context,
-            builder: (_) => AlertDialog(
-              title: const Text('Join Code'),
-              content: SelectableText(_group?.joinCode ?? 'N/A'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
+            builder: (_) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 40,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-              ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Join Code',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: _group?.joinCode ?? ''));
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Code copied to clipboard')),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _group?.joinCode ?? 'N/A',
+                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 8.0,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Tap to copy',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         }
@@ -326,10 +387,37 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           );
         }
       },
-      itemBuilder: (_) => const [
-        PopupMenuItem(value: 'show_code', child: Text('Show Join Code')),
-        PopupMenuItem(value: 'regen', child: Text('Regenerate code')),
-        PopupMenuItem(value: 'requests', child: Text('Manage requests')),
+      itemBuilder: (_) => [
+        const PopupMenuItem(
+          value: 'show_code',
+          child: Row(
+            children: [
+              Icon(Icons.qr_code_rounded, size: 20),
+              SizedBox(width: 12),
+              Text('Show Join Code'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'regen',
+          child: Row(
+            children: [
+              Icon(Icons.refresh_rounded, size: 20),
+              SizedBox(width: 12),
+              Text('Regenerate code'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'requests',
+          child: Row(
+            children: [
+              Icon(Icons.group_add_rounded, size: 20),
+              SizedBox(width: 12),
+              Text('Manage requests'),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -338,16 +426,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: colors.onSurface.withAlpha(14),
-              blurRadius: 8,
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 16,
               offset: const Offset(0, 4),
             ),
           ],
@@ -355,13 +443,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         child: TabBar(
           controller: _tabController,
           indicator: BoxDecoration(
-            color: colors.primary.withAlpha(28),
-            borderRadius: BorderRadius.circular(10),
+            color: colors.primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(16),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           dividerColor: Colors.transparent,
           labelColor: colors.primary,
-          unselectedLabelColor: colors.onSurface.withAlpha(140),
+          labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelColor: colors.onSurface.withOpacity(0.4),
           tabs: const [
             Tab(text: 'Announcements'),
             Tab(text: 'Members'),
@@ -397,7 +488,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         if (snapshot.hasError)
           return Center(child: Text('Error: ${snapshot.error}'));
         if (snapshot.connectionState == ConnectionState.waiting)
-          return const Center(child: CircularProgressIndicator());
+          return const PremiumLoadingIndicator();
 
         final announcements = snapshot.data ?? [];
         if (announcements.isEmpty) {
@@ -410,7 +501,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
           itemCount: announcements.length,
           itemBuilder: (context, i) => _buildAnnouncementCard(announcements[i]),
         );
@@ -455,7 +546,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       children: [
         // Search bar
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 12),
           child: TextField(
             onChanged: (value) {
               setState(() {
@@ -464,10 +555,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             },
             decoration: InputDecoration(
               hintText: 'Search members...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _memberSearchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: const Icon(Icons.clear_rounded),
                       onPressed: () {
                         setState(() {
                           _memberSearchQuery = '';
@@ -477,23 +568,20 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                   : null,
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withAlpha(128),
-                ),
+                borderRadius: BorderRadius.circular(24),
+                borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withAlpha(128),
-                ),
+                borderRadius: BorderRadius.circular(24),
+                borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(24),
                 borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 2,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
                 ),
               ),
             ),
@@ -508,7 +596,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               if (snapshot.hasError)
                 return Center(child: Text('Error: ${snapshot.error}'));
               if (snapshot.connectionState == ConnectionState.waiting)
-                return const Center(child: CircularProgressIndicator());
+                return const PremiumLoadingIndicator();
 
               final members = snapshot.data ?? [];
 
@@ -570,7 +658,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
                 itemCount: sortedMembers.length,
                 itemBuilder: (context, i) => _memberTile(sortedMembers[i]),
               );
@@ -601,59 +689,96 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           }
         }
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              child: Text(
-                displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-            ),
-            title: Row(
-              children: [
-                Expanded(child: Text(displayName)),
-                if (member.isAdmin)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+            ],
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                radius: 20,
+                child: Text(
+                  displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            displayName,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        if (member.isAdmin)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'ADMIN',
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        if (member.isMod)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'MOD',
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'ADMIN',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                    const SizedBox(height: 2),
+                    Text(
+                      email,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                       ),
                     ),
-                  ),
-                if (member.isMod)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'MOD',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            subtitle: Text(email),
-            trailing: _isAdmin ? _memberActions(member, displayName) : null,
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (_isAdmin) _memberActions(member, displayName),
+            ],
           ),
         );
       },
@@ -799,86 +924,111 @@ class AnnouncementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (announcement.isPinned)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(Icons.push_pin, size: 16, color: Colors.blue),
+    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (announcement.isPinned)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(Icons.push_pin_rounded, size: 16, color: colors.primary),
+                ),
+              Expanded(
+                child: Text(
+                  announcement.title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurface,
                   ),
-                Expanded(
-                  child: Text(
-                    announcement.title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (isAdmin)
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert_rounded, size: 20, color: colors.onSurface.withOpacity(0.4)),
+                  onSelected: (value) {
+                    if (value == 'delete') onDelete();
+                    if (value == 'toggle_pin') onTogglePin();
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'toggle_pin',
+                      child: Row(
+                        children: [
+                          Icon(
+                            announcement.isPinned
+                                ? Icons.push_pin_outlined
+                                : Icons.push_pin_rounded,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(announcement.isPinned ? 'Unpin' : 'Pin'),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-                if (isAdmin)
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'delete') onDelete();
-                      if (value == 'toggle_pin') onTogglePin();
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'toggle_pin',
-                        child: Row(
-                          children: [
-                            Icon(
-                              announcement.isPinned
-                                  ? Icons.push_pin_outlined
-                                  : Icons.push_pin,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(announcement.isPinned ? 'Unpin' : 'Pin'),
-                          ],
-                        ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                          const SizedBox(width: 8),
+                          const Text('Delete', style: TextStyle(color: Colors.red)),
+                        ],
                       ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(announcement.content, style: const TextStyle(fontSize: 14)),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.person, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  authorName, // Use real-time author name
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  _formatDate(announcement.createdAt),
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            announcement.content,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurface.withOpacity(0.8),
+              height: 1.4,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.person_rounded, size: 14, color: colors.onSurface.withOpacity(0.4)),
+              const SizedBox(width: 4),
+              Text(
+                authorName,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurface.withOpacity(0.4),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(Icons.access_time_rounded, size: 14, color: colors.onSurface.withOpacity(0.4)),
+              const SizedBox(width: 4),
+              Text(
+                _formatDate(announcement.createdAt),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurface.withOpacity(0.4),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

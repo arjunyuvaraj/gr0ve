@@ -1,17 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:gr0ve/features/authentication/screens/account_deletion_screen.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
-import 'package:gr0ve/features/help/screens/help_screen.dart';
 import 'package:gr0ve/features/absence/screens/absence_screen.dart';
 import 'package:gr0ve/features/home/screens/home_screen.dart';
 import 'package:gr0ve/features/club/screens/join_requests_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen_web.dart';
-import 'package:gr0ve/features/authentication/screens/login_screen.dart';
 import 'package:gr0ve/features/lunch_menu/screens/lunch_menu_screen.dart';
-import 'package:gr0ve/features/authentication/screens/register_screen.dart';
 import 'package:gr0ve/features/navigation/screens/navigation_screen.dart';
 import 'package:gr0ve/features/privacy/screens/privacy_policy_screen.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
@@ -149,7 +145,7 @@ class _MyAppState extends State<MyApp> {
           landingPage: kIsWeb
               ? const LandingWebsiteScreen()
               : const LandingScreen(),
-          loginPage: const LoginScreen(),
+          loginPage: const Center(child: Text('Login Screen')),
           navigationRoute: '/navigation',
         ),
       ),
@@ -157,13 +153,13 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => const HomeScreen(),
         '/teacher_absence': (context) => const AbsenceScreen(),
         '/landing': (context) => const LandingScreen(),
-        '/login': (context) => const LoginScreen(),
+        '/login': (context) => const Center(child: Text('Login Screen')),
         '/admin': (context) => const AdminPanelScreen(),
-        '/register': (context) => const RegisterScreen(),
+        '/register': (context) => const Center(child: Text('Register Screen')),
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-        '/help': (context) => const HelpScreen(),
-        '/account_deletion': (context) => const AccountDeletionScreen(),
+        '/help': (context) => const Center(child: Text('Help Screen')),
+        '/account_deletion': (context) => const Center(child: Text('Account Deletion Screen')),
         '/lunch_menu': (context) => const LunchMenuScreen(),
       },
       onGenerateRoute: (settings) {

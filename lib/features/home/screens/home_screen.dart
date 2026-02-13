@@ -8,6 +8,7 @@ import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/features/absence/services/teacher_service.dart';
 import 'package:gr0ve/features/bus/services/bus_service.dart';
+import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 // SCREEN: Dashboard displaying starred items and relevant school info
 // LOGIC: Aggregates teachers, buses, and absences into a unified view
@@ -59,42 +60,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Center(child: CircularProgressIndicator());
-
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         children: [
-          const CustomHeader(title: "GR0VE", subtitle: "FOR BCA"),
+          const CustomHeader(title: "GR0VE", subtitle: ""),
+          const SizedBox(height: 16),
 
-          // STARRED TEACHERS
-          const SizedBox(height: 24),
-          const Text(
-            "STARRED TEACHERS",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ValueListenableBuilder<Set<String>>(
-            valueListenable: StarredTeacherService.starredTeachers,
-            builder: (_, starred, __) {
-              final teachers = allTeachers.values
-                  .where((t) => starred.contains(t['name']))
-                  .toList();
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.only(top: 100),
+              child: PremiumLoadingIndicator(),
+            )
+          else ...[
+            // STARRED TEACHERS
+            const Text(
+              "STARRED TEACHERS",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder<Set<String>>(
+              valueListenable: StarredTeacherService.starredTeachers,
+              builder: (_, starred, __) {
+                final teachers = allTeachers.values
+                    .where((t) => starred.contains(t['name']))
+                    .toList();
 
-              if (teachers.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: Text("No starred teachers yet.")),
-                );
-              }
-
-              return Column(
-                children: teachers.map((t) {
-                  final name = t['name']!;
+                if (teachers.isEmpty) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: CustomTeacherCard(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text("No starred teachers yet.")),
+                  );
+                }
+
+                return Column(
+                  children: teachers.map((t) {
+                    final name = t['name']!;
+                    return CustomTeacherCard(
                       name: name,
                       department: t['department'],
                       email: t['email'],
@@ -103,51 +106,52 @@ class _HomeScreenState extends State<HomeScreen> {
                       starred: true,
                       onStarTap: () =>
                           StarredTeacherService.toggleTeacher(name),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-
-          // STARRED BUSES
-          const SizedBox(height: 32),
-          const Text(
-            "FAVORITE BUSES",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ValueListenableBuilder<Set<String>>(
-            valueListenable: StarredBusService.starredTowns,
-            builder: (_, starred, __) {
-              final buses = allBuses
-                  .where((b) => starred.contains(b.town))
-                  .toList();
-
-              if (buses.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: Text("No starred buses yet.")),
+                    );
+                  }).toList(),
                 );
-              }
+              },
+            ),
 
-              return Column(
-                children: buses
-                    .map(
-                      (b) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: CustomBusCard(
-                          route: b,
-                          starred: true,
-                          onStarTap: () => StarredBusService.toggleTown(b.town),
-                          isLoggedIn: user != null,
+            // STARRED BUSES
+            const SizedBox(height: 32),
+            const Text(
+              "FAVORITE BUSES",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder<Set<String>>(
+              valueListenable: StarredBusService.starredTowns,
+              builder: (_, starred, __) {
+                final buses = allBuses
+                    .where((b) => starred.contains(b.town))
+                    .toList();
+
+                if (buses.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text("No starred buses yet.")),
+                  );
+                }
+
+                return Column(
+                  children: buses
+                      .map(
+                        (b) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: CustomBusCard(
+                            route: b,
+                            starred: true,
+                            onStarTap: () =>
+                                StarredBusService.toggleTown(b.town),
+                            isLoggedIn: user != null,
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
-          ),
+                      )
+                      .toList(),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

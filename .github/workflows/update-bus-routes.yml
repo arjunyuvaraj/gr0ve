@@ -2,13 +2,13 @@ name: Update Bus Routes
 
 on:
   schedule:
-    # Runs every 5 minutes
     - cron: "*/5 * * * *"
-  workflow_dispatch: # Allows manual triggering from GitHub UI
+  workflow_dispatch:
 
 jobs:
   update-buses:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

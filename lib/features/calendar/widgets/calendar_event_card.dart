@@ -22,111 +22,116 @@ class CalendarEventCard extends StatelessWidget {
         : _getPersonalCategoryColor(context);
     IconData categoryIcon = isBCA ? Icons.school : _getPersonalCategoryIcon();
 
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(14),
-      shadowColor: colors.onSurface.withOpacity(0.05),
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            color: colors.surface,
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: categoryColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(categoryIcon, color: categoryColor, size: 22),
+        borderRadius: BorderRadius.circular(24),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: categoryColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Icon(
+                _getRoundedIcon(categoryIcon),
+                color: categoryColor,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  if (event.description != null) ...[
+                    const SizedBox(height: 4),
                     Text(
-                      event.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                      event.description!,
+                      style: TextStyle(
+                        color: colors.onSurface.withOpacity(0.6),
+                        fontSize: 14,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (!event.isAllDay && event.startTime != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _formatTime(event.startTime!),
+                      style: TextStyle(
+                        color: colors.onSurface.withOpacity(0.4),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (event.description != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        event.description!,
-                        style: TextStyle(
-                          color: colors.onSurface.withOpacity(0.65),
-                          fontSize: 14,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (!event.isAllDay && event.startTime != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        _formatTime(event.startTime!),
-                        style: TextStyle(
-                          color: colors.onSurface.withOpacity(0.5),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
-              if (!isBCA)
-                Icon(
-                  Icons.chevron_right,
-                  color: colors.onSurface.withOpacity(0.3),
-                  size: 20,
-                ),
-            ],
-          ),
+            ),
+            if (!isBCA)
+              Icon(
+                Icons.chevron_right_rounded,
+                color: colors.onSurface.withOpacity(0.3),
+                size: 20,
+              ),
+          ],
         ),
       ),
     );
   }
 
+  IconData _getRoundedIcon(IconData icon) {
+    if (icon == Icons.school) return Icons.school_rounded;
+    if (icon == Icons.assignment) return Icons.assignment_rounded;
+    if (icon == Icons.quiz) return Icons.quiz_rounded;
+    if (icon == Icons.book) return Icons.book_rounded;
+    if (icon == Icons.work) return Icons.work_rounded;
+    if (icon == Icons.people) return Icons.people_rounded;
+    return Icons.event_available_rounded;
+  }
+
   Color _getPersonalCategoryColor(BuildContext context) {
-    final colors = context.colors;
-    switch (event.personalCategory) {
-      case 'test':
-        return Colors.red;
-      case 'quiz':
-        return Colors.orange;
-      case 'homework':
-        return Colors.blue;
-      case 'project':
-        return Colors.purple;
-      case 'social':
-        return Colors.green;
-      default:
-        return colors.secondary;
-    }
+    return context.colors.onSurface.withOpacity(0.4);
   }
 
   IconData _getPersonalCategoryIcon() {
     switch (event.personalCategory) {
       case 'test':
-        return Icons.assignment;
+        return Icons.assignment_rounded;
       case 'quiz':
-        return Icons.quiz;
+        return Icons.quiz_rounded;
       case 'homework':
-        return Icons.book;
+        return Icons.book_rounded;
       case 'project':
-        return Icons.work;
+        return Icons.work_rounded;
       case 'social':
-        return Icons.people;
+        return Icons.people_rounded;
       default:
-        return Icons.event;
+        return Icons.event_rounded;
     }
   }
 

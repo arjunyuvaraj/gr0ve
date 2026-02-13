@@ -19,14 +19,14 @@ class JoinWithCodeCard extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colors.onSurface.withAlpha(16),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -37,34 +37,31 @@ class JoinWithCodeCard extends StatelessWidget {
           Text(
             "Join with code",
             style: context.text.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              color: colors.onSurface,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             "Someone trusted you with a code. Don’t mess it up.",
             style: context.text.bodySmall?.copyWith(
-              color: colors.onSurface.withAlpha(140),
+              color: colors.onSurface.withOpacity(0.5),
+              height: 1.3,
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           TextField(
             controller: controller,
             textCapitalization: TextCapitalization.characters,
             decoration: InputDecoration(
               hintText: "Enter club code",
-              filled: true,
-              fillColor: colors.surfaceVariant,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
+              prefixIcon: const Icon(Icons.password_rounded),
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           CustomPrimaryButton(
             label: isLoading ? "Joining..." : "Join club",

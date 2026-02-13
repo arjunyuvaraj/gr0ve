@@ -121,12 +121,15 @@ class LinkService {
 
     final doc = await _firestore.collection('users').doc(user.uid).get();
 
-    if (!doc.exists || doc.data()?['links'] == null) {
+    final data = doc.data();
+    final linksData = data?['links'] ?? data?['inks'];
+
+    if (!doc.exists || linksData == null) {
       await saveUserLinks(defaultLinks);
       return defaultLinks;
     }
 
-    final saved = (doc['links'] as List)
+    final saved = (linksData as List)
         .map((l) => QuickLink.fromMap(Map<String, dynamic>.from(l)))
         .toList();
 

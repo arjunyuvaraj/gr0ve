@@ -19,23 +19,33 @@ class CustomPrimaryButton extends StatelessWidget {
     final colors = context.colors;
     final textStyles = context.text;
 
-    return SizedBox(
+    return Container(
       width: fullWidth ? double.infinity : null,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: colors.primary.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Material(
         color: colors.primary,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 18),
             child: Center(
               child: Text(
                 label.capitalized,
                 style: textStyles.labelLarge?.copyWith(
                   color: colors.onPrimary,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
                 ),
               ),
             ),

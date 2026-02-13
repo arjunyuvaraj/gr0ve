@@ -22,96 +22,91 @@ class LinkCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: isReordering ? null : onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: isReordering
-                ? Border.all(color: link.color.withOpacity(0.3), width: 2)
-                : null,
-            boxShadow: [
-              BoxShadow(
-                color: link.color.withOpacity(0.1),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: isReordering
+            ? Border.all(color: colors.primary, width: 2)
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
-          child: Row(
-            children: [
-              // Drag handle when reordering
-              if (isReordering)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Icon(
-                    Icons.drag_handle,
-                    color: colors.onSurface.withOpacity(0.5),
-                    size: 20,
-                  ),
-                ),
-
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      link.color.withOpacity(0.2),
-                      link.color.withOpacity(0.1),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(link.icon, color: link.color, size: 26),
-              ),
-
-              const SizedBox(width: 14),
-
-              // Title
-              Expanded(
-                child: Text(
-                  link.title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: isReordering ? null : onTap,
+        child: Row(
+          children: [
+            // Drag handle when reordering
+            if (isReordering)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(
+                  Icons.drag_handle,
+                  color: colors.onSurface.withOpacity(0.5),
+                  size: 20,
                 ),
               ),
 
-              // Edit button (only show when not reordering and onEdit is provided)
-              if (!isReordering && onEdit != null)
-                IconButton(
-                  icon: Icon(
-                    Icons.edit,
-                    size: 20,
-                    color: colors.onSurface.withOpacity(0.5),
-                  ),
-                  onPressed: onEdit,
-                  tooltip: 'Edit link',
-                ),
+            // Icon
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: link.color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                link.icon,
+                color: link.color,
+                size: 24,
+              ),
+            ),
 
-              // Remove button
+            const SizedBox(width: 14),
+
+            // Title
+            Expanded(
+              child: Text(
+                link.title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  letterSpacing: 0.1,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+
+            // Edit button
+            if (!isReordering && onEdit != null)
               IconButton(
                 icon: Icon(
-                  Icons.close,
+                  Icons.edit_rounded,
                   size: 20,
-                  color: colors.onSurface.withOpacity(0.5),
+                  color: colors.onSurface.withOpacity(0.4),
                 ),
-                onPressed: onRemove,
-                tooltip: 'Remove link',
+                onPressed: onEdit,
+                tooltip: 'Edit link',
               ),
-            ],
-          ),
+
+            // Remove button
+            IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                size: 20,
+                color: colors.onSurface.withOpacity(0.4),
+              ),
+              onPressed: onRemove,
+              tooltip: 'Remove link',
+            ),
+          ],
         ),
       ),
     );

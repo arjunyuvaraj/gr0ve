@@ -24,132 +24,138 @@ class CustomTeacherCard extends StatefulWidget {
   State<CustomTeacherCard> createState() => _CustomTeacherCardState();
 }
 
-class _CustomTeacherCardState extends State<CustomTeacherCard>
-    with SingleTickerProviderStateMixin {
+class _CustomTeacherCardState extends State<CustomTeacherCard> {
   bool expanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final isAbsent = !widget.status.contains("Present");
 
-    return GestureDetector(
-      onTap: () => setState(() => expanded = !expanded),
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
+    return AnimatedScale(
+      scale: expanded ? 1.02 : 1.0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
         child: Container(
-          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: colors.onSurface.withAlpha(16),
-                blurRadius: 10,
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.showStar)
-                GestureDetector(
-                  onTap: widget.onStarTap,
-                  child: Icon(
-                    widget.starred
-                        ? Icons.star_rounded
-                        : Icons.star_border_rounded,
-                    size: 28,
-                    color: widget.starred
-                        ? colors.primary
-                        : colors.onSurface.withAlpha(140),
-                  ),
-                ),
-              if (widget.showStar) const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.name,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+          child: InkWell(
+            onTap: () => setState(() => expanded = !expanded),
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      if (widget.showStar)
+                        GestureDetector(
+                          onTap: widget.onStarTap,
+                          child: AnimatedScale(
+                            scale: widget.starred ? 1.2 : 1.0,
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(
+                              widget.starred
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              size: 26,
+                              color: widget.starred
+                                  ? colors.primary
+                                  : colors.onSurface.withOpacity(0.3),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                      if (widget.showStar) const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: colors.onSurface,
                           ),
-                          decoration: BoxDecoration(
-                            color: isAbsent
-                                ? colors.errorContainer.withAlpha(20)
-                                : colors.primary.withAlpha(20),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            widget.status,
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: isAbsent
-                                      ? colors.onErrorContainer
-                                      : colors.primary,
-                                ),
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
-                    if (expanded) ...[
-                      const SizedBox(height: 10),
-                      _infoRow(
-                        context,
-                        Icons.school_rounded,
-                        widget.department,
                       ),
-                      const SizedBox(height: 4),
-                      _infoRow(
-                        context,
-                        Icons.email_rounded,
-                        widget.email,
-                        overflow: TextOverflow.ellipsis,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isAbsent
+                              ? colors.errorContainer.withOpacity(0.5)
+                              : colors.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Text(
+                          widget.status,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                            color: isAbsent
+                                ? colors.onErrorContainer
+                                : colors.primary,
+                          ),
+                        ),
                       ),
                     ],
+                  ),
+                  if (expanded) ...[
+                    const SizedBox(height: 16),
+                    _buildInfoRow(
+                      Icons.school_rounded,
+                      widget.department,
+                      colors,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(
+                      Icons.email_rounded,
+                      widget.email,
+                      colors,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _infoRow(
-    BuildContext context,
+  Widget _buildInfoRow(
     IconData icon,
-    String text, {
+    String text,
+    ColorScheme colors, {
     TextOverflow overflow = TextOverflow.visible,
   }) {
-    final colors = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 18, color: colors.onSurface.withAlpha(140)),
+        Icon(icon, size: 18, color: colors.onSurface.withOpacity(0.4)),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
             overflow: overflow,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: TextStyle(
+              color: colors.onSurface.withOpacity(0.7),
+              fontSize: 14,
+            ),
           ),
         ),
       ],

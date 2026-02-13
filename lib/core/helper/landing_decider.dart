@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class LandingDecider extends StatefulWidget {
   final Widget landingPage;
@@ -58,13 +59,8 @@ class _LandingDeciderState extends State<LandingDecider> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: Center(
-          child: CircularProgressIndicator(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
+      return const Scaffold(
+        body: PremiumLoadingIndicator(),
       );
     }
 

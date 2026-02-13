@@ -5,6 +5,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/extensions/string_extensions.dart';
+import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class LunchMenuScreen extends StatefulWidget {
   const LunchMenuScreen({super.key});
@@ -122,128 +123,108 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final text = context.text;
+    final textSize = context.text;
 
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.restaurant_menu_outlined,
-                size: 64,
-                color: colors.onSurface.withOpacity(0.3),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                error!,
-                textAlign: TextAlign.center,
-                style: text.titleMedium?.copyWith(
-                  color: colors.onSurface.withOpacity(0.6),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+    return Column(
+      children: [
+        CustomHeader(title: 'LUNCH'.capitalized, subtitle: ''),
+        const SizedBox(height: 16),
+        TextField(
+          controller: searchController,
+          decoration: const InputDecoration(
+            hintText: 'Search food...',
+            prefixIcon: Icon(Icons.search_rounded),
           ),
         ),
-      );
-    }
-
-    String? lastStation;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Column(
-        children: [
-          CustomHeader(
-            title: 'LUNCH'.capitalized,
-            subtitle: 'What you\'re actually getting today',
-          ),
-          const SizedBox(height: 12),
-
-          // Search Bar
-          Material(
-            elevation: 4,
-            shadowColor: colors.onSurface.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: 'Search food...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                filled: true,
-                fillColor: colors.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          Expanded(
-            child: filteredItems.isEmpty
-                ? Center(
-                    child: Text(
-                      'No items match your search.',
-                      style: text.bodyLarge?.copyWith(
-                        color: colors.onSurface.withOpacity(0.5),
-                      ),
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _fetchTodayMenu,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ...filteredItems.map((entry) {
-                            final widgets = <Widget>[];
-
-                            if (entry.station.isNotEmpty &&
-                                entry.station != lastStation) {
-                              widgets.add(
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 20,
-                                    bottom: 8,
-                                  ),
-                                  child: Text(
-                                    entry.station,
-                                    style: text.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              );
-                              lastStation = entry.station;
-                            }
-
-                            widgets.add(_MenuItemCard(item: entry.food));
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: widgets,
-                            );
-                          }),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: loading
+              ? const PremiumLoadingIndicator()
+              : error != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.restaurant_menu_outlined,
+                          size: 64,
+                          color: colors.onSurface.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          error!,
+                          textAlign: TextAlign.center,
+                          style: textSize.titleMedium?.copyWith(
+                            color: colors.onSurface.withOpacity(0.6),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-          ),
-        ],
-      ),
+                )
+              : filteredItems.isEmpty
+              ? Center(
+                  child: Text(
+                    'No items match your search.',
+                    style: textSize.bodyLarge?.copyWith(
+                      color: colors.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _fetchTodayMenu,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Builder(
+                          builder: (context) {
+                            String? lastStation;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: filteredItems.map((entry) {
+                                final widgets = <Widget>[];
+
+                                if (entry.station.isNotEmpty &&
+                                    entry.station != lastStation) {
+                                  widgets.add(
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 24,
+                                        bottom: 12,
+                                      ),
+                                      child: Text(
+                                        entry.station,
+                                        style: textSize.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                  lastStation = entry.station;
+                                }
+
+                                widgets.add(_MenuItemCard(item: entry.food));
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: widgets,
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+        ),
+      ],
     );
   }
 }
@@ -495,9 +476,8 @@ class _MenuItemCard extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Material(
-        elevation: 4,
         shadowColor: colors.onSurface.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(

@@ -13,7 +13,21 @@ class JoinRequestsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Join Requests'),
+        title: Text(
+          'Pending Requests',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        centerTitle: false,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Navigator.of(context).pop(),
+          iconSize: 20,
+        ),
       ),
       body: StreamBuilder<List<JoinRequest>>(
         stream: groupService.getPendingJoinRequests(groupId),
@@ -29,15 +43,22 @@ class JoinRequestsScreen extends StatelessWidget {
           final requests = snapshot.data ?? [];
 
           if (requests.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Icon(
+                    Icons.inbox_rounded,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                  ),
+                  const SizedBox(height: 24),
                   Text(
                     'No pending requests',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -46,141 +67,165 @@ class JoinRequestsScreen extends StatelessWidget {
 
           return ListView.builder(
             itemCount: requests.length,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
             itemBuilder: (context, index) {
               final request = requests[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            child: Text(request.displayName[0].toUpperCase()),
+              final colors = Theme.of(context).colorScheme;
+              
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: colors.primary.withOpacity(0.08),
+                          child: Text(
+                            request.displayName[0].toUpperCase(),
+                            style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  request.displayName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                request.displayName,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.onSurface,
                                 ),
-                                Text(
-                                  request.email,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
+                              ),
+                              Text(
+                                request.email,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: colors.onSurface.withOpacity(0.4),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const Icon(Icons.vpn_key, size: 14, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Code: ${request.joinCode}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.vpn_key_rounded, size: 14, color: colors.onSurface.withOpacity(0.3)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Code: ${request.joinCode}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colors.onSurface.withOpacity(0.4),
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(width: 16),
-                          const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatDate(request.requestedAt),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                        ),
+                        const SizedBox(width: 20),
+                        Icon(Icons.access_time_rounded, size: 14, color: colors.onSurface.withOpacity(0.3)),
+                        const SizedBox(width: 6),
+                        Text(
+                          _formatDate(request.requestedAt),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colors.onSurface.withOpacity(0.4),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                try {
-                                  await groupService.rejectJoinRequest(
-                                    groupId,
-                                    request.userId,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: () async {
+                              try {
+                                await groupService.rejectJoinRequest(
+                                  groupId,
+                                  request.userId,
+                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Request rejected')),
                                   );
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Request rejected'),
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Error: $e'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
                                 }
-                              },
-                              icon: const Icon(Icons.close),
-                              label: const Text('Reject'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.red,
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.close_rounded, size: 18),
+                            label: const Text('Reject'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                try {
-                                  await groupService.approveJoinRequest(
-                                    groupId,
-                                    request.userId,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                await groupService.approveJoinRequest(
+                                  groupId,
+                                  request.userId,
+                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Member approved!'),
+                                      backgroundColor: Colors.green,
+                                    ),
                                   );
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Member approved!'),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Error: $e'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
                                 }
-                              },
-                              icon: const Icon(Icons.check),
-                              label: const Text('Approve'),
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.check_rounded, size: 18),
+                            label: const Text('Approve'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               );
             },

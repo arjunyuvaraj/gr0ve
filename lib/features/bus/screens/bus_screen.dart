@@ -5,7 +5,7 @@ import 'package:gr0ve/features/bus/widgets/custom_bus_card.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/features/bus/services/bus_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
-import 'package:gr0ve/core/extensions/context_extensions.dart';
+import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class BusScreen extends StatefulWidget {
   const BusScreen({super.key});
@@ -39,40 +39,11 @@ class _BusScreenState extends State<BusScreen> {
     super.dispose();
   }
 
-  void _scheduleRefresh() async {
+  void _scheduleRefresh() {
     _refreshTimer?.cancel();
 
-    final now = DateTime.now();
-    Duration nextRefresh;
-
-    // Get the actual bus arrival time (accounts for minimum days and overrides)
-    try {
-      final arrivalTime = await getBusArrivalTime();
-      final dismissalEnd = arrivalTime.add(const Duration(hours: 1));
-
-      // Check if we're in the dismissal window (arrival time to 1 hour after)
-      if (now.isAfter(arrivalTime) && now.isBefore(dismissalEnd)) {
-        // Refresh every minute during dismissal
-        nextRefresh = Duration(seconds: 60 - now.second);
-        print('[BUS_SCREEN] In dismissal window - refreshing every minute');
-      } else {
-        // Refresh every hour outside dismissal
-        nextRefresh = Duration(
-          minutes: 60 - now.minute,
-          seconds: 60 - now.second,
-        );
-        print('[BUS_SCREEN] Outside dismissal window - refreshing every hour');
-      }
-    } catch (e) {
-      print('[BUS_SCREEN] Error getting bus arrival time, using default: $e');
-      // Fallback to hourly refresh if there's an error
-      nextRefresh = Duration(
-        minutes: 60 - now.minute,
-        seconds: 60 - now.second,
-      );
-    }
-
-    _refreshTimer = Timer(nextRefresh, () {
+    // Simple 5-minute refresh interval
+    _refreshTimer = Timer(const Duration(minutes: 5), () {
       loadRoutes(silent: true);
       _scheduleRefresh(); // Schedule the next refresh
     });
@@ -138,97 +109,80 @@ class _BusScreenState extends State<BusScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Column(
-        children: [
-          const CustomHeader(title: "BUSES", subtitle: "DISMISSAL PLACES"),
-          const SizedBox(height: 12),
-          Material(
-            elevation: 4,
-            shadowColor: context.colors.onSurface.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            child: TextField(
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: 'Search buses or parking spot...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                filled: true,
-                fillColor: context.colors.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (value) {
-                searchQuery = value;
-                applyFilters();
-              },
-            ),
+    return Column(
+      children: [
+        const CustomHeader(title: "BUSES", subtitle: ""),
+        const SizedBox(height: 16),
+        TextField(
+          onChanged: (value) {
+            searchQuery = value;
+            applyFilters();
+          },
+          decoration: const InputDecoration(
+            hintText: 'Search buses or parking spots...',
+            prefixIcon: Icon(Icons.search_rounded),
           ),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: isLoading
+              ? const PremiumLoadingIndicator()
+              : ValueListenableBuilder<Set<String>>(
+                  valueListenable: StarredBusService.starredTowns,
+                  builder: (context, starredTowns, _) {
+                    final orderedRoutes = getOrderedRoutes(starredTowns);
 
-          const SizedBox(height: 12),
+                    if (orderedRoutes.isEmpty) {
+                      return const Center(child: Text("No buses found"));
+                    }
 
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ValueListenableBuilder<Set<String>>(
-                    valueListenable: StarredBusService.starredTowns,
-                    builder: (context, starredTowns, _) {
-                      final orderedRoutes = getOrderedRoutes(starredTowns);
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        int columns = 1;
+                        if (constraints.maxWidth > 900) {
+                          columns = 3;
+                        } else if (constraints.maxWidth > 600) {
+                          columns = 2;
+                        }
 
-                      if (orderedRoutes.isEmpty) {
-                        return const Center(child: Text("No buses found"));
-                      }
+                        final cardWidth =
+                            (constraints.maxWidth - (16 * (columns - 1))) /
+                            columns;
 
-                      return LayoutBuilder(
-                        builder: (context, constraints) {
-                          int columns = 1;
-                          if (constraints.maxWidth > 900) {
-                            columns = 3;
-                          } else if (constraints.maxWidth > 600) {
-                            columns = 2;
-                          }
+                        return RefreshIndicator(
+                          onRefresh: () => loadRoutes(silent: true),
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              children: orderedRoutes.map((route) {
+                                final isStarred = starredTowns.contains(
+                                  route.town,
+                                );
 
-                          final cardWidth =
-                              (constraints.maxWidth - (16 * (columns - 1))) /
-                              columns;
-
-                          return RefreshIndicator(
-                            onRefresh: () => loadRoutes(silent: true),
-                            child: SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: Wrap(
-                                spacing: 16,
-                                runSpacing: 8,
-                                children: orderedRoutes.map((route) {
-                                  final isStarred = starredTowns.contains(
-                                    route.town,
-                                  );
-
-                                  return SizedBox(
-                                    width: cardWidth,
-                                    child: CustomBusCard(
-                                      route: route,
-                                      starred: isStarred,
-                                      onStarTap: () =>
-                                          StarredBusService.toggleTown(
-                                            route.town,
-                                          ),
-                                      isLoggedIn: isLoggedIn,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
+                                return SizedBox(
+                                  width: cardWidth,
+                                  child: CustomBusCard(
+                                    route: route,
+                                    starred: isStarred,
+                                    onStarTap: () =>
+                                        StarredBusService.toggleTown(
+                                          route.town,
+                                        ),
+                                    isLoggedIn: isLoggedIn,
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

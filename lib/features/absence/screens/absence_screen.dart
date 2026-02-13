@@ -5,9 +5,8 @@ import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/cards/custom_teacher_card.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/features/absence/services/teacher_service.dart';
-import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/helper/teacher_utils.dart';
-import 'package:gr0ve/core/extensions/string_extensions.dart';
+import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class AbsenceScreen extends StatefulWidget {
   const AbsenceScreen({super.key});
@@ -208,84 +207,89 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       return _buildVerifyEmailState(context, user);
     }
 
-    final colors = context.colors;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Column(
-        children: [
-          CustomHeader(
-            title: "Teachers".capitalized,
-            // FIXED: Changed from 'Date' to 'date' to match Firestore structure
-            subtitle: absenceList['date'] ?? "",
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: 'Search teachers...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: colors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+    return Column(
+      children: [
+        CustomHeader(title: "Teachers", subtitle: absenceList['date'] ?? ""),
+        const SizedBox(height: 16),
+        Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Search teachers...',
+                prefixIcon: const Icon(Icons.search_rounded),
               ),
+              onChanged: (v) {
+                searchQuery = v;
+                setState(() => filteredTeachers = _applyFilters());
+              },
             ),
-            onChanged: (v) {
-              searchQuery = v;
-              setState(() => filteredTeachers = _applyFilters());
-            },
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: selectedPeriod,
-            items: periodOptions
-                .map(
-                  (p) => DropdownMenuItem(value: p, child: Text("Period: $p")),
-                )
-                .toList(),
-            onChanged: (v) {
-              selectedPeriod = v!;
-              setState(() => filteredTeachers = _applyFilters());
-            },
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ValueListenableBuilder<Set<String>>(
-                    valueListenable: StarredTeacherService.starredTeachers,
-                    builder: (_, starred, __) {
-                      final ordered = _ordered(starred);
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+              decoration: const InputDecoration(isDense: true),
+              value: selectedPeriod,
+              items: periodOptions
+                  .map(
+                    (p) =>
+                        DropdownMenuItem(value: p, child: Text("Period: $p")),
+                  )
+                  .toList(),
+              onChanged: (v) {
+                selectedPeriod = v!;
+                setState(() => filteredTeachers = _applyFilters());
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: isLoading
+              ? const PremiumLoadingIndicator()
+              : ValueListenableBuilder<Set<String>>(
+                  valueListenable: StarredTeacherService.starredTeachers,
+                  builder: (_, starred, __) {
+                    final ordered = _ordered(starred);
 
-                      return RefreshIndicator(
-                        onRefresh: () => _loadAbsences(silent: true),
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: ordered.map((t) {
-                            final name = t['name'];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: CustomTeacherCard(
-                                name: name,
-                                department: t['department'],
-                                email: t['email'],
-                                status: formatStatusString(_statusFor(name)),
-                                showStar: true,
-                                starred: starred.contains(name),
-                                onStarTap: () =>
-                                    StarredTeacherService.toggleTeacher(name),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                    return RefreshIndicator(
+                      onRefresh: () => _loadAbsences(silent: true),
+                      child: ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: ordered.length,
+                        itemBuilder: (context, index) {
+                          final t = ordered[index];
+                          final name = t['name'];
+                          return TweenAnimationBuilder<double>(
+                            duration: Duration(
+                              milliseconds: 300 + (index % 10) * 50,
+                            ),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: CustomTeacherCard(
+                              name: name,
+                              department: t['department'],
+                              email: t['email'],
+                              status: formatStatusString(_statusFor(name)),
+                              showStar: true,
+                              starred: starred.contains(name),
+                              onStarTap: () =>
+                                  StarredTeacherService.toggleTeacher(name),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

@@ -170,9 +170,13 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
     final isClub = widget.event.category == 'club';
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: colors.surface,
-      child: Padding(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(32),
+        ),
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -185,21 +189,26 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
                   child: Text(
                     widget.event.title,
                     style: text.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: colors.primary,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(Icons.close, size: 22, color: colors.onSurface),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 24,
+                    color: colors.onSurface.withOpacity(0.4),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
             _buildInfoRow(
-              Icons.calendar_today,
+              Icons.calendar_today_rounded,
               _formatDate(widget.event.date),
               colors,
               text,
@@ -207,14 +216,14 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
 
             if (!widget.event.isAllDay && widget.event.startTime != null)
               _buildInfoRow(
-                Icons.access_time,
+                Icons.access_time_filled_rounded,
                 '${_formatTime(widget.event.startTime!)}${widget.event.endTime != null ? ' - ${_formatTime(widget.event.endTime!)}' : ''}',
                 colors,
                 text,
               ),
 
             _buildInfoRow(
-              Icons.category,
+              Icons.category_rounded,
               isBCA
                   ? 'BCA Event'
                   : isClub
@@ -224,14 +233,24 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
               text,
             ),
 
-            if (widget.event.description != null) ...[
+            if (widget.event.description != null &&
+                widget.event.description!.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
                 'Description',
-                style: text.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: text.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.1,
+                ),
               ),
               const SizedBox(height: 8),
-              Text(widget.event.description!, style: text.bodyMedium),
+              Text(
+                widget.event.description!,
+                style: text.bodyMedium?.copyWith(
+                  color: colors.onSurface.withOpacity(0.7),
+                  height: 1.4,
+                ),
+              ),
             ],
 
             // Delete button
@@ -256,10 +275,22 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
                 children: [
                   TextButton.icon(
                     onPressed: _deleteEvent,
-                    icon: Icon(Icons.delete, color: colors.error),
+                    icon: Icon(Icons.delete_outline_rounded, color: colors.error),
                     label: Text(
-                      'Delete',
-                      style: TextStyle(color: colors.error),
+                      'Delete Event',
+                      style: TextStyle(
+                        color: colors.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ],
@@ -281,7 +312,7 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, size: 19, color: colors.secondary),
+          Icon(icon, size: 19, color: Colors.white.withOpacity(0.5)),
           const SizedBox(width: 12),
           Expanded(child: Text(textStr, style: text.bodyMedium)),
         ],

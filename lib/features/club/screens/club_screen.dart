@@ -74,7 +74,7 @@ class _ClubScreenState extends State<ClubScreen>
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         children: [
           /// Header
@@ -82,7 +82,7 @@ class _ClubScreenState extends State<ClubScreen>
             title: "Groups".capitalized,
             subtitle: "Yes, you are unfortunately social.",
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           /// Tabs (segmented control style) with notification indicator
           Container(

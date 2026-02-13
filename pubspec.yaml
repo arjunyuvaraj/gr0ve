@@ -47,6 +47,7 @@ dependencies:
   table_calendar: ^3.2.0
   flutter_local_notifications: ^20.0.0
   firebase_messaging: ^16.1.1
+  hugeicons: ^1.1.5
 
 dev_dependencies:
   flutter_test:
