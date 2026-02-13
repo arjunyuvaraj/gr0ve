@@ -19,6 +19,8 @@ class CustomBusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final hasNoCode = route.code.isEmpty;
+    final displayCode = hasNoCode ? '?' : route.code;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -82,22 +84,23 @@ class CustomBusCard extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            width: 80,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             decoration: BoxDecoration(
-              color: colors.primary.withOpacity(0.08),
+              color: hasNoCode
+                  ? colors.errorContainer.withOpacity(0.5)
+                  : colors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  route.code,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
+            child: Center(
+              child: Text(
+                displayCode,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: hasNoCode ? colors.onErrorContainer : colors.primary,
+                  fontWeight: FontWeight.w900,
                 ),
-              ],
+              ),
             ),
           ),
         ],

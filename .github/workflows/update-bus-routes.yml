@@ -1,7 +1,9 @@
-name: Update Bus Routes (Debug)
+name: Update Bus Routes
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Keep manual trigger option
+  schedule:
+    - cron: "*/5 * * * *" # Run every 5 minutes
 
 jobs:
   update-buses:
