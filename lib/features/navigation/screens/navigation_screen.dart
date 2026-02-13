@@ -47,6 +47,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
   Map<String, int> _unreadCounts = {};
   Map<String, int> _unreadAnnouncementsByClub = {};
 
+  // Feature flags
+  bool _enableClubs = false;
+  bool _enableMaps = false;
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +59,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     _determineUserRole();
     _checkAdminStatus();
     _loadVersionInfo();
+    _loadFeatureFlags();
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
   }
@@ -63,6 +68,36 @@ class _NavigationScreenState extends State<NavigationScreen> {
   void dispose() {
     _unreadCountSubscription?.cancel();
     super.dispose();
+  }
+
+  // ============================================================================
+  // FEATURE FLAGS
+  // ============================================================================
+
+  Future<void> _loadFeatureFlags() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('app_config')
+          .doc('feature_flags')
+          .get();
+
+      if (mounted && doc.exists) {
+        final data = doc.data();
+        final betaTesters = List<String>.from(data?['beta_testers'] ?? []);
+        final userEmail = _user?.email ?? '';
+
+        final isBetaTester = betaTesters.contains(userEmail);
+
+        setState(() {
+          // Enable for beta testers OR if globally enabled
+          _enableClubs = (data?['enable_clubs'] ?? false) || isBetaTester;
+          _enableMaps = (data?['enable_maps'] ?? false) || isBetaTester;
+          _buildNavigation();
+        });
+      }
+    } catch (e) {
+      print('[NAV] Error loading feature flags: $e');
+    }
   }
 
   // ============================================================================
@@ -187,19 +222,31 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ]);
         }
 
+        // Add Clubs feature if enabled
+        if (_enableClubs) {
+          baseNav.add(
+            NavConfig(
+              iconData: HugeIcons.strokeRoundedUserGroup,
+              label: 'Clubs',
+              screen: const ClubScreen(),
+              showClubNotifications: true,
+            ),
+          );
+        }
+
+        // Add Maps feature if enabled
+        if (_enableMaps) {
+          baseNav.add(
+            NavConfig(
+              iconData: HugeIcons.strokeRoundedMaps,
+              label: 'Maps',
+              screen: const MapScreen(),
+            ),
+          );
+        }
+
         // Add remaining screens
         baseNav.addAll([
-          NavConfig(
-            iconData: HugeIcons.strokeRoundedUserGroup,
-            label: 'Clubs',
-            screen: const ClubScreen(),
-            showClubNotifications: true,
-          ),
-          NavConfig(
-            iconData: HugeIcons.strokeRoundedMaps,
-            label: 'Maps',
-            screen: const MapScreen(),
-          ),
           NavConfig(
             iconData: HugeIcons.strokeRoundedHelpCircle,
             label: 'Help',

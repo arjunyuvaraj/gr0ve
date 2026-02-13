@@ -55,3 +55,6 @@ assets/credentials/gsheets.jsonassets/credentials/*.json
 
 scripts/firebase.json
 scripts/gsheets.json
+scripts/teacher.py
+scripts/events.py
+scripts/features.py

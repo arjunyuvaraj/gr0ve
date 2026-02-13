@@ -15,11 +15,37 @@ class BusScreen extends StatefulWidget {
 
 class _BusScreenState extends State<BusScreen> {
   String searchQuery = "";
+  bool isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
     StarredBusService.load();
+  }
+
+  Future<void> _refreshBusData() async {
+    setState(() => isRefreshing = true);
+
+    try {
+      // Trigger a manual fetch from Firestore
+      // This will cause the StreamBuilder to receive fresh data
+      await fetchBusRoutes();
+
+      if (mounted) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to refresh: $e"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isRefreshing = false);
+      }
+    }
   }
 
   List<BusRoute> applyFilters(List<BusRoute> allRoutes) {
@@ -104,25 +130,30 @@ class _BusScreenState extends State<BusScreen> {
                           (constraints.maxWidth - (16 * (columns - 1))) /
                           columns;
 
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          children: orderedRoutes.map((route) {
-                            final isStarred = starredTowns.contains(route.town);
+                      return RefreshIndicator(
+                        onRefresh: _refreshBusData,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            children: orderedRoutes.map((route) {
+                              final isStarred = starredTowns.contains(
+                                route.town,
+                              );
 
-                            return SizedBox(
-                              width: cardWidth,
-                              child: CustomBusCard(
-                                route: route,
-                                starred: isStarred,
-                                onStarTap: () =>
-                                    StarredBusService.toggleTown(route.town),
-                                isLoggedIn: isLoggedIn,
-                              ),
-                            );
-                          }).toList(),
+                              return SizedBox(
+                                width: cardWidth,
+                                child: CustomBusCard(
+                                  route: route,
+                                  starred: isStarred,
+                                  onStarTap: () =>
+                                      StarredBusService.toggleTown(route.town),
+                                  isLoggedIn: isLoggedIn,
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       );
                     },

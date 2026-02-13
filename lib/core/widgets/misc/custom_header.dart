@@ -10,15 +10,15 @@ class CustomHeader extends StatelessWidget {
 
   String _getSarcasticSubtitle(String title) {
     if (subtitle.isNotEmpty && subtitle != "FOR BCA") return subtitle;
-    
+
     final t = title.toUpperCase();
-    if (t.contains('GR0VE')) return "YOUR ACADEMIC SURVIVAL GUIDE";
-    if (t.contains('BUSES')) return "THE MIRAGE OF TRANSPORTATION";
-    if (t.contains('TEACHERS')) return "WHO'S ACTUALLY HERE TODAY?";
-    if (t.contains('LUNCH')) return "WHAT YOU'RE ACTUALLY GETTING TODAY";
+    if (t.contains('GR0VE')) return "LET'S TAKE A LOOK";
+    if (t.contains('BUSES')) return "FINALLY LEAVING?";
+    if (t.contains('TEACHERS')) return "HOPE I HAVE A FREE!";
+    if (t.contains('LUNCH')) return "IS IT EDIABLE";
     if (t.contains('CALENDAR')) return "STUFF YOU'LL PROBABLY MISS";
-    if (t.contains('CLUBS')) return "JOIN FOR THE RESUME, STAY FOR PIZZA";
-    
+    if (t.contains('CLUBS')) return "SADLY SOCIAL";
+
     return "FOR BCA";
   }
 
