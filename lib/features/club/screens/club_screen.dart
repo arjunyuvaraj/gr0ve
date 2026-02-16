@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/features/club/widgets/club_browse_tab.dart';
@@ -26,6 +27,7 @@ class _ClubScreenState extends State<ClubScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    FirebaseAnalytics.instance.logEvent(name: 'screen_club_main');
     _subscribeToNotifications();
   }
 

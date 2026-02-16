@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
@@ -33,6 +34,7 @@ class _AccountScreenState extends State<AccountScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    FirebaseAnalytics.instance.logEvent(name: 'screen_account');
   }
 
   Future<void> _loadUserData() async {

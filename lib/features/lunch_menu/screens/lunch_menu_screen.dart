@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:icons_plus/icons_plus.dart';
@@ -28,6 +29,7 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
     super.initState();
     _fetchTodayMenu();
     searchController.addListener(_applySearch);
+    FirebaseAnalytics.instance.logEvent(name: 'screen_lunch');
   }
 
   @override

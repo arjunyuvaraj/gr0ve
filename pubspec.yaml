@@ -48,6 +48,7 @@ dependencies:
   flutter_local_notifications: ^20.0.0
   firebase_messaging: ^16.1.1
   hugeicons: ^1.1.5
+  firebase_analytics: ^12.1.2
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
-import 'package:gr0ve/features/changelog/screens/changelog_entries.dart';
+import 'package:gr0ve/features/changelog/data/changelog_entries.dart';
 import 'package:gr0ve/features/changelog/widgets/changelog_pager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,186 +16,205 @@ class HelpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final text = context.text;
 
     final currentAnnouncement =
-        "Welcome to gr0ve! Please update the app and login to make the most of the app! ";
+        "Welcome to gr0ve! Please update the app and login to make the most of the app!";
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsetsGeometry.fromLTRB(16, 16, 16, 0),
+    return Column(
+      children: [
+        const CustomHeader(title: "HELP"),
+        const SizedBox(height: 16),
+        Expanded(
           child: SingleChildScrollView(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 640),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Announcement card
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const CustomHeader(title: "HELP"),
-
-                      const SizedBox(height: 24),
-
-                      Material(
-                        elevation: 4,
-                        shadowColor: colors.surface.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: context.colors.surface,
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors.onSurface.withAlpha(12),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.campaign_rounded,
-                                color: colors.onSurface,
-                                size: 28,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Announcements",
-                                      style: text.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: colors.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      currentAnnouncement,
-                                      style: text.bodyMedium?.copyWith(
-                                        color: colors.onSurface.withAlpha(200),
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.campaign_rounded,
+                          color: colors.primary,
+                          size: 24,
                         ),
                       ),
-                      SizedBox(height: 12),
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 1.1,
-                        children: [
-                          _buildGridCard(
-                            context,
-                            icon: Icons.feedback_rounded,
-                            title: "Feedback",
-                            subtitle: "Suggest features",
-                            onTap: () => _launchUrl(
-                              "https://forms.gle/Zrp2h8c8Sud24xPo6",
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Announcements",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: colors.primary,
+                                letterSpacing: 0.3,
+                              ),
                             ),
-                          ),
-                          _buildGridCard(
-                            context,
-                            icon: Icons.email_rounded,
-                            title: "Questions",
-                            subtitle: "Email us",
-                            onTap: () =>
-                                _launchUrl("mailto:grove.bca@gmail.com"),
-                          ),
-                          _buildGridCard(
-                            context,
-                            icon: Icons.warning_rounded,
-                            title: "Security",
-                            subtitle: "Report issue",
-                            isDestructive: true,
-                            onTap: () =>
-                                _launchUrl("mailto:grove.bca@gmail.com"),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Text(
+                              currentAnnouncement,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: colors.onSurface.withOpacity(0.75),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-
-                      const SizedBox(height: 24),
-
-                      const SizedBox(height: 16),
-
-                      ChangelogPager(changelogEntries: changelogEntries),
-
-                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
-              ),
+
+                // Contact options
+                Text(
+                  "GET IN TOUCH",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: colors.onSurface.withOpacity(0.5),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Feedback card
+                _buildActionCard(
+                  context,
+                  icon: Icons.feedback_rounded,
+                  iconColor: colors.primary,
+                  title: "Share Feedback",
+                  subtitle: "Help us improve gr0ve with your suggestions",
+                  onTap: () =>
+                      _launchUrl("https://forms.gle/Zrp2h8c8Sud24xPo6"),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Email card
+                _buildActionCard(
+                  context,
+                  icon: Icons.email_rounded,
+                  iconColor: colors.primary,
+                  title: "Email Support",
+                  subtitle: "grove.bca@gmail.com",
+                  onTap: () => _launchUrl("mailto:grove.bca@gmail.com"),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Security card
+                _buildActionCard(
+                  context,
+                  icon: Icons.shield_rounded,
+                  iconColor: colors.error,
+                  title: "Report Security Issue",
+                  subtitle: "Found a vulnerability? Let us know",
+                  onTap: () => _launchUrl("mailto:grove.bca@gmail.com"),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Changelog section
+                Text(
+                  "WHAT'S NEW",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: colors.onSurface.withOpacity(0.5),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                ChangelogPager(changelogEntries: changelogEntries),
+
+                const SizedBox(height: 24),
+              ],
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildGridCard(
+  Widget _buildActionCard(
     BuildContext context, {
     required IconData icon,
+    required Color iconColor,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
-    bool isDestructive = false,
   }) {
     final colors = context.colors;
-    final text = context.text;
 
-    return Material(
-      elevation: 2,
-      shadowColor: colors.surface.withOpacity(0.2),
-      borderRadius: BorderRadius.circular(16),
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: colors.onSurface.withAlpha(12),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 24,
-                color: isDestructive ? colors.error : colors.primary,
+              child: Icon(icon, color: iconColor, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: colors.onSurface,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colors.onSurface.withOpacity(0.6),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                title,
-                style: text.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDestructive ? colors.error : colors.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: colors.onSurface.withOpacity(0.3),
+            ),
+          ],
         ),
       ),
     );

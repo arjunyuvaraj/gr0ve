@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
-import 'package:gr0ve/core/extensions/string_extensions.dart';
-import 'package:gr0ve/core/helper/helper_functions.dart';
 
 class ChangelogPager extends StatefulWidget {
   final Map<String, String> changelogEntries;
@@ -13,84 +11,95 @@ class ChangelogPager extends StatefulWidget {
 }
 
 class ChangelogPagerState extends State<ChangelogPager> {
-  late final List<String> versions;
-  int currentIndex = 0;
   bool isExpanded = false;
 
   @override
-  void initState() {
-    super.initState();
-    versions = widget.changelogEntries.keys.toList();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final text = context.text;
     final colors = context.colors;
-    final currentVersion = versions[currentIndex];
-    final entry = widget.changelogEntries[currentVersion]!;
 
-    return Material(
-      elevation: 6,
-      shadowColor: colors.surface.withOpacity(0.4),
-      borderRadius: BorderRadius.circular(20),
-      color: Colors.transparent,
+    // Get the latest version (first entry)
+    final latestVersion = widget.changelogEntries.keys.first;
+    final latestEntry = widget.changelogEntries[latestVersion]!;
+
+    return InkWell(
+      onTap: () => setState(() => isExpanded = !isExpanded),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.only(top: 8, bottom: 8, left: 24, right: 8),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colors.surface.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(20),
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
+            // Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      "Dev Notes".capitalized,
-                      style: text.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: colors.primary,
-                        letterSpacing: getLetterSpacing(12, 10),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        currentVersion,
-                        style: text.labelMedium?.copyWith(
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.description_rounded,
+                    color: colors.primary,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "What's New",
+                        style: TextStyle(
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: colors.primary,
+                          color: colors.onSurface,
+                          letterSpacing: 0.2,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  icon: Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
-                    size: 28,
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Version $latestVersion',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: colors.primary,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  onPressed: () => setState(() => isExpanded = !isExpanded),
-                  color: colors.primary,
+                ),
+                AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: colors.primary,
+                    size: 24,
+                  ),
                 ),
               ],
             ),
 
+            // Expandable content
             AnimatedSize(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               child: isExpanded
                   ? Column(
@@ -98,40 +107,34 @@ class ChangelogPagerState extends State<ChangelogPager> {
                       children: [
                         const SizedBox(height: 16),
 
-                        Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: Text(
-                            entry,
-                            style: text.bodyMedium?.copyWith(
-                              color: colors.onSurface.withAlpha(200),
-                              height: 1.6,
-                              fontWeight: FontWeight.w400,
+                        // Divider
+                        Container(
+                          height: 1,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                colors.outline.withOpacity(0),
+                                colors.outline.withOpacity(0.1),
+                                colors.outline.withOpacity(0),
+                              ],
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.arrow_back, size: 20),
-                              onPressed: currentIndex > 0
-                                  ? () => setState(() => currentIndex--)
-                                  : null,
-                              color: colors.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_forward, size: 20),
-                              onPressed: currentIndex < versions.length - 1
-                                  ? () => setState(() => currentIndex++)
-                                  : null,
-                              color: colors.primary,
-                            ),
-                          ],
+                        // Changelog content
+                        Text(
+                          latestEntry,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colors.onSurface.withOpacity(0.75),
+                            height: 1.5,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
+
+                        const SizedBox(height: 4),
                       ],
                     )
                   : const SizedBox.shrink(),

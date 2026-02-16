@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -78,6 +79,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   void initState() {
     super.initState();
     _init();
+    FirebaseAnalytics.instance.logEvent(name: 'screen_absence');
   }
 
   @override

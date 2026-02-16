@@ -4,7 +4,7 @@ import 'package:gr0ve/features/changelog/widgets/changelog_pager.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/features/landing/widgets/landing_card.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
-import 'package:gr0ve/features/changelog/screens/changelog_entries.dart';
+import 'package:gr0ve/features/changelog/data/changelog_entries.dart';
 import 'package:gr0ve/core/constants/landing_content.dart';
 import 'package:gr0ve/core/helper/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/bus/widgets/custom_bus_card.dart';
@@ -21,6 +22,7 @@ class _BusScreenState extends State<BusScreen> {
   void initState() {
     super.initState();
     StarredBusService.load();
+    FirebaseAnalytics.instance.logEvent(name: 'screen_bus');
   }
 
   Future<void> _refreshBusData() async {

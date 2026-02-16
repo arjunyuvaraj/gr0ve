@@ -46,6 +46,7 @@ class NotificationService {
   final Map<String, int> _unreadCounts = {
     'join_requests': 0,
     'club_requests': 0,
+    'bus': 0,
   };
 
   // Stream controller for unread count updates
@@ -106,6 +107,7 @@ class NotificationService {
           prefs.getInt('unread_join_requests') ?? 0;
       _unreadCounts['club_requests'] =
           prefs.getInt('unread_club_requests') ?? 0;
+      _unreadCounts['bus'] = prefs.getInt('unread_bus') ?? 0;
 
       // Load per-club announcement counts
       final clubAnnouncementsJson = prefs.getString(
@@ -138,6 +140,7 @@ class NotificationService {
         'unread_club_requests',
         _unreadCounts['club_requests'] ?? 0,
       );
+      await prefs.setInt('unread_bus', _unreadCounts['bus'] ?? 0);
 
       // Save per-club announcement counts
       await prefs.setString(
@@ -402,13 +405,33 @@ class NotificationService {
   }
 
   // METHOD: Check if any starred buses have arrived
+  // LOGIC: Only sends notifications during lunch (12:00-1:30 PM) and afternoon (3:45-5:45 PM)
   Future<void> _checkStarredBusArrivals() async {
     try {
+      // Check if we're in the allowed notification time windows
+      final now = DateTime.now();
+      final currentTime =
+          now.hour * 60 + now.minute; // Convert to minutes since midnight
+
+      // Time windows in minutes since midnight
+      final lunchStart = 12 * 60; // 12:00 PM
+      final lunchEnd = 13 * 60 + 30; // 1:30 PM
+      final afternoonStart = 15 * 60 + 45; // 3:45 PM
+      final afternoonEnd = 17 * 60 + 45; // 5:45 PM
+
+      final isLunchTime = currentTime >= lunchStart && currentTime <= lunchEnd;
+      final isAfternoonTime =
+          currentTime >= afternoonStart && currentTime <= afternoonEnd;
+
+      if (!isLunchTime && !isAfternoonTime) {
+        // Outside notification windows, skip check
+        return;
+      }
+
       final starredTowns = StarredBusService.starredTowns.value;
       if (starredTowns.isEmpty) return;
 
       final routes = await fetchBusRoutes();
-      final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
       for (final route in routes) {
@@ -428,6 +451,10 @@ class NotificationService {
               title: '🚌 ${route.town}',
               body: 'Parking spot: ${route.code}',
               payload: 'bus:${route.town}',
+            );
+
+            print(
+              '[NOTIF] Bus notification sent for ${route.town} during allowed time window',
             );
           }
         }

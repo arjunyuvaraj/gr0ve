@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
 import 'package:gr0ve/features/absence/screens/absence_screen.dart';
+import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/home/screens/home_screen.dart';
 import 'package:gr0ve/features/club/screens/join_requests_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen.dart';
@@ -161,9 +162,7 @@ class _MyAppState extends State<MyApp> {
         '/register': (context) => const RegisterScreen(),
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-        '/help': (context) => const Center(child: Text('Help Screen')),
-        '/account_deletion': (context) =>
-            const Center(child: Text('Account Deletion Screen')),
+        '/help': (context) => const HelpScreen(),
         '/lunch_menu': (context) => const LunchMenuScreen(),
         '/links': (context) => const LinksScreen(),
       },

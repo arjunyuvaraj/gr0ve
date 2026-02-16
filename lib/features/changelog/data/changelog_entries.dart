@@ -1,4 +1,6 @@
 final Map<String, String> changelogEntries = {
+  "v1.4.5":
+      "After much demand, we restyled the app, making it easier to use. Also made some minor patches to enahnce the overall experience",
   "v1.4.4":
       "We apologize for not updating the changelog through v1.4.1-v1.4.3! This update brings intelligent bus arrival notifications: get notified when your starred buses arrive, with automatic detection of minimum days and regular dismissal times. Buses now show accurate arrival status based on the school schedule.",
   "v1.4.0":

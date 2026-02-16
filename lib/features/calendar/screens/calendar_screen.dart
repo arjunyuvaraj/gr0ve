@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/calendar/widgets/add_event_dialog.dart';
@@ -29,6 +30,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     _selectedDay = _focusedDay;
     _pageController = PageController(initialPage: _initialPage);
+    FirebaseAnalytics.instance.logEvent(name: 'screen_calendar');
     _initializeScreen();
   }
 

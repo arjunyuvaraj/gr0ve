@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -37,6 +38,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
   void initState() {
     super.initState();
     _checkEmailVerification();
+    FirebaseAnalytics.instance.logEvent(name: 'screen_onboarding');
   }
 
   Future<void> _checkEmailVerification() async {

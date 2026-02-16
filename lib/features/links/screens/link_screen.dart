@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -24,6 +25,7 @@ class _LinksScreenState extends State<LinksScreen> {
   @override
   void initState() {
     super.initState();
+    FirebaseAnalytics.instance.logEvent(name: 'screen_links');
     _loadUserData();
   }
 

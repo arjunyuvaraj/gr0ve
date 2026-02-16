@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() => setState(() {}));
     _loadGroupData();
+    FirebaseAnalytics.instance.logEvent(name: 'screen_club_details');
 
     // Clear notifications for this club when entering detail screen
     NotificationService().clearClubAnnouncementCount(widget.groupId);
@@ -207,8 +209,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading)
-      return const Scaffold(body: PremiumLoadingIndicator());
+    if (_isLoading) return const Scaffold(body: PremiumLoadingIndicator());
     if (_group == null) return _emptyView('This club does not exist.');
     if (!_isMember) return _membersOnlyView();
 
@@ -303,7 +304,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
   Widget _adminHeaderMenu() {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert_rounded, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+      ),
       onSelected: (value) {
         if (value == 'show_code') {
           showDialog(
@@ -330,33 +334,45 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                       'Join Code',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.4),
                         letterSpacing: 2.0,
                       ),
                     ),
                     const SizedBox(height: 24),
                     GestureDetector(
                       onTap: () {
-                        Clipboard.setData(ClipboardData(text: _group?.joinCode ?? ''));
+                        Clipboard.setData(
+                          ClipboardData(text: _group?.joinCode ?? ''),
+                        );
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Code copied to clipboard')),
+                          const SnackBar(
+                            content: Text('Code copied to clipboard'),
+                          ),
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 20,
+                        ),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           _group?.joinCode ?? 'N/A',
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 8.0,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontFamily: 'monospace',
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 8.0,
+                                color: Theme.of(context).colorScheme.primary,
+                                fontFamily: 'monospace',
+                              ),
                         ),
                       ),
                     ),
@@ -364,7 +380,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                     Text(
                       'Tap to copy',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -449,9 +467,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           indicatorSize: TabBarIndicatorSize.tab,
           dividerColor: Colors.transparent,
           labelColor: colors.primary,
-          labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          labelStyle: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           unselectedLabelColor: colors.onSurface.withOpacity(0.4),
           tabs: const [
             Tab(text: 'Announcements'),
@@ -568,7 +586,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                   : null,
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: BorderSide.none,
@@ -706,7 +727,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withOpacity(0.08),
                 radius: 20,
                 child: Text(
                   displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
@@ -726,42 +749,61 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                         Expanded(
                           child: Text(
                             displayName,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
                           ),
                         ),
                         if (member.isAdmin)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'ADMIN',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 10,
-                              ),
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 10,
+                                  ),
                             ),
                           ),
                         if (member.isMod)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'MOD',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 10,
-                              ),
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface.withOpacity(0.5),
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 10,
+                                  ),
                             ),
                           ),
                       ],
@@ -770,7 +812,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                     Text(
                       email,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.4),
                       ),
                     ),
                   ],
@@ -949,7 +993,11 @@ class AnnouncementCard extends StatelessWidget {
               if (announcement.isPinned)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Icon(Icons.push_pin_rounded, size: 16, color: colors.primary),
+                  child: Icon(
+                    Icons.push_pin_rounded,
+                    size: 16,
+                    color: colors.primary,
+                  ),
                 ),
               Expanded(
                 child: Text(
@@ -962,7 +1010,11 @@ class AnnouncementCard extends StatelessWidget {
               ),
               if (isAdmin)
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert_rounded, size: 20, color: colors.onSurface.withOpacity(0.4)),
+                  icon: Icon(
+                    Icons.more_vert_rounded,
+                    size: 20,
+                    color: colors.onSurface.withOpacity(0.4),
+                  ),
                   onSelected: (value) {
                     if (value == 'delete') onDelete();
                     if (value == 'toggle_pin') onTogglePin();
@@ -987,9 +1039,16 @@ class AnnouncementCard extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                          const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Colors.red,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
-                          const Text('Delete', style: TextStyle(color: Colors.red)),
+                          const Text(
+                            'Delete',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -1008,7 +1067,11 @@ class AnnouncementCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              Icon(Icons.person_rounded, size: 14, color: colors.onSurface.withOpacity(0.4)),
+              Icon(
+                Icons.person_rounded,
+                size: 14,
+                color: colors.onSurface.withOpacity(0.4),
+              ),
               const SizedBox(width: 4),
               Text(
                 authorName,
@@ -1018,7 +1081,11 @@ class AnnouncementCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              Icon(Icons.access_time_rounded, size: 14, color: colors.onSurface.withOpacity(0.4)),
+              Icon(
+                Icons.access_time_rounded,
+                size: 14,
+                color: colors.onSurface.withOpacity(0.4),
+              ),
               const SizedBox(width: 4),
               Text(
                 _formatDate(announcement.createdAt),

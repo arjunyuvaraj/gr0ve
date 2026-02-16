@@ -1,9 +1,10 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/changelog/widgets/changelog_pager.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/download_button.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
-import 'package:gr0ve/features/changelog/screens/changelog_entries.dart';
+import 'package:gr0ve/features/changelog/data/changelog_entries.dart';
 import 'package:gr0ve/core/helper/helper_functions.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:gr0ve/core/extensions/string_extensions.dart';
@@ -15,7 +16,6 @@ class LandingWebsiteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final text = context.text;
-
     return Scaffold(
       body: Container(
         width: double.infinity,

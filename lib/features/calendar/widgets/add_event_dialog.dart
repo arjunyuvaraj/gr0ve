@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,6 +53,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
   @override
   void initState() {
     super.initState();
+    FirebaseAnalytics.instance.logEvent(name: 'calendar_add_event');
     _loadUserClubStatus();
   }
 
@@ -210,6 +212,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
             ),
           );
         }
+        FirebaseAnalytics.instance.logEvent(name: "add_event_personal");
       } else if (_eventScope == 'club') {
         if (_selectedGroup == null) {
           setState(() => _errorMessage = 'Please select a group');
@@ -225,6 +228,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
             ),
           );
         }
+        FirebaseAnalytics.instance.logEvent(name: "add_event_club");
       } else if (_eventScope == 'public') {
         // Request public event (requires admin approval unless platform admin)
         final groupId = _selectedGroup?.id ?? _userClub?.id ?? 'platform';
@@ -258,6 +262,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
             );
           }
         }
+        FirebaseAnalytics.instance.logEvent(name: "add_event_public");
       }
     } catch (e) {
       if (mounted) setState(() => _errorMessage = 'Error: $e');
