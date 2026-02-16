@@ -1,4 +1,6 @@
 final Map<String, String> changelogEntries = {
+  "v1.4.6":
+      "Sadly, a minor bug was discoverd with the bus refreshing system, that has successfully been patched. Also minor restyling in calendar and help pages",
   "v1.4.5":
       "After much demand, we restyled the app, making it easier to use. Also made some minor patches to enahnce the overall experience",
   "v1.4.4":
