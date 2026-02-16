@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
 import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
-import 'package:gr0ve/features/links/link_service.dart';
+import 'package:gr0ve/features/links/service/link_service.dart';
 
 class AddLinkDialog extends StatefulWidget {
   final Function(String title, String url, String iconKey, Color color) onAdd;

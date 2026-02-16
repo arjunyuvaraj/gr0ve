@@ -78,10 +78,7 @@ class _ClubScreenState extends State<ClubScreen>
       child: Column(
         children: [
           /// Header
-          CustomHeader(
-            title: "Groups".capitalized,
-            subtitle: "Yes, you are unfortunately social.",
-          ),
+          CustomHeader(title: "Groups".capitalized),
           const SizedBox(height: 16),
 
           /// Tabs (segmented control style) with notification indicator

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gr0ve/features/help/help_screen.dart';
+import 'package:gr0ve/features/links/screens/link_screen.dart';
+import 'package:gr0ve/features/authentication/screen/bergen_onboarding_screen.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
@@ -51,11 +54,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
   bool _enableClubs = false;
   bool _enableMaps = false;
 
+  // Onboarding state
+  bool _isCheckingOnboarding = true;
+  bool _needsOnboarding = false;
+
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
     _user = FirebaseAuth.instance.currentUser;
+    _checkOnboarding(); // Check onboarding FIRST
     _determineUserRole();
     _checkAdminStatus();
     _loadVersionInfo();
@@ -68,6 +76,60 @@ class _NavigationScreenState extends State<NavigationScreen> {
   void dispose() {
     _unreadCountSubscription?.cancel();
     super.dispose();
+  }
+
+  // ============================================================================
+  // ONBOARDING CHECK
+  // ============================================================================
+
+  Future<void> _checkOnboarding() async {
+    if (_user == null) {
+      setState(() {
+        _isCheckingOnboarding = false;
+        _needsOnboarding = false;
+      });
+      return;
+    }
+
+    final email = _user!.email ?? '';
+    final isBergenStudent = email.endsWith('@bergen.org');
+
+    if (!isBergenStudent) {
+      setState(() {
+        _isCheckingOnboarding = false;
+        _needsOnboarding = false;
+      });
+      return;
+    }
+
+    // Check if email is verified and profile is complete
+    await _user!.reload();
+    _user = FirebaseAuth.instance.currentUser; // Reload user object
+    final isEmailVerified = _user!.emailVerified;
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .get();
+
+      final data = userDoc.data();
+      final hasGrade = data?['grade'] != null;
+      final hasAcademy = data?['academy'] != null;
+
+      final needsSetup = !isEmailVerified || !hasGrade || !hasAcademy;
+
+      setState(() {
+        _needsOnboarding = needsSetup;
+        _isCheckingOnboarding = false;
+      });
+    } catch (e) {
+      print('[NAV] Error checking onboarding: $e');
+      setState(() {
+        _needsOnboarding = false;
+        _isCheckingOnboarding = false;
+      });
+    }
   }
 
   // ============================================================================
@@ -91,7 +153,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         setState(() {
           // Enable for beta testers OR if globally enabled
           _enableClubs = (data?['enable_clubs'] ?? false) || isBetaTester;
-          _enableMaps = (data?['enable_maps'] ?? false) || isBetaTester;
+          _enableMaps = (data?['enable_maps'] ?? false);
           _buildNavigation();
         });
       }
@@ -245,12 +307,21 @@ class _NavigationScreenState extends State<NavigationScreen> {
           );
         }
 
+        // Add Links screen (always available for students)
+        baseNav.add(
+          NavConfig(
+            iconData: HugeIcons.strokeRoundedLink01,
+            label: 'Links',
+            screen: const LinksScreen(),
+          ),
+        );
+
         // Add remaining screens
         baseNav.addAll([
           NavConfig(
             iconData: HugeIcons.strokeRoundedHelpCircle,
             label: 'Help',
-            screen: const Center(child: Text('Help Screen')),
+            screen: const HelpScreen(),
           ),
           NavConfig(
             iconData: HugeIcons.strokeRoundedUser,
@@ -277,6 +348,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
             iconData: HugeIcons.strokeRoundedRestaurant02,
             label: 'Lunch Menu',
             screen: const LunchMenuScreen(),
+          ),
+          NavConfig(
+            iconData: HugeIcons.strokeRoundedLink01,
+            label: 'Links',
+            screen: const LinksScreen(),
           ),
           NavConfig(
             iconData: HugeIcons.strokeRoundedHelpCircle,
@@ -565,6 +641,25 @@ class _NavigationScreenState extends State<NavigationScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    // Show loading while checking onboarding
+    if (_isCheckingOnboarding) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator(color: colors.primary)),
+      );
+    }
+
+    // Show onboarding screen - COVERS EVERYTHING including navigation bar
+    if (_needsOnboarding) {
+      return BergenOnboardingScreen(
+        onComplete: () {
+          setState(() {
+            _needsOnboarding = false;
+          });
+        },
+      );
+    }
+
+    // Normal navigation UI
     final int displayCount = _navConfigs.length > 5 ? 4 : _navConfigs.length;
     final List<Widget> navItems = [];
 
@@ -599,7 +694,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 24, 32, 80),
+                padding: const EdgeInsets.fromLTRB(16, 24, 32, 80),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder:
@@ -628,10 +723,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 12,
-                  ),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: navItems,

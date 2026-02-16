@@ -22,10 +22,7 @@ class AdminPanelScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CustomHeader(
-                title: "Pending Groups".capitalized,
-                subtitle: "These people think they can run a club… we’ll see.",
-              ),
+              CustomHeader(title: "Pending Groups".capitalized),
               const SizedBox(height: 24),
               Expanded(
                 child: StreamBuilder<List<GroupCreationRequest>>(

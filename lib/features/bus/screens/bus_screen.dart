@@ -27,11 +27,21 @@ class _BusScreenState extends State<BusScreen> {
     setState(() => isRefreshing = true);
 
     try {
-      // Trigger a manual fetch from Firestore
-      // This will cause the StreamBuilder to receive fresh data
-      await fetchBusRoutes();
+      // Trigger refresh from Google Sheets
+      await refreshBusRoutesFromSheets();
 
-      if (mounted) {}
+      // Wait a moment for Firestore to update
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Bus routes refreshed! ✓"),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,7 +88,7 @@ class _BusScreenState extends State<BusScreen> {
 
     return Column(
       children: [
-        const CustomHeader(title: "BUSES", subtitle: ""),
+        const CustomHeader(title: "BUSES"),
         const SizedBox(height: 16),
         TextField(
           onChanged: (value) {

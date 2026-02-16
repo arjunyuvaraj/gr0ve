@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomTeacherCard extends StatefulWidget {
   final String name;
@@ -103,7 +104,7 @@ class _CustomTeacherCardState extends State<CustomTeacherCard> {
                         ),
                         child: Text(
                           widget.status,
-                          style: TextStyle(
+                          style: GoogleFonts.raleway(
                             fontWeight: FontWeight.w800,
                             fontSize: 13,
                             color: isAbsent

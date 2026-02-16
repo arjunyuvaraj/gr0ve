@@ -169,30 +169,151 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   }
 
   Widget _buildVerifyEmailState(BuildContext context, User? user) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.email, size: 64, color: Colors.orange),
-            const SizedBox(height: 16),
-            const Text(
-              "Please verify your email to view absences.",
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.email_rounded, size: 48, color: Colors.orange),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              "Verify Your Email",
+              style: text.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 24,
+                color: colors.onSurface,
+              ),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Please verify your email address to view teacher absences",
+              style: text.bodyMedium?.copyWith(
+                color: colors.onSurface.withOpacity(0.6),
+                fontSize: 15,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            InkWell(
+              onTap: () async {
+                if (user != null && !user.emailVerified) {
+                  try {
+                    await user.sendEmailVerification();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            "Verification email sent! Check your inbox.",
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Error: ${e.toString()}"),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                }
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.send_rounded, size: 20, color: colors.primary),
+                    const SizedBox(width: 10),
+                    Text(
+                      "Send Verification",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: colors.primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                if (user != null && !user.emailVerified) {
-                  await user.sendEmailVerification();
+            InkWell(
+              onTap: () async {
+                await user?.reload();
+                setState(() {
+                  // Rebuild to check email verification status
+                });
+                if (context.mounted && user?.emailVerified == true) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Verification email sent!")),
+                    SnackBar(
+                      content: const Text(
+                        "Email verified! Loading teachers...",
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: colors.primary,
+                    ),
                   );
                 }
               },
-              child: const Text("Resend verification email"),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.surface.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colors.outline.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.refresh_rounded,
+                      size: 20,
+                      color: colors.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      "I've Verified My Email",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -209,7 +330,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
     return Column(
       children: [
-        CustomHeader(title: "Teachers", subtitle: absenceList['date'] ?? ""),
+        CustomHeader(title: "Teachers"),
         const SizedBox(height: 16),
         Column(
           children: [

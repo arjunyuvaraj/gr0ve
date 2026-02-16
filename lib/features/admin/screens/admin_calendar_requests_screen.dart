@@ -22,10 +22,7 @@ class AdminCalendarRequestsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CustomHeader(
-                title: "Pending Events".capitalized,
-                subtitle: "Apparently everyone says their party is priority",
-              ),
+              CustomHeader(title: "Pending Events".capitalized),
               const SizedBox(height: 24),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(

@@ -70,21 +70,21 @@ class LinkService {
   static const List<QuickLink> defaultLinks = [
     QuickLink(
       id: 'schoology',
-      title: 'SCHOOLOGY',
+      title: 'Schoology',
       url: 'https://bca.schoology.com/home',
       iconKey: 'school',
       color: Color(0xFF3B5998),
     ),
     QuickLink(
       id: 'gradebook',
-      title: 'GRADEBOOK',
+      title: 'Powerschool',
       url: 'https://bcts.powerschool.com/public/',
       iconKey: 'book',
       color: Color(0xFF00AEEF),
     ),
     QuickLink(
       id: 'teacher_absence',
-      title: 'TEACHER ABSENCE',
+      title: 'Class Cancellation',
       url:
           'https://docs.google.com/document/d/e/2PACX-1vRkhySmwAiTtY88tcshckpV4F0vRrULccaGrYl_Sf2ubWpyyXA4l8c-KAOuMzSwFe-qyAQhLqXzVsbA/pub',
       iconKey: 'description',
@@ -92,7 +92,7 @@ class LinkService {
     ),
     QuickLink(
       id: 'bus_locations',
-      title: 'BUS LOCATIONS',
+      title: 'Buses',
       url:
           'https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/edit?gid=0#gid=0',
       iconKey: 'directions_bus',
@@ -100,7 +100,7 @@ class LinkService {
     ),
     QuickLink(
       id: 'counselor_booking',
-      title: 'COUNSELOR BOOKING',
+      title: 'Counselor Bookings',
       url:
           'https://outlook.office365.com/book/CounselorBookings@bergen.org/?ismsaljsauthenabled=true',
       iconKey: 'event_available',
@@ -108,7 +108,7 @@ class LinkService {
     ),
     QuickLink(
       id: 'privacy_policy',
-      title: 'PRIVACY POLICY',
+      title: 'Pirvacy Policy',
       url: '/privacy_policy',
       iconKey: 'privacy_tip',
       color: Color(0xFF6A1B9A),

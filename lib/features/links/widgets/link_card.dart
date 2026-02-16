@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr0ve/features/links/link_service.dart';
+import 'package:gr0ve/features/links/service/link_service.dart';
 
 class LinkCard extends StatelessWidget {
   final QuickLink link;
@@ -61,11 +61,7 @@ class LinkCard extends StatelessWidget {
                 color: link.color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                link.icon,
-                color: link.color,
-                size: 24,
-              ),
+              child: Icon(link.icon, color: link.color, size: 24),
             ),
 
             const SizedBox(width: 14),

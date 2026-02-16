@@ -7,6 +7,9 @@ import 'package:gr0ve/features/home/screens/home_screen.dart';
 import 'package:gr0ve/features/club/screens/join_requests_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen_web.dart';
+import 'package:gr0ve/features/landing/screens/login_screen.dart';
+import 'package:gr0ve/features/landing/screens/register_screen.dart';
+import 'package:gr0ve/features/links/screens/link_screen.dart';
 import 'package:gr0ve/features/lunch_menu/screens/lunch_menu_screen.dart';
 import 'package:gr0ve/features/navigation/screens/navigation_screen.dart';
 import 'package:gr0ve/features/privacy/screens/privacy_policy_screen.dart';
@@ -138,14 +141,14 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey, // Set the global navigator key
       darkTheme: darkTheme,
       theme: lightTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       home: Builder(
         builder: (context) => LandingDecider(
           landingPage: kIsWeb
               ? const LandingWebsiteScreen()
               : const LandingScreen(),
-          loginPage: const Center(child: Text('Login Screen')),
+          loginPage: const LoginScreen(),
           navigationRoute: '/navigation',
         ),
       ),
@@ -153,14 +156,16 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => const HomeScreen(),
         '/teacher_absence': (context) => const AbsenceScreen(),
         '/landing': (context) => const LandingScreen(),
-        '/login': (context) => const Center(child: Text('Login Screen')),
+        '/login': (context) => const LoginScreen(),
         '/admin': (context) => const AdminPanelScreen(),
-        '/register': (context) => const Center(child: Text('Register Screen')),
+        '/register': (context) => const RegisterScreen(),
         '/navigation': (context) => const NavigationScreen(),
         '/privacy_policy': (context) => const PrivacyPolicyScreen(),
         '/help': (context) => const Center(child: Text('Help Screen')),
-        '/account_deletion': (context) => const Center(child: Text('Account Deletion Screen')),
+        '/account_deletion': (context) =>
+            const Center(child: Text('Account Deletion Screen')),
         '/lunch_menu': (context) => const LunchMenuScreen(),
+        '/links': (context) => const LinksScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/club/join-requests') {

@@ -127,7 +127,7 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
 
     return Column(
       children: [
-        CustomHeader(title: 'LUNCH'.capitalized, subtitle: ''),
+        CustomHeader(title: 'LUNCH'.capitalized),
         const SizedBox(height: 16),
         TextField(
           controller: searchController,

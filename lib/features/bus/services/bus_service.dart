@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 @immutable
 class BusRoute {
@@ -71,6 +72,40 @@ Stream<List<BusRoute>> getBusRoutesStream() {
 
         return routes;
       });
+}
+
+/// Trigger refresh from Google Sheets to Firestore
+/// This calls your webhook/endpoint that runs the Python script
+Future<void> refreshBusRoutesFromSheets() async {
+  try {
+    if (kDebugMode) {
+      print('Triggering bus routes refresh from Google Sheets...');
+    }
+
+    // Replace with your actual webhook URL
+    // This could be a GitHub Action webhook, Railway endpoint, etc.
+    const webhookUrl = 'YOUR_WEBHOOK_URL_HERE';
+
+    final response = await http
+        .post(
+          Uri.parse(webhookUrl),
+          headers: {'Content-Type': 'application/json'},
+        )
+        .timeout(const Duration(seconds: 30));
+
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print('✓ Bus routes refresh triggered successfully');
+      }
+    } else {
+      throw Exception('Failed to refresh: ${response.statusCode}');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error triggering bus routes refresh: $e');
+    }
+    rethrow;
+  }
 }
 
 /// Fetch bus routes from Firestore (one-time fetch)

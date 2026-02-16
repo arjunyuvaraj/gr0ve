@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-// import 'package:gr0ve/features/help/screens/help_screen.dart';
-// import 'package:gr0ve/features/privacy/screens/privacy_policy_screen.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -69,9 +67,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: lightTheme,
-          home: Scaffold(
-            body: CustomHeader(title: 'Test Title', subtitle: 'Test Subtitle'),
-          ),
+          home: Scaffold(body: CustomHeader(title: 'Test Title')),
         ),
       );
 
@@ -156,7 +152,7 @@ void main() {
   // Note: LandingScreen tests skipped as they require Firebase initialization
   // LandingScreen uses FirebaseAuth.instance.currentUser which requires Firebase.initializeApp()
 
-/*
+  /*
   group('Help Screen Tests', () {
     testWidgets('HelpScreen displays help content and grid cards', (
       WidgetTester tester,
@@ -203,10 +199,7 @@ void main() {
           home: Scaffold(
             body: Column(
               children: [
-                const CustomHeader(
-                  title: 'Test Page',
-                  subtitle: 'Test Description',
-                ),
+                const CustomHeader(title: 'Test Page'),
                 CustomPrimaryButton(
                   label: 'Action',
                   onTap: () => wasTapped = true,
@@ -350,7 +343,7 @@ void main() {
           home: Scaffold(
             body: Column(
               children: [
-                const CustomHeader(title: 'Title', subtitle: 'Subtitle'),
+                const CustomHeader(title: 'Title'),
                 CustomPrimaryButton(label: 'Button', onTap: () {}),
               ],
             ),
@@ -366,7 +359,6 @@ void main() {
 
       final header = tester.widget<CustomHeader>(find.byType(CustomHeader));
       expect(header.title, 'Title');
-      expect(header.subtitle, 'Subtitle');
     });
 
     testWidgets('Buttons use proper styling', (WidgetTester tester) async {
@@ -439,9 +431,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: lightTheme,
-          home: Scaffold(
-            body: CustomHeader(title: '', subtitle: ''),
-          ),
+          home: Scaffold(body: CustomHeader(title: '')),
         ),
       );
 
@@ -503,36 +493,4 @@ void main() {
       expect(find.byType(CustomPrimaryButton), findsOneWidget);
     });
   });
-
-/*
-  group('Screen Layout Tests', () {
-    testWidgets('HelpScreen has proper layout structure', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: const HelpScreen()),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Scaffold), findsOneWidget);
-      expect(find.byType(SafeArea), findsOneWidget);
-      expect(find.byType(CustomHeader), findsOneWidget);
-    });
-
-    testWidgets('AccountDeletionScreen has proper layout structure', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: const AccountDeletionScreen()),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Scaffold), findsOneWidget);
-      expect(find.byType(SafeArea), findsOneWidget);
-      expect(find.byType(CustomHeader), findsOneWidget);
-    });
-  });
-*/
 }

@@ -53,7 +53,7 @@ class AuthenticationService {
             email: trimmedEmail,
             password: trimmedPassword,
           );
-      
+
       if (userCredential.user != null) {
         await _createUserDocument(userCredential.user!, email: trimmedEmail);
         await userCredential.user?.updateDisplayName(name);
@@ -113,7 +113,7 @@ class AuthenticationService {
     try {
       // Reset services BEFORE signing out
       StarredTeacherService.reset();
-      
+
       await _auth.signOut();
     } catch (e) {
       throw Exception('Failed to sign out. Please try again.');
@@ -191,11 +191,14 @@ class AuthenticationService {
   }
 
   // METHOD: Deletes user account and profile
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount(String password) async {
     if (currentUser == null) return;
 
     try {
       final uid = currentUser!.uid;
+      final email = currentUser!.email!;
+      signOut();
+      signInWithEmail(email, password);
       await currentUser!.delete();
       await _firestore.collection('users').doc(uid).delete();
     } catch (e) {
