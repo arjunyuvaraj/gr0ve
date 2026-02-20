@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:icons_plus/icons_plus.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -49,15 +50,25 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
       final todayStr =
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-      final url =
+      final baseUrl =
           'https://bergen.api.nutrislice.com/menu/api/weeks/school/'
           'bergen-academy/menu-type/lunch/'
           '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}?format=json';
 
+      final url = kIsWeb
+          ? 'https://api.allorigins.win/get?url=${Uri.encodeComponent(baseUrl)}'
+          : baseUrl;
+
       final res = await http.get(Uri.parse(url));
       if (res.statusCode != 200) throw Exception();
 
-      final data = json.decode(res.body);
+      final dynamic data;
+      if (kIsWeb) {
+        final proxyData = json.decode(res.body);
+        data = json.decode(proxyData['contents']);
+      } else {
+        data = json.decode(res.body);
+      }
       final days = data['days'] as List;
 
       final today = days.firstWhere(
@@ -481,15 +492,15 @@ class _MenuItemCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Material(
         shadowColor: colors.onSurface.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
         child: InkWell(
           onTap: () => _showNutritionDialog(context),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,10 +515,10 @@ class _MenuItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.info_outline,
                       size: 20,
-                      color: Colors.grey,
+                      color: colors.onSurface.withOpacity(0.3),
                     ),
                   ],
                 ),
@@ -516,7 +527,7 @@ class _MenuItemCard extends StatelessWidget {
                   Text(
                     item.description,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
+                      color: colors.onSurface.withOpacity(0.5),
                     ),
                   ),
                 ],

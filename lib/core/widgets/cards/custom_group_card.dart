@@ -5,12 +5,14 @@ class CustomGroupCard extends StatelessWidget {
   final String name;
   final String description;
   final VoidCallback onTap;
+  final bool hasNotification;
 
   const CustomGroupCard({
     super.key,
     required this.name,
     required this.description,
     required this.onTap,
+    this.hasNotification = false,
   });
 
   @override
@@ -18,7 +20,6 @@ class CustomGroupCard extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(24),
@@ -29,58 +30,84 @@ class CustomGroupCard extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-      ),      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: colors.primary.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                Icons.groups_rounded,
-                color: colors.primary,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        Icons.groups_rounded,
+                        color: colors.primary,
+                        size: 28,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    if (hasNotification)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.surface, width: 2),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: context.text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: colors.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        description,
+                        style: context.text.bodySmall?.copyWith(
+                          color: colors.onSurface.withOpacity(0.5),
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    description,
-                    style: context.text.bodySmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.5),
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: colors.onSurface.withOpacity(0.3),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: colors.onSurface.withOpacity(0.3),
-            ),
-          ],
+          ),
         ),
       ),
     );

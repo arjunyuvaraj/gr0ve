@@ -6,6 +6,7 @@ import 'package:gr0ve/features/absence/screens/absence_screen.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/home/screens/home_screen.dart';
 import 'package:gr0ve/features/club/screens/join_requests_screen.dart';
+import 'package:gr0ve/features/club/screens/club_detail_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen.dart';
 import 'package:gr0ve/features/landing/screens/landing_screen_web.dart';
 import 'package:gr0ve/features/landing/screens/login_screen.dart';
@@ -108,13 +109,34 @@ class _MyAppState extends State<MyApp> {
           ),
           (route) => false,
         );
+      } else if (payload.startsWith('qa_reply:') ||
+          payload.startsWith('qa_question:')) {
+        // Q&A Notification: qa_reply:$groupId:$announcementId:$questionId
+        final parts = payload.split(':');
+        if (parts.length >= 4) {
+          final groupId = parts[1];
+          final announcementId = parts[2];
+          final questionId = parts[3];
+
+          print('[MAIN] Navigating to Q&A: $groupId -> $announcementId');
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => ClubDetailScreen(
+                groupId: groupId,
+                initialAnnouncementId: announcementId,
+                initialQuestionId: questionId,
+              ),
+            ),
+            (route) => false,
+          );
+        }
       } else if (payload.startsWith('announcement:')) {
-        // Announcement notification - navigate to clubs screen
-        // final groupId = payload.substring('announcement:'.length);
-        print('[MAIN] Navigating to home/clubs');
+        // Announcement notification - navigate to club detail
+        final groupId = payload.substring('announcement:'.length);
+        print('[MAIN] Navigating to Club: $groupId');
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => const NavigationScreen(initialIndex: 0),
+            builder: (context) => ClubDetailScreen(groupId: groupId),
           ),
           (route) => false,
         );
@@ -179,3 +201,4 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+// https://console.firebase.google.com/v1/r/project/grove-bca/firestore/indexes?create_composite=Cktwcm9qZWN0cy9ncjB2ZS1iY2EvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL3F1ZXN0aW9ucy9pbmRleGVzL18QAROMCghhdXRob3JJZBABGg0KCWNyZWF0ZWRBdBACGgwKCF9fbmFtZV9fEAI

@@ -3,9 +3,9 @@
     "short_name": "gr0ve",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1F6F5B",
+    "theme_color": "#1F6F5B",
+    "description": "The official app for your school community.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

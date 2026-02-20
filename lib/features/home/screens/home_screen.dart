@@ -156,20 +156,26 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
     }
-    String? user = FirebaseAuth.instance.currentUser?.displayName;
-    return Column(
-      children: [
-        // Header and tab indicator
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            children: [
-              CustomHeader(title: user ?? "GR0VE"),
-              const SizedBox(height: 20),
+    String? displayName = FirebaseAuth.instance.currentUser?.displayName;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 700;
 
-              // Page indicator bar
+        return Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: CustomHeader(title: displayName ?? "GR0VE"),
+            ),
+
+            if (!isWide) ...[
+              // Page indicator bar (Mobile only)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -192,28 +198,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
             ],
-          ),
-        ),
 
-        // Swipable content
-        Expanded(
-          child: isLoading
-              ? const Center(child: PremiumLoadingIndicator())
-              : RefreshIndicator(
-                  onRefresh: _loadData,
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      setState(() => _currentPage = index);
-                    },
-                    children: [
-                      _buildTeachersSection(colors, textTheme),
-                      _buildBusesSection(colors, textTheme),
-                    ],
-                  ),
-                ),
-        ),
+            // Content
+            Expanded(
+              child: isLoading
+                  ? const Center(child: PremiumLoadingIndicator())
+                  : RefreshIndicator(
+                      onRefresh: _loadData,
+                      child: isWide
+                          ? _buildWideContent(colors, textTheme)
+                          : PageView(
+                              controller: _pageController,
+                              onPageChanged: (index) {
+                                setState(() => _currentPage = index);
+                              },
+                              children: [
+                                _buildTeachersSection(colors, textTheme),
+                                _buildBusesSection(colors, textTheme),
+                              ],
+                            ),
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWideContent(ColorScheme colors, TextTheme textTheme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildTeachersSection(colors, textTheme)),
+        const VerticalDivider(width: 1, indent: 20, endIndent: 20),
+        Expanded(child: _buildBusesSection(colors, textTheme)),
       ],
     );
   }
@@ -240,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color: isActive
               ? colors.primary.withOpacity(0.15)
               : colors.surface.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isActive ? colors.primary : colors.outline.withOpacity(0.2),
             width: isActive ? 2 : 1,
@@ -259,9 +279,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 10),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
                 color: isActive
                     ? colors.primary
                     : colors.onSurface.withOpacity(0.6),

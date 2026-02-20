@@ -10,4 +10,7 @@ new feature
 2. "Capstone counclser, SPARK Member, etc."
   2a. Role title and description 
 3. data analysis to figure out whos doing what
+HOT IDEA:
+- make an llm that helpsp course recs, pull from the docs, limit sources to JUST chat
+- add gemini
 */

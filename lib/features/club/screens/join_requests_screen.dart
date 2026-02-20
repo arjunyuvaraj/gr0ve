@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/club/services/group_service.dart';
 import 'package:gr0ve/models/join_request.dart';
+import 'package:gr0ve/services/notifications/notification_service.dart';
 
-class JoinRequestsScreen extends StatelessWidget {
+class JoinRequestsScreen extends StatefulWidget {
   final String groupId;
 
   const JoinRequestsScreen({super.key, required this.groupId});
 
   @override
-  Widget build(BuildContext context) {
-    final groupService = GroupService();
+  State<JoinRequestsScreen> createState() => _JoinRequestsScreenState();
+}
 
+class _JoinRequestsScreenState extends State<JoinRequestsScreen> {
+  final GroupService _groupService = GroupService();
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().clearUnreadCount('join_requests');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -30,7 +42,7 @@ class JoinRequestsScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<List<JoinRequest>>(
-        stream: groupService.getPendingJoinRequests(groupId),
+        stream: _groupService.getPendingJoinRequests(widget.groupId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
@@ -50,13 +62,17 @@ class JoinRequestsScreen extends StatelessWidget {
                   Icon(
                     Icons.inbox_rounded,
                     size: 80,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.05),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'No pending requests',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.3),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -71,7 +87,7 @@ class JoinRequestsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final request = requests[index];
               final colors = Theme.of(context).colorScheme;
-              
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
@@ -95,7 +111,10 @@ class JoinRequestsScreen extends StatelessWidget {
                           backgroundColor: colors.primary.withOpacity(0.08),
                           child: Text(
                             request.displayName[0].toUpperCase(),
-                            style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -105,16 +124,18 @@ class JoinRequestsScreen extends StatelessWidget {
                             children: [
                               Text(
                                 request.displayName,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: colors.onSurface,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.onSurface,
+                                    ),
                               ),
                               Text(
                                 request.email,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: colors.onSurface.withOpacity(0.4),
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: colors.onSurface.withOpacity(0.4),
+                                    ),
                               ),
                             ],
                           ),
@@ -124,23 +145,33 @@ class JoinRequestsScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Icon(Icons.vpn_key_rounded, size: 14, color: colors.onSurface.withOpacity(0.3)),
+                        Icon(
+                          Icons.vpn_key_rounded,
+                          size: 14,
+                          color: colors.onSurface.withOpacity(0.3),
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Code: ${request.joinCode}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.onSurface.withOpacity(0.4),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: colors.onSurface.withOpacity(0.4),
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                         const SizedBox(width: 20),
-                        Icon(Icons.access_time_rounded, size: 14, color: colors.onSurface.withOpacity(0.3)),
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 14,
+                          color: colors.onSurface.withOpacity(0.3),
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           _formatDate(request.requestedAt),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.onSurface.withOpacity(0.4),
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: colors.onSurface.withOpacity(0.4),
+                              ),
                         ),
                       ],
                     ),
@@ -151,13 +182,15 @@ class JoinRequestsScreen extends StatelessWidget {
                           child: TextButton.icon(
                             onPressed: () async {
                               try {
-                                await groupService.rejectJoinRequest(
-                                  groupId,
+                                await _groupService.rejectJoinRequest(
+                                  widget.groupId,
                                   request.userId,
                                 );
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Request rejected')),
+                                    const SnackBar(
+                                      content: Text('Request rejected'),
+                                    ),
                                   );
                                 }
                               } catch (e) {
@@ -187,8 +220,8 @@ class JoinRequestsScreen extends StatelessWidget {
                           child: ElevatedButton.icon(
                             onPressed: () async {
                               try {
-                                await groupService.approveJoinRequest(
-                                  groupId,
+                                await _groupService.approveJoinRequest(
+                                  widget.groupId,
                                   request.userId,
                                 );
                                 if (context.mounted) {

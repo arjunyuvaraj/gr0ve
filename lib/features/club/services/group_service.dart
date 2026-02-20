@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/models/announcement_question.dart';
 import 'package:gr0ve/models/group.dart';
 import 'package:gr0ve/models/group_member.dart';
 import 'package:gr0ve/models/join_request.dart';
@@ -912,5 +913,208 @@ class GroupService {
         .collection('announcements')
         .doc(announcementId)
         .update({'isPinned': isPinned});
+  }
+  // ========== Q&A OPERATIONS ==========
+  // Add these methods to GroupService
+
+  // METHOD: Get questions for an announcement (only visible to the author + mods/admins)
+  Stream<List<AnnouncementQuestion>> getAnnouncementQuestions(
+    String groupId,
+    String announcementId,
+    String currentUserId,
+    bool isModOrAdmin,
+  ) {
+    Query query = _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .orderBy('createdAt', descending: true);
+
+    // Regular members only see their own questions
+    if (!isModOrAdmin) {
+      query = query.where('authorId', isEqualTo: currentUserId);
+    }
+
+    return query.snapshots().map(
+      (snapshot) => snapshot.docs
+          .map((doc) => AnnouncementQuestion.fromFirestore(doc))
+          .toList(),
+    );
+  }
+
+  // METHOD: Get total question count for a mod/admin (badge on announcement)
+  Stream<int> getUnansweredQuestionCount(
+    String groupId,
+    String announcementId,
+  ) {
+    return _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .where('isAnswered', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+  }
+
+  // METHOD: Get replies for a question
+  Stream<List<QuestionReply>> getQuestionReplies(
+    String groupId,
+    String announcementId,
+    String questionId,
+  ) {
+    return _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .doc(questionId)
+        .collection('replies')
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => QuestionReply.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  // METHOD: Post a private question on an announcement (any member)
+  Future<void> postQuestion({
+    required String groupId,
+    required String announcementId,
+    required String content,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    final isMember = await isGroupMember(groupId);
+    if (!isMember) throw Exception('Not a member of this group');
+
+    await _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .add({
+          'groupId': groupId,
+          'announcementId': announcementId,
+          'authorId': user.uid,
+          'authorName': user.displayName ?? 'Unknown',
+          'content': content,
+          'createdAt': FieldValue.serverTimestamp(),
+          'isAnswered': false,
+        });
+  }
+
+  // METHOD: Reply to a question (any member can reply, isStaff flag set for mods/admins)
+  Future<void> replyToQuestion({
+    required String groupId,
+    required String announcementId,
+    required String questionId,
+    required String content,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    final isModOrAdmin = await isGroupModOrAdmin(groupId);
+    final isMember = await isGroupMember(groupId);
+    if (!isMember) throw Exception('Not a member of this group');
+
+    // Check that the replier is either the question author or a mod/admin
+    final questionDoc = await _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .doc(questionId)
+        .get();
+
+    if (!questionDoc.exists) throw Exception('Question not found');
+    final authorId = questionDoc.get('authorId') as String;
+
+    if (user.uid != authorId && !isModOrAdmin) {
+      throw Exception('Not authorized to reply to this question');
+    }
+
+    await _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .doc(questionId)
+        .collection('replies')
+        .add({
+          'authorId': user.uid,
+          'authorName': user.displayName ?? 'Unknown',
+          'isStaff': isModOrAdmin,
+          'content': content,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+    // Mark as answered if a staff member replied
+    if (isModOrAdmin) {
+      await _firestore
+          .collection('groups')
+          .doc(groupId)
+          .collection('announcements')
+          .doc(announcementId)
+          .collection('questions')
+          .doc(questionId)
+          .update({'isAnswered': true});
+    }
+  }
+
+  // METHOD: Delete a question (admin/mod or question author)
+  Future<void> deleteQuestion({
+    required String groupId,
+    required String announcementId,
+    required String questionId,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    final isModOrAdmin = await isGroupModOrAdmin(groupId);
+
+    final questionDoc = await _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .doc(questionId)
+        .get();
+
+    if (!questionDoc.exists) throw Exception('Question not found');
+    final authorId = questionDoc.get('authorId') as String;
+
+    if (user.uid != authorId && !isModOrAdmin) {
+      throw Exception('Not authorized to delete this question');
+    }
+
+    // Delete replies first
+    final replies = await _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('announcements')
+        .doc(announcementId)
+        .collection('questions')
+        .doc(questionId)
+        .collection('replies')
+        .get();
+
+    final batch = _firestore.batch();
+    for (final reply in replies.docs) {
+      batch.delete(reply.reference);
+    }
+    batch.delete(questionDoc.reference);
+    await batch.commit();
   }
 }

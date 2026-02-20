@@ -145,6 +145,7 @@ class _CustomTeacherCardState extends State<CustomTeacherCard> {
     ColorScheme colors, {
     TextOverflow overflow = TextOverflow.visible,
   }) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Icon(icon, size: 18, color: colors.onSurface.withOpacity(0.4)),
@@ -153,7 +154,7 @@ class _CustomTeacherCardState extends State<CustomTeacherCard> {
           child: Text(
             text,
             overflow: overflow,
-            style: TextStyle(
+            style: theme.textTheme.bodySmall?.copyWith(
               color: colors.onSurface.withOpacity(0.7),
               fontSize: 14,
             ),

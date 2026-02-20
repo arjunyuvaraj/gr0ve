@@ -19,45 +19,11 @@ class _ClubScreenState extends State<ClubScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Track unread announcements
-  Map<String, int> _unreadAnnouncementsByClub = {};
-  bool _hasUnreadAnnouncements = false;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     FirebaseAnalytics.instance.logEvent(name: 'screen_club_main');
-    _subscribeToNotifications();
-  }
-
-  void _subscribeToNotifications() {
-    NotificationService().unreadCountStream.listen((data) {
-      if (mounted) {
-        setState(() {
-          // Convert from Map<dynamic, dynamic> to Map<String, int>
-          final announcementsMap =
-              data['announcementsByClub'] as Map<dynamic, dynamic>?;
-          _unreadAnnouncementsByClub =
-              announcementsMap?.map(
-                (key, value) => MapEntry(key.toString(), value as int),
-              ) ??
-              {};
-          _hasUnreadAnnouncements = _unreadAnnouncementsByClub.values.any(
-            (count) => count > 0,
-          );
-        });
-      }
-    });
-
-    // Get initial counts
-    setState(() {
-      _unreadAnnouncementsByClub =
-          NotificationService().unreadAnnouncementsByClub;
-      _hasUnreadAnnouncements = _unreadAnnouncementsByClub.values.any(
-        (count) => count > 0,
-      );
-    });
   }
 
   @override
@@ -111,28 +77,73 @@ class _ClubScreenState extends State<ClubScreen>
                 const Tab(text: "Browse"),
                 // My Clubs tab with notification indicator
                 Tab(
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      const Text("My Clubs"),
-                      if (_hasUnreadAnnouncements)
-                        Positioned(
-                          right: -12,
-                          top: -4,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colors.surface,
-                                width: 1.5,
+                  child: StreamBuilder<Map<String, dynamic>>(
+                    stream: NotificationService().unreadCountStream,
+                    builder: (context, snapshot) {
+                      final data = snapshot.data;
+                      bool hasUnread = false;
+
+                      if (data != null) {
+                        final announcementsMap =
+                            data['announcementsByClub'] != null
+                            ? Map.from(data['announcementsByClub'] as Map)
+                            : null;
+                        final qaMap = data['qaByClub'] != null
+                            ? Map.from(data['qaByClub'] as Map)
+                            : null;
+
+                        final Map<String, int> announcements =
+                            announcementsMap?.map(
+                              (key, value) =>
+                                  MapEntry(key.toString(), value as int),
+                            ) ??
+                            {};
+                        final Map<String, int> unreadQA =
+                            qaMap?.map(
+                              (key, value) =>
+                                  MapEntry(key.toString(), value as int),
+                            ) ??
+                            {};
+
+                        hasUnread =
+                            announcements.values.any((c) => c > 0) ||
+                            unreadQA.values.any((c) => c > 0);
+                      } else {
+                        // Initial load
+                        hasUnread =
+                            NotificationService()
+                                .unreadAnnouncementsByClub
+                                .values
+                                .any((c) => c > 0) ||
+                            NotificationService().unreadQAByClub.values.any(
+                              (c) => c > 0,
+                            );
+                      }
+
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Text("My Clubs"),
+                          if (hasUnread)
+                            Positioned(
+                              right: -12,
+                              top: -4,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: colors.surface,
+                                    width: 1.5,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                    ],
+                        ],
+                      );
+                    },
                   ),
                 ),
                 const Tab(text: "Create"),

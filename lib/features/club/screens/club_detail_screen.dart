@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/features/club/widgets/announcment_qa_sheet.dart';
 import 'package:gr0ve/features/club/widgets/post_announcement_dialog.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:gr0ve/features/club/services/group_service.dart';
@@ -13,7 +14,15 @@ import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final String groupId;
-  const ClubDetailScreen({super.key, required this.groupId});
+  final String? initialAnnouncementId;
+  final String? initialQuestionId;
+
+  const ClubDetailScreen({
+    super.key,
+    required this.groupId,
+    this.initialAnnouncementId,
+    this.initialQuestionId,
+  });
 
   @override
   State<ClubDetailScreen> createState() => _ClubDetailScreenState();
@@ -31,10 +40,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   bool _isMember = false;
   bool _isLoading = true;
 
-  // Cache for user profiles to reduce Firestore reads
   final Map<String, Map<String, dynamic>> _userProfileCache = {};
-
-  // Add this as a state variable in your StatefulWidget
   String _memberSearchQuery = '';
 
   @override
@@ -44,17 +50,47 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     _tabController.addListener(() => setState(() {}));
     _loadGroupData();
     FirebaseAnalytics.instance.logEvent(name: 'screen_club_details');
-
-    // Clear notifications for this club when entering detail screen
     NotificationService().clearClubAnnouncementCount(widget.groupId);
+    // Also clear global qa_replies if the user is entering a club
+    // (We don't know for sure which club the reply was for without more logic,
+    // but clearing the global one is safe here as a start).
+    NotificationService().clearUnreadCount('qa_replies');
 
-    // Also clear when switching to announcements tab
     _tabController.addListener(() {
       if (_tabController.index == 0) {
-        // Announcements tab
         NotificationService().clearClubAnnouncementCount(widget.groupId);
+        NotificationService().clearClubQACount(widget.groupId);
       }
     });
+
+    // Handle deep-linking from notifications
+    if (widget.initialAnnouncementId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openDeepLinkedQA();
+      });
+    }
+  }
+
+  void _openDeepLinkedQA() async {
+    // Wait for group data to load so we have mod/admin status if needed
+    while (_isLoading) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AnnouncementQASheet(
+        groupId: widget.groupId,
+        announcementId: widget.initialAnnouncementId!,
+        announcementTitle: "Announcement", // Fallback title
+        isModOrAdmin: _isModOrAdmin,
+        initialQuestionId: widget.initialQuestionId,
+      ),
+    );
   }
 
   Future<void> _loadGroupData() async {
@@ -79,18 +115,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error loading club: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error loading group: $e')));
     }
   }
 
-  /// Get user profile from cache or Firestore
   Future<Map<String, dynamic>> _getUserProfile(String userId) async {
-    // Check cache first
     if (_userProfileCache.containsKey(userId)) {
       return _userProfileCache[userId]!;
     }
-
-    // Fetch from Firestore
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
@@ -99,19 +131,15 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         return profile;
       }
     } catch (e) {
-      // Fallback to empty profile
+      // ignore
     }
-
     return {'displayName': 'Unknown', 'email': ''};
   }
 
-  /// Sync member profile with latest user data
   Future<void> _syncMemberProfile(GroupMember member) async {
     final profile = await _getUserProfile(member.userId);
     final latestName = profile['displayName'] ?? member.displayName;
     final latestEmail = profile['email'] ?? member.email;
-
-    // Only update if there's a difference
     if (latestName != member.displayName || latestEmail != member.email) {
       try {
         await _firestore
@@ -121,7 +149,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             .doc(member.userId)
             .update({'displayName': latestName, 'email': latestEmail});
       } catch (e) {
-        // Silently fail - not critical
+        // Silently fail
       }
     }
   }
@@ -132,7 +160,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       builder: (_) => AlertDialog(
         title: const Text('Regenerate Join Code?'),
         content: const Text(
-          'This will invalidate the current join code. Members already in the club will not be affected.',
+          'This will invalidate the current join code. Members already in the group will not be affected.',
         ),
         actions: [
           TextButton(
@@ -146,7 +174,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         ],
       ),
     );
-
     if (confirm != true) return;
     try {
       await _groupService.regenerateJoinCode(widget.groupId);
@@ -167,8 +194,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Leave Club?'),
-        content: const Text('Are you sure you want to leave this club?'),
+        title: const Text('Leave Group?'),
+        content: const Text('Are you sure you want to leave this group?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -182,16 +209,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         ],
       ),
     );
-
     if (confirm != true) return;
-
     try {
       await _groupService.leaveGroup(widget.groupId);
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Left club successfully')));
+      ).showSnackBar(const SnackBar(content: Text('Left group successfully')));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -207,10 +232,34 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
+  void _openQASheet(Announcement announcement) {
+    NotificationService().clearAnnouncementQACount(
+      widget.groupId,
+      announcement.id,
+    );
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: false,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(viewInsets: EdgeInsets.zero),
+        child: AnnouncementQASheet(
+          groupId: widget.groupId,
+          announcementId: announcement.id,
+          announcementTitle: announcement.title,
+          isModOrAdmin: _isModOrAdmin,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Scaffold(body: PremiumLoadingIndicator());
-    if (_group == null) return _emptyView('This club does not exist.');
+    if (_group == null) return _emptyView('This group does not exist.');
     if (!_isMember) return _membersOnlyView();
 
     return Scaffold(
@@ -235,7 +284,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget? _dynamicFAB() {
-    // Moderators and admins can post announcements
     if (!_isModOrAdmin) return null;
     if (_tabController.index == 0) {
       return FloatingActionButton(
@@ -297,152 +345,179 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       child: IconButton(
         icon: const Icon(Icons.logout_rounded, color: Colors.red),
         onPressed: _leaveClub,
-        tooltip: 'Leave Club',
+        tooltip: 'Leave Group',
       ),
     );
   }
 
   Widget _adminHeaderMenu() {
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert_rounded,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-      ),
-      onSelected: (value) {
-        if (value == 'show_code') {
-          showDialog(
-            context: context,
-            builder: (_) => Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 40,
-                      offset: const Offset(0, 10),
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: NotificationService().unreadCountStream,
+      builder: (context, snapshot) {
+        final count = NotificationService().unreadCounts['join_requests'] ?? 0;
+        return PopupMenuButton<String>(
+          icon: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(
+                Icons.more_vert_rounded,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
+              if (count > 0 && _isModOrAdmin)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                  ],
+                  ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Join Code',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withOpacity(0.4),
-                        letterSpacing: 2.0,
-                      ),
+            ],
+          ),
+          onSelected: (value) {
+            if (value == 'show_code') {
+              showDialog(
+                context: context,
+                builder: (_) => Dialog(
+                  backgroundColor: Colors.transparent,
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 40,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _group?.joinCode ?? ''),
-                        );
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Code copied to clipboard'),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _group?.joinCode ?? 'N/A',
-                          style: Theme.of(context).textTheme.displaySmall
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Join Code',
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 8.0,
-                                color: Theme.of(context).colorScheme.primary,
-                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.4),
+                                letterSpacing: 2.0,
                               ),
                         ),
-                      ),
+                        const SizedBox(height: 24),
+                        GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(
+                              ClipboardData(text: _group?.joinCode ?? ''),
+                            );
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Code copied to clipboard'),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 20,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _group?.joinCode ?? 'N/A',
+                              style: Theme.of(context).textTheme.displaySmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 8.0,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontFamily: 'monospace',
+                                  ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Tap to copy',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.3),
+                              ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Tap to copy',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withOpacity(0.3),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                  ],
+                  ),
                 ),
+              );
+            }
+            if (value == 'regen') _regenerateJoinCode();
+            if (value == 'requests') {
+              Navigator.pushNamed(
+                context,
+                '/club/join-requests',
+                arguments: widget.groupId,
+              );
+            }
+          },
+          itemBuilder: (_) => [
+            const PopupMenuItem(
+              value: 'show_code',
+              child: Row(
+                children: [
+                  Icon(Icons.qr_code_rounded, size: 20),
+                  SizedBox(width: 12),
+                  Text('Show Join Code'),
+                ],
               ),
             ),
-          );
-        }
-        if (value == 'regen') _regenerateJoinCode();
-        if (value == 'requests') {
-          Navigator.pushNamed(
-            context,
-            '/club/join-requests',
-            arguments: widget.groupId,
-          );
-        }
+            const PopupMenuItem(
+              value: 'regen',
+              child: Row(
+                children: [
+                  Icon(Icons.refresh_rounded, size: 20),
+                  SizedBox(width: 12),
+                  Text('Regenerate code'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'requests',
+              child: Row(
+                children: [
+                  Icon(Icons.group_add_rounded, size: 20),
+                  SizedBox(width: 12),
+                  Text('Manage requests'),
+                ],
+              ),
+            ),
+          ],
+        );
       },
-      itemBuilder: (_) => [
-        const PopupMenuItem(
-          value: 'show_code',
-          child: Row(
-            children: [
-              Icon(Icons.qr_code_rounded, size: 20),
-              SizedBox(width: 12),
-              Text('Show Join Code'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'regen',
-          child: Row(
-            children: [
-              Icon(Icons.refresh_rounded, size: 20),
-              SizedBox(width: 12),
-              Text('Regenerate code'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'requests',
-          child: Row(
-            children: [
-              Icon(Icons.group_add_rounded, size: 20),
-              SizedBox(width: 12),
-              Text('Manage requests'),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
   Widget _tabSelector() {
     final colors = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Container(
@@ -471,9 +546,37 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           unselectedLabelColor: colors.onSurface.withOpacity(0.4),
-          tabs: const [
-            Tab(text: 'Announcements'),
-            Tab(text: 'Members'),
+          tabs: [
+            Tab(
+              child: StreamBuilder<Map<String, dynamic>>(
+                stream: NotificationService().unreadCountStream,
+                builder: (context, snapshot) {
+                  final unreadCount = NotificationService().getClubUnreadCount(
+                    widget.groupId,
+                  );
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Text('Announcements'),
+                      if (unreadCount > 0)
+                        Positioned(
+                          right: -8,
+                          top: -2,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            const Tab(text: 'Members'),
           ],
         ),
       ),
@@ -496,7 +599,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget _membersOnlyView() {
-    return _emptyView('Members only You\'re not on the list. Yet.');
+    return _emptyView('Members only. You\'re not on the list. Yet.');
   }
 
   Widget _announcementsTab() {
@@ -528,7 +631,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget _buildAnnouncementCard(Announcement announcement) {
-    // Use StreamBuilder to get real-time user profile updates
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore
           .collection('users')
@@ -536,8 +638,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           .snapshots(),
       builder: (context, userSnapshot) {
         String authorName = announcement.authorName;
-
-        // Update author name if we have fresh data from user profile
         if (userSnapshot.hasData && userSnapshot.data!.exists) {
           final userData = userSnapshot.data!.data() as Map<String, dynamic>;
           authorName = userData['displayName'] ?? announcement.authorName;
@@ -545,8 +645,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
         return AnnouncementCard(
           announcement: announcement,
-          authorName: authorName, // Use real-time author name
+          authorName: authorName,
           isAdmin: _isAdmin,
+          isModOrAdmin: _isModOrAdmin,
+          groupId: widget.groupId,
           onDelete: () =>
               _groupService.deleteAnnouncement(widget.groupId, announcement.id),
           onTogglePin: () => _groupService.toggleAnnouncementPin(
@@ -554,6 +656,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             announcement.id,
             !announcement.isPinned,
           ),
+          onOpenQA: () => _openQASheet(announcement),
         );
       },
     );
@@ -562,26 +665,17 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   Widget _membersTab() {
     return Column(
       children: [
-        // Search bar
         Padding(
           padding: const EdgeInsets.fromLTRB(32, 16, 32, 12),
           child: TextField(
-            onChanged: (value) {
-              setState(() {
-                _memberSearchQuery = value;
-              });
-            },
+            onChanged: (value) => setState(() => _memberSearchQuery = value),
             decoration: InputDecoration(
               hintText: 'Search members...',
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _memberSearchQuery.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.clear_rounded),
-                      onPressed: () {
-                        setState(() {
-                          _memberSearchQuery = '';
-                        });
-                      },
+                      onPressed: () => setState(() => _memberSearchQuery = ''),
                     )
                   : null,
               filled: true,
@@ -608,8 +702,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             ),
           ),
         ),
-
-        // Members list
         Expanded(
           child: StreamBuilder<List<GroupMember>>(
             stream: _groupService.getGroupMembers(widget.groupId),
@@ -620,8 +712,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                 return const PremiumLoadingIndicator();
 
               final members = snapshot.data ?? [];
-
-              // Filter members based on search query
               final filteredMembers = members.where((member) {
                 if (_memberSearchQuery.isEmpty) return true;
                 final query = _memberSearchQuery.toLowerCase();
@@ -629,10 +719,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                     member.email.toLowerCase().contains(query);
               }).toList();
 
-              // Sort members: ADMIN first, then MODERATOR, then alphabetically
               final sortedMembers = List<GroupMember>.from(filteredMembers)
                 ..sort((a, b) {
-                  // Define role priority: admin = 0, moderator = 1, member = 2
                   int getRolePriority(MemberRole role) {
                     if (role == MemberRole.admin) return 0;
                     if (role == MemberRole.moderator) return 1;
@@ -641,13 +729,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
                   final aPriority = getRolePriority(a.role);
                   final bPriority = getRolePriority(b.role);
-
-                  // If roles are different, sort by priority
-                  if (aPriority != bPriority) {
+                  if (aPriority != bPriority)
                     return aPriority.compareTo(bPriority);
-                  }
-
-                  // If same role, sort alphabetically by displayName (case-insensitive)
                   return a.displayName.toLowerCase().compareTo(
                     b.displayName.toLowerCase(),
                   );
@@ -691,20 +774,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Widget _memberTile(GroupMember member) {
-    // Use StreamBuilder to get real-time user profile updates
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(member.userId).snapshots(),
       builder: (context, userSnapshot) {
         String displayName = member.displayName;
         String email = member.email;
 
-        // Update with fresh data if available
         if (userSnapshot.hasData && userSnapshot.data!.exists) {
           final userData = userSnapshot.data!.data() as Map<String, dynamic>;
           displayName = userData['displayName'] ?? member.displayName;
           email = userData['email'] ?? member.email;
-
-          // Sync the member profile in the background if changed
           if (displayName != member.displayName || email != member.email) {
             _syncMemberProfile(member);
           }
@@ -845,7 +924,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               context: context,
               builder: (_) => AlertDialog(
                 title: const Text('Remove Member?'),
-                content: Text('Kick $displayName from the club?'),
+                content: Text('Kick $displayName from the group?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
@@ -885,14 +964,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       },
       itemBuilder: (_) {
         final items = <PopupMenuEntry<String>>[];
-
-        // Kick option - available for non-original-admin members
         if (!isOriginalAdmin)
           items.add(const PopupMenuItem(value: 'kick', child: Text('Kick')));
-
-        // Moderator options
         if (!member.isAdmin) {
-          // Can make moderator if they're not already
           if (!member.isMod) {
             items.add(
               const PopupMenuItem(
@@ -901,7 +975,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               ),
             );
           } else {
-            // Can remove moderator status
             items.add(
               const PopupMenuItem(
                 value: 'remove_mod',
@@ -910,7 +983,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             );
           }
         } else if (member.isMod && member.isAdmin) {
-          // Admin who is also a mod - can remove mod status
           items.add(
             const PopupMenuItem(
               value: 'remove_mod',
@@ -918,8 +990,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             ),
           );
         }
-
-        // Admin options - only original admin can manage other admins
         if (_group != null &&
             _group!.adminIds.first == FirebaseAuth.instance.currentUser?.uid) {
           if (!member.isAdmin) {
@@ -950,26 +1020,37 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 }
 
+// ---------------------------------------------------------------------------
+// AnnouncementCard
+// ---------------------------------------------------------------------------
+
 class AnnouncementCard extends StatelessWidget {
   final Announcement announcement;
-  final String authorName; // Real-time author name
+  final String authorName;
   final bool isAdmin;
+  final bool isModOrAdmin;
+  final String groupId;
   final VoidCallback onDelete;
   final VoidCallback onTogglePin;
+  final VoidCallback onOpenQA;
 
   const AnnouncementCard({
     super.key,
     required this.announcement,
     required this.authorName,
     required this.isAdmin,
+    required this.isModOrAdmin,
+    required this.groupId,
     required this.onDelete,
     required this.onTogglePin,
+    required this.onOpenQA,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+    final groupService = GroupService();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1035,20 +1116,17 @@ class AnnouncementCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.delete_outline_rounded,
                             color: Colors.red,
                             size: 20,
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Delete',
-                            style: TextStyle(color: Colors.red),
-                          ),
+                          SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -1093,10 +1171,114 @@ class AnnouncementCard extends StatelessWidget {
                   color: colors.onSurface.withOpacity(0.4),
                 ),
               ),
+              const Spacer(),
+              if (isModOrAdmin)
+                StreamBuilder<int>(
+                  stream: groupService.getUnansweredQuestionCount(
+                    groupId,
+                    announcement.id,
+                  ),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data ?? 0;
+                    return _qaButton(context, colors, count, announcement.id);
+                  },
+                )
+              else
+                _qaButton(context, colors, 0, announcement.id),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _qaButton(
+    BuildContext context,
+    ColorScheme colors,
+    int unansweredCount,
+    String announcementId,
+  ) {
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: NotificationService().unreadCountStream,
+      builder: (context, snapshot) {
+        final hasUnread =
+            NotificationService().getAnnouncementUnreadQACount(announcementId) >
+            0;
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            TextButton.icon(
+              onPressed: onOpenQA,
+              icon: Icon(
+                Icons.question_answer_rounded,
+                size: 15,
+                color: colors.primary,
+              ),
+              label: Text(
+                'Ask',
+                style: TextStyle(
+                  color: colors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: colors.primary.withOpacity(0.08),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+            // Show either unanswered count (for staff) or red dot (for unread replies)
+            if (unansweredCount > 0)
+              Positioned(
+                right: -4,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    '$unansweredCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            else if (hasUnread)
+              Positioned(
+                right: -2,
+                top: -2,
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: colors.surface, width: 1.5),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 

@@ -7,6 +7,7 @@ import 'package:gr0ve/features/links/service/link_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:gr0ve/features/links/widgets/add_link_dialog.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
+import 'package:hugeicons/hugeicons.dart'; // Make sure you have this imported
 
 class LinksScreen extends StatefulWidget {
   const LinksScreen({super.key});
@@ -79,7 +80,6 @@ class _LinksScreenState extends State<LinksScreen> {
     });
 
     if (!isReordering) {
-      // Save the new order when exiting reorder mode
       LinkService.saveUserLinks(links);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -229,10 +229,11 @@ class _LinksScreenState extends State<LinksScreen> {
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.add_rounded,
+                  icon: HugeIcons.strokeRoundedAdd01,
                   label: 'Add Link',
                   onTap: _addLink,
                   colors: colors,
+                  isPrimary: true,
                 ),
               ),
               if (links.isNotEmpty) ...[
@@ -240,11 +241,12 @@ class _LinksScreenState extends State<LinksScreen> {
                 Expanded(
                   child: _buildActionButton(
                     icon: isReordering
-                        ? Icons.check_rounded
-                        : Icons.swap_vert_rounded,
+                        ? HugeIcons.strokeRoundedTick02
+                        : HugeIcons.strokeRoundedArrangeByNumbers19,
                     label: isReordering ? 'Done' : 'Reorder',
                     onTap: _toggleReordering,
                     colors: colors,
+                    isPrimary: false,
                   ),
                 ),
               ],
@@ -253,21 +255,49 @@ class _LinksScreenState extends State<LinksScreen> {
         ),
 
         if (links.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              '${links.length}/$maxLinks links',
-              style: TextStyle(
-                fontSize: 13,
-                color: colors.onSurface.withOpacity(0.4),
-              ),
-              textAlign: TextAlign.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${links.length} / $maxLinks',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onSurface.withOpacity(0.4),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                if (links.length == maxLinks) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.errorContainer,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'FULL',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: colors.onErrorContainer,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ],
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
 
         // Links List
         if (links.isEmpty)
@@ -276,39 +306,48 @@ class _LinksScreenState extends State<LinksScreen> {
           _buildReorderableList()
         else
           _buildLinksList(),
+        const SizedBox(height: 16),
       ],
     );
   }
 
   Widget _buildActionButton({
-    required IconData icon,
+    required List<List<dynamic>> icon,
     required String label,
     required VoidCallback onTap,
     required ColorScheme colors,
+    required bool isPrimary,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: colors.primary.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 20, color: colors.primary),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: colors.primary,
+    return Material(
+      color: isPrimary
+          ? colors.primary
+          : colors.surfaceContainerHighest.withOpacity(0.6),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              HugeIcon(
+                icon: icon,
+                color: isPrimary ? colors.onPrimary : colors.onSurface,
+                size: 20,
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: isPrimary ? colors.onPrimary : colors.onSurface,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -316,28 +355,36 @@ class _LinksScreenState extends State<LinksScreen> {
 
   Widget _buildEmptyState(ColorScheme colors, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(48),
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons.link_off_rounded,
-              size: 48,
-              color: colors.onSurface.withOpacity(0.3),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedLinkSquare02,
+                size: 42,
+                color: colors.onSurface.withOpacity(0.3),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              'No links yet',
+              'No Quick Links Yet',
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colors.onSurface.withOpacity(0.6),
+                fontWeight: FontWeight.w700,
+                color: colors.onSurface.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Add your first quick link to get started',
+              'Add your favorite websites and shortcuts\nfor quick access anytime',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurface.withOpacity(0.4),
+                color: colors.onSurface.withOpacity(0.5),
+                height: 1.4,
               ),
               textAlign: TextAlign.center,
             ),
@@ -353,111 +400,135 @@ class _LinksScreenState extends State<LinksScreen> {
       physics: const NeverScrollableScrollPhysics(),
       onReorder: _reorderLinks,
       itemCount: links.length,
+      proxyDecorator: (child, index, animation) {
+        return Material(
+          elevation: 8,
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: child,
+        );
+      },
       itemBuilder: (context, index) {
         final link = links[index];
-        return Column(
+        return Padding(
           key: ValueKey(link.id),
-          children: [
-            _buildLinkTile(link, isReordering: true),
-            if (index < links.length - 1) _buildDivider(),
-          ],
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildLinkCard(link, isReordering: true),
         );
       },
     );
   }
 
   Widget _buildLinksList() {
-    return Column(
-      children: [
-        for (int i = 0; i < links.length; i++) ...[
-          _buildLinkTile(links[i]),
-          if (i < links.length - 1) _buildDivider(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          for (int i = 0; i < links.length; i++) ...[
+            _buildLinkCard(links[i]),
+            if (i < links.length - 1) const SizedBox(height: 12),
+          ],
         ],
-      ],
+      ),
     );
   }
 
-  Widget _buildLinkTile(QuickLink link, {bool isReordering = false}) {
+  Widget _buildLinkCard(QuickLink link, {bool isReordering = false}) {
     final colors = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: isReordering ? null : () => _openLink(link),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: link.color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(link.icon, size: 22, color: link.color),
+    return Padding(
+      padding: isReordering
+          ? const EdgeInsets.symmetric(horizontal: 20)
+          : EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isReordering ? null : () => _openLink(link),
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(14),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+            child: Row(
+              children: [
+                // Icon Container
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: link.color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Icon(link.icon, size: 24, color: link.color),
+                  ),
+                ),
+                const SizedBox(width: 14),
+
+                // Title (with ellipsis truncation)
+                Expanded(
+                  child: Text(
                     link.title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: colors.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    link.url,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colors.onSurface.withOpacity(0.5),
+                      letterSpacing: 0.1,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+
+                // Action buttons
+                if (isReordering)
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedMenu11,
+                    size: 22,
+                    color: colors.onSurface.withOpacity(0.4),
+                  )
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildIconButton(
+                        icon: HugeIcons.strokeRoundedEdit02,
+                        color: colors.onSurface.withOpacity(0.5),
+                        onPressed: () => _editLink(link),
+                      ),
+                      const SizedBox(width: 2),
+                      _buildIconButton(
+                        icon: HugeIcons.strokeRoundedDelete02,
+                        color: colors.error.withOpacity(0.7),
+                        onPressed: () => _removeLink(link),
+                      ),
+                    ],
+                  ),
+              ],
             ),
-            const SizedBox(width: 12),
-            if (isReordering)
-              Icon(
-                Icons.drag_handle_rounded,
-                size: 24,
-                color: colors.onSurface.withOpacity(0.3),
-              )
-            else ...[
-              IconButton(
-                icon: Icon(
-                  Icons.edit_rounded,
-                  size: 20,
-                  color: colors.onSurface.withOpacity(0.5),
-                ),
-                onPressed: () => _editLink(link),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.close_rounded,
-                  size: 20,
-                  color: colors.error.withOpacity(0.7),
-                ),
-                onPressed: () => _removeLink(link),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Divider(
-        height: 1,
-        thickness: 1,
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+  Widget _buildIconButton({
+    required List<List<dynamic>> icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: HugeIcon(icon: icon, size: 20, color: color),
+        ),
       ),
     );
   }

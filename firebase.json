@@ -1,11 +1,3 @@
-/*
-rm web/index.html
-flutter build web --release
-head -20 build/web/index.html
-firebase deploy --only hosting
-
-*/
-
 {
   "flutter": {
     "platforms": {

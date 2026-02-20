@@ -6,7 +6,6 @@ import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/cards/custom_teacher_card.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/features/absence/services/teacher_service.dart';
-import 'package:gr0ve/core/helper/teacher_utils.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 
 class AbsenceScreen extends StatefulWidget {
@@ -90,9 +89,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
   Future<void> _init() async {
     await StarredTeacherService.load();
-    teachers = teacherList.values
-        .map((t) => Map<String, dynamic>.from(t))
-        .toList();
     await _loadAbsences();
     _scheduleRefresh();
   }
@@ -118,10 +114,20 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   Future<void> _loadAbsences({bool silent = false}) async {
     if (!silent) setState(() => isLoading = true);
 
-    absenceList = await fetchGoogleSheetAbsences(
-      spreadsheetId: _spreadsheetId,
-      worksheetTitle: _worksheetTitle,
-    );
+    // Fetch teacher list and absences in parallel
+    final results = await Future.wait([
+      fetchTeacherListFromFirebase(),
+      fetchGoogleSheetAbsences(
+        spreadsheetId: _spreadsheetId,
+        worksheetTitle: _worksheetTitle,
+      ),
+    ]);
+
+    teachers = (results[0] as Map<String, Map<String, dynamic>>).values
+        .map((t) => Map<String, dynamic>.from(t))
+        .toList();
+
+    absenceList = results[1] as Map<String, String>;
 
     if (!mounted) return;
 
@@ -372,7 +378,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                   valueListenable: StarredTeacherService.starredTeachers,
                   builder: (_, starred, __) {
                     final ordered = _ordered(starred);
-
                     return RefreshIndicator(
                       onRefresh: () => _loadAbsences(silent: true),
                       child: ListView.builder(

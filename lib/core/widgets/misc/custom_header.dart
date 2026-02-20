@@ -19,17 +19,18 @@ class CustomHeader extends StatelessWidget {
     if (t.contains('TEACHERS')) return "HOPE YOU HAVE A FREE!";
     if (t.contains('LUNCH')) return "\"FOOD\" THEY SAY";
     if (t.contains('CALENDAR')) return "STUFF YOU'LL PROBABLY MISS";
-    if (t.contains('CLUBS')) return "SADLY SOCIAL";
-    if (t.contains('GROUPS')) return "SADLY SOCIAL";
+    if (t.contains('CLUBS')) return "BETTER TOGETHER";
+    if (t.contains('GROUPS')) return "BETTER TOGETHER";
     if (t.contains('ACCOUNT')) return "WHO YOU ARE";
     if (t.contains('HELP')) return "WE GOT YOU";
     if (t.contains('PRIVACY POLICY'))
       return privacyPolicySections[0]["content"].toString();
     if (t.contains('TEACHERS')) return absenceList['date'] ?? "NO DATE FOUND";
-    if (t.contains('PENDING GROUPS')) return "SADLY SOCIAL";
-    if (t.contains('PENDING EVENTS')) return "SADLY SOCIAL";
+    if (t.contains('PENDING GROUPS')) return "BETTER TOGETHER";
+    if (t.contains('PENDING EVENTS')) return "BETTER TOGETHER";
     if (t.contains('LINKS')) return "HANDY LITTLE SHORTCUTS";
     if (t.contains('PENDING EVENTS')) return "SADLY SOCIAL";
+    if (t.contains('NEWS')) return "Academy Chronicle".capitalized;
     if (t.contains(user.capitalized)) return "NICE TO SEE YOU";
     return "FOR BCA";
   }

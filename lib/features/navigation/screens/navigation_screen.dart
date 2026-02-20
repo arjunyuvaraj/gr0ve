@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/links/screens/link_screen.dart';
 import 'package:gr0ve/features/authentication/screen/bergen_onboarding_screen.dart';
+import 'package:gr0ve/news/screens/news_screen.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
@@ -23,6 +24,8 @@ import 'package:gr0ve/features/map/screens/map_screen.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gr0ve/features/navigation/models/nav_config.dart';
+import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
 
 // SCREEN: Main navigation hub with role-based access control
 class NavigationScreen extends StatefulWidget {
@@ -42,6 +45,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   List<NavConfig> _navConfigs = [];
   List<Widget> _screens = [];
+  final NavigationPersistenceService _persistenceService =
+      NavigationPersistenceService();
+  List<String>? _customOrder;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -49,6 +55,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   StreamSubscription? _unreadCountSubscription;
   Map<String, int> _unreadCounts = {};
   Map<String, int> _unreadAnnouncementsByClub = {};
+  Map<String, int> _unreadQAByClub = {};
 
   // Feature flags
   bool _enableClubs = false;
@@ -68,8 +75,19 @@ class _NavigationScreenState extends State<NavigationScreen> {
     _checkAdminStatus();
     _loadVersionInfo();
     _loadFeatureFlags();
+    _loadNavigationOrder(); // Load custom order
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
+  }
+
+  Future<void> _loadNavigationOrder() async {
+    final order = await _persistenceService.getSavedOrder();
+    if (mounted) {
+      setState(() {
+        _customOrder = order;
+        _buildNavigation();
+      });
+    }
   }
 
   @override
@@ -209,7 +227,30 @@ class _NavigationScreenState extends State<NavigationScreen> {
   // ============================================================================
 
   void _buildNavigation() {
-    _navConfigs = _getNavigationForRole(_userRole, _isPlatformAdmin);
+    final baseDocs = _getNavigationForRole(_userRole, _isPlatformAdmin);
+
+    if (_customOrder != null && _customOrder!.isNotEmpty) {
+      // Create a map for quick lookup
+      final Map<String, NavConfig> configMap = {
+        for (var config in baseDocs) config.id: config,
+      };
+
+      List<NavConfig> sortedConfigs = [];
+      // 1. Add items in custom order if they still exist in baseDocs
+      for (var id in _customOrder!) {
+        if (configMap.containsKey(id)) {
+          sortedConfigs.add(configMap[id]!);
+          configMap.remove(id);
+        }
+      }
+      // 2. Add any remaining items that weren't in the custom order (e.g. new features)
+      sortedConfigs.addAll(configMap.values);
+
+      _navConfigs = sortedConfigs;
+    } else {
+      _navConfigs = baseDocs;
+    }
+
     _screens = _navConfigs.map((config) => config.screen).toList();
   }
 
@@ -219,49 +260,63 @@ class _NavigationScreenState extends State<NavigationScreen> {
       case UserRole.guest:
         return [
           NavConfig(
+            id: 'bus',
             iconData: HugeIcons.strokeRoundedBus02,
             label: 'Bus',
             screen: const BusScreen(),
           ),
           NavConfig(
+            id: 'help',
             iconData: HugeIcons.strokeRoundedHelpCircle,
             label: 'Help',
             screen: const Center(child: Text('Help Screen')),
           ),
           NavConfig(
+            id: 'account',
             iconData: HugeIcons.strokeRoundedUser,
             label: 'Account',
-            screen: const AccountScreen(),
+            screen: AccountScreen(onCustomizeNavigation: _showReorderMenu),
           ),
         ];
 
       case UserRole.student:
         final baseNav = [
           NavConfig(
+            id: 'home',
             iconData: HugeIcons.strokeRoundedHome01,
             label: 'Home',
             screen: const HomeScreen(),
           ),
           NavConfig(
+            id: 'absence',
             iconData: HugeIcons.strokeRoundedUserRemove02,
             label: 'Absence',
             screen: const AbsenceScreen(),
           ),
           NavConfig(
+            id: 'bus',
             iconData: HugeIcons.strokeRoundedBus02,
             label: 'Bus',
             screen: const BusScreen(),
             notificationKey: 'bus',
           ),
           NavConfig(
+            id: 'lunch_menu',
             iconData: HugeIcons.strokeRoundedRestaurant02,
             label: 'Lunch Menu',
             screen: const LunchMenuScreen(),
           ),
           NavConfig(
+            id: 'calendar',
             iconData: HugeIcons.strokeRoundedCalendar03,
             label: 'Calendar',
             screen: const CalendarScreen(),
+          ),
+          NavConfig(
+            id: 'news',
+            iconData: HugeIcons.strokeRoundedNews01,
+            label: 'News',
+            screen: const NewsScreen(),
           ),
         ];
 
@@ -269,12 +324,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
         if (isAdmin) {
           baseNav.addAll([
             NavConfig(
+              id: 'event_requests',
               iconData: HugeIcons.strokeRoundedTaskDaily02,
               label: 'Event Requests',
               screen: const AdminCalendarRequestsScreen(),
               isAdminOnly: true,
             ),
             NavConfig(
+              id: 'club_requests',
               iconData: HugeIcons.strokeRoundedUserQuestion01,
               label: 'Club Requests',
               screen: const AdminPanelScreen(),
@@ -288,6 +345,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         if (_enableClubs) {
           baseNav.add(
             NavConfig(
+              id: 'clubs',
               iconData: HugeIcons.strokeRoundedUserGroup,
               label: 'Clubs',
               screen: const ClubScreen(),
@@ -300,6 +358,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         if (_enableMaps) {
           baseNav.add(
             NavConfig(
+              id: 'maps',
               iconData: HugeIcons.strokeRoundedMaps,
               label: 'Maps',
               screen: const MapScreen(),
@@ -310,6 +369,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         // Add Links screen (always available for students)
         baseNav.add(
           NavConfig(
+            id: 'links',
             iconData: HugeIcons.strokeRoundedLink01,
             label: 'Links',
             screen: const LinksScreen(),
@@ -319,14 +379,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
         // Add remaining screens
         baseNav.addAll([
           NavConfig(
+            id: 'help',
             iconData: HugeIcons.strokeRoundedHelpCircle,
             label: 'Help',
             screen: const HelpScreen(),
           ),
           NavConfig(
+            id: 'account',
             iconData: HugeIcons.strokeRoundedUser,
             label: 'Account',
-            screen: const AccountScreen(),
+            screen: AccountScreen(onCustomizeNavigation: _showReorderMenu),
           ),
         ]);
 
@@ -335,34 +397,40 @@ class _NavigationScreenState extends State<NavigationScreen> {
       case UserRole.parent:
         return [
           NavConfig(
+            id: 'home',
             iconData: HugeIcons.strokeRoundedHome01,
             label: 'Home',
             screen: const HomeScreen(),
           ),
           NavConfig(
+            id: 'bus',
             iconData: HugeIcons.strokeRoundedBus02,
             label: 'Bus',
             screen: const BusScreen(),
           ),
           NavConfig(
+            id: 'lunch_menu',
             iconData: HugeIcons.strokeRoundedRestaurant02,
             label: 'Lunch Menu',
             screen: const LunchMenuScreen(),
           ),
           NavConfig(
+            id: 'links',
             iconData: HugeIcons.strokeRoundedLink01,
             label: 'Links',
             screen: const LinksScreen(),
           ),
           NavConfig(
+            id: 'help',
             iconData: HugeIcons.strokeRoundedHelpCircle,
             label: 'Help',
             screen: const Center(child: Text('Help Screen')),
           ),
           NavConfig(
+            id: 'account',
             iconData: HugeIcons.strokeRoundedUser,
             label: 'Account',
-            screen: const AccountScreen(),
+            screen: AccountScreen(onCustomizeNavigation: _showReorderMenu),
           ),
         ];
     }
@@ -378,9 +446,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
     ) {
       if (mounted) {
         setState(() {
-          final countsMap = data['counts'] as Map<dynamic, dynamic>?;
-          final announcementsMap =
-              data['announcementsByClub'] as Map<dynamic, dynamic>?;
+          final countsMap = data['counts'] != null
+              ? Map.from(data['counts'] as Map)
+              : null;
+          final announcementsMap = data['announcementsByClub'] != null
+              ? Map.from(data['announcementsByClub'] as Map)
+              : null;
+          final qaMap = data['qaByClub'] != null
+              ? Map.from(data['qaByClub'] as Map)
+              : null;
 
           _unreadCounts =
               countsMap?.map(
@@ -392,6 +466,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 (key, value) => MapEntry(key.toString(), value as int),
               ) ??
               {};
+          _unreadQAByClub =
+              qaMap?.map(
+                (key, value) => MapEntry(key.toString(), value as int),
+              ) ??
+              {};
         });
       }
     });
@@ -400,6 +479,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       _unreadCounts = NotificationService().unreadCounts;
       _unreadAnnouncementsByClub =
           NotificationService().unreadAnnouncementsByClub;
+      _unreadQAByClub = NotificationService().unreadQAByClub;
     });
   }
 
@@ -479,23 +559,24 @@ class _NavigationScreenState extends State<NavigationScreen> {
     if (config.notificationKey != null) {
       NotificationService().clearUnreadCount(config.notificationKey!);
     }
-    if (config.showClubNotifications) {
-      NotificationService().clearAllAnnouncementCounts();
-    }
 
     setState(() => _selectedIndex = index);
   }
 
   int _getTotalUnreadCount(NavConfig config) {
+    int count = 0;
     if (config.showClubNotifications) {
-      return _unreadAnnouncementsByClub.values.fold(
+      count += _unreadAnnouncementsByClub.values.fold(
         0,
         (sum, count) => sum + count,
       );
+      count += _unreadQAByClub.values.fold(0, (sum, count) => sum + count);
+      count += _unreadCounts['qa_replies'] ?? 0;
+      count += _unreadCounts['unread_questions'] ?? 0;
     } else if (config.notificationKey != null) {
-      return _unreadCounts[config.notificationKey] ?? 0;
+      count = _unreadCounts[config.notificationKey] ?? 0;
     }
-    return 0;
+    return count;
   }
 
   // ============================================================================
@@ -548,6 +629,45 @@ class _NavigationScreenState extends State<NavigationScreen> {
               letterSpacing: 0.5,
             ),
           ),
+          const SizedBox(height: 8),
+          // NEW CUSTOMIZATION OPTION
+          InkWell(
+            onTap: () {
+              Navigator.pop(context);
+              _showReorderMenu();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: colors.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colors.primary.withOpacity(0.1)),
+              ),
+              child: Row(
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedSorting01,
+                    color: colors.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Customize Navigation',
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colors.primary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           Flexible(
             child: ListView.separated(
@@ -595,13 +715,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.red,
+                            color: colors.error,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             unreadCount > 9 ? '9+' : unreadCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colors.onError,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -648,7 +768,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       );
     }
 
-    // Show onboarding screen - COVERS EVERYTHING including navigation bar
+    // Show onboarding screen
     if (_needsOnboarding) {
       return BergenOnboardingScreen(
         onComplete: () {
@@ -657,21 +777,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
           });
         },
       );
-    }
-
-    // Normal navigation UI
-    final int displayCount = _navConfigs.length > 5 ? 4 : _navConfigs.length;
-    final List<Widget> navItems = [];
-
-    for (int i = 0; i < displayCount; i++) {
-      final config = _navConfigs[i];
-      final isSelected = _selectedIndex == i;
-      navItems.add(_buildNavItem(i, config, isSelected));
-    }
-
-    if (_navConfigs.length > 5) {
-      final anyMoreSelected = _selectedIndex >= 4;
-      navItems.add(_buildMoreNavItem(anyMoreSelected));
     }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -687,51 +792,225 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ? Brightness.dark
             : Brightness.light,
       ),
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 900;
+
+          if (isWide) {
+            return _buildWideLayout(context, colors);
+          } else {
+            return _buildMobileLayout(context, colors);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildWideLayout(BuildContext context, ColorScheme colors) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Row(
+        children: [
+          // Sidebar / Navigation Rail
+          Container(
+            width: 100,
+            decoration: BoxDecoration(
+              color: colors.surface,
+              border: Border(
+                right: BorderSide(color: colors.onSurface.withOpacity(0.05)),
+              ),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 48),
+                Image.asset(
+                  Theme.of(context).brightness == Brightness.light
+                      ? 'assets/app_icon.png'
+                      : 'assets/appicon_dark.png',
+                  height: 48,
+                  width: 48,
+                ),
+                const SizedBox(height: 48),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _navConfigs.length,
+                    itemBuilder: (context, index) {
+                      final config = _navConfigs[index];
+                      final isSelected = _selectedIndex == index;
+                      final unreadCount = _getTotalUnreadCount(config);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: _buildSidebarItem(
+                          index,
+                          config,
+                          isSelected,
+                          unreadCount,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Main Content
+          Expanded(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 48,
+                    vertical: 32,
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: KeyedSubtree(
+                      key: ValueKey<int>(_selectedIndex),
+                      child: _screens[_selectedIndex],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarItem(
+    int index,
+    NavConfig config,
+    bool isSelected,
+    int unreadCount,
+  ) {
+    final colors = context.colors;
+
+    return Tooltip(
+      message: config.label,
+      child: InkWell(
+        onTap: () => _changeIndex(index),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 32, 80),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                  child: KeyedSubtree(
-                    key: ValueKey<int>(_selectedIndex),
-                    child: _screens[_selectedIndex],
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? colors.primary.withOpacity(0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: HugeIcon(
+                    icon: config.iconData,
+                    color: isSelected
+                        ? colors.primary
+                        : colors.onSurface.withOpacity(0.4),
+                    size: 28,
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 20,
-                left: 20,
-                right: 20,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
+              if (unreadCount > 0)
+                Positioned(
+                  right: 12,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: colors.error,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      unreadCount > 9 ? '9+' : unreadCount.toString(),
+                      style: TextStyle(
+                        color: colors.onError,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: navItems,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, ColorScheme colors) {
+    final int displayCount = _navConfigs.length > 5 ? 4 : _navConfigs.length;
+    final List<Widget> navItems = [];
+
+    for (int i = 0; i < displayCount; i++) {
+      final config = _navConfigs[i];
+      final isSelected = _selectedIndex == i;
+      navItems.add(_buildNavItem(i, config, isSelected));
+    }
+
+    if (_navConfigs.length > 5) {
+      final anyMoreSelected = _selectedIndex >= 4;
+      navItems.add(_buildMoreNavItem(anyMoreSelected));
+    }
+
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 32, 80),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: KeyedSubtree(
+                  key: ValueKey<int>(_selectedIndex),
+                  child: _screens[_selectedIndex],
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: navItems,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -752,12 +1031,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              HugeIcon(
-                icon: config.iconData,
-                color: isSelected
-                    ? context.colors.primary
-                    : context.colors.onSurface.withOpacity(0.5),
-                size: 28.0,
+              SizedBox(
+                width: 28,
+                height: 28,
+                child: HugeIcon(
+                  icon: config.iconData,
+                  color: isSelected
+                      ? context.colors.primary
+                      : context.colors.onSurface.withOpacity(0.5),
+                  size: 28.0,
+                ),
               ),
               if (unreadCount > 0)
                 Positioned(
@@ -765,8 +1048,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                   top: -4,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
+                    decoration: BoxDecoration(
+                      color: context.colors.error,
                       shape: BoxShape.circle,
                     ),
                     constraints: const BoxConstraints(
@@ -775,8 +1058,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     ),
                     child: Text(
                       unreadCount > 9 ? '9+' : unreadCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.colors.onError,
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
                       ),
@@ -828,7 +1111,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: context.colors.error,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: context.colors.surface,
@@ -843,28 +1126,144 @@ class _NavigationScreenState extends State<NavigationScreen> {
       ),
     );
   }
-}
 
-// ============================================================================
-// CONFIGURATION MODELS
-// ============================================================================
+  // ============================================================================
+  // UI - REORDERING
+  // ============================================================================
 
-enum UserRole { guest, parent, student }
+  void _showReorderMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _buildReorderMenu(),
+    );
+  }
 
-class NavConfig {
-  final dynamic iconData; // Compatible with older Hugeicons package
-  final String label;
-  final Widget screen;
-  final bool isAdminOnly;
-  final String? notificationKey;
-  final bool showClubNotifications;
+  Widget _buildReorderMenu() {
+    final colors = Theme.of(context).colorScheme;
+    // We want to reorder ALL available items for the current role
+    List<NavConfig> itemsToReorder = List.from(_navConfigs);
 
-  NavConfig({
-    required this.iconData,
-    required this.label,
-    required this.screen,
-    this.isAdminOnly = false,
-    this.notificationKey,
-    this.showClubNotifications = false,
-  });
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.onSurface.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Customize Navigation',
+                style: context.text.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: colors.primary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Drag items to reorder them in your navigation bar.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colors.onSurface.withOpacity(0.6)),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: ReorderableListView.builder(
+                  itemCount: itemsToReorder.length,
+                  onReorder: (oldIndex, newIndex) {
+                    setModalState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      final item = itemsToReorder.removeAt(oldIndex);
+                      itemsToReorder.insert(newIndex, item);
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final config = itemsToReorder[index];
+                    return ListTile(
+                      key: ValueKey(config.id),
+                      leading: HugeIcon(
+                        icon: config.iconData,
+                        color: colors.primary,
+                      ),
+                      title: Text(config.label),
+                      trailing: Icon(
+                        Icons.drag_handle_rounded,
+                        color: colors.onSurface.withOpacity(0.2),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final newOrder = itemsToReorder.map((c) => c.id).toList();
+                    await _persistenceService.saveOrder(newOrder);
+                    if (mounted) {
+                      setState(() {
+                        _customOrder = newOrder;
+                        _buildNavigation();
+                      });
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Navigation order saved!'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save Order',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () async {
+                  await _persistenceService.saveOrder([]);
+                  if (mounted) {
+                    setState(() {
+                      _customOrder = null;
+                      _buildNavigation();
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(
+                  'Reset to Default',
+                  style: TextStyle(color: colors.error),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

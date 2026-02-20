@@ -13,7 +13,8 @@ import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  final VoidCallback? onCustomizeNavigation;
+  const AccountScreen({super.key, this.onCustomizeNavigation});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -633,6 +634,17 @@ class _AccountScreenState extends State<AccountScreen> {
             onTap: isEmailVerified ? _updateAcademy : null,
           ),
         ],
+
+        _buildDivider(),
+
+        _buildSettingsTile(
+          icon: Icons.sort_rounded,
+          iconColor: colors.primary,
+          title: 'Customize Navigation',
+          subtitle: 'Reorder items in your navigation bar',
+          trailing: Icons.chevron_right_rounded,
+          onTap: widget.onCustomizeNavigation,
+        ),
 
         _buildDivider(),
 

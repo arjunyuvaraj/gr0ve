@@ -20,14 +20,12 @@ class _ClubMyClubsTabState extends State<ClubMyClubsTab> {
   @override
   void initState() {
     super.initState();
-    // Clear all announcement counts when viewing My Clubs tab
-    NotificationService().clearAllAnnouncementCounts();
   }
 
   @override
   Widget build(BuildContext context) {
     if (_user == null) {
-      return const Center(child: Text('Please sign in to view your clubs'));
+      return const Center(child: Text('Please sign in to view your groups'));
     }
 
     return StreamBuilder<List<Group>>(
@@ -57,7 +55,7 @@ class _ClubMyClubsTabState extends State<ClubMyClubsTab> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'You haven\'t joined any clubs yet',
+                  'You haven\'t joined any groups yet',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(
                       context,
@@ -66,7 +64,7 @@ class _ClubMyClubsTabState extends State<ClubMyClubsTab> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Browse clubs to find ones you\'re interested in',
+                  'Browse groups to find ones you\'re interested in',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(
                       context,

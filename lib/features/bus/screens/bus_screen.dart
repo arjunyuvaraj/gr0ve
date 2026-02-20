@@ -38,9 +38,8 @@ class _BusScreenState extends State<BusScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Bus routes refreshed! ✓"),
+            content: Text('Bus routes refreshed! \u2713'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.green,
           ),
         );
       }
@@ -126,7 +125,30 @@ class _BusScreenState extends State<BusScreen> {
                   );
 
                   if (orderedRoutes.isEmpty) {
-                    return const Center(child: Text("No buses found"));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.directions_bus_rounded,
+                            size: 56,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.2),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No buses found',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.4),
+                                ),
+                          ),
+                        ],
+                      ),
+                    );
                   }
 
                   return LayoutBuilder(

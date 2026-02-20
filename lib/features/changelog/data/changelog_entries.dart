@@ -1,10 +1,10 @@
 final Map<String, String> changelogEntries = {
-  "v1.4.6":
-      "Sadly, a minor bug was discoverd with the bus refreshing system, that has successfully been patched. Also minor restyling in calendar and help pages",
   "v1.4.5":
-      "After much demand, we restyled the app, making it easier to use. Also made some minor patches to enahnce the overall experience",
+      "Sadly, a minor bug was discoverd with the bus refreshing system, that has successfully been patched. Also minor restyling in calendar and help pages",
   "v1.4.4":
-      "We apologize for not updating the changelog through v1.4.1-v1.4.3! This update brings intelligent bus arrival notifications: get notified when your starred buses arrive, with automatic detection of minimum days and regular dismissal times. Buses now show accurate arrival status based on the school schedule.",
+      "After much demand, we restyled the app, making it easier to use. Also made some minor patches to enahnce the overall experience",
+  "v1.4.3":
+      "We apologize for not updating the changelog through v1.4.1-v1.4.2! This update brings intelligent bus arrival notifications: get notified when your starred buses arrive, with automatic detection of minimum days and regular dismissal times. Buses now show accurate arrival status based on the school schedule.",
   "v1.4.0":
       "Added a calendar page to view BCA events and add your own personal events. Improved quick links with edit and reorder functionality for better customization.",
   "v1.3.0":

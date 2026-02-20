@@ -6,7 +6,8 @@ class PremiumLoadingIndicator extends StatefulWidget {
   const PremiumLoadingIndicator({super.key, this.size = 60});
 
   @override
-  State<PremiumLoadingIndicator> createState() => _PremiumLoadingIndicatorState();
+  State<PremiumLoadingIndicator> createState() =>
+      _PremiumLoadingIndicatorState();
 }
 
 class _PremiumLoadingIndicatorState extends State<PremiumLoadingIndicator>
@@ -27,9 +28,10 @@ class _PremiumLoadingIndicatorState extends State<PremiumLoadingIndicator>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutExpo),
     );
 
-    _opacityAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _opacityAnimation = Tween<double>(
+      begin: 0.3,
+      end: 0.8,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -44,28 +46,48 @@ class _PremiumLoadingIndicatorState extends State<PremiumLoadingIndicator>
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          return Container(
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: context.colors.primary.withOpacity(0.1),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Opacity(
-              opacity: _opacityAnimation.value,
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Image.asset(
-                  'assets/logo.png', // Fallback to a simple container if logo missing
-                  errorBuilder: (context, _, __) => Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.colors.primary,
+          return SizedBox(
+            width: widget.size * 1.5,
+            height: widget.size * 1.5,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Outer pulsing circle
+                Opacity(
+                  opacity:
+                      (1.2 - _scaleAnimation.value) * _opacityAnimation.value,
+                  child: Transform.scale(
+                    scale: _scaleAnimation.value * 1.5,
+                    child: Container(
+                      width: widget.size,
+                      height: widget.size,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.colors.primary.withOpacity(0.4),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                // Inner pulsing circle
+                Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Container(
+                    width: widget.size * 0.8,
+                    height: widget.size * 0.8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colors.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.colors.primary.withOpacity(0.3),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },
