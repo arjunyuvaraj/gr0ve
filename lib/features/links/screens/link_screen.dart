@@ -320,7 +320,7 @@ class _LinksScreenState extends State<LinksScreen> {
   }) {
     return Material(
       color: isPrimary
-          ? colors.primary
+          ? colors.primary.withAlpha(150)
           : colors.surfaceContainerHighest.withOpacity(0.6),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(

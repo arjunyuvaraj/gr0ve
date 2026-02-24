@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gr0ve/core/helper/helper_functions.dart';
 
+extension AppColorScheme on ColorScheme {
+  Color get success => brightness == Brightness.dark
+      ? const Color(0xFF35B595)
+      : const Color(0xFF1F6F5B);
+}
+
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   scaffoldBackgroundColor: const Color(0xFF111111),
 
   colorScheme: const ColorScheme.dark(
-    primary: Color(0xFF48A68B),
-    secondary: Color(0xFF48A68B),
+    primary: Color(0xFFEEC3F5),
+    secondary: Color(0xFFEEC3F5),
     surface: Color(0xFF1A1A1A),
     tertiary: Color(0xFF262626),
     errorContainer: Color(0xFF3D1F1F),

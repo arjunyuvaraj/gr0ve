@@ -1,65 +1,139 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-  <application android:label="gr0ve" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">
-    <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-      <!-- Specifies an Android theme to apply to this Activity as soon as
-                 the Android process has started. This theme is visible to the user
-                 while the Flutter UI initializes. After that, this theme continues
-                 to determine the Window background behind the Flutter UI. -->
-      <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme"/>
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
+
+    <application
+        android:label="gr0ve"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+
+        <!-- Base activity — NO intent-filter here intentionally.
+             The activity-aliases below own all launcher entries.
+             Keeping a LAUNCHER intent-filter on this activity is what
+             caused duplicate icons: Android shows one icon per enabled
+             component that has a LAUNCHER filter, so base + alias = 2 icons. -->
+    <activity
+        android:name=".MainActivity"
+        android:exported="true"
+        android:launchMode="singleTop"
+        android:taskAffinity=""
+        android:theme="@style/LaunchTheme"
+        android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+        android:hardwareAccelerated="true"
+        android:windowSoftInputMode="adjustResize">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        <meta-data
+            android:name="io.flutter.embedding.android.NormalTheme"
+            android:resource="@style/NormalTheme" />
     </activity>
-    
-    <!-- Flutter Local Notifications receivers -->
-    <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" android:exported="false" />
-    <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver" android:exported="false">
-        <intent-filter>
-            <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
-        </intent-filter>
-    </receiver>
-    
-    <!-- Firebase Cloud Messaging Service -->
-    <service
-        android:name="com.google.firebase.messaging.FirebaseMessagingService"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="com.google.firebase.MESSAGING_EVENT" />
-        </intent-filter>
-    </service>
 
-    <!-- FCM default notification channel ID -->
-    <meta-data
-        android:name="com.google.firebase.messaging.default_notification_channel_id"
-        android:value="gr0ve_channel" />
-        
-    <!-- FCM default notification icon (make sure you have this icon) -->
-    <meta-data
-        android:name="com.google.firebase.messaging.default_notification_icon"
-        android:resource="@drawable/ic_stat_notification" />
-    
-    <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
-    <meta-data android:name="flutterEmbedding" android:value="2"/>
-  </application>
-  
-  <!-- Permissions -->
-  <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-  <uses-permission android:name="android.permission.VIBRATE" />
-  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-  
-  <!-- Required to query activities that can process text, see:
-         https://developer.android.com/training/package-visibility and
-         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+        <!-- Grover — default enabled (shown on first install) -->
+        <activity-alias
+            android:name=".MainActivityGrover"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_grover"
+            android:roundIcon="@mipmap/ic_launcher_grover_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
-  <queries>
-    <intent>
-      <action android:name="android.intent.action.PROCESS_TEXT"/>
-      <data android:mimeType="text/plain"/>
-    </intent>
-  </queries>
+        <!-- Aspen — disabled -->
+        <activity-alias
+            android:name=".MainActivityAspen"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_aspen"
+            android:roundIcon="@mipmap/ic_launcher_aspen_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Rowan — disabled -->
+        <activity-alias
+            android:name=".MainActivityRowan"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_rowan"
+            android:roundIcon="@mipmap/ic_launcher_rowan_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Sakura — disabled -->
+        <activity-alias
+            android:name=".MainActivitySakura"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_sakura"
+            android:roundIcon="@mipmap/ic_launcher_sakura_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Flutter Local Notifications receivers -->
+        <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" android:exported="false" />
+        <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- Firebase Messaging Service -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- FCM metadata -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="gr0ve_channel" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notification" />
+
+        <!-- Flutter embedding -->
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
+    </application>
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- Queries for PROCESS_TEXT -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+
 </manifest>

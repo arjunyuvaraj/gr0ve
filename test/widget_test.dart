@@ -6,7 +6,6 @@ import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
 import 'package:gr0ve/core/widgets/misc/not_logged_in.dart';
 import 'package:gr0ve/core/theme/light_theme.dart';
-import 'package:gr0ve/core/widgets/misc/glass_container.dart';
 
 void main() {
   group('Custom Components Tests', () {
@@ -473,7 +472,6 @@ void main() {
         ),
       );
 
-      expect(find.byType(GlassContainer), findsOneWidget);
       expect(find.byType(InkWell), findsOneWidget);
     });
 

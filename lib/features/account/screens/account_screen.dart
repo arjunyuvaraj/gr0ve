@@ -8,6 +8,7 @@ import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/misc/not_logged_in.dart';
 import 'package:gr0ve/features/authentication/services/authentication_service.dart';
+import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
@@ -31,11 +32,31 @@ class _AccountScreenState extends State<AccountScreen> {
   String? userGrade;
   String? userAcademy;
 
+  // Active counselor persona (reflected in the tile)
+  CounselorPersona _activePersona = CounselorPersonaService.activePersona.value;
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
     FirebaseAnalytics.instance.logEvent(name: 'screen_account');
+
+    // Keep persona tile in sync with global notifier
+    CounselorPersonaService.activePersona.addListener(_onPersonaChanged);
+  }
+
+  @override
+  void dispose() {
+    CounselorPersonaService.activePersona.removeListener(_onPersonaChanged);
+    super.dispose();
+  }
+
+  void _onPersonaChanged() {
+    if (mounted) {
+      setState(() {
+        _activePersona = CounselorPersonaService.activePersona.value;
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -46,7 +67,6 @@ class _AccountScreenState extends State<AccountScreen> {
       final email = user!.email ?? '';
       isBergenStudent = email.endsWith('@bergen.org');
 
-      // Load grade and academy from Firestore
       try {
         final userDoc = await FirebaseFirestore.instance
             .collection('users')
@@ -59,7 +79,7 @@ class _AccountScreenState extends State<AccountScreen> {
           userAcademy = data?['academy'];
         }
       } catch (e) {
-        print('Error loading user profile: $e');
+        debugPrint('Error loading user profile: $e');
       }
     }
 
@@ -71,9 +91,197 @@ class _AccountScreenState extends State<AccountScreen> {
     return user!.email ?? 'No email';
   }
 
+  // ── Counselor persona picker ─────────────────────────────────
+  Future<void> _showCounselorPicker() async {
+    final brightness = Theme.of(context).brightness;
+    CounselorPersona selected = _activePersona;
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final colors = Theme.of(ctx).colorScheme;
+          final textTheme = Theme.of(ctx).textTheme;
+          return Container(
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 36),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.onSurface.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                Text(
+                  'Switch Counselor',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Your counselor\'s color theme follows you across the app.',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colors.onSurface.withOpacity(0.5),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 22),
+                ...CounselorPersona.values.map((persona) {
+                  final isSelected = selected == persona;
+                  final accent = persona.primary(brightness);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: GestureDetector(
+                      onTap: () => setSheetState(() => selected = persona),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? accent.withOpacity(0.08)
+                              : colors.surfaceContainerHighest.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: isSelected
+                                ? accent
+                                : colors.outline.withOpacity(0.1),
+                            width: isSelected ? 2 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Avatar
+                            Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: accent.withOpacity(0.1),
+                              ),
+                              child: ClipOval(
+                                child: Image.asset(
+                                  persona.avatarAsset(brightness),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        persona.displayName,
+                                        style: textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: isSelected
+                                              ? accent
+                                              : colors.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      // Specialty badge
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: accent.withOpacity(0.14),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          persona.specialtyLabel,
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w800,
+                                            color: accent,
+                                            letterSpacing: 0.4,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    persona.tagline,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colors.onSurface.withOpacity(0.5),
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: accent,
+                                size: 22,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await CounselorPersonaService.setPersona(selected);
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: selected.primary(brightness),
+                      foregroundColor: selected.onPrimary(brightness),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Switch to ${selected.displayName}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ── Other handlers (unchanged) ───────────────────────────────
+
   Future<void> _sendVerificationEmail() async {
     if (user == null || user!.emailVerified) return;
-
     try {
       await user!.sendEmailVerification();
       if (mounted) {
@@ -99,7 +307,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _updateGrade() async {
     if (!isBergenStudent) return;
-
     final grades = ['9', '10', '11', '12'];
     String? selectedGrade = userGrade;
 
@@ -137,11 +344,7 @@ class _AccountScreenState extends State<AccountScreen> {
             .collection('users')
             .doc(user!.uid)
             .update({'grade': selectedGrade});
-
-        setState(() {
-          userGrade = selectedGrade;
-        });
-
+        setState(() => userGrade = selectedGrade);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -165,7 +368,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _updateAcademy() async {
     if (!isBergenStudent) return;
-
     final academies = [
       'ATCS',
       'AAST',
@@ -177,7 +379,6 @@ class _AccountScreenState extends State<AccountScreen> {
       'AVPA-M',
       'AVPA-T',
     ];
-
     String? selectedAcademy = userAcademy;
 
     final confirmed = await showDialog<bool>(
@@ -219,11 +420,7 @@ class _AccountScreenState extends State<AccountScreen> {
             .collection('users')
             .doc(user!.uid)
             .update({'academy': selectedAcademy});
-
-        setState(() {
-          userAcademy = selectedAcademy;
-        });
-
+        setState(() => userAcademy = selectedAcademy);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -247,7 +444,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _updateNickname() async {
     String newNickname = user?.displayName ?? '';
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -293,7 +489,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
 
     if (confirmed != true || newNickname.trim().isEmpty) return;
-
     try {
       if (user == null) return;
       await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
@@ -301,11 +496,7 @@ class _AccountScreenState extends State<AccountScreen> {
       }, SetOptions(merge: true));
       await user!.updateDisplayName(newNickname.trim());
       await user!.reload();
-
-      setState(() {
-        user = FirebaseAuth.instance.currentUser;
-      });
-
+      setState(() => user = FirebaseAuth.instance.currentUser);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -336,7 +527,6 @@ class _AccountScreenState extends State<AccountScreen> {
       );
       return;
     }
-
     final email = user!.email;
     if (email == null || email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -347,7 +537,6 @@ class _AccountScreenState extends State<AccountScreen> {
       );
       return;
     }
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -388,12 +577,9 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
-
     if (confirmed != true) return;
-
     try {
       await _authService.sendPasswordResetEmail(email);
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -417,9 +603,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _confirmDeleteAccount() async {
     if (user == null) return;
-
     String password = '';
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -467,7 +651,6 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
-
     if (confirmed != true) return;
     if (!user!.isAnonymous && password.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -478,7 +661,6 @@ class _AccountScreenState extends State<AccountScreen> {
       );
       return;
     }
-
     try {
       await _authService.deleteAccount(password);
       if (mounted) Navigator.pushReplacementNamed(context, '/login');
@@ -505,17 +687,14 @@ class _AccountScreenState extends State<AccountScreen> {
         confirmLabel: 'Logout',
       ),
     );
-
     if (confirmed != true) return;
-
     StarredBusService.reset();
     StarredTeacherService.reset();
     await _authService.signOut();
-
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+    if (mounted) Navigator.pushReplacementNamed(context, '/login');
   }
+
+  // ── Build ────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -551,19 +730,20 @@ class _AccountScreenState extends State<AccountScreen> {
       children: [
         const CustomHeader(title: "ACCOUNT"),
         const SizedBox(height: 32),
-
-        // Account Information
         _buildAccountInformation(colors),
-
         const SizedBox(height: 32),
       ],
     );
   }
 
   Widget _buildAccountInformation(ColorScheme colors) {
+    final brightness = Theme.of(context).brightness;
+    final personaColor = _activePersona.primary(brightness);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ── Account tiles ──────────────────────────────────────
         if (!user!.isAnonymous)
           _buildSettingsTile(
             icon: Icons.email_rounded,
@@ -646,7 +826,84 @@ class _AccountScreenState extends State<AccountScreen> {
           onTap: widget.onCustomizeNavigation,
         ),
 
-        _buildDivider(),
+        // ── Counselor / Theme section ──────────────────────────
+        _buildSectionHeader('CHATBOT & THEME'),
+
+        // Persona tile — shows avatar + name + color accent
+        InkWell(
+          onTap: _showCounselorPicker,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              children: [
+                // Icon container tinted with persona color
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: personaColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: personaColor.withOpacity(0.2)),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(11),
+                    child: Image.asset(
+                      _activePersona.avatarAsset(brightness),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Counselor & Theme',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: colors.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          // Colored dot
+                          Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.only(right: 6),
+                            decoration: BoxDecoration(
+                              color: personaColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          Text(
+                            '${_activePersona.displayName} · ${_activePersona.specialtyLabel}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: personaColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: colors.onSurface.withOpacity(0.3),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // ── Danger zone ────────────────────────────────────────
+        _buildSectionHeader('ACCOUNT'),
 
         _buildSettingsTile(
           icon: Icons.logout_rounded,
@@ -668,6 +925,22 @@ class _AccountScreenState extends State<AccountScreen> {
           onTap: _confirmDeleteAccount,
         ),
       ],
+    );
+  }
+
+  /// Gray section header label (e.g. "CHATBOT & THEME")
+  Widget _buildSectionHeader(String label) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
+        ),
+      ),
     );
   }
 

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gr0ve/features/counselor/screens/counselor_screen.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/links/screens/link_screen.dart';
 import 'package:gr0ve/features/authentication/screen/bergen_onboarding_screen.dart';
-import 'package:gr0ve/news/screens/news_screen.dart';
+import 'package:gr0ve/features/news/screens/news_screen.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
@@ -20,12 +21,12 @@ import 'package:gr0ve/features/club/screens/club_screen.dart';
 import 'package:gr0ve/features/absence/screens/absence_screen.dart';
 import 'package:gr0ve/features/home/screens/home_screen.dart';
 import 'package:gr0ve/features/lunch_menu/screens/lunch_menu_screen.dart';
-import 'package:gr0ve/features/map/screens/map_screen.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gr0ve/features/navigation/models/nav_config.dart';
 import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
+import 'package:gr0ve/features/snapshot/snapshot_overlay.dart';
 
 // SCREEN: Main navigation hub with role-based access control
 class NavigationScreen extends StatefulWidget {
@@ -78,6 +79,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     _loadNavigationOrder(); // Load custom order
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
+    _showSnapshotOnLaunch();
   }
 
   Future<void> _loadNavigationOrder() async {
@@ -150,6 +152,21 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
+  Future<void> _showSnapshotOnLaunch() async {
+    // Wait for onboarding check to finish before showing snapshot
+    // (we don't want it layered on top of the onboarding screen)
+    await Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 100));
+      return _isCheckingOnboarding;
+    });
+    if (!mounted || _needsOnboarding) return;
+
+    // Small delay so the nav screen has fully rendered first
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+
+    SnapshotOverlay.show(context);
+  }
   // ============================================================================
   // FEATURE FLAGS
   // ============================================================================
@@ -171,7 +188,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
         setState(() {
           // Enable for beta testers OR if globally enabled
           _enableClubs = (data?['enable_clubs'] ?? false) || isBetaTester;
-          _enableMaps = (data?['enable_maps'] ?? false);
           _buildNavigation();
         });
       }
@@ -318,6 +334,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: 'News',
             screen: const NewsScreen(),
           ),
+          NavConfig(
+            id: 'snapshot',
+            iconData: HugeIcons.strokeRoundedSun02,
+            label: 'Today',
+            screen: const SizedBox.shrink(), // never actually rendered
+          ),
         ];
 
         // Add admin-only screens
@@ -340,6 +362,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           ]);
         }
+        baseNav.add(
+          NavConfig(
+            id: 'counselor',
+            iconData: HugeIcons.strokeRoundedMentor,
+            label: 'Counselor',
+            screen: const CounselorScreen(),
+          ),
+        );
 
         // Add Clubs feature if enabled
         if (_enableClubs) {
@@ -353,19 +383,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           );
         }
-
-        // Add Maps feature if enabled
-        if (_enableMaps) {
-          baseNav.add(
-            NavConfig(
-              id: 'maps',
-              iconData: HugeIcons.strokeRoundedMaps,
-              label: 'Maps',
-              screen: const MapScreen(),
-            ),
-          );
-        }
-
         // Add Links screen (always available for students)
         baseNav.add(
           NavConfig(
@@ -552,14 +569,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   void _changeIndex(int index) {
     if (index == -1 || index >= _navConfigs.length) return;
-
     final config = _navConfigs[index];
 
-    // Clear notifications
+    // Snapshot tab opens the overlay instead of switching screens
+    if (config.id == 'snapshot') {
+      SnapshotOverlay.show(context);
+      return;
+    }
+
     if (config.notificationKey != null) {
       NotificationService().clearUnreadCount(config.notificationKey!);
     }
-
     setState(() => _selectedIndex = index);
   }
 

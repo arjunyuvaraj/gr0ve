@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 
 class CreateClubForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -53,6 +54,11 @@ class CreateClubForm extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(
+                      context.colors.primary.withAlpha(150),
+                    ),
+                  ),
                   onPressed: isSubmitting ? null : onSubmit,
                   child: isSubmitting
                       ? const SizedBox(

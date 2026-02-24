@@ -32,7 +32,7 @@ class CustomPrimaryButton extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: colors.primary,
+        color: colors.primary.withAlpha(150),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),

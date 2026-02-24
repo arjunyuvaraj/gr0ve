@@ -298,7 +298,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   Widget _clubHeader() {
     final colors = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 24, 32, 12),
+      padding: const EdgeInsets.fromLTRB(32, 12, 32, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1212,25 +1212,25 @@ class AnnouncementCard extends StatelessWidget {
               onPressed: onOpenQA,
               icon: Icon(
                 Icons.question_answer_rounded,
-                size: 15,
+                size: 18,
                 color: colors.primary,
               ),
               label: Text(
                 'Ask',
                 style: TextStyle(
                   color: colors.primary,
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               style: TextButton.styleFrom(
                 backgroundColor: colors.primary.withOpacity(0.08),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                  horizontal: 16,
+                  vertical: 10,
                 ),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,

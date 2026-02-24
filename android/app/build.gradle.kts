@@ -4,9 +4,7 @@ import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
     id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -15,20 +13,22 @@ android {
     namespace = "com.arjunyuvaraj.gr0ve"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-
+    buildTypes {
+        getByName("debug") {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+    }
     defaultConfig {
         applicationId = "com.arjunyuvaraj.gr0ve"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        
-        // Enable core library desugaring
         multiDexEnabled = true
     }
 
     compileOptions {
-        // Enable desugaring
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -46,16 +46,15 @@ android {
             if (keyPropsFile.exists()) {
                 FileInputStream(keyPropsFile).use { keyProps.load(it) }
                 println("Loaded key.properties for release signing.")
-
-                storeFile = file(keyProps.getProperty("storeFile") ?: throw GradleException("storeFile missing in key.properties"))
-                keyAlias = keyProps.getProperty("keyAlias") ?: throw GradleException("keyAlias missing in key.properties")
-                keyPassword = keyProps.getProperty("keyPassword") ?: throw GradleException("keyPassword missing in key.properties")
-                storePassword = keyProps.getProperty("storePassword") ?: throw GradleException("storePassword missing in key.properties")
+                storeFile     = file(keyProps.getProperty("storeFile")     ?: throw GradleException("storeFile missing"))
+                keyAlias      = keyProps.getProperty("keyAlias")           ?: throw GradleException("keyAlias missing")
+                keyPassword   = keyProps.getProperty("keyPassword")        ?: throw GradleException("keyPassword missing")
+                storePassword = keyProps.getProperty("storePassword")      ?: throw GradleException("storePassword missing")
             } else {
                 println("Warning: key.properties not found. Using debug keystore.")
-                storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
+                storeFile     = file("${System.getProperty("user.home")}/.android/debug.keystore")
+                keyAlias      = "androiddebugkey"
+                keyPassword   = "android"
                 storePassword = "android"
             }
         }
@@ -63,12 +62,12 @@ android {
 
     buildTypes {
         getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            signingConfig    = signingConfigs.getByName("release")
+            isMinifyEnabled  = false
             isShrinkResources = false
         }
         getByName("debug") {
-            // debug uses default debug keystore automatically
+            // uses default debug keystore automatically
         }
     }
 }
@@ -81,7 +80,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
-    
-    // Add desugaring library
+
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // WorkManager compatible with Glance 1.1.0
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

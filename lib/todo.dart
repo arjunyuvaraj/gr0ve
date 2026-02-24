@@ -13,4 +13,8 @@ new feature
 HOT IDEA:
 - make an llm that helpsp course recs, pull from the docs, limit sources to JUST chat
 - add gemini
+notbook m
+- add courses ntoebook lm
+- put the things into 
+
 */

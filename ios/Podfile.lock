@@ -1297,6 +1297,10 @@ PODS:
     - nanopb (~> 3.30910.0)
   - FirebaseSharedSwift (12.8.0)
   - Flutter (1.0.0)
+  - flutter_dynamic_icon (0.0.1):
+    - Flutter
+  - flutter_dynamic_launcher_icon (0.0.1):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - GoogleAdsOnDeviceConversion (3.2.0):
@@ -1475,6 +1479,8 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
+  - flutter_dynamic_icon (from `.symlinks/plugins/flutter_dynamic_icon/ios`)
+  - flutter_dynamic_launcher_icon (from `.symlinks/plugins/flutter_dynamic_launcher_icon/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -1523,6 +1529,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
+  flutter_dynamic_icon:
+    :path: ".symlinks/plugins/flutter_dynamic_icon/ios"
+  flutter_dynamic_launcher_icon:
+    :path: ".symlinks/plugins/flutter_dynamic_launcher_icon/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   package_info_plus:
@@ -1556,6 +1566,8 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 7f42cfd10ec64181db4e01b305a613791c8e782c
   FirebaseSharedSwift: f57ed48f4542b2d7eb4738f4f23ba443f78b3780
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_dynamic_icon: 9b73b8d673f589e913991cc025c007823c59ed19
+  flutter_dynamic_launcher_icon: 4938f52504820660b50a2a766ea9d59305d8b041
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   GoogleAdsOnDeviceConversion: d68c69dd9581a0f5da02617b6f377e5be483970f
   GoogleAppMeasurement: 72c9a682fec6290327ea5e3c4b829b247fcb2c17

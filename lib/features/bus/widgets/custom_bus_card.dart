@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/theme/dark_theme.dart';
 import 'package:gr0ve/features/bus/services/bus_service.dart';
 
 class CustomBusCard extends StatelessWidget {
@@ -89,7 +90,7 @@ class CustomBusCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: hasNoCode
                   ? colors.errorContainer.withOpacity(0.5)
-                  : colors.primary.withOpacity(0.08),
+                  : colors.success.withOpacity(0.08),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -97,7 +98,7 @@ class CustomBusCard extends StatelessWidget {
                 displayCode,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
-                  color: hasNoCode ? colors.onErrorContainer : colors.primary,
+                  color: hasNoCode ? colors.onErrorContainer : colors.success,
                   fontWeight: FontWeight.w900,
                 ),
               ),

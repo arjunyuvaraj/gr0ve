@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : RefreshIndicator(
                       onRefresh: _loadData,
                       child: isWide
-                          ? _buildWideContent(colors, textTheme)
+                          ? _buildWideContent(colors, textTheme, context)
                           : PageView(
                               controller: _pageController,
                               onPageChanged: (index) {
@@ -227,12 +227,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildWideContent(ColorScheme colors, TextTheme textTheme) {
+  Widget _buildWideContent(
+    ColorScheme colors,
+    TextTheme textTheme,
+    BuildContext context,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: _buildTeachersSection(colors, textTheme)),
-        const VerticalDivider(width: 1, indent: 20, endIndent: 20),
+        const SizedBox(width: 16),
+        VerticalDivider(
+          width: 1,
+          indent: 20,
+          endIndent: 20,
+          color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
+        ),
+        const SizedBox(width: 16),
         Expanded(child: _buildBusesSection(colors, textTheme)),
       ],
     );

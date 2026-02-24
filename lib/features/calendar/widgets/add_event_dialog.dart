@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/features/calendar/services/calendar_service.dart';
 import 'package:gr0ve/features/club/services/group_service.dart';
 import 'package:gr0ve/models/group.dart';
@@ -607,6 +608,11 @@ class _AddEventDialogState extends State<AddEventDialog> {
                         prefixIcon: Icon(
                           Icons.category_rounded,
                           color: colors.primary,
+                        ),
+                        labelStyle: TextStyle(color: context.colors.primary),
+                        floatingLabelStyle: TextStyle(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w700,
                         ),
                         filled: true,
                         fillColor: colors.surface.withOpacity(0.5),

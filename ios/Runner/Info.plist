@@ -11,14 +11,52 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- TODO Replace this value: -->
 				<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
 				<string>com.googleusercontent.apps.718476022436-l8bjfnrjqbpdup6amcjjmt8g3oijce6s</string>
 			</array>
 		</dict>
 	</array>
 	<!-- End of the Google Sign-in Section -->
-	
+
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
+		</dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>aspen</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>aspen</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+			<key>rowan</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>rowan</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+			<key>sakura</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>sakura</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

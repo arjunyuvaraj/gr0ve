@@ -1,0 +1,2774 @@
+[
+  {
+    "NAME": "Anatomy and Physiology",
+    "DESCRIPTION": "Study of the structure and function of the human body, including basic chemistry, biochemistry, and histology. Covers characteristics of life, levels of organization, all major body systems including integumentary, skeletal, muscular, nervous, endocrine, lymphatic, cardiovascular, respiratory, digestive, urinary, and reproductive systems and embryology. Extensive laboratory activities accompany each unit.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11",
+    "REQUIRED_FOR": ["AMST"]
+  },
+  {
+    "NAME": "AP Biology (AMST Core)",
+    "DESCRIPTION": "Elective open to students from all academies. Covers unifying themes in biology: emergent properties, evolution and diversity, form and function, science as a process, and ethical implications. Subject areas: chemistry of life, cellular anatomy and physiology, evolution, classification and diversity, genetics, plant anatomy and physiology, animal anatomy and physiology, ecology. Prepares students for the AP Biology Exam.",
+    "PREREQS": "Strong background in biology or lab sciences recommended. For AMST Juniors beginning with Class of 2026.",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AMST (Juniors, Class of 2026+)"]
+  },
+  {
+    "NAME": "Biology (AAST Core)",
+    "DESCRIPTION": "Comprehensive and challenging curriculum supplying a solid scientific foundation. Explores social and ethical issues, critical thinking and problem-solving skills. Weekly laboratory assignments, modeling activities, media and technology, and assigned readings.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AAST"]
+  },
+  {
+    "NAME": "Biology (ACAHA & AVPA Core)",
+    "DESCRIPTION": "Investigates the composition, diversity, complexity, and interconnectedness of life on Earth. Fundamental concepts of cells, heredity, evolution, and ecology through inquiry-based instruction and laboratory experience. Topics include cell biology, homeostasis, photosynthesis, cellular respiration, cell replication, natural selection, and ecology.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["ACAHA", "AVPA"]
+  },
+  {
+    "NAME": "Biology (AMST Core)",
+    "DESCRIPTION": "Comprehensive course covering fundamental and current topics in biological sciences. Begins with the nature of science and scientific method, then covers biotechnology discoveries. Topics include study of life, chemistry, biochemistry, cell biology, homeostasis, cellular respiration, and photosynthesis.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AMST"]
+  },
+  {
+    "NAME": "Biology / General Biology (ATCS & ABF Core)",
+    "DESCRIPTION": "General Biology is a comprehensive course covering fundamental and current topics in the biological sciences. Covers the nature of science, scientific method, biotechnology realm discoveries. Topics include study of life, chemistry, biochemistry, cell biology, homeostasis, cellular respiration, and photosynthesis.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["ATCS", "ABF"]
+  },
+  {
+    "NAME": "Biology (AEDT Core)",
+    "DESCRIPTION": "Comprehensive and challenging curriculum supplying a solid scientific foundation. Explores social and ethical issues, critical thinking, and problem-solving skills. Hands-on exploration through laboratory assignments, modeling activities, media and technology, and assigned readings.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Experimental Biology",
+    "DESCRIPTION": "Introduces students to experimental design, basic lab skills, and data collection and analysis. Topics include project development, experimental design, primary literature, bioinformatics, technical writing, laboratory techniques, data collection and analysis, representing data in figures, and conveying technical information. Students spend one trimester with each biology research teacher.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AMST"]
+  },
+  {
+    "NAME": "AP Biology (Elective)",
+    "DESCRIPTION": "Elective open to students from all academies. Same content as core AP Biology. Covers unifying themes in biology. Prepares students for the AP Biology Exam.",
+    "PREREQS": "Strong background in biology or lab sciences recommended",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Environmental Systems & Societies SL",
+    "DESCRIPTION": "Systems approach methodology. Aims to promote understanding of environmental processes from local to global scale, provide knowledge and skills for environmental issue analysis, promote critical awareness of cultural perspectives, recognize technology's role in environmental problems, appreciate value of international collaboration, and understand the links between human society and the environment.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Agricultural Research Methods",
+    "DESCRIPTION": "Second required course for students to enter the Agriscience Program. Students identify a research topic and prepare their lab notebook to engage in experimental research. Anticipated to enter research project into FFA Agriscience Fair and/or other competitions.",
+    "PREREQS": "Intro to Agriculture",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Applications of Biology in Human Medicine",
+    "DESCRIPTION": "Surveys the latest trends and discoveries in biosciences shaping modern medicine. Topics include CRISPR/Cas9 gene editing, mRNA vaccine development, cancer immunology, DNA sequencing, personalized medicine, and recombinant DNA technology.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Agriscience Research",
+    "DESCRIPTION": "Students use scientific principles and emerging technologies to solve complex AFNR problems. Research takes place in the Environmental Science Center and greenhouse. Projects may involve plants, food, biofuels, marine organisms, and sustainable practices. FFA membership required to participate in NJ State FFA Agriscience Fair.",
+    "PREREQS": "Introduction to Agriscience elective required",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Bioethics",
+    "DESCRIPTION": "Application of ethics to medicine. Multidisciplinary course blending law, philosophy, humanities, and medicine. Addresses significant questions including the ends and purposes of life sciences, healthcare, distributive justice, global healthcare, meaning of life and death, pain and suffering, and rights and responsibilities.",
+    "PREREQS": "Not available to AMST academy",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Botany",
+    "DESCRIPTION": "Study of plant anatomy and morphology. Introduces students to growth, maintenance, and life cycles of all members of the Plant Kingdom. Special emphasis on flowering plants and their use as food, fuel, and fiber. Laboratory-based course utilizing knowledge of cell anatomy and biochemistry.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Cell Biology Research",
+    "DESCRIPTION": "Students conduct independent research in cell and molecular biology. Students develop a research project, design and conduct experiments, collect and analyze data, and present findings at fairs/competitions or publish to a professional journal. Scheduled twice per week on an individual basis.",
+    "PREREQS": "AMST: 1 trimester of Experimental Biology; All other Academies: Research in Cell Biology elective",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Developmental Biology I",
+    "DESCRIPTION": "Study of all aspects of growth and differentiation. Introduction to concepts and discoveries in developmental biology including various modes of development from embryonic development to limb regeneration. Embryonic and adult stem cells discussed in detail with respect to regenerative medicine. Also addresses ethical issues with stem cell research.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Global Climate Change",
+    "DESCRIPTION": "Explores physical principles involved in planetary scale energy budgets and how changes affect chemical and biological processes on Earth. Students develop understanding of mechanics of climate change and investigate options for mitigation and adaptation.",
+    "PREREQS": "Knowledge of Biology and Chemistry helpful",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro Agriscience",
+    "DESCRIPTION": "Gateway course for the Agriscience Research program. Introduces students to the science of modern agriculture, including botany, zoology, chemistry, molecular biology, earth science, and engineering practices. Provides fundamentals required to develop plans for a successful research project in agriscience.",
+    "PREREQS": "One of the prerequisites for Agriscience research",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Cancer Biology",
+    "DESCRIPTION": "Introduces students to the multifaceted field of cancer biology. Covers principles of cancer biology, cellular and molecular mechanisms that regulate cancer, and common detection and treatment strategies. Uses case studies, interactive media, and classroom discussions.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Forensics",
+    "DESCRIPTION": "Explores physical principles involved in planetary scale energy budgets and how changes to these budgets affect chemical and biological processes on Earth. Students develop a solid understanding of the mechanics of climate change, and investigate options for mitigation and adaptation.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Surgical Techniques",
+    "DESCRIPTION": "Application required; 24 students (8 per trimester) chosen from applicant pool. Offers Juniors the opportunity to gain research experience in a surgical setting at Englewood Hospital and Medical Center (EHMC). Students learn fundamentals of surgical techniques utilizing an in vivo animal model. Covers surgical preparation, aseptic technique, micro-suturing, bioethics, tissue collection, and post-operative care.",
+    "PREREQS": "Completed application required; open to 11th grade only",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Microscopy",
+    "DESCRIPTION": "Surveys light and electron microscopy techniques, illustrating how to use imaging tools to answer scientific questions. Provides hands-on access to laser scanning confocal and electron microscopes. Lab-based course.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Research in Cell Biology",
+    "DESCRIPTION": "Prerequisite elective required for independent research in cell/molecular biology. Introduces students to primary scientific literature and how to use it to develop a research project proposal. Covers basics of working with cultured cells and molecular analysis techniques. Does not count as a science, biology, or medical elective.",
+    "PREREQS": "Not available to AMST academy",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Sports Medicine",
+    "DESCRIPTION": "Students learn about the most common sports injuries along with their common treatments. Covers anatomy and physiology of injuries including ACL, MCL, and LCL sprains. Students make a video of a real-life sports injury with appropriate prognosis, treatment, and timetable for return.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Topics in Oncology",
+    "DESCRIPTION": "20+ year Expert Series elective providing experience for students considering healthcare careers. Topics on pediatric oncology and hematology discussed with guest speakers. Students prepare by doing assigned readings, viewing PowerPoints, and preparing questions. Evaluation via student journals written after speaker seminars.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Biology",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Business Finance Applications",
+    "DESCRIPTION": "Introductory course exploring important business financial concepts. Covers financial accounting, financial statement preparation and analysis, US and international financial markets, financial institutions, and corporate financial management. At year-end, students work in teams to create a comprehensive business plan.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["ABF"]
+  },
+  {
+    "NAME": "IB Business Management SL",
+    "DESCRIPTION": "Two-year course using the IB course outline. Year 1: Focus on business functions, management processes, and decision-making in contemporary contexts. Year 2: Covers Marketing and Operations Management, applying business theory and principles to practical business situations.",
+    "PREREQS": "Two-year course sequence",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["ACAHA"]
+  },
+  {
+    "NAME": "IB Economics HL",
+    "DESCRIPTION": "Two-year course. Year 1: Introduces economics as a social science; covers scarcity, choice, Production Possibilities Frontier, micro-economic theory including markets, supply, demand, equilibrium, price controls, elasticities, theory of the firm, and market failure. Year 2: Focus on Macroeconomics and Global Economy. Revolves around 9 fundamental concepts: Scarcity, Choice, Efficiency, Equity, Economic well-being, Sustainability, Change, Interdependence, and Intervention.",
+    "PREREQS": "Two-year course sequence",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["ABF"]
+  },
+  {
+    "NAME": "Financial Literacy Online",
+    "DESCRIPTION": "Asynchronous, self-paced, online class teaching real-world finance and practical life experience. Students practice managing money, test decision-making skills, and tackle realistic financial dilemmas. Covers credit cards, auto loans, insurance, building and maintaining healthy credit, qualifying for a mortgage, and more.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AAST", "AEDT", "AMST", "ATCS", "AVPA"]
+  },
+  {
+    "NAME": "Management Marketing",
+    "DESCRIPTION": "Explores the nature and scope of business including different forms of business ownership, management, internal and external forces, legal environment, ethical decision-making, and marketing methods. Focuses on the movement of goods and services from producers to customers.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["ABF"]
+  },
+  {
+    "NAME": "AP Macroeconomics",
+    "DESCRIPTION": "Covers dynamics of the economy including business cycles, unemployment, inflation, and growth. Topics include basic measures of economic activity, aggregate demand and supply, the Federal Reserve System, monetary and fiscal policy, and international economics including world trade, capital flows, and foreign exchange rates. All students must take AP exam in May.",
+    "PREREQS": "AP Microeconomics",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Microeconomics",
+    "DESCRIPTION": "Study of individual players in the circular flow of the economy. Covers decision making by individual units, individual markets, specific goods and services, and product and resource prices. Studies how consumers, firms, and government make economic decisions. All students must take AP exam in May.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Business",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["AAST", "ACAHA", "AEDT", "AMST", "ATCS", "AVPA"]
+  },
+  {
+    "NAME": "Business of Sports",
+    "DESCRIPTION": "Overview of sports business, a $73 billion dollar industry. Covers revenues and expenses of running a professional sports franchise, fantasy sports, agents, business managers, branding, endorsements, and wagering. Students make a video of a business proposal for a new sports business.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Business",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Federal Reserve Challenge I",
+    "DESCRIPTION": "Prepares students to compete at the Federal Reserve Bank of New York's Fed Challenge. Students research economic issues, write a research paper exploring a specific research question. Tryout process required to be selected for the team.",
+    "PREREQS": "Only available to ABF academy; tryout process required",
+    "ACADEMY": "Business",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Entrepreneurship",
+    "DESCRIPTION": "Explores the entrepreneurial process and the knowledge, tools, and skills required to be successful entrepreneurs. Focus on identifying and evaluating opportunities for new businesses. Key concepts include industry factors, market and competitive factors, and customer needs. Students work on development of a new business idea.",
+    "PREREQS": "Not available to ABF & ACAHA academies",
+    "ACADEMY": "Business",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Marketing",
+    "DESCRIPTION": "Introduction to the study of methods and institutions involved in the movement of goods and services from producers to customers. Emphasis on consumerism, social and legal aspects, market understanding and decision-making, pricing, distribution, promotion, and product policies.",
+    "PREREQS": "Not available to ABF & ACAHA academies",
+    "ACADEMY": "Business",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Markets and Trading",
+    "DESCRIPTION": "Introduction to financial markets and the securities traded in those markets. Includes lectures, classroom discussion, and hands-on use of Bloomberg and other trading software. Covers current economic developments and stock and equity options markets. Students keep a Trading Journal and Daily Journal. Final portfolio project required.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Business",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Chemistry (AAST Core)",
+    "DESCRIPTION": "Lab science course covering Equilibrium, Acid/Base Equilibrium, Atomic Structure, Structure and Bonding, Kinetics, Thermodynamics, and Electrochemistry. Also includes spectroscopy and separation technologies, and a dedicated unit on Organic Chemistry beyond the typical AP scope.",
+    "PREREQS": "10th grade Chemistry",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["AAST"]
+  },
+  {
+    "NAME": "Chemistry (AAST Core)",
+    "DESCRIPTION": "Covers atomic structure, chemical nomenclature, chemical bonding, stoichiometry, chemical reactions, solution chemistry, introductory acid-base chemistry, and gas behavior. Prepares AAST students for sophomore chemistry. Includes lab rotation every third Wednesday.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AAST"]
+  },
+  {
+    "NAME": "Chemistry (AMST Core)",
+    "DESCRIPTION": "Covers chemical nomenclature, stoichiometry, types of chemical reactions, thermochemistry, gases, atomic structure, chemical bonding and molecular geometry, liquids, solids and solutions, chemical equilibrium, and acids and bases. Designed to give medical students thorough understanding of chemical compounds. Includes laboratory component.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AMST"]
+  },
+  {
+    "NAME": "Chemistry I (AEDT Core)",
+    "DESCRIPTION": "Covers atomic structure and understanding and quantifying chemical reactions. Students develop thorough understanding of the structure of atoms, molecules, and compounds and their reactivity. Includes additional laboratory rotation for safe lab practices, recordkeeping, and techniques.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Semester Long",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Chemistry (General Elective)",
+    "DESCRIPTION": "Covers atomic structure, behavior of gases, thermodynamics, acids and bases, and chemical equilibrium. Includes laboratory component where students keep a laboratory notebook and learn key components of recordkeeping and how to produce a good laboratory report.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Chemistry II (AEDT Core)",
+    "DESCRIPTION": "Covers understanding chemical reactions with real life applications, behavior of gases, thermodynamics, chemical equilibria, and acid/base chemistry. Also covers oxidation/reduction reactions, heat exchange, and quantifying equilibria. Includes additional laboratory rotation.",
+    "PREREQS": "Chemistry I (AEDT)",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Semester Long",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Chemical Systems & Engineering",
+    "DESCRIPTION": "Introduces students to chemical concepts with connections to chemical engineering. Topics include Thermodynamics, Atomic Structure, Bonding, Solutions and States of Matter, Kinetics, Equilibrium, Acid-Base Equilibrium, and Electrochemistry. Labs may include block flow diagrams, desalination, engineering design processes, chemical reaction optimization, and testing physical properties.",
+    "PREREQS": "9th grade AAST Chemistry course",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AAST"]
+  },
+  {
+    "NAME": "AP Chemistry (Elective)",
+    "DESCRIPTION": "Systematic review of previous chemistry courses with additional new material. Topics include gas laws, stoichiometry, equilibrium, acid base chemistry, atomic theory, structure and bonding, thermodynamics, chemical reactions, states of matter, colligative properties, kinetics, electrochemistry, and organic chemistry.",
+    "PREREQS": "Department approval required for other academy students",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Topics in Chemistry (Full Year)",
+    "DESCRIPTION": "Expands on concepts found in traditional high school chemistry while introducing foundational and 'leading edge' topics not found in AP science classes. Themes: Materials of Modern Living, The Future of Energy, and 21st Century STEM Trends. Includes demonstrations, hands-on activities, guest speakers, and field trips.",
+    "PREREQS": "AP Chemistry, AP Biology, AP Physics, or instructor approval",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Topics in Chemistry (Trimester)",
+    "DESCRIPTION": "Explores historically significant advances in chemistry not covered in previous science classes. Focus on important advances from the past decade likely to be active research areas as BCA students enter these fields.",
+    "PREREQS": "Completed at least two (2) trimesters of AP Chemistry",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Chemistry Research",
+    "DESCRIPTION": "Project-based elective for independent student research in the emerging field of chemistry and nanotechnology. Students perform their own experiments, collect data using state-of-the-art scientific equipment, and present outcomes through various science competitions.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Forensic Science",
+    "DESCRIPTION": "Covers basic principles of Forensic Science. Students learn to identify, examine, and collect evidence such as fingerprints, hair and fiber samples, and blood spatter. Lab-based elective. Culminates with the 'Crime Scene in a Box' project.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Foundations of Nano",
+    "DESCRIPTION": "Prerequisite for chemistry/nanotechnology independent research. Students explore fundamental theories and experimental practices of nanoscience and nanotechnology with focus on chemical, biological, and electronic applications. Includes invention challenge project presentation, lab worksheet, and take-home test.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Medicinal Chemistry",
+    "DESCRIPTION": "Introductory overview to the field of medicinal chemistry. Explores how the structure of bioactive medicinal compounds impacts how they behave in the body. Topics include drug design to bind to a specific receptor, drug formulation for immediate or gradual release, and treatment of drug overdose.",
+    "PREREQS": "Must have already completed 1 chemistry class",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Organic Chemistry I",
+    "DESCRIPTION": "Focuses on learning and understanding the basic principles of organic molecule structures and organic reaction mechanisms. Designed as an understanding-based approach rather than rote memorization.",
+    "PREREQS": "Completion of at least two (2) trimesters of a sophomore core chemistry class, or enrollment with instructor approval",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Organic Chemistry II",
+    "DESCRIPTION": "Continues discussions regarding the structure and reactivity of commonly encountered classes of organic molecules. Discussion-based, no lab component. Topics include stereochemistry, substitution reactions, elimination reactions, chemistry of alkenes, alkynes, aldehydes, and ketones.",
+    "PREREQS": "Completed Organic Chemistry I",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Strategies in Chemistry",
+    "DESCRIPTION": "Provides students with additional support for their core chemistry class. Most useful to students taking a freshman or sophomore core chemistry class wishing to get extra help on problem-solving skills and essential chemistry concepts.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Chemistry",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Topics in Computer Science Sequence",
+    "DESCRIPTION": "Three-trimester sequence: (1) Math Foundations of Computer Science – Boolean Algebra, inductive techniques, set theory, cardinality of infinite sets; (2) Functional Programming – functional programming paradigm, immutability, recursion, lambdas, lambda calculus; (3) Computational Theory – finite state machines, pushdown automata, Turing machines, Church-Turing thesis. Culminates in building a full interpreter for Lambda Calculus.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["ATCS"]
+  },
+  {
+    "NAME": "AP Computer Science A / Data Structure",
+    "DESCRIPTION": "Based on College Board syllabus plus additional data structures topics. Covers program design and implementation, algorithm analysis, object-oriented programming, queues, stacks, linked lists, heaps, and binary trees. Emphasizes programming methodology with focus on problem solving and algorithm development.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["ATCS"]
+  },
+  {
+    "NAME": "Capstone Computer Science",
+    "DESCRIPTION": "Provides real-world experience of developing a large project for a client with a small team. Students are introduced to Agile-style project management and learn new technologies and techniques as needed.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["ATCS"]
+  },
+  {
+    "NAME": "Introduction to Computer Science",
+    "DESCRIPTION": "Introduces students to computer science and programming. Begins with Python, then moves to web programming with HTML, CSS, and JavaScript. Two open-ended group projects are built to promote team-based development skills.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["ATCS"]
+  },
+  {
+    "NAME": "AP Computer Science A (Elective)",
+    "DESCRIPTION": "Covers core aspects of computer science for creating solutions that are understandable, adaptable, and reusable. Includes development and analysis of algorithms and fundamental data structures, use of logic and formal methods.",
+    "PREREQS": "Foundations of Computer Science (1, 2, and 3) OR Instructor Approval",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Foundations of Computer Science (Full Year)",
+    "DESCRIPTION": "Introduction to concepts and practices of computer programming with emphasis on program flow and structure. Instruction in Java though concepts are universal across programming languages. Upon completion, students will be prepared to enroll in AP Computer Science A.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Computer Science SL",
+    "DESCRIPTION": "Requires understanding of fundamental concepts of computational thinking and knowledge of how computers and digital devices operate. Students study how computer science interacts with and influences cultures and society. Students develop computational solutions.",
+    "PREREQS": "Foundations of Computer Science (1, 2, and 3) AND Structured Query Language OR Instructor Permission",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction Systems Programming",
+    "DESCRIPTION": "Students move beyond abstractions of modern programming languages. Covers assembly language (6502 chipset), instruction processing, byte-level memory architecture, bash shell in Linux, C programming, pointers, data structures (array lists, linked lists, stacks), computer networks, network programming, and threading.",
+    "PREREQS": "Foundations of Computer Science (non-ATCS) OR Intro to Computer Science (ATCS) OR Instructor Permission",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Software Engineering",
+    "DESCRIPTION": "Explores how very large projects can be engineered to succeed as they scale. Focus on test-driven development and programming design patterns. Course takes place within Unity and C#.",
+    "PREREQS": "AP Computer Science A (strict prerequisite)",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Web Apps with Databases",
+    "DESCRIPTION": "Introduction to developing web applications. Students strengthen skills in HTML, CSS, and browser-based JS, learn to query and update data in an existing MySQL database, design and implement new relational databases, and build a full data-enabled web application.",
+    "PREREQS": "Foundations of Computer Science (non-ATCS) or Intro to Computer Science (ATCS)",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Artificial Intelligence",
+    "DESCRIPTION": "Intensive introduction to the broad field of AI. Covers computational representations of knowledge and reasoning. Topics include uninformed and informed search, adversarial search, and reinforcement learning, with applications including route planning and game playing.",
+    "PREREQS": "AP Computer Science A",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Assembly Language Basics",
+    "DESCRIPTION": "Students learn how the computer understands and executes programs. Covers basics of assembly language (6502 chipset), fundamental concepts of instruction processing, and byte-level memory architecture.",
+    "PREREQS": "Intro to Computer Science (ATCS) OR Foundations of Computer Science (non-ATCS)",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Computer Security",
+    "DESCRIPTION": "Provides students with basic knowledge required to be involved in the field of computer security. Covers how computers work at very low levels, how attacks are made in the digital sphere, and foundations for digital defense.",
+    "PREREQS": "Intro to C Programming or permission of instructor",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Foundations of Computer Science (Trimester)",
+    "DESCRIPTION": "Trimester 1: Introduction to Java – input/output, conditionals, loops, methods. Trimester 2: Object-oriented programming – objects, behaviors, properties, inheritance. Trimester 3: ArrayLists and arrays to store sequences of data and standard array/list patterns.",
+    "PREREQS": "Trimester 2: Foundations of CS 1 or Instructor Permission; Trimester 3: Foundations of CS 2 or Instructor Permission",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Front End Web Dev",
+    "DESCRIPTION": "Students learn to create basic webpages using HTML and CSS, then advance to animation, UX/UI design patterns, responsive design, more in-depth CSS, JavaScript, and standard JavaScript libraries.",
+    "PREREQS": "Foundations of Computer Science-2 (non-ATCS) or ATCS may take beginning 2nd trimester of 9th grade",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro Web App Development",
+    "DESCRIPTION": "Students design, build, and deploy their first web applications, exploring available web technologies and their advantages and disadvantages.",
+    "PREREQS": "All students: Structured Query Language; Additionally for non-ATCS students: Foundations of Computer Science-2",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Machine Learning",
+    "DESCRIPTION": "Introduction to the discipline of machine learning and a survey of popular supervised learning techniques. Covers algorithms and statistical models to make decisions without explicit programming, relying on patterns and inferences found in data.",
+    "PREREQS": "Foundations of Computer Science (non-ATCS) or Intro to Computer Science (ATCS)",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Processors",
+    "DESCRIPTION": "Two-course sequence. Part 1 focuses on combinational logic using AND, OR, XOR, and NOT. Culminates with creation of a virtual version of the 1970s retro digital game 'Lights Out'.",
+    "PREREQS": "Co-requisite: AP Computer Science, Systems Programming, or Assembly Language Basics",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Processors II",
+    "DESCRIPTION": "Part Two of the processors sequence. Focuses on processor architecture, culminating in the creation of your very own processor.",
+    "PREREQS": "Processors I (Foundations of Computation)",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Sockets and Threading",
+    "DESCRIPTION": "Introduces threading and sockets. Threading enables multiple simultaneous execution points to increase program speed. Sockets allow communication between computer programs on different computers for network-based applications like chat servers or online games. Taught in Java.",
+    "PREREQS": "Prerequisite or Co-requisite: AP Computer Science A",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Structured Query Language",
+    "DESCRIPTION": "Students learn to design, update, and query relational databases using SQL.",
+    "PREREQS": "ATCS students may take beginning 2nd trimester of 9th grade; Other academies: may be taken with or after Foundations of Computer Science-2",
+    "ACADEMY": "Computer Science",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Culinary Design (Semester)",
+    "DESCRIPTION": "Introduction to the art of cooking. Students learn about savory and sweet dishes while practicing safe food habits and maintaining a safe working environment. Topics include knife handling, basic cooking skills, safety and sanitation, weighing and measuring ingredients, and different mixing methods in baking.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Semester Long",
+    "GRADE": "9, 10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Entrepreneurship & Advanced Culinary Arts",
+    "DESCRIPTION": "Builds on previous fundamental skills from 9th and 10th grade courses. Enhances the field of study of hospitality industry: food & beverage and lodging. Builds culinary theory principles to mastery. Online ServSafe class administered.",
+    "PREREQS": "Hotel Management Culinary Theory",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["ACAHA"]
+  },
+  {
+    "NAME": "Hospitality Management",
+    "DESCRIPTION": "Presents basics of operational theory of hospitality management and culinary arts under the functions of planning, organizing, staffing, and controlling. Administered through the National Restaurant Educational Foundation's ProStart Management Curriculum. Covers entrepreneurship and management.",
+    "PREREQS": "Entrepreneurship & Advanced Culinary Arts",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["ACAHA"]
+  },
+  {
+    "NAME": "Hotel Management & Culinary Theory",
+    "DESCRIPTION": "Builds on fundamental skills from 9th grade courses. Enhances the field of study of hospitality industry: food & beverage and lodging. Builds on culinary theory principles. Focuses on development of flexible skills essential for success in a Hospitality career.",
+    "PREREQS": "Introduction Hospitality Culinary Arts",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["ACAHA"]
+  },
+  {
+    "NAME": "Introduction Hospitality Culinary Arts",
+    "DESCRIPTION": "Overview of the many dimensions of the hospitality industry. Explores food, beverage and lodging segments, historical foundations, and career possibilities. Students receive exposure to fundamentals of Culinary Arts including safety, sanitation, knife skills, soup, and sauce preparation.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["ACAHA"]
+  },
+  {
+    "NAME": "Culinary Design (Trimester Elective)",
+    "DESCRIPTION": "Four specialty tracks: Baking for the Holidays, Classical French Cuisine, All About Chocolate, and World Cuisine. Each explores different culinary techniques and ingredients.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "ProStart Competition",
+    "DESCRIPTION": "Students demonstrate knowledge of the restaurant and hospitality industry by developing a new restaurant concept including descriptions, menu, floor plan, interior/exterior design, SWOT analysis, organizational chart, recipes/costing, and marketing tactics.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Culinary",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["ACAHA"]
+  },
+  {
+    "NAME": "Advanced Electrical Engineering",
+    "DESCRIPTION": "Builds on the intermediate electrical engineering course. Expands use of operational amplifiers for interfacing sensors and designing active filters. Covers microcontrollers for embedded control, Electronic Design Automation, schematic entry, circuit board layout, and generating Gerber files.",
+    "PREREQS": "Intermediate Electrical Engineering (implied by sequence)",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Computer Assisted Design",
+    "DESCRIPTION": "Introduction to Engineering Design I (IEDI). Three-trimester course covering webpage-based HTML codes, 2D and 3D computer aided design (CAD), and oral and written presentation. Students learn Autodesk Inventor software, 3D Studio Max software, and visualization tools of CAD.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Electronics",
+    "DESCRIPTION": "Introduction to fundamentals of electronics and circuit prototyping. Covers diodes, capacitors, resistors, transistors, op-amps, TIP120 and IC-555 timers. Students apply concepts through labs and trimester projects. Covers bread-boarding, PCB fabrication, and use of test instruments.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Engineering Applications Programming",
+    "DESCRIPTION": "Focuses on engineering analysis using MatLab and Fusion 360. MatLab used for modeling engineering problems for analysis, simulation, and data presentation. Fusion 360 used for FEA (Finite Element Analysis) for stress, deflection, and thermal simulations. Applications include mechanical, dynamic, thermal, electrical, and financial problems.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Engineering Capstone",
+    "DESCRIPTION": "Builds on skills from IED, POE, Electronics, CIM, and traditional academic coursework. Supports a project in student's preferred area of engineering. Includes fabrication of student inventions, architectural designs, or engineering competitions. Culminates with a working prototype and product presentation.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Electrical Engineering",
+    "DESCRIPTION": "Covers basic concepts in electrical engineering: relationships between Voltage, Current, Impedance and Power; passive components; active components (diodes and transistors); PN junction; operational amplifiers; embedded control using microcontrollers. Includes many lab exercises.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Introduction to Object Oriented Programming",
+    "DESCRIPTION": "Introduces students to the Python programming language. Focus on developing algorithms and simulations of physical systems. Covers variables, operators, branches, loops, lists, functions, classes, user input, and output formatting. Students write code for plotting, line-fitting, numerical integration, and simulation.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Makerspace",
+    "DESCRIPTION": "Introduces students to engineering principles, mechanical drawing, materials, tools, equipment, and machining techniques. Students fabricate various items using metalworking equipment. Skills include using a drill and tap chart, marking out work, center punching, spot drilling, drilling, tapping, countersinking, and deburring.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Makerspace Program (C Programming)",
+    "DESCRIPTION": "Introduces students to Arduino C Programming language theory, commands, and architecture. Students learn fundamentals of C programming with Arduino hardware, microcontrollers, and sensors. Students prototype circuits and learn to use simulation software.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Materials Tolerances",
+    "DESCRIPTION": "Students learn about materials used in engineering and technology. Covers materials science and technology (MST) including polymers, metals, and concrete. Focus is on student-driven projects with clear, analytical goals using accepted techniques for research.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "BioEngineering",
+    "DESCRIPTION": "Specialty course in Project Lead the Way pre-engineering curriculum. Focus on biotechnology including biomedical engineering, bio-molecular genetics, bioprocess engineering, and agricultural and environmental engineering. Students engage in engineering design problems related to biomechanics, cardiovascular engineering, genetic engineering, forensics, and bioethics.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Civil Engineering Architecture",
+    "DESCRIPTION": "Study of design and construction of residential and commercial building projects. Covers building components and systems, structural design, stormwater management, site design, utilities and services, cost estimation, energy efficiency, and careers in design and construction.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Design for 3D Printing",
+    "DESCRIPTION": "Teaches fundamentals of designing items for 3D printing. Students learn Fusion 360 CAD software, DFM (Design for Manufacturing) techniques, and reverse engineering methods. Also covers considerations for future mass production using plastic injection molding.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Engineering Research",
+    "DESCRIPTION": "Chance to work on engineering projects in one of the engineering labs. Applied research involving real engineering. Students work with professionals in the field. Access to Electronics lab, Mechanical engineering lab, 3D printers, and Makerspace facilities. Primarily for AEDT students who will be juniors in the fall.",
+    "PREREQS": "Primarily for AEDT juniors; other academies or rising sophomores with experience will be considered; conversation with engineering teacher required",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Robotics",
+    "DESCRIPTION": "Overview of robot mechanisms, electronic controls, Arduino and Raspberry Pi Microcontrollers, and basic electronics. Topics include motion planning, mechanism design, control design, actuators, sensors, and wireless networking. Weekly labs with Servo, Microcontrollers, Sensors, and Lego NXT.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Medibotics",
+    "DESCRIPTION": "Provides information on how to construct and program the LEGO NXT Mindstorms robotic kit, how to build and program for specific simulated medical surgeries, and how to relate these surgeries to STEM areas.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "MRL-Xploration",
+    "DESCRIPTION": "Introduces students to fundamentals of electronics, microcontrollers, and mechanical design. Serves as a prerequisite for the Mechatronic Research Lab. Students learn to design and prototype circuits, identify electronic components, learn basic Arduino C-Programming, and tool usage and safety procedures.",
+    "PREREQS": "Serves as prerequisite for Mechatronic Research Lab",
+    "ACADEMY": "Engineering",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Autodesk Fusion 360",
+    "DESCRIPTION": "For students with little to no CAD or 3D modeling experience. Introduces essential features of Autodesk Fusion 360. Students learn to draw, sculpt, render, assemble, and animate their own 3D designs, as well as modify already existing 3D models. Not available for AEDT academy.",
+    "PREREQS": "Not available for AEDT academy",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "American Literature I",
+    "DESCRIPTION": "Genre-based study that explores American literary history. Covers issues of gender, class oppression, and alienation. Uses novels, plays, essays, short stories, personal narratives, and poetry. Develops listening, speaking, reading, thinking, writing, and researching skills.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "American Literature II",
+    "DESCRIPTION": "Builds on skills and content from American Literature I. Students become confident critical readers and interpreters. Covers longer works of fiction, poetry, short prose, and nonfiction essays. Focuses on comparing American authors' treatment of major themes coinciding with critical moments in American history.",
+    "PREREQS": "American Literature I",
+    "ACADEMY": "English",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "IB Literature I & II HL",
+    "DESCRIPTION": "Two-year course. Year I: Develops skills in literary analysis, survey of literature from various cultures and time periods. Year II: Students study manifestations of literature across cultures. Focuses on understanding factors that contribute to the production and reception of literature.",
+    "PREREQS": "American Literature I & II",
+    "ACADEMY": "English",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Literature/Language I & II HL",
+    "DESCRIPTION": "Two-year course. Year I: Language and literature course exploring the complex and dynamic nature of language, its practical and aesthetic dimensions, and the role language plays in communication. Year II: Students study a wide range of literary and non-literary texts in a variety of media.",
+    "PREREQS": "American Literature I & II",
+    "ACADEMY": "English",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "World Literature I & II",
+    "DESCRIPTION": "Two-year course. Year I: World Literature I Honors – understanding of literary masterpieces from the Ancient World to the Renaissance. Year II: World Literature II Honors – focus on literature from the 16th through 21st centuries. Emphasizes critical analysis, interpretation, and writing skills.",
+    "PREREQS": "American Literature I & II",
+    "ACADEMY": "English",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Creative Writing I & II",
+    "DESCRIPTION": "Creative Writing I: For students new to creative writing or those who have already begun creative projects. Builds a portfolio of new work. Creative Writing II: For juniors and seniors with existing creative writing projects to revise and refine for submission to contests and writing opportunities.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Dystopian Literature",
+    "DESCRIPTION": "Students read and analyze literary texts of the 20th and 21st centuries from both America and abroad within the dystopian genre while practicing creative writing skills in the creation of their own dystopian story/stories.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Film Studies",
+    "DESCRIPTION": "Students are given terms and tools to appreciate and analyze films as works of art and expressions of social context. Examines technique, historical periods, and parts of the world. Students either present an analysis of a chosen film or create a short film.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Introduction to Journalism / Advanced Journalism Workshop",
+    "DESCRIPTION": "Introduction: Focuses on journalistic techniques and supports The Academy Chronicle school newspaper. Advanced: Allows students who completed the Intro elective to function as specialists in four areas: section managers and editors, graphic artists, technology managers, and senior staff writers.",
+    "PREREQS": "Advanced requires completion of Intro elective",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Mythology",
+    "DESCRIPTION": "Reading and analysis of world mythology to answer: 'Why do so many distinct cultures have similar myths?' Students research parallels among world myths, explore the mythic world of archetype/symbol, study critics who attempt to answer this question, and create an original mythology.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Nonfiction Writing",
+    "DESCRIPTION": "Creative nonfiction consisting of true stories, well told. Students read model essays, respond to writing prompts, and practice multiple forms of creative essay writing including the college essay. Students produce at least two creative nonfiction works by end of trimester.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Playing Shakespeare from Text to Performance",
+    "DESCRIPTION": "Examines four Shakespearean plays: A Midsummer Night's Dream, As You Like It, Romeo and Juliet, and Macbeth. Focus on helping students overcome the obstacle of Shakespeare's language through performance-based reading.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Poetry Workshop",
+    "DESCRIPTION": "Student-driven elective providing the student-poet with the opportunity to explore and refine creative writing skills. Various methods, forms, and techniques practiced in a comfortable workshop atmosphere. Culminates in a poetry reading of selected works.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Science Fiction as a Literary and Film Genre",
+    "DESCRIPTION": "Comprehensive, critical analysis of the Science Fiction genre using essays, short stories, and film. Follows a historical timeline from pioneers of Science Fiction (1920s) to contemporary writing. Includes writing, producing, and presenting a trailer for a science fiction movie.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Songwriters Circle",
+    "DESCRIPTION": "Examines the connection between history, literature, and music by focusing on specific decades of American life. Students analyze songs and songwriting styles. Students also work on their own compositions performed in a Songwriter's Circle format.",
+    "PREREQS": "Some proficiency on an instrument preferred but not required",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Stories for Podcasting",
+    "DESCRIPTION": "Students create their own podcasts that tell personal stories of themselves or others. Listens to samples from NPR's Radio Rookies, This American Life, Freakonomics, and Generation PRX.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "The Personal Essay",
+    "DESCRIPTION": "Community of trusted feedback for reading and writing about personal subjects. May include college essays, creative nonfiction for other audiences, and multimedia. Students write from prompts and their own interests, share for feedback, and earn grades based on a plan of production rather than solely on the quality of completed work.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Women in Literature",
+    "DESCRIPTION": "Pursuit of the study of female characters in contemporary literary works and the women who create them. Begins with Kate Chopin's The Awakening and works by Charlotte Perkins Gilman, Virginia Woolf, Toni Morrison, Alice Walker, Sandra Cisneros, and Amy Tan. Includes an independent study of one female author.",
+    "PREREQS": "None listed",
+    "ACADEMY": "English",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Theory of Knowledge",
+    "DESCRIPTION": "Two-year IB course. Explores how knowledge is constructed in varied disciplines. Year 1: Focus on core theme 'knowledge and the knower' plus 3 additional themes (knowledge and language, knowledge and indigenous societies). Year 2: Focus on 2 additional themes (knowledge and technology). Major assessments: 1600-word essay and an exhibition of three original objects.",
+    "PREREQS": "None listed",
+    "ACADEMY": "IB",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["IB students"]
+  },
+  {
+    "NAME": "IB Research Seminar",
+    "DESCRIPTION": "One period per week session. Students are introduced to IB Extended Essay. Reviews criteria, peruses sample essays, brainstorms ideas, discovers sources, and writes a research question which is central to the extended essay.",
+    "PREREQS": "None listed",
+    "ACADEMY": "IB",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["IB students"]
+  },
+  {
+    "NAME": "Advanced Algebra",
+    "DESCRIPTION": "Covers basic concepts of elementary algebra including Sequences and Linear Functions, Linear Systems, Function Families and Transformation, Working with Functions, Exponential Functions and Logarithms, Quadratics, Higher Degree Functions, Rational Functions, Trigonometry, and Intro to Statistics.",
+    "PREREQS": "Placement test",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Math Analysis I",
+    "DESCRIPTION": "Begins with logic, then geometry (congruent triangles, quadrilaterals, inequalities, similar polygons, right triangles including trigonometry, circles, constructions, area and volume). Concludes with pre-calculus topics: linear, quadratic, polynomial, exponential, and logarithmic functions, and conic sections. First course in two-course precalculus series.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Math Analysis II",
+    "DESCRIPTION": "Pre-calculus Honors. Designed to prepare students for AP Calculus AB or BC. Covers analysis of polynomial, exponential, logarithmic, and trigonometric functions. Topics include sequences, series, polar equations, parametric equations, combinatorics, probability, limits, continuity, and derivatives.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Math Topics",
+    "DESCRIPTION": "Lays foundation for further serious mathematics and physics. Covers linear algebra, vector spaces, linear transformations, Fourier series and analysis, scalar fields, vector fields, directional derivatives, partial derivatives, total derivative, line integrals, and classical partial differential equations.",
+    "PREREQS": "Teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Pre Calculus Discrete",
+    "DESCRIPTION": "Higher version of Advanced Analysis II. Covers field and set proofs, induction, limits of sequences, trigonometry and complex numbers, linear algebra and calculus through applications of derivatives. More rigorous definitions and sophisticated proofs than AAII.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "9, 10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Analyt Calculus (BC+)",
+    "DESCRIPTION": "Highly theoretical version of calculus covering all basic material from AP Calculus BC with additional topics. Entirely proof-based. Begins with axiomatizing the real numbers, then covers integrability, limits and continuity, differentiability and applications, methods of integration, sequences and series, and Taylor series.",
+    "PREREQS": "Teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Calculus AB",
+    "DESCRIPTION": "Introduction to single variable calculus and preparation for the AP Calculus AB examination. Topics include limits, derivatives, and integrals. Covers finding tangent lines, area of regions, volumes of solids, maximums and minimums, position/velocity/acceleration.",
+    "PREREQS": "Teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Calculus BC",
+    "DESCRIPTION": "Corresponds to the AP Calculus BC syllabus. Full-year rigorous introduction to fundamentals of differential and integral calculus with precisely formulated definitions and problem-solving skills. Students are thoroughly prepared to take the BC Advanced Placement Exam.",
+    "PREREQS": "Teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Statistics",
+    "DESCRIPTION": "Introductory college-level statistics course. Topics include variation and distribution, patterns and uncertainty, and data-based predictions, decisions, and conclusions. Uses technology, investigations, problem solving, and writing.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Calculus I",
+    "DESCRIPTION": "Based on four major concepts: limit, derivative, definite integral, and indefinite integral. Algebraic methods for differentiating and integrating the elementary transcendental functions including trigonometric, logarithmic, and exponential.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Math HL",
+    "DESCRIPTION": "Two-year curriculum by the IBO. Main topics: statistics, probability, vectors, complex numbers, proofs, binomial theorem extension, Maclaurin series, and differential equations. Students complete a mathematical exploration (essay). Requires thorough knowledge of all math topics learned throughout four years at BCA.",
+    "PREREQS": "Teacher recommendation; thorough knowledge of all math from BCA; calculus course counts as first year",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Math SL",
+    "DESCRIPTION": "Broad range of topics for students anticipating future studies in chemistry, economics, psychology, and business. Curriculum: number and algebra, functions, geometry and trigonometry, statistics & probability, and calculus. Senior year focuses on modeling data, statistics, probability, and math exploration.",
+    "PREREQS": "Calculus I or higher Calculus course",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Linear Algebra & Differential Equations",
+    "DESCRIPTION": "Introduction to college level Linear Algebra including linear combinations, vector spaces, linear transformations, and eigenspaces. Extends Calculus topics to solve key varieties of differential equations. Culminates in analysis of systems of differential equations including coupled linear systems and nonlinear systems. Major project required.",
+    "PREREQS": "Calculus AB or BC, or teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Math Analysis I",
+    "DESCRIPTION": "Begins with review of Algebra topics, then moves through Algebra II and Precalculus including functions (linear, quadratic, polynomial, exponential, logarithmic, trigonometric). Introduces fundamental Statistics topics and key Geometry concepts.",
+    "PREREQS": "Placement test",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "9, 10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Math Analysis II",
+    "DESCRIPTION": "Comprehensive coverage providing solid preparation for college level courses in calculus, linear algebra, finite mathematical structures, and probability and statistics. Balance of theory and application through theorems, proofs, examples, and solutions.",
+    "PREREQS": "Placement test, or by teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Math Structures Proofs",
+    "DESCRIPTION": "Begins with mathematical and symbolic logic, then a thorough axiomatic introduction to geometry (lines, angles, circles, triangles, larger polygons, non-Euclidean geometries). Introduces trigonometry, then covers algebra topics (quadratic functions, polynomials, conics, exponential and logarithmic functions). Concludes with number theory basics.",
+    "PREREQS": "Placement test",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Multivariable Calculus",
+    "DESCRIPTION": "Equivalent to a typical third semester calculus course in a university sequence. Covers single-variable calculus concepts applied to vector and parametric functions, multi-variable calculus, and vector calculus. Emphasis on practical applications to science and engineering. Students introduced to technical typesetting using LaTeX.",
+    "PREREQS": "Teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Statistics",
+    "DESCRIPTION": "Introduces students to major concepts and tools for collecting, analyzing, and drawing conclusions from data. Four major themes: exploratory analysis, planning a study, probability, and statistical inference. Includes hands-on activities such as M&M's experiments and news broadcasts.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Data Structures",
+    "DESCRIPTION": "Comparable to university courses titled 'Algorithms and Data Structures.' Reviews discrete mathematics with big-oh notation. Covers stacks, queues, binary trees, arrays, linked lists, recursion, searching, sorting, binary search trees, hash tables, dynamic programming, graphs, and NP completeness.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Math Topics (Trimester)",
+    "DESCRIPTION": "Miscellaneous advanced topics determined by student and instructor discussion.",
+    "PREREQS": "Teacher recommendation",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Pre Calculus Discrete Extension",
+    "DESCRIPTION": "Continuation of Discrete Mathematics I. Covers pre-calculus type topics (field and set proofs, limits of sequences and series, trigonometry, polar and parametric coordinates, basic limits and derivatives), basic linear algebra, combinatorics, probability and statistics. Includes research/writing projects and introduction to a mathematical word-processing program like TeX. Extension class.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Analyt Calculus Extension",
+    "DESCRIPTION": "Highly theoretical version of calculus covering all basic material from AP Calculus BC with additional topics. Entirely proof-based. Extension class.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "BC Calculus Extension",
+    "DESCRIPTION": "In-depth explanations, discussions, and examples of concepts currently being studied in BC Calculus. Problems that extend the concepts are presented to students. Extension class.",
+    "PREREQS": "Co-requisite: BC Calculus",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Cryptology",
+    "DESCRIPTION": "Study of how to communicate so that only intended partners have access to the communication. Covers historical and modern cryptology, mathematics underlying cryptology, encryption, and decryption techniques used throughout the Internet.",
+    "PREREQS": "Some background in programming and knowledge of math beyond Freshman level will enable deeper coverage",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Game Theory",
+    "DESCRIPTION": "Formalized structure for decision making, cost-and-benefit analysis. Covers mathematical games including Nim, Prisoner's Dilemma, Wythoff's Game, Hackenbush, Nash equilibrium, and the game of Domineering.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Math Problem Seminar",
+    "DESCRIPTION": "Aimed at Math research and competitions such as Regeneron, YSAP, NRSF, and Google. Students write math contributions in Combinatorics, Number Theory, Geometry, etc. Also prepares for math problem-solving contests such as AMC 10, 12, AIME, USA Math Olympiad, and International Math Olympiad.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Numerical Analysis",
+    "DESCRIPTION": "Introduction to techniques in Mathematics and Computer Science used to compute numerical results such as roots of equations, limits, definite integrals, and differential equations. At the intersection of Mathematics and Computer Science.",
+    "PREREQS": "Intro to Computer Science (ATCS) or Foundations of Computer Science (non-ATCS)",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Skepticism in Data Analysis",
+    "DESCRIPTION": "Provides powerful tools to cut through intimidating data and misinformation. Topics include Causality, Numbers and Nonsense, Selection Bias, and Data Visualization based on the book 'Calling out BS, the Art of Skepticism in a Data-Driven World.'",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Simulations & Numerical Methods",
+    "DESCRIPTION": "Explores how to build numerical models for quantitative systems, describe different kinds of models, and use basic computational techniques to run simulations. Students have lessons on formatting mathematics into technical writing syntax. Uses Excel or Google Sheets for numerical modeling.",
+    "PREREQS": "Coding helpful but not required",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Strategies in Mathematics",
+    "DESCRIPTION": "Provides students with mathematical support based on their individual needs. Appropriate for students in a variety of core classes. Provides opportunities for reflection on inquiry/problem solving and the nature of mathematics.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Strategy of Card Games",
+    "DESCRIPTION": "A look at the history and mathematics behind social card games such as Hearts, Euchre, and Cribbage. Students learn the rules and practice playing the games, examine the probabilities involved, and learn basic and intermediate strategies.",
+    "PREREQS": "Basic understanding of probability and counting, such as covered in Analysis II, recommended",
+    "ACADEMY": "Math",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Problems in Music Theory & Technology (11th grade core)",
+    "DESCRIPTION": "Continuation of AP Music Theory in the Digital Age. Covers French, Italian, and German augmented sixth and Neapolitan Chords, composition of fugue expositions, counterpoint including Twentieth-century counterpoint, advanced harmonic analysis including late Romantic literature, analysis of Twentieth-century music, conducting knowledge, performance preparation, and ensemble skills.",
+    "PREREQS": "At least one year of piano study prior to beginning highly recommended",
+    "ACADEMY": "Music",
+    "LENGTH": "Two Trimesters Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "AP Music Theory in Digital Age",
+    "DESCRIPTION": "Prepares students for the College Board AP Exam. Covers fundamentals of tone, intervals, scale and triad construction, phrase analysis and construction, Roman numeral harmonic analysis, non-chord tones, two-voiced species counterpoint, four-part chorale-style composition, dominant and non-dominant seventh chords, analysis of standard repertoire, and analysis of binary and ternary forms. Ear-training comprises nearly 50% of the exam.",
+    "PREREQS": "At least one year of piano studies highly recommended; exceptions made for instrumentalists with intermediate or better proficiency",
+    "ACADEMY": "Music",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Conducting",
+    "DESCRIPTION": "Delves into conducting and score-reading. Course is customized to the student's level. Culminates in a rehearsal with one of BCA's major ensembles (band, orchestra, or choir).",
+    "PREREQS": "Advanced Problems Music Theory & Technology, or teacher's recommendation",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Digital Keyboarding",
+    "DESCRIPTION": "Open-ended course designed to fit the individual needs of the student. Covers beginner concepts or advanced keyboard harmony (non-traditional clef reading, transposition, harmonization, and fundamentals of improvisation). Students are introduced to the synthesizer and MIDI software.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Digital Recording Lab (Core)",
+    "DESCRIPTION": "Students explore various elements of digital recording, audio equipment, and editing. Covers microphones, cables, mixers, amplifiers, wireless systems, and troubleshooting. Recording sessions using GarageBand, Logic Pro, Soundtrap. Projects may include audition material, original songs, formal compositions, arrangements, ringtones, and music videos.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Electronic Music Synthesis",
+    "DESCRIPTION": "Applied music course involving fundamentals of MIDI, proceeding through more advanced concepts. Students produce an original composition using Finale software. Course is two trimesters long, taking place in the final two trimesters of senior year.",
+    "PREREQS": "Mandatory: at least six months of piano studies prior to the course",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long (Two Trimesters)",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Musicianship",
+    "DESCRIPTION": "Methods course where students learn to play woodwind, brass, string, and percussion instruments. Also covers development of modern instruments and their transposition, conducting techniques, and rhythm dictation. Students conduct in all meters including 2, 3, 4, 5, 6, and 7.",
+    "PREREQS": "Ability to read music, permission of instructor",
+    "ACADEMY": "Music",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "World Music",
+    "DESCRIPTION": "Arts and humanities course involving the historical development of Western music from its earliest beginnings in Antiquity and Gregorian Chant through the Middle Ages, Renaissance, and Baroque periods.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Late 20th Century Music",
+    "DESCRIPTION": "Arts and humanities course involving the historical development of Western music during the Viennese Classical period.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Post-Romantic Music",
+    "DESCRIPTION": "Arts and humanities course involving the historical development of Western music beginning in the Romantic period, continuing through Post-Romantic, and culminating in the 20th and 21st centuries.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Senior Music Media Seminar",
+    "DESCRIPTION": "Two units: Unit 1 is a 'maker' style course where students construct an authentic musical instrument such as a Telecaster style guitar and mini amplifier. Unit 2: Seniors plan their AVPA-Music Senior Recital (graduation requirement, adjudicated by professional musicians).",
+    "PREREQS": "Completion of an in-class 'Safety Test' with a score of 100%",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-M"]
+  },
+  {
+    "NAME": "Advanced Problems in Music Theory (12th grade elective)",
+    "DESCRIPTION": "Continuation of AP Music Theory in the Digital Age. Covers French, Italian, and German augmented sixth and Neapolitan Chords, composition of fugue expositions, counterpoint including Twentieth-century counterpoint, advanced harmonic analysis, conducting knowledge, performance preparation, and ensemble skills.",
+    "PREREQS": "At least one year of piano study prior to beginning highly recommended",
+    "ACADEMY": "Music",
+    "LENGTH": "Two Trimesters Long",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Concert Band",
+    "DESCRIPTION": "Large ensemble that performs formal concert music. Includes wind and percussion instruments. Emphasizes performance techniques, general musicianship, and creative/critical thinking. Runs only first and third trimester. Satisfies participation requirement for county, regional, and all-state honors ensembles.",
+    "PREREQS": "Audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Concert Choir",
+    "DESCRIPTION": "Large ensemble of mixed voices. No audition required. Featured in Holiday and Spring Choir & Dance Concerts, performs at school functions, and participates in music festivals.",
+    "PREREQS": "No audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Concert Choir (Lunch)",
+    "DESCRIPTION": "Same choir as the Concert Choir, but at lunchtime. Large ensemble of mixed voices. No audition required. Featured in Holiday and Spring Choir & Dance Concerts, performs at school functions, and participates in music festivals.",
+    "PREREQS": "No audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Digital Recording Lab (Elective)",
+    "DESCRIPTION": "Students explore various elements of digital recording, audio equipment, and editing. Covers microphones, cables, mixers, amplifiers, wireless systems, and troubleshooting. Recording sessions using GarageBand, Logic Pro, Soundtrap.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Ensemble (Wind & String)",
+    "DESCRIPTION": "Wind Ensemble: BCA chamber ensembles of 3-8 people including Flute, Clarinet, Saxophone, Mixed Wind, Brass, and Bergen Arts Ensemble. String Ensemble: Piano Trio, String Quartet, etc. Satisfies participation requirement for county, regional, and all-state honors ensembles.",
+    "PREREQS": "Audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Guitar I",
+    "DESCRIPTION": "Comprehensive group lessons covering all facets of guitar performance. Main goal: students with no prior knowledge of guitar/music gain enough skills to begin playing independently. Topics: notation, tablature, chords/notes in first position, ensemble skills. Must have an instrument.",
+    "PREREQS": "Must have an instrument",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Guitar II",
+    "DESCRIPTION": "Comprehensive group lessons taking students through all facets of guitar performance.",
+    "PREREQS": "Guitar I or teacher recommendation",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Guitar III",
+    "DESCRIPTION": "Comprehensive group lessons building on Guitar II. Topics include barre chords, fingerstyle playing, and basic music theory. Students may audition for Guitar & Mandolin Orchestra.",
+    "PREREQS": "Guitar II or teacher recommendation",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Guitar & Mandolin Orchestra",
+    "DESCRIPTION": "Large ensemble performing music on acoustic guitars, bass guitars, mandolins, mandolas, and mandocellos. Satisfies participation requirement for regional and all-state honors ensembles.",
+    "PREREQS": "Audition required (students who have auditioned for BCA Orchestra on violin, viola, cello, bass may register without audition)",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "History of Rock Music",
+    "DESCRIPTION": "Survey of rock music covering key figures who helped shape rock and roll from its infancy to the 1970s. Includes original song recordings, video clips, documentaries, and class discussions of concurrent events in American history.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Jazz Band",
+    "DESCRIPTION": "Medium size combo of about 9-12 musicians. Emphasizes performance techniques, general musicianship, and creative/critical thinking. Satisfies participation requirement for county, regional, and all-state honors ensembles.",
+    "PREREQS": "Audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Musicians Workshop",
+    "DESCRIPTION": "Students build authentic musical instruments or electro-music devices. Covers almost all steps in the 'maker' process from cutting wood to soldering electronics. Team-work skills emphasized. Safe use of materials and tools emphasized. Materials fee required.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Music & Society",
+    "DESCRIPTION": "Arts and humanities course involving the historical development of Western music from Antiquity and Gregorian Chant through all stylistic periods: Middle Ages, Renaissance, Baroque (T1), Viennese Classical (T2), and Romantic, Post-Romantic, culminating in the 20th and 21st centuries.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Orchestra",
+    "DESCRIPTION": "Large ensemble performing different styles of classical music. Instrumentation includes bowed strings with a limited number of winds/percussion. Runs only first and third trimester. Satisfies participation requirement for regional and all-state honors ensembles.",
+    "PREREQS": "Audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Percussion Ensemble",
+    "DESCRIPTION": "BCA chamber ensemble for accomplished musicians in smaller settings of 3-8 people. Satisfies participation requirement for county, regional, and all-state honors ensembles.",
+    "PREREQS": "Audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Pit Orchestra I & II",
+    "DESCRIPTION": "Performs original Broadway show music for the annual BCA musical. Instrumentation dependent on current show. Runs only second trimester. Satisfies participation requirement for regional and all-state honors ensembles.",
+    "PREREQS": "Audition required",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Ukulele Café",
+    "DESCRIPTION": "Beginner level course for ukulele (soprano and/or concert size instruments). Students learn enough basics to start practicing and performing independently. Culminating experience is a luau-style performance. Students must have their own instrument.",
+    "PREREQS": "Students must have their own instrument",
+    "ACADEMY": "Music",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Acting I",
+    "DESCRIPTION": "Students work with physically based techniques and unscripted strategies such as Viewpoints and improvisation to release and open emotional and physical range. Stimulates imagination, puts emphasis on physical actions, and aids in ridding the actor of self-conscious mannerisms.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Acting II / Playwriting / Theatre History I",
+    "DESCRIPTION": "Acting, playwriting, and theatre history taught concurrently. Acting: rehearsal process through scene study, ensemble playing, emotional recall, script analysis, and characterization. Playwriting: creating given circumstances, character development, and writing a ten-minute play. Theatre History: Romanticism through contemporary theatre practices.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Acting III",
+    "DESCRIPTION": "Develops a close, organic connection between the actor and their technique. Students investigate and utilize their widest possible range. All students prepare 4-6 monologues from contemporary and classical repertory and explore audition technique in preparation for future training or work.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Acting IV",
+    "DESCRIPTION": "Advanced scene study class focused on exploration of the text and utilization of technique to determine actor choices for the particular stylistic demands of a text and its period. Scene studies from a variety of major theatrical periods and styles.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Dance I",
+    "DESCRIPTION": "Two-trimester course. First component of a four-year dance study. One trimester of ballet and one trimester of musical theatre jazz dance. Covers fundamental positions, techniques, and steps; awareness of body in space; dance terminology and dance history.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Two Trimesters Long",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Dance II",
+    "DESCRIPTION": "Two-trimester course. Consists of both ballet and tap dance. Students practice and advance technical ballet skills and learn ballet history. Second trimester consists of tap dance basics covering musicality, weight change, and tap vocabulary.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Two Trimesters Long",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Dance III-IV",
+    "DESCRIPTION": "Two-trimester course. Students work on artistry, performance technique, audition technique, and connecting with an audience through ballet, tap, and jazz. Explores modern dance, movement improvisation, choreography, and emotional expression. Culminates in a choreography project.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Two Trimesters Long",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Directing",
+    "DESCRIPTION": "Introduces the student to theory and techniques of stage direction. Covers stage visualization, picturization, composition and movement, analysis of scenes, director preparation (casting, rehearsal technique, director/actor relationship), and production values. Culminates in directing a fully staged and produced one-act play.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Junior Seminar",
+    "DESCRIPTION": "Students explore theatre, film, and television as a profession and as a business through research, field trips, videoconferences, and guest speakers. Topics include portfolio preparation, resumes, union memberships, agents, job opportunities, auditions, interviews, and advanced training.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Theatre Fundamentals",
+    "DESCRIPTION": "Designed to introduce non-AVPA/Theatre students to a general survey of dramatic principles and theatrical conventions. Covers historical perspective, functions of theatre personnel, and practices of the contemporary stage.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Theatre History I",
+    "DESCRIPTION": "Beginning with Romanticism and ending with contemporary theatre practices, explores major periods and trends in theatre through examination of performance environments, theatre architecture, design, acting styles, scripts, audiences, and social and cultural conditions of the times.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Theatre History II",
+    "DESCRIPTION": "Historical exploration of global theatre arts in relation to developing Eastern and Western world civilizations. Includes study of theatre architecture, styles of acting, development of stage costume, and range of dramatic literature from the Greeks through the closing of the theatre in Great Britain in 1642.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Voice & Speech I",
+    "DESCRIPTION": "Develops the actor's vocal range and quality along with training in standard American speech. Uses the Alexander Method and the work of Cicely Berry and Kristin Linklater. Covers vocal range, placement and flexibility with special emphasis on complex and classical texts.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Voice & Speech II",
+    "DESCRIPTION": "Continued exercises and technique work. Emphasis on vocal production and placement, breath control, articulation, regionalisms, dialects, and projection. Special emphasis on Voice Over work in the industry with each student creating a voice over demo.",
+    "PREREQS": "Teacher recommendation and must have participated in at least one production at BCA",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-T"]
+  },
+  {
+    "NAME": "Fashion Design and Sewing",
+    "DESCRIPTION": "Hands-on ARTS elective where students learn sewing techniques and work with high-end sewing equipment. Includes 'challenge'-style projects similar to Project Runway, creating garments from unusual materials and solving fashion dilemmas.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Beginner Ballroom",
+    "DESCRIPTION": "Students work on communication skills by learning to lead and follow in ballroom dance. Ballroom I covers Fox Trot, Rumba, and Swing. Ballroom II covers Tango and Waltz.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Costume Design",
+    "DESCRIPTION": "Hands-on, project-based class. Students go through the process of designing costumes for the Senior Directed One Acts. Covers stock at BCA, research the play and period, taking measurements, rendering designs, attending concept production meetings and rehearsals, and working with actors.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Dance Fundamentals",
+    "DESCRIPTION": "Learns the secrets of dance training – alignment, musicality, coordination, change of weight in a non-threatening environment. Covers core strength, stretching, isolations, and body alignment. Includes dance moves, turns and leaps across the floor.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Latin Style of Dance",
+    "DESCRIPTION": "Students learn different Latin Ballroom dances including salsa, merengue, cha-cha-cha, rumba, bachata, mambo, and the samba. Slower dances focus on strength and style; faster paced dances focus on change of weight, musicality, and change of direction.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Musical Theater",
+    "DESCRIPTION": "Student actors undertake the tasks necessary to produce a full-length, fully mounted musical theatre piece. Presentational musical theatre technique in acting, singing, and dance developed with rigorous attention given to ensemble building.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "One Act Play",
+    "DESCRIPTION": "Hands-on experience in acting techniques, character analysis, proper staging, costuming, prop making, and scenery design through a one-act play. Students audition for roles, memorize and rehearse lines, make costumes, and present the play during an evening play festival. Directors are AVPA: Theatre Seniors.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Public Speaking",
+    "DESCRIPTION": "Practice public speaking skills in a fun and supportive environment where everyone improves regardless of starting point.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Screenwriting",
+    "DESCRIPTION": "Examines the role of the screenwriter in TV and film. Students study the works of professional screenwriters and investigate different processes of writing for TV, film, and other screen media. Students write their own short screen- or teleplay.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Stage Management",
+    "DESCRIPTION": "Students work on the fall play during the elective hour. Learn to work with costumes, props, sets, sound and lights, read drafting, work on the stage, analyze the play, meet with the director and design teams, organize schedules, run technical rehearsals, work with the actors, and develop protocols.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Stretching and Pilates",
+    "DESCRIPTION": "Somatic practice (mind-body exercise) developed by Joseph Pilates. Focuses on core strength, flexibility, and alignment. Students gain awareness of their alignment and how negative postures can impact overall health. Once per week class based upon the classic Pilates mat series.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Theatre Production",
+    "DESCRIPTION": "Designed to give the student actor an opportunity to develop acting skills, learn character analysis, and participate in the staging, costuming, and scenic design for a full-length play.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Yoga",
+    "DESCRIPTION": "Once per week class exploring mindful movement. Focuses on uniting breath with mindful movement, and body with the mind. Covers sun salutations, warriors, twists, balances, backbends, supine poses, and relaxation.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Yoga Lunch",
+    "DESCRIPTION": "Yoga class covering a series of postures beginning with gentle spine work and ending with relaxation. Students are exposed to various yoga balances, twists, and inversions. Mats are provided.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Performing Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Driver's Education",
+    "DESCRIPTION": "Prepares students to take the NJ Department of Motor Vehicles written exam. Topics include making effective driving decisions, understanding motor vehicle and traffic laws, learning basic maneuvers, and the safe operation of a vehicle. NJ State DMV written exam administered in class.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physical Education, Health & Driver's Ed",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "Health - First Aid Online",
+    "DESCRIPTION": "Family Living curriculum covering four NJ DOE categories: Wellness, Integrated skills (communication, decision making, goal setting, etc.), Drugs and Medicines, and Human Relationships & Sexuality.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physical Education, Health & Driver's Ed",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "Health & Wellness (9th grade)",
+    "DESCRIPTION": "Covers topics related to nutritional wellness, sexual health, and current health issues. Covers four NJ DOE categories: Wellness, Nutrition, Drugs and Medicines, and Human Relationships & Sexuality.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physical Education, Health & Driver's Ed",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "Health & Wellness (11-12 Online)",
+    "DESCRIPTION": "Two units. Unit 1 (Advanced Topics 1): Knowledge and skills to recognize and handle a medical emergency. Unit 2 (Advanced Topics 2): Explores interpersonal relationships, foundations of human growth and development, responsible personal behavior, and family living. Covers four NJ DOE categories.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physical Education, Health & Driver's Ed",
+    "LENGTH": "Full Year (online)",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Physical Education",
+    "DESCRIPTION": "Contributes to the well-being of the student physically, intellectually, emotionally, psychologically, and socially. Emphasis on personal fitness and the pursuit of lifetime activities. Integrates education on the physiology of exercise.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physical Education, Health & Driver's Ed",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "Advanced Physics",
+    "DESCRIPTION": "Algebra-based course providing fundamentals of magnetism, wave phenomena, optics, special relativity, and modern physics (quantum, nuclear and particle physics). Emphasizes problem solving and laboratory work.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AAST"]
+  },
+  {
+    "NAME": "AP Physics C (AAST Core)",
+    "DESCRIPTION": "Calculus-based physics course for college physics/engineering freshmen. Divided into two sections: Mechanics and Electromagnetism. Students may select this to satisfy the 11th grade full year physics requirement. Students must have completed one year of calculus or take Calculus AB/BC concurrently.",
+    "PREREQS": "One year of calculus before OR Calculus AB/BC concurrently (BC strongly recommended); strong 'A' average in previous physics course",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": ["AAST (as option for 11th grade physics)"]
+  },
+  {
+    "NAME": "Physics (AMST Core - 10th grade)",
+    "DESCRIPTION": "Develops skills and vocabulary for understanding the physical world. Topics of Motion, Forces, Energy, and Momentum. Problem solving techniques primary throughout. Projects, experiments, labs, and problem solving used as major tools.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AMST"]
+  },
+  {
+    "NAME": "Physics (AMST Core - 11th grade)",
+    "DESCRIPTION": "Covers units on fluids, thermodynamics, electricity, magnetism, waves, and optics. Includes labs on buoyancy, electric current, and lenses and mirrors. All students should be proficient in algebra.",
+    "PREREQS": "Proficiency in algebra",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AMST"]
+  },
+  {
+    "NAME": "Physics (ACAHA, ABF, ATCS, AVPA Core)",
+    "DESCRIPTION": "Covers vectors, kinematics, Newton's Laws of Motion, gravity (and uniform circular motion), energy, momentum, electricity, magnetism, waves, and optics. Labs on friction, electrostatics, and refraction.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["ACAHA", "ABF", "ATCS", "AVPA"]
+  },
+  {
+    "NAME": "Physics I (AEDT Core)",
+    "DESCRIPTION": "Covers topics of Motion, Forces, Energy, and Momentum. Students apply problem solving techniques to engineering and physics scenarios. Emphasizes directional properties of Displacement, Velocity, Acceleration, Force, and Momentum.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Physics II (AEDT Core)",
+    "DESCRIPTION": "Exposes students to Rotational Motion, Ideal Gas Laws and Kinetic Theory, Heat, Thermal Expansion Thermodynamics, and Electrostatics. Algebra-based course. Emphasizes knowledge of basic laws of nature, application, and experimental and theoretical explanation.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AEDT"]
+  },
+  {
+    "NAME": "Advanced Physics for Engineering",
+    "DESCRIPTION": "Algebra-based course providing fundamentals of magnetism, wave phenomena, optics, special relativity, and modern physics (quantum, nuclear and particle physics). Prepares students to take AP Physics C senior year or enter college engineering programs.",
+    "PREREQS": "Physics II (AEDT students) or Physics (non-AEDT students)",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "11 AEDT, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Physics C (Elective)",
+    "DESCRIPTION": "Calculus-based physics course for college physics/engineering freshmen. Divided into Mechanics and Electromagnetics. Students must have completed one year of calculus or be enrolled in Calculus AB/BC concurrently.",
+    "PREREQS": "One year of calculus before OR Calculus AB/BC concurrently (BC strongly recommended); strong 'A' average in previous physics course. If not taken as core physics, may be taken as an elective.",
+    "ACADEMY": "Physics",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Astronomy",
+    "DESCRIPTION": "Study of planets, stars, and the universe. Covers the Copernican Revolution, stellar energy, distance measurements in space, black holes, Einstein's Theory of Relativity, telescopic observation, history of astronomy, Solar System, stars and galaxies, and the search for extrasolar planets. Uses internet resources as a virtual telescope.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Astrophysics",
+    "DESCRIPTION": "One-trimester introduction to the physical principles behind celestial phenomena: planetary motion, inner workings of stars, and the nature of the universe. No prior physics course required as all necessary principles are discussed at the start.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Automotive Dynamics & Engineering",
+    "DESCRIPTION": "Students study, analyze, and construct solutions to engineering design problems within the automotive industry. Includes deconstruction and analysis of automotive design and function. Students modify, plan, and execute redesigns.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Einstein's Relativity",
+    "DESCRIPTION": "One-trimester elective open to all students. Introduces the concepts of both Einstein's theories of special and general relativity. No prior physics course required.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Earthquake",
+    "DESCRIPTION": "Explores the awesome realm of the earthquake. Topics include measuring energy released in earthquakes, extent of damage, seismic waves and the structure of the Earth.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro to Volcanology",
+    "DESCRIPTION": "Broad picture of volcanism. Topics include types of volcanoes, types of lava, causes of volcanoes, detrimental and beneficial effects of volcanoes, and studies of specific volcanic eruptions such as the 79 C.E. eruption that buried Pompeii.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Math for Physics",
+    "DESCRIPTION": "Helps students with or anticipating difficulties with Mathematics as applied to problem-solving in Physics. Topics include Geometry, Trigonometry, Advanced Algebra, and (upon request) Calculus.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Physics Exploration",
+    "DESCRIPTION": "One-trimester course for students from all Academies. Students explore selected topics in depth with emphasis on related experiments and problem solving skills. Possible topics include classical and quantum mechanics, thermodynamics, electromagnetism, optics, and relativity.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Physics in Medicine",
+    "DESCRIPTION": "Open to all students intrigued by medical and physical aspects of bodily functions in living organisms and diagnostics and treatment. Addresses topics not discussed in core Physics classes but included in the MCAT and similar exams.",
+    "PREREQS": "Previous experience in Physics helpful but not required",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Physics of Music",
+    "DESCRIPTION": "Explores how principles of physics illuminate the art of music. Topics include waves, sound waves, vibrations in strings, harmonics, resonance in open and closed pipes, frequency patterns in scales (Pythagorean, Just, Equal Tempered Scales), timbres of different instruments, and sound intensity levels in decibels. Knowledge of algebra required.",
+    "PREREQS": "Knowledge of algebra required; knowledge of music helpful",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Quantum Mechanics",
+    "DESCRIPTION": "Math-based introduction to Quantum Physics. Topics include wave functions, measurements, quantum states, solutions of Schrödinger's equation, linear algebra and complex numbers, and abstract framework for quantum theory applications. Prior knowledge of differentiation and integrals necessary.",
+    "PREREQS": "Prior knowledge of differentiation and integrals necessary",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Quantum Physics",
+    "DESCRIPTION": "Conceptual introduction to Quantum Physics. No prior knowledge required. Topics include early experiments (Blackbody Radiation, Photoelectric effect), wave-particle duality, quantum states and operators, entanglement, double-slit experiment, and uncertainty principle. Serves as preparation for 'Quantum Mechanics' elective.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Science Olympiad: Get Ready",
+    "DESCRIPTION": "For students interested in the Science Olympiad contest. Students work on events of their choice, both theoretical and building, alone or in a group. Instructor facilitates students' work and provides guidance.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Sports Science",
+    "DESCRIPTION": "Students learn and apply physics and engineering knowledge to understand and enhance interactions within sports and other activities. Students focus on their own extracurricular activities and interests. Projects focus on applying science to understand and enhance performance.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Physics",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Psychology",
+    "DESCRIPTION": "Introduces students to the systematic and scientific study of human behavior and mental processes. Topics include biological basis of behavior, sensation and perception, learning and cognition, motivation, developmental psychology, testing individual differences, treatments of psychological disorders, and social psychology.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Psychology",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB History of American I & II HL",
+    "DESCRIPTION": "Two-year course. Year 1: Comparative course integrating history of the Western Hemisphere from colonization through the 20th Century. Year 2: Higher Level IB History continuing from Age of American Expansion through the Great Depression, then 20th century world history (Communism in Crisis, Causes/practices/effects of wars, Cold War). Includes IB Historical Investigation.",
+    "PREREQS": "Two-year course sequence",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB 20th Century SL",
+    "DESCRIPTION": "One-year course. 20th Century World History Course based on a comparative, multi-perspective approach. Focuses on change, causation, and significance. Involves study of political, economic, social, and cultural history, encouraging students to think historically and develop historical skills.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "20th Century American History I",
+    "DESCRIPTION": "For Juniors not in the IB HL program. Beginning with Reconstruction through the dawn of the 21st Century. Develops critical thinking skills for understanding the complexities of social sciences. Includes a yearlong research project focusing on an aspect of American History.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "20th Century American History II",
+    "DESCRIPTION": "Honors level continuation of the Global History sequence. Beginning with post-Civil War Reconstruction through the Cold War. Covers political, economic, and social history of the United States through a global lens. Students engage extensively with primary and secondary sources.",
+    "PREREQS": "20th Century American History I",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "World History I",
+    "DESCRIPTION": "Covers world history between the Postclassical Era and the revolutions in France, Latin America, and the United States in the early 1800s. Develops history-oriented vocabulary, understanding of political/social/economic systems. Prepares students for the IB history program at BCA.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "World History II",
+    "DESCRIPTION": "Core Social Studies course. Covers world history from the Rise of Europe in the Renaissance through the French and Haitian Revolutions, the Industrial Revolution, and Imperialism. Pays attention to Europe, China and Far East, India, the Islamic world, Latin America, and Africa.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["All Academies"]
+  },
+  {
+    "NAME": "American History on Trial",
+    "DESCRIPTION": "Students explore controversial actions and patterns of behavior of American presidents starting with Thomas Jefferson. Students craft trial cases, investigate and impersonate key historical figures, build understanding of the American judicial process, and collaboratively design a trial packet.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Contemporary Ethics",
+    "DESCRIPTION": "Seminar format course on ethics (morality, what is right or wrong in human behavior). Also covers epistemology and metaphysics as connected to ethics. Graded discussions and papers.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "In the Era of Mao",
+    "DESCRIPTION": "Explores the complex dynamics of Mao Zedong's personality and his continual reinterpretation of Chinese socialism. Investigates the rise of Mao to power, the establishment of the People's Republic of China, The Great Leap Forward, the Great Proletarian Cultural Revolution, and contemporary China's understanding of the era of Mao.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Model UN",
+    "DESCRIPTION": "Instructs students in the current state of world affairs and how to argue and debate these issues using Model UN. Students research the United Nations, other international bodies, and international issues, then debate using standard Model UN debate format.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Modern Russian History I",
+    "DESCRIPTION": "First of three electives focusing on Russia's history. Covers from the Crimean War (1853-1856) to the Soviet Union on the eve of World War II (1941-1945). Themes: war as a catalyst for political reform, Russia's relations with the West, WWI's impact, inevitability of the Bolshevik Revolution, and challenges facing the new Soviet Government.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Modern Russian History II",
+    "DESCRIPTION": "Covers the period of Soviet history from World War II until the collapse of the USSR in 1991. Focus on Soviet contribution to WWII victory, and the Cold War that emerged between the US and Soviet Union after WWII. Concludes with Gorbachev's reforms and the collapse of the Soviet Union.",
+    "PREREQS": "Modern Russian History I, or teacher recommendation (seniors only)",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Modern Russian History III",
+    "DESCRIPTION": "Final installment of Modern Russian History electives. Normally covers post-Soviet Russia (1991 to present). Focuses on Cold War, developments leading to Gorbachev's perestroika, the collapse of the Soviet Union, and challenges Russia faced creating a viable political and economic model in the 1990s.",
+    "PREREQS": "Modern Russian History I & II or teacher recommendation",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Women in East Asia",
+    "DESCRIPTION": "Explores the concepts of femininity, feminism, and filial piety within the context of China, Korea, and Japan through investigation of primary and secondary sources. Relocates the voice and critical roles women played in pre-20th century East Asia.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Social Studies",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Art Fundamentals",
+    "DESCRIPTION": "Covers fundamentals in one of the following areas of visual art: video, interactive design, fine arts, or computer imaging. Teacher may accommodate more advanced students through differentiated instruction.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Design Prod 1",
+    "DESCRIPTION": "Primary project: C-SPAN Student Cam Competition (5-month documentary video production unit). Other units: introduction to Arduino, Virtual Animals (3D printing), and Cooper Hewitt National High School Design Competition.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Design Prod 2",
+    "DESCRIPTION": "Focuses on event management, planning, budgeting, and production. Covers computer-assisted art and design, color theory and psychology, imaging, communication skills, and commercial art business operations.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "10",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Emerging Tech I",
+    "DESCRIPTION": "Multimedia-themed projects. Advanced topics in web development including animation, UX, UI patterns, responsive design, CSS, JavaScript, and jQuery. Students also learn to develop and prepare designs for laser cutting.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Emerging Tech II",
+    "DESCRIPTION": "Project-based units: Cooper Hewitt National High School Design Competition, shooting interviews for 'The Romance Chronicles,' Technology Zoo (animal sculpture from recycled tech elements), Movie Poster/Trailer Production, Creating Animations in Virtual Reality, and Gallery Production.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "11",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Foundation of Visual Art",
+    "DESCRIPTION": "Introductory foundation course for Visual Art majors. Focus on Elements and Principles of Art/Design and developing student drawing and design skills to a more mature level. Students maintain a sketchbook and portfolio. Students introduced to aesthetics and critique.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Intro to Visual Art",
+    "DESCRIPTION": "Introduces students to visual arts and graphic communications. Students create, design, and explore utilizing a wide variety of media and printing processes. Units cover graphic design, computer instruction and production, software usage, fundamental design elements and principles, perspective drawing, digital art, and package design.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "9",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Visual Art Senior Capstone I",
+    "DESCRIPTION": "Helps students strengthen their art portfolios through development of individual Capstone projects. Supplements with classroom projects enhancing compositional, drawing, painting, and sculpting skills. Capstone projects have the potential to be displayed in a public setting or professionally published.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "Visual Art Senior Capstone II",
+    "DESCRIPTION": "Students work in a graphic arts facility to acquire advanced skills. Focus on portfolio development and studio projects (personal and group). Students create artwork in traditional media and digitally using Adobe Photoshop and Illustrator. Students create their own books using Adobe InDesign.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Semester Long",
+    "GRADE": "12",
+    "REQUIRED_FOR": ["AVPA-V"]
+  },
+  {
+    "NAME": "AP Art History",
+    "DESCRIPTION": "Introductory college-level art history course. Students cultivate their understanding of art history through analyzing works of art and placing them in historical context. Explores culture and cultural interactions, theories and interpretations of art, impact of materials/processes/techniques, and purpose and audience in art historical analysis.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "AP Studio Art",
+    "DESCRIPTION": "Inquiry-based thinking and making. Students create a portfolio of work demonstrating inquiry through art and design and development of materials, processes, and ideas over the course of a year. Portfolios include works of art, process documentation, and written information. Students submit portfolios in May for evaluation.",
+    "PREREQS": "Prior experience learning about and making art and design supports success; Pre-AP Studio Art participation prior year is a plus; summer art assignment expected prior to course",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Drawing",
+    "DESCRIPTION": "Twice a week course focusing on elements of art and principles of design in drawing: composition, proportion, spatial relationships, perspective, volume, light and shadow, value and texture. Students explore traditional and alternative media, drawing styles, techniques, and materials. Satisfies the NJ State requirement for Visual and Performing Arts.",
+    "PREREQS": "No prerequisites",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Design & Digital Media",
+    "DESCRIPTION": "Students choose an independent project while being exposed to new hardware and software. Disciplines include video production, VR, AR, 3D printing, laser cutting, Arduino, sculpture, animation, Unity game design, interactive installation, and Adobe packages (Photoshop, Illustrator, After Effects).",
+    "PREREQS": "Must have taken a semester, full-year, or two trimester class with the teacher in order to sign up",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Pre-AP Studio Art",
+    "DESCRIPTION": "For students who want to build up their art portfolio and consider AP Studio Art for the following year. Course of 2-D art and design and 3-D media exploration. Students can bank works for their AP Studio Art portfolio. Class meets twice per week; students expected to put 2-3 hours per week outside class.",
+    "PREREQS": "Foundations of Visual Art, or Art Fundamentals courses; Highly recommended for Visual majors",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Visual Art (General)",
+    "DESCRIPTION": "Non-AVPA students have a chance to experiment with various traditional and digital art techniques to create original works. Projects focus on two-dimensional works, with potential three-dimensional projects if time permits.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Full Year",
+    "GRADE": "10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Ceramics",
+    "DESCRIPTION": "Introductory Ceramics course open to all students. Students explore working with clay using hand-building techniques such as pinch pot, coil, and slab. Fired ceramic objects will be glazed for a completed decorative look.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Creative Art Workshop",
+    "DESCRIPTION": "Students explore creative expression through a variety of applied art options including clay hand building, ceramic glazing, 3-D object design, and paper design. Workshop theme changes from trimester to trimester.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Digital Imaging",
+    "DESCRIPTION": "Introduction to creating images for Web and Printing using Adobe Photoshop and Illustrator. Units include introduction to software tools and terms, Photoshop projects, Illustrator projects, and animated images.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Digital Photography",
+    "DESCRIPTION": "Teaches how to use a camera and Adobe Photoshop to capture, edit, manipulate, and produce quality images for print and the Internet/Multimedia. Focuses on digital image capture and manipulation. Assessments include quizzes and hands-on exercises/projects.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Global Art & Social Impact",
+    "DESCRIPTION": "Students analyze, understand, and enjoy various works of art and architecture. Main focus on modern and post-modern contemporary art. Students gain understanding of the role of arts in reflecting human thinking throughout history, build art vocabulary, and develop artistic concepts through hands-on work.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Interactive Design Level I",
+    "DESCRIPTION": "Foundation course. Students work with the Arduino platform, program using Processing, and get an introduction to the Unity game engine. Foundation for more in-depth, multi-trimester projects through Interactive Design 2, 3, and Advanced Topics.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Interactive Design Level II",
+    "DESCRIPTION": "Students design their own project utilizing skills acquired in Interactive Design 1. Also includes work with virtual reality and 3D printing.",
+    "PREREQS": "Interactive Design 1",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Interactive Design Level III",
+    "DESCRIPTION": "Students continue work on projects begun in Interactive Design 2 or propose and develop new projects.",
+    "PREREQS": "Interactive Design 2",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Topics Interactive Design I",
+    "DESCRIPTION": "More advanced projects combining multiple disciplines. Examples include virtual reality experiences and interactive installations.",
+    "PREREQS": "Interactive Design 1, 2, and 3",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Topics Interactive Design II",
+    "DESCRIPTION": "Continuing work from Advanced Topics in Interactive Design 1. Students may also propose and develop new projects.",
+    "PREREQS": "Interactive Design 1, 2, 3, and Advanced Topics Interactive Design 1",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Advanced Topics Interactive Design III",
+    "DESCRIPTION": "Continuing work from Advanced Topics in Interactive Design 2. Students may also propose and develop new projects.",
+    "PREREQS": "Interactive Design 1, 2, 3, Advanced Topics Interactive Design 1 and 2",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro to Photoshop",
+    "DESCRIPTION": "Introductory course on how to edit and create amazing images and effects with Photoshop. Step-by-step exercises ranging from beginner to advanced techniques. Also helps prepare students for the Adobe Certified Associate (ACA) exam.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro to UX Design",
+    "DESCRIPTION": "Students learn tools and techniques to design useful, functional, and pleasurable products. Equal focus on theoretical frameworks and practical applications, progressing through a final project to serve as an eventual portfolio piece.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Paper Art",
+    "DESCRIPTION": "Various types of paper projects using different kinds of papers. Techniques include paper folding, pop-up, paper cutting, paper sculpture, and collage. Students are introduced to design concepts, aesthetics, function, technical skills, and social, cultural, and historical influences on design.",
+    "PREREQS": "None listed",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Video Production (Intro, Intermediate, Advanced)",
+    "DESCRIPTION": "Intro: Students learn video production process from Pre-Production to Post-Production, including basics of non-linear editing using Adobe Premiere Pro. Intermediate: Students expand skills through production of a video project from scratch. Advanced: Students develop longer-form independent or school videos and have the opportunity to work with Adobe After Effects.",
+    "PREREQS": "Intermediate and Advanced require prior completion of lower levels",
+    "ACADEMY": "Visual Arts",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Espanol I-II Accelerated",
+    "DESCRIPTION": "Designed for 9th graders studying the language for the first time or with some exposure. Accelerated course meeting more often than level II. Covers essential grammar, vocabulary, and cultural material at novice level. Students create and perform original dialogues, question and answer scenarios, and various pair and group projects.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Espanol II",
+    "DESCRIPTION": "Advances students' communicative abilities to the novice-high level. Topics: summer vacations, current events, past actions, biographies of Spanish-speaking celebrities, places in Spanish speaking countries, and changes over time. Goal: Novice-High proficiency.",
+    "PREREQS": "Placement test",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Espanol III",
+    "DESCRIPTION": "Advances students' communicative abilities to the intermediate-mid level. Topics: describing people/situations/relationships, future of environment and technology, personal future, short stories, and commands for giving advice.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Francais I-II Accelerated",
+    "DESCRIPTION": "Designed for freshmen studying French for the first time or with some exposure. Covers essential grammar, vocabulary, and cultural material at novice level. Activities include creation and performance of original dialogs and skits, question and answer scenarios, and pair and group projects.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Francais II",
+    "DESCRIPTION": "Advances students' communicative abilities to the novice-high level. Topics include describing oneself and others, daily life, and marketplace and restaurant interactions.",
+    "PREREQS": "Placement Test",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Francais III",
+    "DESCRIPTION": "Advances students' communicative abilities to the intermediate-mid level. Topics include leisure activities, summer vacation, how life used to be, social conflict, and authentic literary works.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Espanol IV HL",
+    "DESCRIPTION": "Part one of a two-year course sequence. Students use the range and complexity of the language to communicate. Develops vocabulary, grammar, and conceptual understanding of how the language works. Students summarize chapter books and use strategies to maintain flow of conversations and discussions.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Espanol IV SL",
+    "DESCRIPTION": "Part one of a two-year course sequence. Students develop ability to communicate in Spanish at the intermediate-high skill level. Covers grammar, diversity and wellbeing, narration of the past, expressions of possibility, traditions, and social changes.",
+    "PREREQS": "Espanol III",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Espanol V HL",
+    "DESCRIPTION": "Part two of the two-year course sequence. Students continue to develop knowledge of vocabulary, grammar, and conceptual understanding of how the language works in order to construct, analyze, and evaluate arguments.",
+    "PREREQS": "Espanol IV HL",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Espanol V SL",
+    "DESCRIPTION": "Part two of the two-year course sequence. Students further develop ability to communicate in Spanish at the intermediate-advanced skill level. Topics include Identities, Experiences, Sharing the Planet, Human Ingenuity, and Social Organization. Prepares students for IB exams.",
+    "PREREQS": "Espanol IV SL",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Francais IV HL",
+    "DESCRIPTION": "Part one of a two-year course sequence. Students extend range and complexity of the language to communicate at an advanced level. Emphasizes ability to analyze and develop arguments on a wide variety of topics. Students read authentic articles and literary works in light of five IB themes: identities, experiences, human ingenuity, social organization, and sharing the planet.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Francais IV SL",
+    "DESCRIPTION": "Part one of a two-year course sequence. Language acquisition at intermediate-high linguistic level. Aims to foster appreciation and understanding of French and Francophone cultures. Five thematic units: Identities, Experiences, Human Ingenuity, Social Organization, and Sharing the Planet.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Francais V HL",
+    "DESCRIPTION": "Part two of the two-year course sequence. Students extend range and complexity of the language to communicate at an advanced level. Continues literary exploration begun with 'Le Petit Prince,' delving into a second full-length work, typically 'Antigone' by Jean Anouilh.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Francais V SL",
+    "DESCRIPTION": "Part two of the two-year course sequence. Language acquisition at intermediate-high linguistic level. Includes Internal Oral Assessment and externally moderated IB papers. Five thematic units: Identities, Experiences, Human Ingenuity, Social Organization, and Sharing the Planet.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Mandarin IV Ab Initio (SL)",
+    "DESCRIPTION": "Part one of a two-year course sequence. Students reinforce knowledge of vocabulary and grammar and extend it by understanding the why and how of language: audience, context, purpose, meaning. Students expand range of communication skills by understanding and producing a wide variety of oral and written texts.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "11",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "IB Mandarin V Ab Initio (SL)",
+    "DESCRIPTION": "Part two of the two-year course sequence. Students develop the ability to communicate in Mandarin Chinese through study of language, themes, and texts. Careful attention to forms, structures, functions, and conceptual understandings of language.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Mandarin I-II Accelerated",
+    "DESCRIPTION": "Designed for 9th graders studying Mandarin for the first time or with limited exposure. Accelerated course meeting more often than Mandarin II. Covers essential grammar, vocabulary, and cultural material at novice level. Topics include introductions, family, preferences, and simple scheduling. Students learn to read and write around 200 basic characters.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Mandarin II",
+    "DESCRIPTION": "Students develop Mandarin Chinese language skills to make basic conversations on topics such as routines and daily life, rooms and furniture, clothing, food and health, weather, and entertainment. Goal: Novice Mid or Novice High proficiency per ACTFL guidelines.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "9",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Mandarin III",
+    "DESCRIPTION": "Advances students' communicative abilities to the intermediate-low level through interpretive, interpersonal, and presentational activities. Topics: clothing, weather, and transportation. Students can recognize 700-1000 characters and read simple texts.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Full Year",
+    "GRADE": "10",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Contemporary Caribbean Art",
+    "DESCRIPTION": "Introduces students to Latino artists from Mexico and the Caribbean including Cundo Bermúdez, Wifredo Lam, David Alfaro Siqueiros, Frida Kahlo, José Clemente Orozco, and Jean-Michel Basquiat. Students explore their lives and times and understand how these artists have expressed influences of pop culture, religion, politics, human suffering, and pain.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro to Latin Music",
+    "DESCRIPTION": "Gateway for students who love music and are curious about the Spanish speaking world. Students learn about the history of music in different Spanish speaking countries and are exposed to authentic Latin music, its cultural impact, a variety of Latin music genres, musical instruments, and famous songwriters and singers.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Intro to ASL",
+    "DESCRIPTION": "Four sections (A, B, C, D) using the web-based course Lifeprint. Students practice language through interviews, skits, and presentations. Section A: talking about self and family. Section B: school, home, city, and interpersonal conflicts. Section C: transportation, media, colors, and time. Section D: food, clothes, and household life. Does not count towards GPA.",
+    "PREREQS": "All levels welcome",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Spanish Customs & Traditions",
+    "DESCRIPTION": "Explores the customs and traditions of the Spanish-speaking world, including European and Indigenous customs and traditions that fused to create Latin American culture, and the influence from traditions brought by Africans to the continent during colonial times.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Veganism",
+    "DESCRIPTION": "Students explore how the practice of veganism intersects with topics such as animal rights, environmentalism, health, culinary arts, social justice, feminism, psychology, and mindfulness. Students do not need to be vegan/vegetarian to enroll.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Vibrant Flavors of the Latin Cuisine",
+    "DESCRIPTION": "Students research (and sample) the gastronomy in Latin America, its ingredients, history, fun facts, and some Spanish lingo that will help while ordering food.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  },
+  {
+    "NAME": "Vibrant Flavors of the Spanish Cuisine",
+    "DESCRIPTION": "Students research (and sample) the gastronomy in Spain, its ingredients, history, fun facts, and some Spanish lingo that will help while ordering food.",
+    "PREREQS": "None listed",
+    "ACADEMY": "World Language",
+    "LENGTH": "Trimester Long",
+    "GRADE": "9, 10, 11, 12",
+    "REQUIRED_FOR": []
+  }
+]

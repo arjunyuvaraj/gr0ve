@@ -1,8 +1,11 @@
+import 'package:dotenv/dotenv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:gr0ve/core/theme/persona_theme.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
 import 'package:gr0ve/features/absence/screens/absence_screen.dart';
+import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/home/screens/home_screen.dart';
 import 'package:gr0ve/features/club/screens/join_requests_screen.dart';
@@ -17,8 +20,6 @@ import 'package:gr0ve/features/navigation/screens/navigation_screen.dart';
 import 'package:gr0ve/features/privacy/screens/privacy_policy_screen.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:gr0ve/features/absence/services/teacher_service.dart';
-import 'package:gr0ve/core/theme/dark_theme.dart';
-import 'package:gr0ve/core/theme/light_theme.dart';
 import 'package:gr0ve/core/helper/landing_decider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gr0ve/core/helper/teacher_utils.dart';
@@ -46,7 +47,8 @@ void main() async {
 
   // Initialize notification service
   await NotificationService().initialize();
-
+  await CounselorPersonaService.init();
+  DotEnv().load();
   runApp(const MyApp());
 }
 
@@ -159,46 +161,50 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gr0ve',
-      navigatorKey: navigatorKey, // Set the global navigator key
-      darkTheme: darkTheme,
-      theme: lightTheme,
-      themeMode: ThemeMode.dark,
-      debugShowCheckedModeBanner: false,
-      home: Builder(
-        builder: (context) => LandingDecider(
-          landingPage: kIsWeb
-              ? const LandingWebsiteScreen()
-              : const LandingScreen(),
-          loginPage: const LoginScreen(),
-          navigationRoute: '/navigation',
-        ),
-      ),
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/teacher_absence': (context) => const AbsenceScreen(),
-        '/landing': (context) => const LandingScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/admin': (context) => const AdminPanelScreen(),
-        '/register': (context) => const RegisterScreen(),
-        '/navigation': (context) => const NavigationScreen(),
-        '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-        '/help': (context) => const HelpScreen(),
-        '/lunch_menu': (context) => const LunchMenuScreen(),
-        '/links': (context) => const LinksScreen(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/club/join-requests') {
-          final groupId = settings.arguments as String;
+    return ValueListenableBuilder<CounselorPersona>(
+      valueListenable: CounselorPersonaService.activePersona,
+      builder: (context, persona, _) {
+        return MaterialApp(
+          title: 'Gr0ve',
+          navigatorKey: navigatorKey, // Set the global navigator key
+          theme: PersonaTheme.light(persona),
+          darkTheme: PersonaTheme.dark(persona),
+          themeMode: ThemeMode.system,
+          debugShowCheckedModeBanner: false,
+          home: Builder(
+            builder: (context) => LandingDecider(
+              landingPage: kIsWeb
+                  ? const LandingWebsiteScreen()
+                  : const LandingScreen(),
+              loginPage: const LoginScreen(),
+              navigationRoute: '/navigation',
+            ),
+          ),
+          routes: {
+            '/home': (context) => const HomeScreen(),
+            '/teacher_absence': (context) => const AbsenceScreen(),
+            '/landing': (context) => const LandingScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/admin': (context) => const AdminPanelScreen(),
+            '/register': (context) => const RegisterScreen(),
+            '/navigation': (context) => const NavigationScreen(),
+            '/privacy_policy': (context) => const PrivacyPolicyScreen(),
+            '/help': (context) => const HelpScreen(),
+            '/lunch_menu': (context) => const LunchMenuScreen(),
+            '/links': (context) => const LinksScreen(),
+          },
+          onGenerateRoute: (settings) {
+            if (settings.name == '/club/join-requests') {
+              final groupId = settings.arguments as String;
 
-          return MaterialPageRoute(
-            builder: (context) => JoinRequestsScreen(groupId: groupId),
-          );
-        }
-        return null;
+              return MaterialPageRoute(
+                builder: (context) => JoinRequestsScreen(groupId: groupId),
+              );
+            }
+            return null;
+          },
+        );
       },
     );
   }
 }
-// https://console.firebase.google.com/v1/r/project/grove-bca/firestore/indexes?create_composite=Cktwcm9qZWN0cy9ncjB2ZS1iY2EvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL3F1ZXN0aW9ucy9pbmRleGVzL18QAROMCghhdXRob3JJZBABGg0KCWNyZWF0ZWRBdBACGgwKCF9fbmFtZV9fEAI

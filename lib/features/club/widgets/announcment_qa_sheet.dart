@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/models/announcement_question.dart';
 import 'package:gr0ve/features/club/services/group_service.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
@@ -512,15 +513,9 @@ class _QuestionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: question.isAnswered
-              ? colors.primary.withOpacity(0.25)
-              : colors.onSurface.withOpacity(0.07),
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.025),
+            color: context.colors.onSurface.withOpacity(0.05),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -533,48 +528,68 @@ class _QuestionCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _Avatar(
-                        name: question.authorName,
-                        colors: colors,
-                        radius: 15,
-                        fontSize: 12,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  _Avatar(
+                    name: question.authorName,
+                    colors: colors,
+                    radius: 16,
+                    fontSize: 13,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              isModOrAdmin
-                                  ? question.authorName
-                                  : isOwn
-                                  ? 'You'
-                                  : question.authorName,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: colors.onSurface,
+                            Flexible(
+                              child: Text(
+                                isModOrAdmin
+                                    ? question.authorName
+                                    : isOwn
+                                    ? 'You'
+                                    : question.authorName,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.onSurface,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            const SizedBox(width: 8),
+                            _StatusIcon(
+                              isAnswered: question.isAnswered,
+                              colors: colors,
+                            ),
+                            const Spacer(),
                             Text(
                               _fmt(question.createdAt),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: colors.onSurface.withOpacity(0.4),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      if (question.isAnswered) ...[
-                        _AnsweredBadge(),
-                        const SizedBox(width: 6),
+                        const SizedBox(height: 6),
+                        Text(
+                          question.content,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colors.onSurface.withOpacity(0.85),
+                            height: 1.4,
+                          ),
+                        ),
                       ],
+                    ),
+                  ),
+                  // Trailing actions column (Unread dot, Menu, Chevron)
+                  const SizedBox(width: 8),
+                  Column(
+                    children: [
                       StreamBuilder<Map<String, dynamic>>(
                         stream: NotificationService().unreadCountStream,
                         builder: (context, snapshot) {
@@ -582,11 +597,11 @@ class _QuestionCard extends StatelessWidget {
                               .getQuestionUnreadCount(question.id);
                           if (unread == 0) return const SizedBox.shrink();
                           return Container(
-                            margin: const EdgeInsets.only(right: 8),
+                            margin: const EdgeInsets.only(bottom: 8),
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: Colors.red,
+                              color: Colors.blue, // Blue for unread replies
                               shape: BoxShape.circle,
                             ),
                           );
@@ -594,21 +609,13 @@ class _QuestionCard extends StatelessWidget {
                       ),
                       if (isOwn || isModOrAdmin)
                         _DeleteMenu(onDelete: onDelete, colors: colors),
-                      if (!isExpanded)
+                      if (!isExpanded && !(isOwn || isModOrAdmin))
                         Icon(
                           Icons.chevron_right_rounded,
                           color: colors.onSurface.withOpacity(0.25),
                           size: 20,
                         ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    question.content,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.onSurface.withOpacity(0.85),
-                      height: 1.5,
-                    ),
                   ),
                 ],
               ),
@@ -948,30 +955,38 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _AnsweredBadge extends StatelessWidget {
+class _StatusIcon extends StatelessWidget {
+  final bool isAnswered;
+  final ColorScheme colors;
+
+  const _StatusIcon({required this.isAnswered, required this.colors});
+
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-    decoration: BoxDecoration(
-      color: Colors.green.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: const [
-        Icon(Icons.check_circle_outline_rounded, size: 10, color: Colors.green),
-        SizedBox(width: 4),
-        Text(
-          'Answered',
-          style: TextStyle(
-            color: Colors.green,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-          ),
+  Widget build(BuildContext context) {
+    if (isAnswered) {
+      return Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.green.withOpacity(0.15),
+          shape: BoxShape.circle,
         ),
-      ],
-    ),
-  );
+        child: Icon(
+          Icons.check_rounded, // Simple check
+          size: 14,
+          color: Colors.green[700],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(4),
+        child: Icon(
+          Icons.info_outline_rounded,
+          size: 18,
+          color: colors.error.withOpacity(0.7),
+        ),
+      );
+    }
+  }
 }
 
 class _DeleteMenu extends StatelessWidget {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gr0ve/core/theme/dark_theme.dart';
 
 class CustomTeacherCard extends StatefulWidget {
   final String name;
@@ -99,7 +100,7 @@ class _CustomTeacherCardState extends State<CustomTeacherCard> {
                         decoration: BoxDecoration(
                           color: isAbsent
                               ? colors.errorContainer.withOpacity(0.5)
-                              : colors.primary.withOpacity(0.08),
+                              : colors.success.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: Text(
@@ -109,7 +110,7 @@ class _CustomTeacherCardState extends State<CustomTeacherCard> {
                             fontSize: 13,
                             color: isAbsent
                                 ? colors.onErrorContainer
-                                : colors.primary,
+                                : colors.success,
                           ),
                         ),
                       ),
