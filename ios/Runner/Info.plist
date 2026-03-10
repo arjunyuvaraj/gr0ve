@@ -54,9 +54,28 @@
 				<key>UIPrerenderedIcon</key>
 				<false/>
 			</dict>
+			<key>abies</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array><string>abies</string></array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
 		</dict>
 	</dict>
-
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Gr0ve uses the microphone so you can talk to your counselor.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Gr0ve uses speech recognition to transcribe your voice questions.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Gr0ve needs access to your photo library to analyze your school notes for Homework Help.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Gr0ve needs access to your camera to take photos of your notes for Homework Help.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

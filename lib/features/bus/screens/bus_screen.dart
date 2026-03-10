@@ -87,117 +87,120 @@ class _BusScreenState extends State<BusScreen> {
   Widget build(BuildContext context) {
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
-    return Column(
-      children: [
-        const CustomHeader(title: "BUSES"),
-        const SizedBox(height: 16),
-        TextField(
-          onChanged: (value) {
-            setState(() => searchQuery = value);
-          },
-          decoration: const InputDecoration(
-            hintText: 'Search buses or parking spots...',
-            prefixIcon: Icon(Icons.search_rounded),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
+      child: Column(
+        children: [
+          const CustomHeader(title: "Buses"),
+          const SizedBox(height: 16),
+          TextField(
+            onChanged: (value) {
+              setState(() => searchQuery = value);
+            },
+            decoration: const InputDecoration(
+              hintText: 'Search buses or parking spots...',
+              prefixIcon: Icon(Icons.search_rounded),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: StreamBuilder<List<BusRoute>>(
-            stream: getBusRoutesStream(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Center(child: Text("Error: ${snapshot.error}"));
-              }
+          const SizedBox(height: 16),
+          Expanded(
+            child: StreamBuilder<List<BusRoute>>(
+              stream: getBusRoutesStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
 
-              if (!snapshot.hasData) {
-                return const PremiumLoadingIndicator();
-              }
+                if (!snapshot.hasData) {
+                  return const PremiumLoadingIndicator();
+                }
 
-              final allRoutes = snapshot.data!;
-              final filteredRoutes = applyFilters(allRoutes);
+                final allRoutes = snapshot.data!;
+                final filteredRoutes = applyFilters(allRoutes);
 
-              return ValueListenableBuilder<Set<String>>(
-                valueListenable: StarredBusService.starredTowns,
-                builder: (context, starredTowns, _) {
-                  final orderedRoutes = getOrderedRoutes(
-                    filteredRoutes,
-                    starredTowns,
-                  );
-
-                  if (orderedRoutes.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.directions_bus_rounded,
-                            size: 56,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withOpacity(0.2),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No buses found',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withOpacity(0.4),
-                                ),
-                          ),
-                        ],
-                      ),
+                return ValueListenableBuilder<Set<String>>(
+                  valueListenable: StarredBusService.starredTowns,
+                  builder: (context, starredTowns, _) {
+                    final orderedRoutes = getOrderedRoutes(
+                      filteredRoutes,
+                      starredTowns,
                     );
-                  }
 
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      int columns = 1;
-                      if (constraints.maxWidth > 900) {
-                        columns = 3;
-                      } else if (constraints.maxWidth > 600) {
-                        columns = 2;
-                      }
-
-                      final cardWidth =
-                          (constraints.maxWidth - (16 * (columns - 1))) /
-                          columns;
-
-                      return RefreshIndicator(
-                        onRefresh: _refreshBusData,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Wrap(
-                            spacing: 16,
-                            runSpacing: 16,
-                            children: orderedRoutes.map((route) {
-                              final isStarred = starredTowns.contains(
-                                route.town,
-                              );
-
-                              return SizedBox(
-                                width: cardWidth,
-                                child: CustomBusCard(
-                                  route: route,
-                                  starred: isStarred,
-                                  onStarTap: () =>
-                                      StarredBusService.toggleTown(route.town),
-                                  isLoggedIn: isLoggedIn,
-                                ),
-                              );
-                            }).toList(),
-                          ),
+                    if (orderedRoutes.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.directions_bus_rounded,
+                              size: 56,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.2),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No buses found',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface.withOpacity(0.4),
+                                  ),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  );
-                },
-              );
-            },
+                    }
+
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        int columns = 1;
+                        if (constraints.maxWidth > 900) {
+                          columns = 3;
+                        } else if (constraints.maxWidth > 600) {
+                          columns = 2;
+                        }
+
+                        final cardWidth =
+                            (constraints.maxWidth - (16 * (columns - 1))) /
+                            columns;
+
+                        return RefreshIndicator(
+                          onRefresh: _refreshBusData,
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              children: orderedRoutes.map((route) {
+                                final isStarred = starredTowns.contains(
+                                  route.town,
+                                );
+
+                                return SizedBox(
+                                  width: cardWidth,
+                                  child: CustomBusCard(
+                                    route: route,
+                                    starred: isStarred,
+                                    onStarTap: () => StarredBusService
+                                        .toggleTown(route.town),
+                                    isLoggedIn: isLoggedIn,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

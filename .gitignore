@@ -52,9 +52,6 @@ android/app/google-services.json
 
 # Assets
 assets/credentials/gsheets.jsonassets/credentials/*.json
-
-scripts/firebase.json
-scripts/gsheets.json
-scripts/teacher.py
-scripts/events.py
-scripts/features.py
+scripts/
+gr0ve_accessKeys.csv
+assets/credentials/service_account.json

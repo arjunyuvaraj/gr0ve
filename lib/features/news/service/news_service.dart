@@ -30,7 +30,7 @@ class NewsArticle {
 }
 
 class NewsService {
-  static const baseUrl = 'https://academychronicle.com/feed/';
+  static const baseUrl = 'https://academychronicle.org/feed/';
 
   /// Fetch all articles by paginating through the RSS feed
   Future<List<NewsArticle>> fetchArticles() async {

@@ -2,6 +2,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:gr0ve/features/club/widgets/announcment_qa_sheet.dart';
 import 'package:gr0ve/features/club/widgets/post_announcement_dialog.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
@@ -51,9 +53,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     _loadGroupData();
     FirebaseAnalytics.instance.logEvent(name: 'screen_club_details');
     NotificationService().clearClubAnnouncementCount(widget.groupId);
-    // Also clear global qa_replies if the user is entering a club
-    // (We don't know for sure which club the reply was for without more logic,
-    // but clearing the global one is safe here as a start).
     NotificationService().clearUnreadCount('qa_replies');
 
     _tabController.addListener(() {
@@ -63,7 +62,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       }
     });
 
-    // Handle deep-linking from notifications
     if (widget.initialAnnouncementId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _openDeepLinkedQA();
@@ -72,13 +70,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   void _openDeepLinkedQA() async {
-    // Wait for group data to load so we have mod/admin status if needed
     while (_isLoading) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
-
     if (!mounted) return;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -86,7 +81,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       builder: (context) => AnnouncementQASheet(
         groupId: widget.groupId,
         announcementId: widget.initialAnnouncementId!,
-        announcementTitle: "Announcement", // Fallback title
+        announcementTitle: "Announcement",
         isModOrAdmin: _isModOrAdmin,
         initialQuestionId: widget.initialQuestionId,
       ),
@@ -606,10 +601,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     return StreamBuilder<List<Announcement>>(
       stream: _groupService.getAnnouncements(widget.groupId),
       builder: (context, snapshot) {
-        if (snapshot.hasError)
+        if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        if (snapshot.connectionState == ConnectionState.waiting)
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const PremiumLoadingIndicator();
+        }
 
         final announcements = snapshot.data ?? [];
         if (announcements.isEmpty) {
@@ -706,10 +703,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           child: StreamBuilder<List<GroupMember>>(
             stream: _groupService.getGroupMembers(widget.groupId),
             builder: (context, snapshot) {
-              if (snapshot.hasError)
+              if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
-              if (snapshot.connectionState == ConnectionState.waiting)
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const PremiumLoadingIndicator();
+              }
 
               final members = snapshot.data ?? [];
               final filteredMembers = members.where((member) {
@@ -729,8 +728,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
                   final aPriority = getRolePriority(a.role);
                   final bPriority = getRolePriority(b.role);
-                  if (aPriority != bPriority)
+                  if (aPriority != bPriority) {
                     return aPriority.compareTo(bPriority);
+                  }
                   return a.displayName.toLowerCase().compareTo(
                     b.displayName.toLowerCase(),
                   );
@@ -838,52 +838,18 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                           ),
                         ),
                         if (member.isAdmin)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'ADMIN',
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 10,
-                                  ),
-                            ),
+                          _roleBadge(
+                            context,
+                            'ADMIN',
+                            Theme.of(context).colorScheme.primary,
                           ),
                         if (member.isMod)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'MOD',
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface.withOpacity(0.5),
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 10,
-                                  ),
-                            ),
+                          _roleBadge(
+                            context,
+                            'MOD',
+                            Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.4),
                           ),
                       ],
                     ),
@@ -905,6 +871,25 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _roleBadge(BuildContext context, String label, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(left: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w900,
+          fontSize: 10,
+        ),
+      ),
     );
   }
 
@@ -940,8 +925,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                 ],
               ),
             );
-            if (confirm == true)
+            if (confirm == true) {
               await _groupService.removeMember(widget.groupId, member.userId);
+            }
           } else if (value == 'make_mod') {
             await _groupService.makeModerator(widget.groupId, member.userId);
           } else if (value == 'remove_mod') {
@@ -964,8 +950,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       },
       itemBuilder: (_) {
         final items = <PopupMenuEntry<String>>[];
-        if (!isOriginalAdmin)
+        if (!isOriginalAdmin) {
           items.add(const PopupMenuItem(value: 'kick', child: Text('Kick')));
+        }
         if (!member.isAdmin) {
           if (!member.isMod) {
             items.add(
@@ -1021,10 +1008,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 }
 
 // ---------------------------------------------------------------------------
-// AnnouncementCard
+// AnnouncementCard  –  now renders Markdown content
 // ---------------------------------------------------------------------------
 
-class AnnouncementCard extends StatelessWidget {
+class AnnouncementCard extends StatefulWidget {
   final Announcement announcement;
   final String authorName;
   final bool isAdmin;
@@ -1047,10 +1034,78 @@ class AnnouncementCard extends StatelessWidget {
   });
 
   @override
+  State<AnnouncementCard> createState() => _AnnouncementCardState();
+}
+
+class _AnnouncementCardState extends State<AnnouncementCard> {
+  bool _isExpanded = false;
+
+  // Truncate long announcements and let users expand.
+  static const int _collapseThreshold = 300;
+
+  bool get _isLong => widget.announcement.content.length > _collapseThreshold;
+
+  String get _displayContent {
+    if (!_isLong || _isExpanded) return widget.announcement.content;
+    return '${widget.announcement.content.substring(0, _collapseThreshold)}…';
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final groupService = GroupService();
+
+    // Build a MarkdownStyleSheet that inherits the app's theme
+    final mdStyle = MarkdownStyleSheet(
+      p: theme.textTheme.bodyMedium?.copyWith(
+        color: colors.onSurface.withOpacity(0.8),
+        height: 1.5,
+      ),
+      strong: theme.textTheme.bodyMedium?.copyWith(
+        color: colors.onSurface,
+        fontWeight: FontWeight.w700,
+        height: 1.5,
+      ),
+      em: theme.textTheme.bodyMedium?.copyWith(
+        color: colors.onSurface.withOpacity(0.8),
+        fontStyle: FontStyle.italic,
+        height: 1.5,
+      ),
+      del: theme.textTheme.bodyMedium?.copyWith(
+        color: colors.onSurface.withOpacity(0.5),
+        decoration: TextDecoration.lineThrough,
+        height: 1.5,
+      ),
+      a: theme.textTheme.bodyMedium?.copyWith(
+        color: colors.primary,
+        decoration: TextDecoration.underline,
+        height: 1.5,
+      ),
+      code: theme.textTheme.bodySmall?.copyWith(
+        fontFamily: 'monospace',
+        color: colors.primary,
+        backgroundColor: colors.primary.withOpacity(0.08),
+        fontSize: 13,
+      ),
+      codeblockDecoration: BoxDecoration(
+        color: colors.onSurface.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      blockquoteDecoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(color: colors.primary.withOpacity(0.4), width: 3),
+        ),
+        color: colors.primary.withOpacity(0.04),
+        borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
+      ),
+      blockquote: theme.textTheme.bodyMedium?.copyWith(
+        color: colors.onSurface.withOpacity(0.65),
+        fontStyle: FontStyle.italic,
+        height: 1.5,
+      ),
+      listBullet: theme.textTheme.bodyMedium?.copyWith(color: colors.primary),
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1069,9 +1124,10 @@ class AnnouncementCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Title row ────────────────────────────────────
           Row(
             children: [
-              if (announcement.isPinned)
+              if (widget.announcement.isPinned)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Icon(
@@ -1082,14 +1138,14 @@ class AnnouncementCard extends StatelessWidget {
                 ),
               Expanded(
                 child: Text(
-                  announcement.title,
+                  widget.announcement.title,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: colors.onSurface,
                   ),
                 ),
               ),
-              if (isAdmin)
+              if (widget.isAdmin)
                 PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_vert_rounded,
@@ -1097,8 +1153,8 @@ class AnnouncementCard extends StatelessWidget {
                     color: colors.onSurface.withOpacity(0.4),
                   ),
                   onSelected: (value) {
-                    if (value == 'delete') onDelete();
-                    if (value == 'toggle_pin') onTogglePin();
+                    if (value == 'delete') widget.onDelete();
+                    if (value == 'toggle_pin') widget.onTogglePin();
                   },
                   itemBuilder: (_) => [
                     PopupMenuItem(
@@ -1106,13 +1162,13 @@ class AnnouncementCard extends StatelessWidget {
                       child: Row(
                         children: [
                           Icon(
-                            announcement.isPinned
+                            widget.announcement.isPinned
                                 ? Icons.push_pin_outlined
                                 : Icons.push_pin_rounded,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(announcement.isPinned ? 'Unpin' : 'Pin'),
+                          Text(widget.announcement.isPinned ? 'Unpin' : 'Pin'),
                         ],
                       ),
                     ),
@@ -1135,14 +1191,40 @@ class AnnouncementCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            announcement.content,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface.withOpacity(0.8),
-              height: 1.4,
-            ),
+
+          // ── Markdown content ─────────────────────────────
+          MarkdownBody(
+            data: _displayContent,
+            styleSheet: mdStyle,
+            shrinkWrap: true,
+            softLineBreak: true,
+            onTapLink: (text, href, title) async {
+              if (href == null) return;
+              final uri = Uri.tryParse(href);
+              if (uri != null && await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
           ),
+
+          // ── Expand / collapse ────────────────────────────
+          if (_isLong) ...[
+            const SizedBox(height: 6),
+            GestureDetector(
+              onTap: () => setState(() => _isExpanded = !_isExpanded),
+              child: Text(
+                _isExpanded ? 'Show less' : 'Read more',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 16),
+
+          // ── Footer: author · time · Q&A button ───────────
           Row(
             children: [
               Icon(
@@ -1152,7 +1234,7 @@ class AnnouncementCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                authorName,
+                widget.authorName,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colors.onSurface.withOpacity(0.4),
                   fontWeight: FontWeight.w600,
@@ -1166,25 +1248,30 @@ class AnnouncementCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                _formatDate(announcement.createdAt),
+                _formatDate(widget.announcement.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colors.onSurface.withOpacity(0.4),
                 ),
               ),
               const Spacer(),
-              if (isModOrAdmin)
+              if (widget.isModOrAdmin)
                 StreamBuilder<int>(
                   stream: groupService.getUnansweredQuestionCount(
-                    groupId,
-                    announcement.id,
+                    widget.groupId,
+                    widget.announcement.id,
                   ),
                   builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
-                    return _qaButton(context, colors, count, announcement.id);
+                    return _qaButton(
+                      context,
+                      colors,
+                      count,
+                      widget.announcement.id,
+                    );
                   },
                 )
               else
-                _qaButton(context, colors, 0, announcement.id),
+                _qaButton(context, colors, 0, widget.announcement.id),
             ],
           ),
         ],
@@ -1209,7 +1296,7 @@ class AnnouncementCard extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             TextButton.icon(
-              onPressed: onOpenQA,
+              onPressed: widget.onOpenQA,
               icon: Icon(
                 Icons.question_answer_rounded,
                 size: 18,
@@ -1236,7 +1323,6 @@ class AnnouncementCard extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
-            // Show either unanswered count (for staff) or red dot (for unread replies)
             if (unansweredCount > 0)
               Positioned(
                 right: -4,
@@ -1284,10 +1370,11 @@ class AnnouncementCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final diff = DateTime.now().difference(date);
-    if (diff.inDays == 0)
+    if (diff.inDays == 0) {
       return diff.inHours > 0
           ? '${diff.inHours}h ago'
           : '${diff.inMinutes}m ago';
+    }
     if (diff.inDays < 7) return '${diff.inDays}d ago';
     return '${date.month}/${date.day}/${date.year}';
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_screen.dart';
@@ -26,7 +27,6 @@ import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gr0ve/features/navigation/models/nav_config.dart';
 import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
-import 'package:gr0ve/features/snapshot/snapshot_overlay.dart';
 
 // SCREEN: Main navigation hub with role-based access control
 class NavigationScreen extends StatefulWidget {
@@ -49,6 +49,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   final NavigationPersistenceService _persistenceService =
       NavigationPersistenceService();
   List<String>? _customOrder;
+  String _selectedTabId = 'home'; // Track by ID to prevent re-order glitches
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -60,26 +61,32 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   // Feature flags
   bool _enableClubs = false;
-  bool _enableMaps = false;
 
   // Onboarding state
   bool _isCheckingOnboarding = true;
   bool _needsOnboarding = false;
+
+  // IDs hidden from the nav bar — accessible via More > Extra
+  static const _extraScreenIds = {'lunch_menu', 'news', 'help'};
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
     _user = FirebaseAuth.instance.currentUser;
-    _checkOnboarding(); // Check onboarding FIRST
+    _checkOnboarding();
     _determineUserRole();
     _checkAdminStatus();
     _loadVersionInfo();
     _loadFeatureFlags();
-    _loadNavigationOrder(); // Load custom order
+    _loadNavigationOrder();
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
-    _showSnapshotOnLaunch();
+    ProfilePictureService.activeVariant.addListener(_onVariantChanged);
+  }
+
+  void _onVariantChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadNavigationOrder() async {
@@ -94,6 +101,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   void dispose() {
+    ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     _unreadCountSubscription?.cancel();
     super.dispose();
   }
@@ -122,9 +130,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
       return;
     }
 
-    // Check if email is verified and profile is complete
     await _user!.reload();
-    _user = FirebaseAuth.instance.currentUser; // Reload user object
+    _user = FirebaseAuth.instance.currentUser;
     final isEmailVerified = _user!.emailVerified;
 
     try {
@@ -136,7 +143,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
       final data = userDoc.data();
       final hasGrade = data?['grade'] != null;
       final hasAcademy = data?['academy'] != null;
-
       final needsSetup = !isEmailVerified || !hasGrade || !hasAcademy;
 
       setState(() {
@@ -152,21 +158,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  Future<void> _showSnapshotOnLaunch() async {
-    // Wait for onboarding check to finish before showing snapshot
-    // (we don't want it layered on top of the onboarding screen)
-    await Future.doWhile(() async {
-      await Future.delayed(const Duration(milliseconds: 100));
-      return _isCheckingOnboarding;
-    });
-    if (!mounted || _needsOnboarding) return;
-
-    // Small delay so the nav screen has fully rendered first
-    await Future.delayed(const Duration(milliseconds: 200));
-    if (!mounted) return;
-
-    SnapshotOverlay.show(context);
-  }
   // ============================================================================
   // FEATURE FLAGS
   // ============================================================================
@@ -182,11 +173,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
         final data = doc.data();
         final betaTesters = List<String>.from(data?['beta_testers'] ?? []);
         final userEmail = _user?.email ?? '';
-
         final isBetaTester = betaTesters.contains(userEmail);
 
         setState(() {
-          // Enable for beta testers OR if globally enabled
           _enableClubs = (data?['enable_clubs'] ?? false) || isBetaTester;
           _buildNavigation();
         });
@@ -246,31 +235,35 @@ class _NavigationScreenState extends State<NavigationScreen> {
     final baseDocs = _getNavigationForRole(_userRole, _isPlatformAdmin);
 
     if (_customOrder != null && _customOrder!.isNotEmpty) {
-      // Create a map for quick lookup
       final Map<String, NavConfig> configMap = {
         for (var config in baseDocs) config.id: config,
       };
 
       List<NavConfig> sortedConfigs = [];
-      // 1. Add items in custom order if they still exist in baseDocs
       for (var id in _customOrder!) {
         if (configMap.containsKey(id)) {
           sortedConfigs.add(configMap[id]!);
           configMap.remove(id);
         }
       }
-      // 2. Add any remaining items that weren't in the custom order (e.g. new features)
       sortedConfigs.addAll(configMap.values);
-
       _navConfigs = sortedConfigs;
     } else {
       _navConfigs = baseDocs;
     }
 
-    _screens = _navConfigs.map((config) => config.screen).toList();
+    _screens = _navConfigs.map((c) => c.screen).toList();
+    
+    // Sync index with selected ID
+    final newIndex = _navConfigs.indexWhere((c) => c.id == _selectedTabId);
+    if (newIndex != -1) {
+      _selectedIndex = newIndex;
+    } else if (_navConfigs.isNotEmpty) {
+      _selectedIndex = 0;
+      _selectedTabId = _navConfigs[0].id;
+    }
   }
 
-  /// Central configuration for all navigation items by role
   List<NavConfig> _getNavigationForRole(UserRole role, bool isAdmin) {
     switch (role) {
       case UserRole.guest:
@@ -317,16 +310,18 @@ class _NavigationScreenState extends State<NavigationScreen> {
             notificationKey: 'bus',
           ),
           NavConfig(
-            id: 'lunch_menu',
-            iconData: HugeIcons.strokeRoundedRestaurant02,
-            label: 'Lunch Menu',
-            screen: const LunchMenuScreen(),
-          ),
-          NavConfig(
             id: 'calendar',
             iconData: HugeIcons.strokeRoundedCalendar03,
             label: 'Calendar',
             screen: const CalendarScreen(),
+          ),
+          // Extra screens — registered so deep-links & notification routing work,
+          // but hidden from the nav bar. Accessible via ··· > Extra.
+          NavConfig(
+            id: 'lunch_menu',
+            iconData: HugeIcons.strokeRoundedRestaurant02,
+            label: 'Lunch Menu',
+            screen: const LunchMenuScreen(),
           ),
           NavConfig(
             id: 'news',
@@ -335,14 +330,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
             screen: const NewsScreen(),
           ),
           NavConfig(
-            id: 'snapshot',
-            iconData: HugeIcons.strokeRoundedSun02,
-            label: 'Today',
-            screen: const SizedBox.shrink(), // never actually rendered
+            id: 'help',
+            iconData: HugeIcons.strokeRoundedHelpCircle,
+            label: 'Help',
+            screen: const HelpScreen(),
           ),
         ];
 
-        // Add admin-only screens
         if (isAdmin) {
           baseNav.addAll([
             NavConfig(
@@ -362,6 +356,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           ]);
         }
+
         baseNav.add(
           NavConfig(
             id: 'counselor',
@@ -371,7 +366,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
         );
 
-        // Add Clubs feature if enabled
         if (_enableClubs) {
           baseNav.add(
             NavConfig(
@@ -383,23 +377,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           );
         }
-        // Add Links screen (always available for students)
-        baseNav.add(
+
+        baseNav.addAll([
           NavConfig(
             id: 'links',
             iconData: HugeIcons.strokeRoundedLink01,
             label: 'Links',
             screen: const LinksScreen(),
-          ),
-        );
-
-        // Add remaining screens
-        baseNav.addAll([
-          NavConfig(
-            id: 'help',
-            iconData: HugeIcons.strokeRoundedHelpCircle,
-            label: 'Help',
-            screen: const HelpScreen(),
           ),
           NavConfig(
             id: 'account',
@@ -553,10 +537,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
     try {
       final parts = _versionCode.split('.');
       if (parts.length < 2) return false;
-
       final major = int.tryParse(parts[0]) ?? 0;
       final minor = int.tryParse(parts[1]) ?? 0;
-
       return major > 1 || (major == 1 && minor >= 5);
     } catch (e) {
       return false;
@@ -571,26 +553,20 @@ class _NavigationScreenState extends State<NavigationScreen> {
     if (index == -1 || index >= _navConfigs.length) return;
     final config = _navConfigs[index];
 
-    // Snapshot tab opens the overlay instead of switching screens
-    if (config.id == 'snapshot') {
-      SnapshotOverlay.show(context);
-      return;
-    }
-
     if (config.notificationKey != null) {
       NotificationService().clearUnreadCount(config.notificationKey!);
     }
-    setState(() => _selectedIndex = index);
+    setState(() {
+      _selectedIndex = index;
+      _selectedTabId = config.id;
+    });
   }
 
   int _getTotalUnreadCount(NavConfig config) {
     int count = 0;
     if (config.showClubNotifications) {
-      count += _unreadAnnouncementsByClub.values.fold(
-        0,
-        (sum, count) => sum + count,
-      );
-      count += _unreadQAByClub.values.fold(0, (sum, count) => sum + count);
+      count += _unreadAnnouncementsByClub.values.fold(0, (s, c) => s + c);
+      count += _unreadQAByClub.values.fold(0, (s, c) => s + c);
       count += _unreadCounts['qa_replies'] ?? 0;
       count += _unreadCounts['unread_questions'] ?? 0;
     } else if (config.notificationKey != null) {
@@ -614,7 +590,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Widget _buildMoreMenu() {
     final colors = Theme.of(context).colorScheme;
-    final moreItems = _navConfigs.length > 5 ? _navConfigs.sublist(4) : [];
+    final isStudent = _userRole == UserRole.student;
+
+    // Only non-extra configs count toward overflow items
+    final visibleConfigs = _navConfigs
+        .where((c) => !_extraScreenIds.contains(c.id))
+        .toList();
+    final moreItems = visibleConfigs.length > 5
+        ? visibleConfigs.sublist(4)
+        : <NavConfig>[];
 
     return Container(
       decoration: BoxDecoration(
@@ -632,6 +616,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Handle
           Container(
             width: 40,
             height: 4,
@@ -650,7 +635,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          // NEW CUSTOMIZATION OPTION
+
+          // Customize Navigation button
           InkWell(
             onTap: () {
               Navigator.pop(context);
@@ -689,85 +675,264 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Flexible(
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: moreItems.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final actualIndex = index + 4;
-                final config = moreItems[index];
-                final isSelected = _selectedIndex == actualIndex;
-                final unreadCount = _getTotalUnreadCount(config);
 
-                return ListTile(
-                  onTap: () {
-                    Navigator.pop(context);
-                    _changeIndex(actualIndex);
-                  },
-                  leading: AnimatedScale(
-                    scale: isSelected ? 1.1 : 1.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: HugeIcon(
-                      icon: config.iconData,
-                      color: isSelected
-                          ? colors.primary
-                          : colors.onSurface.withOpacity(0.4),
+          // Overflow nav items
+          if (moreItems.isNotEmpty)
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: moreItems.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final config = moreItems[index];
+                  final actualIndex = _navConfigs.indexOf(config);
+                  final isSelected = _selectedIndex == actualIndex;
+                  final unreadCount = _getTotalUnreadCount(config);
+
+                  return ListTile(
+                    onTap: () {
+                      Navigator.pop(context);
+                      _changeIndex(actualIndex);
+                    },
+                    leading: AnimatedScale(
+                      scale: isSelected ? 1.1 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: HugeIcon(
+                        icon: config.iconData,
+                        color: isSelected
+                            ? colors.primary
+                            : colors.onSurface.withOpacity(0.4),
+                      ),
                     ),
-                  ),
-                  title: Text(
-                    config.label,
-                    style: TextStyle(
-                      color: isSelected ? colors.primary : colors.onSurface,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
+                    title: Text(
+                      config.label,
+                      style: TextStyle(
+                        color: isSelected ? colors.primary : colors.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (unreadCount > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.error,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            unreadCount > 9 ? '9+' : unreadCount.toString(),
-                            style: TextStyle(
-                              color: colors.onError,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (unreadCount > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.error,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              unreadCount > 9 ? '9+' : unreadCount.toString(),
+                              style: TextStyle(
+                                color: colors.onError,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      if (isSelected) ...[
-                        if (unreadCount > 0) const SizedBox(width: 8),
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                          color: colors.primary,
-                          size: 20.0,
-                        ),
+                        if (isSelected) ...[
+                          if (unreadCount > 0) const SizedBox(width: 8),
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                            color: colors.primary,
+                            size: 20.0,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  tileColor: isSelected
-                      ? colors.primary.withOpacity(0.05)
-                      : null,
-                );
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    tileColor: isSelected
+                        ? colors.primary.withOpacity(0.05)
+                        : null,
+                  );
+                },
+              ),
+            ),
+
+          // ── Extra entry — BCA students only ────────────────────────────────
+          if (isStudent) ...[
+            Divider(height: 32, color: colors.onSurface.withOpacity(0.08)),
+            InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                _showExtraMenu();
               },
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.onSurface.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedGridView,
+                      color: colors.onSurface.withOpacity(0.55),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Extra',
+                      style: TextStyle(
+                        color: colors.onSurface.withOpacity(0.75),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'Lunch, News, Help',
+                      style: TextStyle(
+                        color: colors.onSurface.withOpacity(0.35),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: colors.onSurface.withOpacity(0.3),
+                      size: 18,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================================
+  // UI - EXTRA MENU (Lunch, News, Help)
+  // ============================================================================
+
+  void _showExtraMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _buildExtraMenu(),
+    );
+  }
+
+  Widget _buildExtraMenu() {
+    final colors = Theme.of(context).colorScheme;
+
+    final extraConfigs = _navConfigs
+        .where((c) => _extraScreenIds.contains(c.id))
+        .toList();
+
+    const descriptions = {
+      'lunch_menu': "Today's cafeteria menu",
+      'news': 'Bergen Community news & updates',
+      'help': 'FAQs and support resources',
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.onSurface.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 24),
+          Text(
+            'Extra',
+            style: context.text.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: colors.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...extraConfigs.map((config) {
+            final index = _navConfigs.indexOf(config);
+            final isSelected = _selectedIndex == index;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: ListTile(
+                onTap: () {
+                  Navigator.pop(context);
+                  _changeIndex(index);
+                },
+                leading: AnimatedScale(
+                  scale: isSelected ? 1.1 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: HugeIcon(
+                    icon: config.iconData,
+                    color: isSelected
+                        ? colors.primary
+                        : colors.onSurface.withOpacity(0.4),
+                  ),
+                ),
+                title: Text(
+                  config.label,
+                  style: TextStyle(
+                    color: isSelected ? colors.primary : colors.onSurface,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  descriptions[config.id] ?? '',
+                  style: TextStyle(
+                    color: colors.onSurface.withOpacity(0.45),
+                    fontSize: 12,
+                  ),
+                ),
+                trailing: isSelected
+                    ? HugeIcon(
+                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                        color: colors.primary,
+                        size: 20.0,
+                      )
+                    : Icon(
+                        Icons.chevron_right_rounded,
+                        color: colors.onSurface.withOpacity(0.3),
+                        size: 20,
+                      ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                tileColor: isSelected
+                    ? colors.primary.withOpacity(0.05)
+                    : colors.onSurface.withOpacity(0.03),
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -781,21 +946,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    // Show loading while checking onboarding
     if (_isCheckingOnboarding) {
       return Scaffold(
         body: Center(child: CircularProgressIndicator(color: colors.primary)),
       );
     }
 
-    // Show onboarding screen
     if (_needsOnboarding) {
       return BergenOnboardingScreen(
-        onComplete: () {
-          setState(() {
-            _needsOnboarding = false;
-          });
-        },
+        onComplete: () => setState(() => _needsOnboarding = false),
       );
     }
 
@@ -815,23 +974,29 @@ class _NavigationScreenState extends State<NavigationScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth > 900;
-
-          if (isWide) {
-            return _buildWideLayout(context, colors);
-          } else {
-            return _buildMobileLayout(context, colors);
-          }
+          return isWide
+              ? _buildWideLayout(context, colors)
+              : _buildMobileLayout(context, colors);
         },
       ),
     );
   }
 
+  // ============================================================================
+  // UI - WIDE LAYOUT
+  // ============================================================================
+
   Widget _buildWideLayout(BuildContext context, ColorScheme colors) {
+    // Extra screens are not shown in the sidebar either — still accessible
+    // via the More / Extra flow if needed, or directly by deep-link.
+    final sidebarConfigs = _navConfigs
+        .where((c) => !_extraScreenIds.contains(c.id))
+        .toList();
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Row(
         children: [
-          // Sidebar / Navigation Rail
           Container(
             width: 100,
             decoration: BoxDecoration(
@@ -853,16 +1018,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 const SizedBox(height: 48),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: _navConfigs.length,
+                    itemCount: sidebarConfigs.length,
                     itemBuilder: (context, index) {
-                      final config = _navConfigs[index];
-                      final isSelected = _selectedIndex == index;
+                      final config = sidebarConfigs[index];
+                      final navIndex = _navConfigs.indexOf(config);
+                      final isSelected = _selectedIndex == navIndex;
                       final unreadCount = _getTotalUnreadCount(config);
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: _buildSidebarItem(
-                          index,
+                          navIndex,
                           config,
                           isSelected,
                           unreadCount,
@@ -874,8 +1040,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
               ],
             ),
           ),
-
-          // Main Content
           Expanded(
             child: Center(
               child: ConstrainedBox(
@@ -885,11 +1049,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     horizontal: 48,
                     vertical: 32,
                   ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: KeyedSubtree(
-                      key: ValueKey<int>(_selectedIndex),
-                      child: _screens[_selectedIndex],
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 100), // Height of floating nav + safety
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: KeyedSubtree(
+                        key: ValueKey<String>(_selectedTabId),
+                        child: _screens[_selectedIndex],
+                      ),
                     ),
                   ),
                 ),
@@ -932,13 +1099,24 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 child: SizedBox(
                   width: 28,
                   height: 28,
-                  child: HugeIcon(
-                    icon: config.iconData,
-                    color: isSelected
-                        ? colors.primary
-                        : colors.onSurface.withOpacity(0.4),
-                    size: 28,
-                  ),
+                  child: config.id == 'account'
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            ProfilePictureService.activeVariant.value
+                                .assetPath(Theme.of(context).brightness),
+                            fit: BoxFit.cover,
+                            height: 28,
+                            width: 28,
+                          ),
+                        )
+                      : HugeIcon(
+                          icon: config.iconData,
+                          color: isSelected
+                              ? colors.primary
+                              : colors.onSurface.withOpacity(0.4),
+                          size: 28,
+                        ),
                 ),
               ),
               if (unreadCount > 0)
@@ -973,18 +1151,31 @@ class _NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
+  // ============================================================================
+  // UI - MOBILE LAYOUT
+  // ============================================================================
+
   Widget _buildMobileLayout(BuildContext context, ColorScheme colors) {
-    final int displayCount = _navConfigs.length > 5 ? 4 : _navConfigs.length;
+    // Filter out extra screens — they don't appear in the bottom bar
+    final visibleConfigs = _navConfigs
+        .where((c) => !_extraScreenIds.contains(c.id))
+        .toList();
+
+    final int displayCount = visibleConfigs.length > 5
+        ? 4
+        : visibleConfigs.length;
     final List<Widget> navItems = [];
 
     for (int i = 0; i < displayCount; i++) {
-      final config = _navConfigs[i];
-      final isSelected = _selectedIndex == i;
-      navItems.add(_buildNavItem(i, config, isSelected));
+      final config = visibleConfigs[i];
+      final navIndex = _navConfigs.indexOf(config);
+      navItems.add(_buildNavItem(navIndex, config, _selectedIndex == navIndex));
     }
 
-    if (_navConfigs.length > 5) {
-      final anyMoreSelected = _selectedIndex >= 4;
+    if (visibleConfigs.length > 5) {
+      final anyMoreSelected = visibleConfigs
+          .sublist(4)
+          .any((c) => _selectedIndex == _navConfigs.indexOf(c));
       navItems.add(_buildMoreNavItem(anyMoreSelected));
     }
 
@@ -992,17 +1183,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
       key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
+        bottom: false,
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 32, 80),
+              padding: const EdgeInsets.only(bottom: 100), // Room for floating nav
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
                 child: KeyedSubtree(
-                  key: ValueKey<int>(_selectedIndex),
+                  key: ValueKey<String>(_selectedTabId),
                   child: _screens[_selectedIndex],
                 ),
               ),
@@ -1054,13 +1245,24 @@ class _NavigationScreenState extends State<NavigationScreen> {
               SizedBox(
                 width: 28,
                 height: 28,
-                child: HugeIcon(
-                  icon: config.iconData,
-                  color: isSelected
-                      ? context.colors.primary
-                      : context.colors.onSurface.withOpacity(0.5),
-                  size: 28.0,
-                ),
+                child: config.id == 'account'
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.asset(
+                          ProfilePictureService.activeVariant.value
+                              .assetPath(Theme.of(context).brightness),
+                          fit: BoxFit.cover,
+                          height: 28,
+                          width: 28,
+                        ),
+                      )
+                    : HugeIcon(
+                        icon: config.iconData,
+                        color: isSelected
+                            ? context.colors.primary
+                            : context.colors.onSurface.withOpacity(0.5),
+                        size: 28.0,
+                      ),
               ),
               if (unreadCount > 0)
                 Positioned(
@@ -1095,12 +1297,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
   }
 
   Widget _buildMoreNavItem(bool isSelected) {
-    bool hasNotificationsInRange = false;
+    final visibleConfigs = _navConfigs
+        .where((c) => !_extraScreenIds.contains(c.id))
+        .toList();
 
-    for (int i = 4; i < _navConfigs.length; i++) {
-      if (_getTotalUnreadCount(_navConfigs[i]) > 0) {
-        hasNotificationsInRange = true;
-        break;
+    bool hasNotificationsInRange = false;
+    if (visibleConfigs.length > 5) {
+      for (final config in visibleConfigs.sublist(4)) {
+        if (_getTotalUnreadCount(config) > 0) {
+          hasNotificationsInRange = true;
+          break;
+        }
       }
     }
 
@@ -1162,7 +1369,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Widget _buildReorderMenu() {
     final colors = Theme.of(context).colorScheme;
-    // We want to reorder ALL available items for the current role
     List<NavConfig> itemsToReorder = List.from(_navConfigs);
 
     return StatefulBuilder(
@@ -1204,9 +1410,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                   itemCount: itemsToReorder.length,
                   onReorder: (oldIndex, newIndex) {
                     setModalState(() {
-                      if (oldIndex < newIndex) {
-                        newIndex -= 1;
-                      }
+                      if (oldIndex < newIndex) newIndex -= 1;
                       final item = itemsToReorder.removeAt(oldIndex);
                       itemsToReorder.insert(newIndex, item);
                     });

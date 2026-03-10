@@ -7,7 +7,8 @@ import 'package:gr0ve/features/links/service/link_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:gr0ve/features/links/widgets/add_link_dialog.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
-import 'package:hugeicons/hugeicons.dart'; // Make sure you have this imported
+import 'package:hugeicons/hugeicons.dart';
+import 'package:gr0ve/features/easter_eggs/ash_screen.dart'; // ADDED
 
 class LinksScreen extends StatefulWidget {
   const LinksScreen({super.key});
@@ -127,6 +128,26 @@ class _LinksScreenState extends State<LinksScreen> {
     }
   }
 
+  // ADDED: Easter egg trigger
+  void _openAshScreen() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (ctx, animation, _) => AshScreen(
+          onUnlocked: () {
+            if (Navigator.canPop(ctx)) Navigator.pop(ctx);
+          },
+        ),
+        transitionsBuilder: (ctx, animation, _, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeIn),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
+    );
+  }
+
   Future<void> _addLink() async {
     if (links.length >= maxLinks) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -217,7 +238,7 @@ class _LinksScreenState extends State<LinksScreen> {
     }
 
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.only(top: 24, bottom: 16),
       children: [
         const CustomHeader(title: "LINKS"),
         const SizedBox(height: 32),
@@ -422,13 +443,95 @@ class _LinksScreenState extends State<LinksScreen> {
   Widget _buildLinksList() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          for (int i = 0; i < links.length; i++) ...[
-            _buildLinkCard(links[i]),
-            if (i < links.length - 1) const SizedBox(height: 12),
-          ],
-        ],
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.1,
+        ),
+        itemCount: links.length,
+        itemBuilder: (context, index) => _buildLinkGridCard(links[index]),
+      ),
+    );
+  }
+
+  Widget _buildLinkGridCard(QuickLink link) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _openLink(link),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: colors.outline.withOpacity(0.06)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Centered Icon
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: link.color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(link.icon, size: 22, color: link.color),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Centered Title
+              Text(
+                link.title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: colors.onSurface,
+                  letterSpacing: 0.1,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              // Bottom Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildIconButton(
+                    icon: HugeIcons.strokeRoundedEdit02,
+                    color: colors.onSurface.withOpacity(0.2),
+                    onPressed: () => _editLink(link),
+                  ),
+                  const SizedBox(width: 8),
+                  // MODIFIED: Added long press for Ash easter egg
+                  _buildIconButton(
+                    icon: HugeIcons.strokeRoundedDelete02,
+                    color: colors.error.withOpacity(0.3),
+                    onPressed: () => _removeLink(link),
+                    onLongPress: _openAshScreen, // ADDED
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -500,10 +603,12 @@ class _LinksScreenState extends State<LinksScreen> {
                         onPressed: () => _editLink(link),
                       ),
                       const SizedBox(width: 2),
+                      // MODIFIED: Added long press for Ash easter egg
                       _buildIconButton(
                         icon: HugeIcons.strokeRoundedDelete02,
                         color: colors.error.withOpacity(0.7),
                         onPressed: () => _removeLink(link),
+                        onLongPress: _openAshScreen, // ADDED
                       ),
                     ],
                   ),
@@ -519,11 +624,13 @@ class _LinksScreenState extends State<LinksScreen> {
     required List<List<dynamic>> icon,
     required Color color,
     required VoidCallback onPressed,
+    VoidCallback? onLongPress, // ADDED
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
+        onLongPress: onLongPress, // ADDED
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(8),

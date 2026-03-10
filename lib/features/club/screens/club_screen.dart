@@ -42,7 +42,7 @@ class _ClubScreenState extends State<ClubScreen>
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 24),
       child: Column(
         children: [
           /// Header

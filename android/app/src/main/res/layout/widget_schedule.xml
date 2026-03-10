@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/widget_schedule.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Header row: dot + label -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <!-- dot color is set at runtime via setColorFilter() in Kotlin -->
+        <ImageView
+            android:id="@+id/schedule_dot"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@drawable/circle_dot" />
+
+        <TextView
+            android:id="@+id/schedule_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="PERIOD 4"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.15"
+            android:textColor="@color/widget_secondary_text" />
+    </LinearLayout>
+
+    <!-- Big countdown -->
+    <TextView
+        android:id="@+id/schedule_countdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="24:30"
+        android:textSize="42sp"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        android:textColor="@color/gr0ve_accent"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="20sp"
+        android:autoSizeMaxTextSize="48sp"
+        android:maxLines="1" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/schedule_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="remaining in Period 4"
+        android:textSize="12sp"
+        android:textColor="@color/widget_secondary_text"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="10dp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Progress bar container -->
+    <LinearLayout
+        android:id="@+id/schedule_progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <ProgressBar
+            android:id="@+id/schedule_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:max="100"
+            android:progress="60"
+            android:progressTint="@color/gr0ve_accent"
+            android:progressBackgroundTint="@color/widget_progress_bg" />
+    </LinearLayout>
+
+</LinearLayout>

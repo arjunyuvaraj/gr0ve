@@ -97,6 +97,62 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
   return absenceMap;
 }
 
+Stream<Map<String, String>> streamTeacherAbsences() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null ||
+      !user.emailVerified ||
+      !user.email!.toLowerCase().endsWith('@bergen.org')) {
+    return Stream.value({});
+  }
+
+  return FirebaseFirestore.instance
+      .collection('public_data')
+      .doc('teacher_absences')
+      .snapshots()
+      .map((doc) {
+        if (!doc.exists || doc.data() == null) return <String, String>{};
+        final data = doc.data()!;
+        final Map<String, String> result = {};
+        if (data.containsKey('date')) {
+          result['date'] = data['date'].toString();
+        }
+        if (data.containsKey('teachers')) {
+          final teachers = data['teachers'] as Map<String, dynamic>;
+          teachers.forEach((key, value) {
+            result[key] = value.toString();
+          });
+        }
+        return result;
+      });
+}
+
+// ── NEW: Live stream of the teachers collection ───────────────────────────────
+// Used by SnapshotAbsenceCard so it doesn't need a one-time fetch + setState.
+Stream<Map<String, Map<String, dynamic>>> streamTeacherList() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null ||
+      !user.emailVerified ||
+      !user.email!.toLowerCase().endsWith('@bergen.org')) {
+    return Stream.value({});
+  }
+
+  return FirebaseFirestore.instance.collection('teachers').snapshots().map((
+    snapshot,
+  ) {
+    final Map<String, Map<String, dynamic>> result = {};
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final String name = (data['name'] ?? doc.id).toString();
+      result[name] = {
+        'name': name,
+        'department': data['department'] ?? '',
+        'email': data['email'] ?? '',
+      };
+    }
+    return result;
+  });
+}
+
 Future<List<Map<String, dynamic>>> fetchAllTeachersFromFirebase() async {
   try {
     final snapshot = await FirebaseFirestore.instance

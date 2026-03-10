@@ -5,30 +5,25 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- Base activity — NO intent-filter here intentionally.
-             The activity-aliases below own all launcher entries.
-             Keeping a LAUNCHER intent-filter on this activity is what
-             caused duplicate icons: Android shows one icon per enabled
-             component that has a LAUNCHER filter, so base + alias = 2 icons. -->
-    <activity
-        android:name=".MainActivity"
-        android:exported="true"
-        android:launchMode="singleTop"
-        android:taskAffinity=""
-        android:theme="@style/LaunchTheme"
-        android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-        android:hardwareAccelerated="true"
-        android:windowSoftInputMode="adjustResize">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        <meta-data
-            android:name="io.flutter.embedding.android.NormalTheme"
-            android:resource="@style/NormalTheme" />
-    </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+        </activity>
 
-        <!-- Grover — default enabled (shown on first install) -->
+        <!-- Grover — default enabled -->
         <activity-alias
             android:name=".MainActivityGrover"
             android:enabled="true"
@@ -44,7 +39,6 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Aspen — disabled -->
         <activity-alias
             android:name=".MainActivityAspen"
             android:enabled="false"
@@ -60,7 +54,6 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Rowan — disabled -->
         <activity-alias
             android:name=".MainActivityRowan"
             android:enabled="false"
@@ -76,7 +69,6 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Sakura — disabled -->
         <activity-alias
             android:name=".MainActivitySakura"
             android:enabled="false"
@@ -92,7 +84,52 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Flutter Local Notifications receivers -->
+        <activity-alias
+            android:name=".MainActivityAbies"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_abies"
+            android:roundIcon="@mipmap/ic_launcher_abies_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityCedite"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_cedite"
+            android:roundIcon="@mipmap/ic_launcher_cedite_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAsh"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ash"
+            android:roundIcon="@mipmap/ic_launcher_ash_round"
+            android:targetActivity=".MainActivity"
+            android:taskAffinity=""
+            android:label="gr0ve">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Flutter Local Notifications -->
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" android:exported="false" />
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver" android:exported="false">
             <intent-filter>
@@ -101,7 +138,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- Firebase Messaging Service -->
+        <!-- Firebase Messaging -->
         <service
             android:name="com.google.firebase.messaging.FirebaseMessagingService"
             android:exported="false">
@@ -110,7 +147,6 @@
             </intent-filter>
         </service>
 
-        <!-- FCM metadata -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="gr0ve_channel" />
@@ -118,8 +154,66 @@
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_notification" />
 
-        <!-- Flutter embedding -->
         <meta-data android:name="flutterEmbedding" android:value="2"/>
+
+        <!-- ── gr0ve Widgets ──────────────────────────────────────────────── -->
+        <!-- These MUST be inside <application>, not outside it             -->
+
+        <receiver
+            android:name=".BusWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bus_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".TeacherWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/teacher_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".ScheduleWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/schedule_widget_info" />
+        </receiver>
+
+        <!-- home_widget bridge — called by WidgetBridgeService._update() -->
+        <receiver
+            android:name=".Gr0veWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bus_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".BusWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
+        <service
+            android:name=".TeacherWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
     </application>
 
     <!-- Permissions -->
@@ -127,8 +221,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
-    <!-- Queries for PROCESS_TEXT -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

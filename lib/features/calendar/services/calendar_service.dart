@@ -368,6 +368,40 @@ class CalendarService {
     return eventsByDate;
   }
 
+  // ── NEW: Real-time stream of upcoming events ──────────────────────────────
+  // Merges all three ValueNotifiers (bca, personal, club) into a single
+  // Stream so SnapshotUpcomingCard never has to manually refresh.
+  //
+  // Strategy: listen to eventsVersion (already incremented whenever any
+  // list changes) and re-compute the upcoming slice on each tick.
+  // This is zero extra Firestore reads — it reuses the in-memory lists
+  // that are already kept hot by loadAllEvents() + club streams.
+  static Stream<List<CalendarEvent>> upcomingEventsStream({
+    int days = 7,
+    int limit = 5,
+  }) {
+    return eventsVersion.toStream().map((_) {
+      final now = DateTime.now();
+      final cutoff = now.add(Duration(days: days));
+      final events = <CalendarEvent>[];
+
+      for (int i = 0; i < days; i++) {
+        events.addAll(getEventsForDate(now.add(Duration(days: i))));
+      }
+
+      // De-duplicate by id (club events could appear in multiple sources)
+      final seen = <String>{};
+      final unique = events.where((e) {
+        if (seen.contains(e.id)) return false;
+        seen.add(e.id);
+        return e.date.isBefore(cutoff) || e.date.isAtSameMomentAs(cutoff);
+      }).toList();
+
+      unique.sort((a, b) => a.date.compareTo(b.date));
+      return unique.take(limit).toList();
+    });
+  }
+
   /// Load all events (BCA + personal + club) - optimized order
   static Future<void> loadAllEvents() async {
     isLoading.value = true;
@@ -785,5 +819,26 @@ class CalendarService {
       'rejectedAt': FieldValue.serverTimestamp(),
       'rejectedBy': _auth.currentUser?.uid,
     });
+  }
+}
+
+// ── Extension: bridge ValueNotifier<int> → Stream<int> ───────────────────────
+// Used by CalendarService.upcomingEventsStream() to turn eventsVersion
+// into a proper stream without adding any new dependencies.
+extension _ValueNotifierStream<T> on ValueNotifier<T> {
+  Stream<T> toStream() {
+    late StreamController<T> controller;
+    void listener() => controller.add(value);
+
+    controller = StreamController<T>(
+      onListen: () {
+        addListener(listener);
+        controller.add(value); // emit current value immediately
+      },
+      onCancel: () => removeListener(listener),
+      sync: true,
+    );
+
+    return controller.stream;
   }
 }

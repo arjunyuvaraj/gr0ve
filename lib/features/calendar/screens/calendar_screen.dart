@@ -92,10 +92,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final colors = context.colors;
 
-    return Column(
-      children: [
-        const CustomHeader(title: "CALENDAR"),
-        const SizedBox(height: 16),
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: Column(
+        children: [
+          const CustomHeader(title: "CALENDAR"),
+          const SizedBox(height: 16),
         Expanded(
           child: PageView.builder(
             controller: _pageController,
@@ -524,8 +526,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
   String _getWeekday(DateTime date) {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

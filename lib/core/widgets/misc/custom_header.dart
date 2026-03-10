@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/extensions/string_extensions.dart';
 import 'package:gr0ve/core/helper/teacher_utils.dart';
-import 'package:gr0ve/features/privacy/privacy_policy.dart';
+import 'package:gr0ve/features/privacy_policy/privacy_policy.dart';
 
 class CustomHeader extends StatelessWidget {
   final String title;
@@ -32,10 +32,11 @@ class CustomHeader extends StatelessWidget {
     if (t.contains('PENDING EVENTS')) return "SADLY SOCIAL";
     if (t.contains('NEWS')) return "Academy Chronicle".capitalized;
     if (t.contains(user.capitalized)) return "NICE TO SEE YOU";
-    if (t.contains("GROVER")) return "STRUCTURED GUIDENCE";
+    if (t.contains("GROVER")) return "STRUCTURED GUIDENCE".capitalized;
     if (t.contains("ASPEN")) return "Explore Your Path".capitalized;
     if (t.contains("ROWAN")) return "Practical Direction".capitalized;
     if (t.contains("SAKURA")) return "Creative Insight".capitalized;
+    if (t.contains("AIBES")) return "I remember".capitalized;
     return "FOR BCA";
   }
 

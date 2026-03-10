@@ -7,7 +7,6 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-
     private val ICON_CHANNEL = "com.gr0ve.app/icon"
 
     private val baseActivity = "MainActivity"
@@ -16,13 +15,15 @@ class MainActivity : FlutterActivity() {
         "MainActivityAspen",
         "MainActivityRowan",
         "MainActivitySakura",
+        "MainActivityAbies",
+        "MainActivityCedite",
+        "MainActivityAsh",
     )
 
     private var pendingAlias: String? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-
         // ── Icon channel ─────────────────────────────────────
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ICON_CHANNEL)
             .setMethodCallHandler { call, result ->

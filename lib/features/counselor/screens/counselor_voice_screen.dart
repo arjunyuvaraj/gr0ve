@@ -1,0 +1,776 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:audio_session/audio_session.dart';
+import 'package:flutter/material.dart';
+import 'package:gr0ve/features/counselor/services/polly_service.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/features/counselor/services/counselor_service.dart';
+import 'package:gr0ve/features/counselor/services/persona_voice.dart';
+import 'package:gr0ve/models/counselor.dart';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROUTE
+// ═══════════════════════════════════════════════════════════════════════════
+
+class CounselorVoiceRoute<T> extends PageRouteBuilder<T> {
+  CounselorVoiceRoute({
+    required CounselorPersona persona,
+    required UserProfile profile,
+    required List<ChatMessage> history,
+    required void Function(List<ChatMessage> updated) onHistoryUpdated,
+  }) : super(
+         pageBuilder: (context, _, __) => CounselorVoiceScreen(
+           persona: persona,
+           profile: profile,
+           history: history,
+           onHistoryUpdated: onHistoryUpdated,
+         ),
+         transitionsBuilder: (context, animation, _, child) =>
+             _VoiceScreenTransition(animation: animation, child: child),
+         transitionDuration: const Duration(milliseconds: 380),
+         reverseTransitionDuration: const Duration(milliseconds: 260),
+       );
+}
+
+class _VoiceScreenTransition extends StatelessWidget {
+  const _VoiceScreenTransition({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 0.97, end: 1.0).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOICE THEME MANAGER
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _VoiceThemeManager {
+  static _VoiceTheme forPersona(CounselorPersona persona, bool isLight) {
+    final bgColor = isLight
+        ? _lightBackgrounds[persona] ?? const Color(0xFFFAFAFA)
+        : _darkBackgrounds[persona] ?? const Color(0xFF060E0B);
+
+    return isLight ? _VoiceTheme.light(bgColor) : _VoiceTheme.dark(bgColor);
+  }
+
+  static const _lightBackgrounds = {
+    CounselorPersona.grover: Color(0xFFFAFAFA),
+    CounselorPersona.aspen: Color(0xFFF8F9FA),
+    CounselorPersona.rowan: Color(0xFFFAF6F2),
+    CounselorPersona.sakura: Color(0xFFFDF8FD),
+    CounselorPersona.abies: Color(0xFFF7F6FB),
+    CounselorPersona.cedite: Color(0xFFF9F7FC),
+    CounselorPersona.ash: Color(0xFFF5F5F5),
+  };
+
+  static const _darkBackgrounds = {
+    CounselorPersona.grover: Color(0xFF060E0B),
+    CounselorPersona.aspen: Color(0xFF07090F),
+    CounselorPersona.rowan: Color(0xFF0E0704),
+    CounselorPersona.sakura: Color(0xFF0E070E),
+    CounselorPersona.abies: Color(0xFF05080F),
+    CounselorPersona.cedite: Color(0xFF0A0510),
+    CounselorPersona.ash: Color(0xFF090909),
+  };
+}
+
+@immutable
+class _VoiceTheme {
+  final Color bg;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color cardBg;
+  final Color cardBorder;
+  final Color waveformInactive;
+
+  const _VoiceTheme({
+    required this.bg,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.cardBg,
+    required this.cardBorder,
+    required this.waveformInactive,
+  });
+
+  factory _VoiceTheme.light(Color bgColor) => _VoiceTheme(
+    bg: bgColor,
+    textPrimary: const Color(0xFF1F1F1F),
+    textSecondary: const Color(0xFF666666),
+    cardBg: Colors.black.withOpacity(0.04),
+    cardBorder: Colors.black.withOpacity(0.08),
+    waveformInactive: Colors.black.withOpacity(0.12),
+  );
+
+  factory _VoiceTheme.dark(Color bgColor) => _VoiceTheme(
+    bg: bgColor,
+    textPrimary: Colors.white,
+    textSecondary: Colors.white70,
+    cardBg: Colors.white.withOpacity(0.06),
+    cardBorder: Colors.white.withOpacity(0.10),
+    waveformInactive: Colors.white.withOpacity(0.12),
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOICE PHASE ENUM
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum _VoicePhase { greeting, idle, listening, thinking, speaking }
+
+extension _VoicePhaseExt on _VoicePhase {
+  String get label => switch (this) {
+    _VoicePhase.greeting => 'Greeting',
+    _VoicePhase.idle => 'Ready',
+    _VoicePhase.listening => 'Listening',
+    _VoicePhase.thinking => 'Thinking',
+    _VoicePhase.speaking => 'Speaking',
+  };
+
+  bool get isActive =>
+      this == _VoicePhase.speaking || this == _VoicePhase.listening;
+
+  bool get isAnimated => isActive || this == _VoicePhase.thinking;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN VOICE SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+
+class CounselorVoiceScreen extends StatefulWidget {
+  const CounselorVoiceScreen({
+    super.key,
+    required this.persona,
+    required this.profile,
+    required this.history,
+    required this.onHistoryUpdated,
+  });
+
+  final CounselorPersona persona;
+  final UserProfile profile;
+  final List<ChatMessage> history;
+  final void Function(List<ChatMessage> updated) onHistoryUpdated;
+
+  @override
+  State<CounselorVoiceScreen> createState() => _CounselorVoiceScreenState();
+}
+
+class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
+    with TickerProviderStateMixin {
+  late SpeechToText _stt;
+  late List<ChatMessage> _messages;
+
+  _VoicePhase _phase = _VoicePhase.greeting;
+  String _transcript = '';
+  String _lastResponse = '';
+  bool _isProcessing = false;
+
+  late AnimationController _pulseCtrl;
+  late AnimationController _waveCtrl;
+  late AnimationController _entryCtrl;
+  late Animation<double> _pulseScale;
+  late Animation<double> _entryFade;
+  late Animation<Offset> _entrySlide;
+
+  static const int _barCount = 28;
+  final List<double> _barHeights = List.filled(_barCount, 4.0);
+
+  bool _sttListening = false;
+  Timer? _silenceTimer;
+  String _accumulatedTranscript = '';
+  DateTime? _lastSpeechDetected;
+
+  @override
+  void initState() {
+    super.initState();
+    _messages = List.from(widget.history);
+    _stt = SpeechToText();
+    _setupAnimations();
+    _initializeServices();
+  }
+
+  void _setupAnimations() {
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _pulseScale = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+
+    _waveCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 80),
+    )..addListener(_updateWaveform);
+
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
+    _entrySlide = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
+
+    _entryCtrl.forward();
+  }
+
+  Future<void> _initializeServices() async {
+    final sttOk = await _stt.initialize();
+    final pollyOk = await PollyService.initialize();
+
+    if (!mounted) return;
+    if (!pollyOk || !sttOk) {
+      _showError('Failed to initialize voice services');
+      return;
+    }
+
+    _playGreeting();
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    _waveCtrl.dispose();
+    _entryCtrl.dispose();
+    _silenceTimer?.cancel();
+    _stt.stop();
+    PollyService.stop();
+    super.dispose();
+  }
+
+  Future<void> _playGreeting() async {
+    final name = widget.profile.greetingName;
+    final greeting = widget.persona.welcomeGreeting(name);
+    final intro = '$greeting ${widget.persona.welcomeSubtitle}';
+
+    if (mounted) setState(() => _lastResponse = intro);
+    _setPhase(_VoicePhase.greeting);
+
+    await PollyService.speak(
+      text: intro,
+      persona: widget.persona,
+      isGreeting: true,
+      onReady: () => _setPhase(_VoicePhase.greeting),
+      onDone: () {
+        if (mounted) {
+          _setPhase(_VoicePhase.idle);
+          Future.delayed(const Duration(milliseconds: 300), _startListening);
+        }
+      },
+    );
+  }
+
+  Future<void> _startListening() async {
+    if (_phase == _VoicePhase.thinking || _phase == _VoicePhase.speaking) {
+      return;
+    }
+
+    if (_sttListening) return;
+
+    _sttListening = true;
+    _accumulatedTranscript = '';
+    _lastSpeechDetected = DateTime.now();
+
+    _setPhase(_VoicePhase.listening);
+
+    try {
+      await _stt.listen(
+        onResult: _handleSttResult,
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 3),
+        localeId: 'en_US',
+        cancelOnError: true,
+        partialResults: true,
+      );
+
+      _monitorSilence();
+    } catch (e) {
+      debugPrint('[Voice] STT error: $e');
+      _sttListening = false;
+    }
+  }
+
+  void _handleSttResult(SpeechRecognitionResult result) {
+    final words = result.recognizedWords.trim();
+
+    if (words.isNotEmpty && words != _accumulatedTranscript) {
+      _lastSpeechDetected = DateTime.now();
+      _accumulatedTranscript = words;
+    }
+
+    if (mounted) {
+      setState(() => _transcript = _accumulatedTranscript);
+    }
+  }
+
+  void _monitorSilence() {
+    _silenceTimer?.cancel();
+    _silenceTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (!_sttListening || _lastSpeechDetected == null) {
+        _silenceTimer?.cancel();
+        return;
+      }
+
+      final timeSinceLastSpeech = DateTime.now()
+          .difference(_lastSpeechDetected!)
+          .inMilliseconds;
+
+      if (timeSinceLastSpeech > 1250 && _accumulatedTranscript.isNotEmpty) {
+        _completeSpeech();
+      }
+    });
+  }
+
+  Future<void> _completeSpeech() async {
+    _silenceTimer?.cancel();
+    _sttListening = false;
+    final finalText = _accumulatedTranscript.trim();
+
+    if (finalText.isEmpty) {
+      if (mounted) {
+        _setPhase(_VoicePhase.idle);
+        Future.delayed(const Duration(milliseconds: 500), _startListening);
+      }
+      return;
+    }
+
+    await _handleUserInput(finalText);
+  }
+
+  Future<void> _handleUserInput(String userText) async {
+    if (_isProcessing) return;
+
+    _isProcessing = true;
+    _setPhase(_VoicePhase.thinking);
+
+    debugPrint('[Voice] Stopping STT before response fetch...');
+    await _stt.stop();
+    _sttListening = false;
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    try {
+      await _fetchAndPlayResponse(userText);
+    } finally {
+      _isProcessing = false;
+    }
+  }
+
+  Future<void> _fetchAndPlayResponse(String userText) async {
+    _messages.add(
+      ChatMessage(text: userText, isUser: true, timestamp: DateTime.now()),
+    );
+
+    try {
+      final closureState = await OllamaCounselorService.sendMessage(
+        history: _messages,
+        question: userText,
+        persona: widget.persona,
+        profile: widget.profile,
+        onToken: (_) {},
+        isVoiceMode: true,
+      );
+
+      if (!mounted) return;
+
+      final responseText = closureState.displayMessage;
+      if (responseText.isEmpty) {
+        _setPhase(_VoicePhase.idle);
+        return;
+      }
+
+      // Add response to messages
+      _messages.add(
+        ChatMessage(
+          text: responseText,
+          isUser: false,
+          speaker: widget.persona,
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      // Save to Firebase
+      await ChatHistoryService.save(
+        widget.persona,
+        _messages,
+        isHomework: false,
+      );
+
+      widget.onHistoryUpdated(_messages);
+
+      if (mounted) {
+        setState(() => _lastResponse = responseText);
+      }
+
+      await _playResponse(responseText, closureState.shouldCloseScreen);
+    } catch (e) {
+      debugPrint('[Voice] Error fetching response: $e');
+      if (mounted) {
+        _showError('Failed to get response');
+        _setPhase(_VoicePhase.idle);
+      }
+    }
+  }
+
+  Future<void> _playResponse(String text, bool shouldClose) async {
+    _setPhase(_VoicePhase.speaking);
+
+    await PollyService.speak(
+      text: text,
+      persona: widget.persona,
+      onReady: () => _setPhase(_VoicePhase.speaking),
+      onDone: () {
+        if (mounted) {
+          if (shouldClose) {
+            Navigator.pop(context);
+          } else {
+            _setPhase(_VoicePhase.idle);
+            Future.delayed(const Duration(milliseconds: 300), _startListening);
+          }
+        }
+      },
+    );
+  }
+
+  void _setPhase(_VoicePhase p) {
+    if (!mounted) return;
+    setState(() => _phase = p);
+
+    if (p.isAnimated) {
+      _pulseCtrl.repeat(reverse: true);
+      _waveCtrl.repeat();
+    } else {
+      _pulseCtrl.stop();
+      _pulseCtrl.reset();
+      _waveCtrl.stop();
+    }
+  }
+
+  void _updateWaveform() {
+    if (!mounted) return;
+    final t = DateTime.now().millisecondsSinceEpoch / 1000.0;
+    final isActive = _phase.isActive;
+    final isThinking = _phase == _VoicePhase.thinking;
+
+    setState(() {
+      for (int i = 0; i < _barCount; i++) {
+        final center = _barCount / 2;
+        final dist = (i - center).abs() / center;
+
+        if (isActive) {
+          final speed = _phase == _VoicePhase.speaking ? 0.38 : 0.65;
+          final raw = (sin(t * speed * pi * 2 + i * 0.7)).abs() * 38 + 4;
+          _barHeights[i] = raw * (1 - dist * 0.45);
+        } else if (isThinking) {
+          final raw = (sin(t * 0.4 + i * 0.2)).abs() * 6 + 4;
+          _barHeights[i] = raw * (1 - dist * 0.45);
+        } else {
+          _barHeights[i] = 4.0;
+        }
+      }
+    });
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red[700]),
+    );
+  }
+
+  String _statusText() => switch (_phase) {
+    _VoicePhase.greeting => 'Greeting…',
+    _VoicePhase.idle => '${widget.persona.displayName} is listening',
+    _VoicePhase.listening => 'You\'re speaking…',
+    _VoicePhase.thinking => 'Processing…',
+    _VoicePhase.speaking => '${widget.persona.displayName} is speaking',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = MediaQuery.of(context).platformBrightness;
+    final isLight = brightness == Brightness.light;
+    final theme = _VoiceThemeManager.forPersona(widget.persona, isLight);
+    final pc = widget.persona.primary(brightness);
+
+    return Scaffold(
+      backgroundColor: theme.bg,
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _entryFade,
+          child: SlideTransition(
+            position: _entrySlide,
+            child: Column(
+              children: [
+                _buildTopBar(theme, pc),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ScaleTransition(
+                        scale: _pulseScale,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: pc.withOpacity(isLight ? 0.08 : 0.10),
+                            border: Border.all(
+                              color: pc.withOpacity(
+                                _phase.isActive ? 0.6 : 0.25,
+                              ),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: pc.withOpacity(
+                                  _phase == _VoicePhase.speaking ? 0.35 : 0.08,
+                                ),
+                                blurRadius: _phase == _VoicePhase.speaking
+                                    ? 50
+                                    : 15,
+                                spreadRadius: _phase == _VoicePhase.speaking
+                                    ? 8
+                                    : 0,
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(29),
+                            child: Image.asset(
+                              widget.persona.avatarAsset(brightness),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      Text(
+                        widget.persona.displayName,
+                        style: TextStyle(
+                          color: theme.textPrimary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 30,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        widget.persona.welcomeTagline,
+                        style: TextStyle(
+                          color: pc.withOpacity(isLight ? 0.5 : 0.65),
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      _buildWaveform(pc, theme),
+                      const SizedBox(height: 32),
+                      Text(
+                        _statusText(),
+                        style: TextStyle(
+                          color: theme.textSecondary.withOpacity(0.6),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (_transcript.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: _buildTranscriptBox(theme),
+                        ),
+                      if (_transcript.isNotEmpty) const SizedBox(height: 16),
+                      if (_lastResponse.isNotEmpty &&
+                          _phase != _VoicePhase.listening)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: _buildResponseBox(pc, theme, isLight),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar(_VoiceTheme theme, Color pc) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              PollyService.stop();
+              _stt.stop();
+              Navigator.pop(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                color: theme.cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: theme.cardBorder),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.call_end_rounded,
+                    color: Color(0xFFFF5555),
+                    size: 14,
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    'End call',
+                    style: TextStyle(color: theme.textSecondary, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color:
+                  (_phase == _VoicePhase.thinking
+                          ? const Color(0xFFFFAA33)
+                          : const Color(0xFF44DD88))
+                      .withOpacity(0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color:
+                    (_phase == _VoicePhase.thinking
+                            ? const Color(0xFFFFAA33)
+                            : const Color(0xFF44DD88))
+                        .withOpacity(0.25),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        (_phase == _VoicePhase.thinking
+                                ? const Color(0xFFFFAA33)
+                                : const Color(0xFF44DD88))
+                            .withOpacity(0.8),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _phase.label,
+                  style: TextStyle(
+                    color: _phase == _VoicePhase.thinking
+                        ? const Color(0xFFFFAA33)
+                        : const Color(0xFF44DD88),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWaveform(Color pc, _VoiceTheme theme) {
+    return SizedBox(
+      height: 50,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          _barCount,
+          (i) => AnimatedContainer(
+            duration: const Duration(milliseconds: 80),
+            width: 3,
+            height: _barHeights[i].clamp(3.0, 46.0),
+            margin: const EdgeInsets.symmetric(horizontal: 1.6),
+            decoration: BoxDecoration(
+              color: _phase.isAnimated
+                  ? pc.withOpacity(
+                      0.3 +
+                          0.7 *
+                              (1 - (_barCount / 2 - i).abs() / (_barCount / 2)),
+                    )
+                  : theme.waveformInactive,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTranscriptBox(_VoiceTheme theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.cardBorder),
+      ),
+      child: Text(
+        '"$_transcript"',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: theme.textSecondary,
+          fontSize: 13,
+          fontStyle: FontStyle.italic,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResponseBox(Color pc, _VoiceTheme theme, bool isLight) {
+    final displayText = _lastResponse.length > 160
+        ? '${_lastResponse.substring(0, 160)}…'
+        : _lastResponse;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+        color: pc.withOpacity(isLight ? 0.06 : 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: pc.withOpacity(isLight ? 0.12 : 0.15)),
+      ),
+      child: Text(
+        displayText,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: theme.textSecondary.withOpacity(0.85),
+          fontSize: 13,
+          height: 1.6,
+        ),
+      ),
+    );
+  }
+}

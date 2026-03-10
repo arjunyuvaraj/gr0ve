@@ -138,106 +138,110 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
     final colors = context.colors;
     final textSize = context.text;
 
-    return Column(
-      children: [
-        CustomHeader(title: 'LUNCH'.capitalized),
-        const SizedBox(height: 16),
-        TextField(
-          controller: searchController,
-          decoration: const InputDecoration(
-            hintText: 'Search food...',
-            prefixIcon: Icon(Icons.search_rounded),
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
+      child: Column(
+        children: [
+          CustomHeader(title: 'LUNCH'.capitalized),
+          const SizedBox(height: 16),
+          TextField(
+            controller: searchController,
+            decoration: const InputDecoration(
+              hintText: 'Search food...',
+              prefixIcon: Icon(Icons.search_rounded),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: loading
-              ? const PremiumLoadingIndicator()
-              : error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.restaurant_menu_outlined,
-                          size: 64,
-                          color: colors.onSurface.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          error!,
-                          textAlign: TextAlign.center,
-                          style: textSize.titleMedium?.copyWith(
-                            color: colors.onSurface.withOpacity(0.6),
-                            fontWeight: FontWeight.w600,
+          const SizedBox(height: 16),
+          Expanded(
+            child: loading
+                ? const PremiumLoadingIndicator()
+                : error != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.restaurant_menu_outlined,
+                            size: 64,
+                            color: colors.onSurface.withOpacity(0.3),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          Text(
+                            error!,
+                            textAlign: TextAlign.center,
+                            style: textSize.titleMedium?.copyWith(
+                              color: colors.onSurface.withOpacity(0.6),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                )
-              : filteredItems.isEmpty
-              ? Center(
-                  child: Text(
-                    'No items match your search.',
-                    style: textSize.bodyLarge?.copyWith(
-                      color: colors.onSurface.withOpacity(0.5),
+                  )
+                : filteredItems.isEmpty
+                ? Center(
+                    child: Text(
+                      'No items match your search.',
+                      style: textSize.bodyLarge?.copyWith(
+                        color: colors.onSurface.withOpacity(0.5),
+                      ),
                     ),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _fetchTodayMenu,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Builder(
-                          builder: (context) {
-                            String? lastStation;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: filteredItems.map((entry) {
-                                final widgets = <Widget>[];
+                  )
+                : RefreshIndicator(
+                    onRefresh: _fetchTodayMenu,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Builder(
+                            builder: (context) {
+                              String? lastStation;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: filteredItems.map((entry) {
+                                  final widgets = <Widget>[];
 
-                                if (entry.station.isNotEmpty &&
-                                    entry.station != lastStation) {
-                                  widgets.add(
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 24,
-                                        bottom: 12,
-                                      ),
-                                      child: Text(
-                                        entry.station,
-                                        style: textSize.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w600,
+                                  if (entry.station.isNotEmpty &&
+                                      entry.station != lastStation) {
+                                    widgets.add(
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 24,
+                                          bottom: 12,
+                                        ),
+                                        child: Text(
+                                          entry.station,
+                                          style: textSize.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    );
+                                    lastStation = entry.station;
+                                  }
+
+                                  widgets.add(_MenuItemCard(item: entry.food));
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: widgets,
                                   );
-                                  lastStation = entry.station;
-                                }
-
-                                widgets.add(_MenuItemCard(item: entry.food));
-
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: widgets,
-                                );
-                              }).toList(),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                                }).toList(),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

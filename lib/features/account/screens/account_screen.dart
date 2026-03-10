@@ -5,13 +5,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
 import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
-import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/misc/not_logged_in.dart';
+import 'package:gr0ve/features/account/screens/profile_picture_picker_sheet.dart';
+import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/features/authentication/services/authentication_service.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/legal/legal.dart';
+import 'package:gr0ve/legal/terms_screen.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
+import 'package:gr0ve/features/counselor/screens/counselor_persona_picker.dart';
+import 'package:gr0ve/features/easter_eggs/cedite_screen.dart';
+import 'package:gr0ve/features/social/services/social_service.dart';
+import 'package:gr0ve/features/social/screens/social_search_sheet.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onCustomizeNavigation;
@@ -25,38 +32,214 @@ class _AccountScreenState extends State<AccountScreen> {
   bool loading = true;
   User? user;
   final AuthenticationService _authService = AuthenticationService();
+  ProfileVariant _activeVariant = ProfilePictureService.activeVariant.value;
 
-  // User profile data
   bool isEmailVerified = false;
   bool isBergenStudent = false;
   String? userGrade;
   String? userAcademy;
 
-  // Active counselor persona (reflected in the tile)
   CounselorPersona _activePersona = CounselorPersonaService.activePersona.value;
+
+  int _counselorTapCount = 0;
+  DateTime? _firstTapTime;
+  static const _requiredTaps = 6;
+  static const _tapWindow = Duration(seconds: 4);
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    ProfilePictureService.activeVariant.addListener(_onVariantChanged);
     FirebaseAnalytics.instance.logEvent(name: 'screen_account');
-
-    // Keep persona tile in sync with global notifier
     CounselorPersonaService.activePersona.addListener(_onPersonaChanged);
   }
 
   @override
   void dispose() {
     CounselorPersonaService.activePersona.removeListener(_onPersonaChanged);
+    ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     super.dispose();
+  }
+
+  void _onVariantChanged() {
+    if (mounted)
+      setState(
+        () => _activeVariant = ProfilePictureService.activeVariant.value,
+      );
   }
 
   void _onPersonaChanged() {
     if (mounted) {
       setState(() {
         _activePersona = CounselorPersonaService.activePersona.value;
+        _counselorTapCount = 0;
+        _firstTapTime = null;
       });
     }
+  }
+
+  void _onCounselorAvatarTap() {
+    if (CounselorPersonaService.cediteUnlocked) {
+      _showCounselorPicker();
+      return;
+    }
+    final now = DateTime.now();
+    if (_firstTapTime != null && now.difference(_firstTapTime!) > _tapWindow) {
+      _counselorTapCount = 0;
+      _firstTapTime = null;
+    }
+    _firstTapTime ??= now;
+    _counselorTapCount++;
+    if (_counselorTapCount >= _requiredTaps) {
+      _counselorTapCount = 0;
+      _firstTapTime = null;
+      _openCediteScreen();
+    }
+  }
+
+  void _openCediteScreen() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (ctx, animation, _) => CediteScreen(
+          onUnlocked: () {
+            // CounselorPersonaService.markCediteUnlocked();
+            if (Navigator.canPop(ctx)) Navigator.pop(ctx);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _offerSwitchToCedite();
+            });
+          },
+        ),
+        transitionsBuilder: (ctx, animation, _, child) => FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeIn),
+          child: child,
+        ),
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  void _offerSwitchToCedite() {
+    final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final brightness = Theme.of(context).brightness;
+    final pc = CounselorPersona.cedite.primary(brightness);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(color: pc.withAlpha(38)),
+        ),
+        padding: const EdgeInsets.fromLTRB(28, 20, 28, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.onSurface.withAlpha(25),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                CounselorPersona.cedite.avatarAsset(brightness),
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Cedite is available.',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colors.onSurface,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "He was already here.\nHe's been waiting for you to notice.",
+              textAlign: TextAlign.center,
+              style: textTheme.bodySmall?.copyWith(
+                color: colors.onSurface.withAlpha(102),
+                fontStyle: FontStyle.italic,
+                height: 1.6,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Verify what he tells you.',
+              textAlign: TextAlign.center,
+              style: textTheme.bodySmall?.copyWith(
+                color: pc.withAlpha(140),
+                fontStyle: FontStyle.italic,
+                fontSize: 11,
+              ),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: colors.outline.withAlpha(51)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      'Later',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colors.onSurface.withAlpha(102),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      await CounselorPersonaService.setPersona(
+                        CounselorPersona.cedite,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: pc,
+                      foregroundColor: CounselorPersona.cedite.onPrimary(
+                        brightness,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Speak with Cedite',
+                      style: textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colors.surface,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _loadUserData() async {
@@ -66,13 +249,11 @@ class _AccountScreenState extends State<AccountScreen> {
       isEmailVerified = user!.emailVerified;
       final email = user!.email ?? '';
       isBergenStudent = email.endsWith('@bergen.org');
-
       try {
         final userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user!.uid)
             .get();
-
         if (userDoc.exists) {
           final data = userDoc.data();
           userGrade = data?['grade'];
@@ -82,7 +263,6 @@ class _AccountScreenState extends State<AccountScreen> {
         debugPrint('Error loading user profile: $e');
       }
     }
-
     setState(() => loading = false);
   }
 
@@ -91,200 +271,35 @@ class _AccountScreenState extends State<AccountScreen> {
     return user!.email ?? 'No email';
   }
 
-  // ── Counselor persona picker ─────────────────────────────────
   Future<void> _showCounselorPicker() async {
-    final brightness = Theme.of(context).brightness;
-    CounselorPersona selected = _activePersona;
-
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) {
-          final colors = Theme.of(ctx).colorScheme;
-          final textTheme = Theme.of(ctx).textTheme;
-          return Container(
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(32),
-              ),
-            ),
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 36),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Drag handle
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.onSurface.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 22),
-                Text(
-                  'Switch Counselor',
-                  style: textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Your counselor\'s color theme follows you across the app.',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface.withOpacity(0.5),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 22),
-                ...CounselorPersona.values.map((persona) {
-                  final isSelected = selected == persona;
-                  final accent = persona.primary(brightness);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: GestureDetector(
-                      onTap: () => setSheetState(() => selected = persona),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? accent.withOpacity(0.08)
-                              : colors.surfaceContainerHighest.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: isSelected
-                                ? accent
-                                : colors.outline.withOpacity(0.1),
-                            width: isSelected ? 2 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            // Avatar
-                            Container(
-                              width: 46,
-                              height: 46,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: accent.withOpacity(0.1),
-                              ),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  persona.avatarAsset(brightness),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        persona.displayName,
-                                        style: textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: isSelected
-                                              ? accent
-                                              : colors.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      // Specialty badge
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: accent.withOpacity(0.14),
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          persona.specialtyLabel,
-                                          style: TextStyle(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w800,
-                                            color: accent,
-                                            letterSpacing: 0.4,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    persona.tagline,
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: colors.onSurface.withOpacity(0.5),
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: accent,
-                                size: 22,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await CounselorPersonaService.setPersona(selected);
-                      if (ctx.mounted) Navigator.pop(ctx);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: selected.primary(brightness),
-                      foregroundColor: selected.onPrimary(brightness),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Switch to ${selected.displayName}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
+      builder: (_) => PersonaPickerSheet(
+        currentPersona: _activePersona,
+        isChange: true,
+        onSelect: (persona) async {
+          await CounselorPersonaService.setPersona(persona);
         },
       ),
     );
   }
 
-  // ── Other handlers (unchanged) ───────────────────────────────
+  Future<void> _showProfilePicturePicker() async {
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => const ProfilePicturePickerSheet(),
+    );
+  }
 
   Future<void> _sendVerificationEmail() async {
     if (user == null || user!.emailVerified) return;
     try {
       await user!.sendEmailVerification();
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Verification email sent! Check your inbox.'),
@@ -292,16 +307,14 @@ class _AccountScreenState extends State<AccountScreen> {
             duration: Duration(seconds: 4),
           ),
         );
-      }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
-      }
     }
   }
 
@@ -309,7 +322,6 @@ class _AccountScreenState extends State<AccountScreen> {
     if (!isBergenStudent) return;
     final grades = ['9', '10', '11', '12'];
     String? selectedGrade = userGrade;
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -317,17 +329,19 @@ class _AccountScreenState extends State<AccountScreen> {
         title: const Text('Select Grade'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: grades.map((grade) {
-            return RadioListTile<String>(
-              title: Text('Grade $grade'),
-              value: grade,
-              groupValue: selectedGrade,
-              onChanged: (value) {
-                selectedGrade = value;
-                Navigator.pop(ctx, true);
-              },
-            );
-          }).toList(),
+          children: grades
+              .map(
+                (grade) => RadioListTile<String>(
+                  title: Text('Grade $grade'),
+                  value: grade,
+                  groupValue: selectedGrade,
+                  onChanged: (value) {
+                    selectedGrade = value;
+                    Navigator.pop(ctx, true);
+                  },
+                ),
+              )
+              .toList(),
         ),
         actions: [
           CustomSecondaryButton(
@@ -337,7 +351,6 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
-
     if (confirmed == true && selectedGrade != null) {
       try {
         await FirebaseFirestore.instance
@@ -345,23 +358,21 @@ class _AccountScreenState extends State<AccountScreen> {
             .doc(user!.uid)
             .update({'grade': selectedGrade});
         setState(() => userGrade = selectedGrade);
-        if (mounted) {
+        if (mounted)
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Grade updated successfully'),
               behavior: SnackBarBehavior.floating,
             ),
           );
-        }
       } catch (e) {
-        if (mounted) {
+        if (mounted)
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${e.toString()}'),
               behavior: SnackBarBehavior.floating,
             ),
           );
-        }
       }
     }
   }
@@ -380,7 +391,6 @@ class _AccountScreenState extends State<AccountScreen> {
       'AVPA-T',
     ];
     String? selectedAcademy = userAcademy;
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -391,18 +401,15 @@ class _AccountScreenState extends State<AccountScreen> {
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: academies.length,
-            itemBuilder: (context, index) {
-              final academy = academies[index];
-              return RadioListTile<String>(
-                title: Text(academy),
-                value: academy,
-                groupValue: selectedAcademy,
-                onChanged: (value) {
-                  selectedAcademy = value;
-                  Navigator.pop(ctx, true);
-                },
-              );
-            },
+            itemBuilder: (context, index) => RadioListTile<String>(
+              title: Text(academies[index]),
+              value: academies[index],
+              groupValue: selectedAcademy,
+              onChanged: (value) {
+                selectedAcademy = value;
+                Navigator.pop(ctx, true);
+              },
+            ),
           ),
         ),
         actions: [
@@ -413,7 +420,6 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
-
     if (confirmed == true && selectedAcademy != null) {
       try {
         await FirebaseFirestore.instance
@@ -421,23 +427,21 @@ class _AccountScreenState extends State<AccountScreen> {
             .doc(user!.uid)
             .update({'academy': selectedAcademy});
         setState(() => userAcademy = selectedAcademy);
-        if (mounted) {
+        if (mounted)
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Academy updated successfully'),
               behavior: SnackBarBehavior.floating,
             ),
           );
-        }
       } catch (e) {
-        if (mounted) {
+        if (mounted)
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${e.toString()}'),
               behavior: SnackBarBehavior.floating,
             ),
           );
-        }
       }
     }
   }
@@ -487,7 +491,6 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
-
     if (confirmed != true || newNickname.trim().isEmpty) return;
     try {
       if (user == null) return;
@@ -497,23 +500,21 @@ class _AccountScreenState extends State<AccountScreen> {
       await user!.updateDisplayName(newNickname.trim());
       await user!.reload();
       setState(() => user = FirebaseAuth.instance.currentUser);
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Name updated successfully'),
             behavior: SnackBarBehavior.floating,
           ),
         );
-      }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
-      }
     }
   }
 
@@ -580,7 +581,7 @@ class _AccountScreenState extends State<AccountScreen> {
     if (confirmed != true) return;
     try {
       await _authService.sendPasswordResetEmail(email);
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Password reset email sent! Check your inbox.'),
@@ -588,16 +589,14 @@ class _AccountScreenState extends State<AccountScreen> {
             duration: Duration(seconds: 4),
           ),
         );
-      }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
-      }
     }
   }
 
@@ -665,7 +664,7 @@ class _AccountScreenState extends State<AccountScreen> {
       await _authService.deleteAccount(password);
       if (mounted) Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -674,7 +673,6 @@ class _AccountScreenState extends State<AccountScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-      }
     }
   }
 
@@ -694,12 +692,16 @@ class _AccountScreenState extends State<AccountScreen> {
     if (mounted) Navigator.pushReplacementNamed(context, '/login');
   }
 
-  // ── Build ────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // BUILD
+  // ─────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final brightness = theme.brightness;
+    final isDark = brightness == Brightness.dark;
 
     if (loading) {
       return Center(
@@ -711,7 +713,7 @@ class _AccountScreenState extends State<AccountScreen> {
             Text(
               'Loading your account...',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurface.withOpacity(0.6),
+                color: colors.onSurface.withAlpha(153),
               ),
             ),
           ],
@@ -725,299 +727,730 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      children: [
-        const CustomHeader(title: "ACCOUNT"),
-        const SizedBox(height: 32),
-        _buildAccountInformation(colors),
-        const SizedBox(height: 32),
-      ],
+    final personaColor = _activePersona.primary(brightness);
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHero(colors, brightness, isDark, personaColor, theme),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+            child: Column(
+              children: [
+                _buildBody(colors, brightness, isDark, personaColor),
+                const SizedBox(
+                  height: 120,
+                ), // ADDED: Bottom padding for nav bar
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildAccountInformation(ColorScheme colors) {
-    final brightness = Theme.of(context).brightness;
-    final personaColor = _activePersona.primary(brightness);
+  // ─────────────────────────────────────────────────────────────
+  // HERO
+  // ─────────────────────────────────────────────────────────────
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ── Account tiles ──────────────────────────────────────
-        if (!user!.isAnonymous)
-          _buildSettingsTile(
-            icon: Icons.email_rounded,
-            iconColor: colors.primary,
-            title: 'Email',
-            subtitle: _getDisplayEmail(),
-            trailing: !isEmailVerified ? Icons.warning_rounded : null,
-            trailingColor: Colors.orange,
-            onTap: !isEmailVerified ? _sendVerificationEmail : () {},
+  Widget _buildHero(
+    ColorScheme colors,
+    Brightness brightness,
+    bool isDark,
+    Color personaColor,
+    ThemeData theme,
+  ) {
+    const double avatarSize = 86.0;
+    const double bannerHeight = 150.0;
+    const double overhang = avatarSize / 2;
+    // Extra space below banner for avatar overhang + name text
+    const double belowBannerHeight = overhang + 52.0;
+
+    return SizedBox(
+      height: bannerHeight + belowBannerHeight,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // ── Banner — now truly edge-to-edge ──
+          Container(
+            width: double.infinity,
+            height: bannerHeight,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  personaColor.withAlpha(isDark ? 140 : 97),
+                  personaColor.withAlpha(isDark ? 25 : 13),
+                ],
+              ),
+            ),
           ),
 
-        if (!user!.isAnonymous && !isEmailVerified) ...[
-          _buildDivider(),
-          _buildSettingsTile(
-            icon: Icons.mark_email_unread_rounded,
-            iconColor: Colors.orange,
-            title: 'Verify Email',
-            subtitle: 'Tap to send verification email',
-            trailing: Icons.send_rounded,
-            onTap: _sendVerificationEmail,
-          ),
-        ],
-
-        _buildDivider(),
-
-        _buildSettingsTile(
-          icon: Icons.person_rounded,
-          iconColor: colors.primary,
-          title: 'Name',
-          subtitle: user?.displayName ?? 'No name set',
-          trailing: Icons.edit_rounded,
-          onTap: _updateNickname,
-        ),
-
-        if (!user!.isAnonymous) ...[
-          _buildDivider(),
-          _buildSettingsTile(
-            icon: Icons.lock_reset_rounded,
-            iconColor: colors.primary,
-            title: 'Password',
-            subtitle: 'Send password reset email',
-            trailing: Icons.email_rounded,
-            onTap: _resetPassword,
-          ),
-        ],
-
-        if (isBergenStudent) ...[
-          _buildDivider(),
-          _buildSettingsTile(
-            icon: Icons.school_rounded,
-            iconColor: colors.primary,
-            title: 'Grade',
-            subtitle: !isEmailVerified
-                ? 'Please verify email to change'
-                : (userGrade != null ? 'Grade $userGrade' : 'Tap to configure'),
-            trailing: Icons.edit_rounded,
-            onTap: isEmailVerified ? _updateGrade : null,
-          ),
-          _buildDivider(),
-          _buildSettingsTile(
-            icon: Icons.apartment_rounded,
-            iconColor: colors.primary,
-            title: 'Academy',
-            subtitle: !isEmailVerified
-                ? 'Please verify email to change'
-                : (userAcademy ?? 'Tap to configure'),
-            trailing: Icons.edit_rounded,
-            onTap: isEmailVerified ? _updateAcademy : null,
-          ),
-        ],
-
-        _buildDivider(),
-
-        _buildSettingsTile(
-          icon: Icons.sort_rounded,
-          iconColor: colors.primary,
-          title: 'Customize Navigation',
-          subtitle: 'Reorder items in your navigation bar',
-          trailing: Icons.chevron_right_rounded,
-          onTap: widget.onCustomizeNavigation,
-        ),
-
-        // ── Counselor / Theme section ──────────────────────────
-        _buildSectionHeader('CHATBOT & THEME'),
-
-        // Persona tile — shows avatar + name + color accent
-        InkWell(
-          onTap: _showCounselorPicker,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            child: Row(
-              children: [
-                // Icon container tinted with persona color
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: personaColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: personaColor.withOpacity(0.2)),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(11),
-                    child: Image.asset(
-                      _activePersona.avatarAsset(brightness),
-                      fit: BoxFit.cover,
+          // ── Avatar ─────────────────────────────────────────────
+          Positioned(
+            top: bannerHeight - overhang,
+            left: 16, // Aligned with the body content padding
+            child: GestureDetector(
+              onTap: _showProfilePicturePicker,
+              child: Stack(
+                children: [
+                  Container(
+                    width: avatarSize,
+                    height: avatarSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: personaColor, width: 3),
+                      color: colors.surface,
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Counselor & Theme',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: colors.onSurface,
+                  Positioned(
+                    left: 4,
+                    top: 4,
+                    child: ClipOval(
+                      child: Image.asset(
+                        _activeVariant.assetPath(brightness),
+                        width: avatarSize - 8,
+                        height: avatarSize - 8,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: avatarSize - 8,
+                          height: avatarSize - 8,
+                          color: personaColor.withAlpha(38),
+                          child: Icon(
+                            Icons.person_rounded,
+                            size: 32,
+                            color: personaColor,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          // Colored dot
-                          Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.only(right: 6),
-                            decoration: BoxDecoration(
-                              color: personaColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          Text(
-                            '${_activePersona.displayName} · ${_activePersona.specialtyLabel}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: personaColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
+                  // Camera badge
+                  Positioned(
+                    right: 0,
+                    bottom: 2,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: personaColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.surface, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt_rounded,
+                        size: 11,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Name + email — right of avatar, constrained so it
+          //    never overflows the available row width ──────────
+          Positioned(
+            top: bannerHeight + 8,
+            left: avatarSize + 28,
+            // Keep right edge within our content area (no bleed here)
+            right: 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user?.displayName ?? 'No name set',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: colors.onSurface.withOpacity(0.3),
+                const SizedBox(height: 2),
+                Text(
+                  _getDisplayEmail(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colors.onSurface.withAlpha(97),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-        ),
-
-        // ── Danger zone ────────────────────────────────────────
-        _buildSectionHeader('ACCOUNT'),
-
-        _buildSettingsTile(
-          icon: Icons.logout_rounded,
-          iconColor: colors.error,
-          title: 'Logout',
-          subtitle: 'Sign out of your account',
-          titleColor: colors.error,
-          onTap: _logout,
-        ),
-
-        _buildDivider(),
-
-        _buildSettingsTile(
-          icon: Icons.delete_forever_rounded,
-          iconColor: colors.error,
-          title: 'Delete Account',
-          subtitle: 'Permanently delete your account',
-          titleColor: colors.error,
-          onTap: _confirmDeleteAccount,
-        ),
-      ],
-    );
-  }
-
-  /// Gray section header label (e.g. "CHATBOT & THEME")
-  Widget _buildSectionHeader(String label) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    IconData? trailing,
-    Color? titleColor,
-    Color? trailingColor,
-    required VoidCallback? onTap,
-  }) {
-    final colors = Theme.of(context).colorScheme;
-    final isDisabled = onTap == null;
+  // ─────────────────────────────────────────────────────────────
+  // BODY
+  // ─────────────────────────────────────────────────────────────
 
-    return InkWell(
-      onTap: onTap,
-      child: Opacity(
-        opacity: isDisabled ? 0.5 : 1.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+  Widget _buildBody(
+    ColorScheme colors,
+    Brightness brightness,
+    bool isDark,
+    Color personaColor,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Email verification banner ──────────────────────────
+          if (!isEmailVerified && !user!.isAnonymous) ...[
+            GestureDetector(
+              onTap: _sendVerificationEmail,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
                 ),
-                child: Icon(icon, size: 22, color: iconColor),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                decoration: BoxDecoration(
+                  color: Colors.orange.withAlpha(20),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withAlpha(64)),
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: titleColor ?? colors.onSurface,
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      size: 15,
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Email not verified — tap to resend',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.orange.shade700,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colors.onSurface.withOpacity(0.5),
-                      ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 15,
+                      color: Colors.orange.withAlpha(128),
                     ),
                   ],
                 ),
               ),
-              if (trailing != null)
-                Icon(
-                  trailing,
-                  size: 20,
-                  color: trailingColor ?? colors.onSurface.withOpacity(0.3),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ── Student info chips ─────────────────────────────────
+          if (isBergenStudent) ...[
+            _sectionLabel('STUDENT INFO'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _infoChip(
+                  colors: colors,
+                  personaColor: personaColor,
+                  icon: Icons.school_rounded,
+                  label: userGrade != null ? 'Grade $userGrade' : 'Set grade',
+                  onTap: isEmailVerified ? _updateGrade : null,
+                  locked: !isEmailVerified,
                 ),
+                const SizedBox(width: 8),
+                _infoChip(
+                  colors: colors,
+                  personaColor: personaColor,
+                  icon: Icons.apartment_rounded,
+                  label: userAcademy ?? 'Set academy',
+                  onTap: isEmailVerified ? _updateAcademy : null,
+                  locked: !isEmailVerified,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ── Chatbot & appearance group ─────────────────────────
+          _sectionLabel('CHATBOT & APPEARANCE'),
+          const SizedBox(height: 8),
+          _buildGroup(
+            borderColor: colors.outline.withAlpha(18),
+            bgColor: colors.surfaceVariant.withAlpha(isDark ? 89 : 115),
+            children: [
+              _counselorRow(colors, brightness, personaColor, isDark),
+              _divider(colors),
+              _settingsRow(
+                leadingWidget: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    _activeVariant.assetPath(brightness),
+                    width: 34,
+                    height: 34,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: personaColor.withAlpha(25),
+                      ),
+                      child: Icon(
+                        Icons.person_rounded,
+                        size: 18,
+                        color: personaColor,
+                      ),
+                    ),
+                  ),
+                ),
+                label: 'Profile Picture',
+                value: _activeVariant.displayName,
+                onTap: _showProfilePicturePicker,
+                colors: colors,
+              ),
             ],
+          ),
+
+          // ── Friends section — Lightweight social ────────────────
+          if (!user!.isAnonymous) ...[
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _sectionLabel('FRIENDS'),
+                GestureDetector(
+                  onTap: _showSocialSearch,
+                  child: Text(
+                    'FIND PEOPLE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: colors.primary,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildFriendsList(colors, personaColor),
+          ],
+          const SizedBox(height: 20),
+          _sectionLabel('SETTINGS'),
+          const SizedBox(height: 8),
+          _buildGroup(
+            borderColor: colors.outline.withAlpha(18),
+            bgColor: colors.surfaceVariant.withAlpha(isDark ? 89 : 115),
+            children: [
+              if (!user!.isAnonymous) ...[
+                _settingsRow(
+                  icon: Icons.person_rounded,
+                  iconColor: colors.primary,
+                  label: 'Name',
+                  value: user?.displayName ?? 'No name set',
+                  onTap: _updateNickname,
+                  colors: colors,
+                ),
+                _divider(colors),
+                _settingsRow(
+                  icon: Icons.lock_reset_rounded,
+                  iconColor: colors.primary,
+                  label: 'Password',
+                  value: 'Reset via email',
+                  onTap: _resetPassword,
+                  colors: colors,
+                ),
+                _divider(colors),
+                _settingsRow(
+                  icon: Icons.description_outlined,
+                  iconColor: colors.primary,
+                  label: 'Terms & Privacy',
+                  value: 'Read and manage',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const TermsOfServiceScreen(),
+                      ),
+                    );
+                  },
+                  colors: colors,
+                ),
+                _divider(colors),
+              ],
+              _settingsRow(
+                icon: Icons.sort_rounded,
+                iconColor: colors.primary,
+                label: 'Navigation',
+                value: 'Customize tab order',
+                onTap: widget.onCustomizeNavigation,
+                colors: colors,
+              ),
+            ],
+          ),
+
+          // ── Danger group ───────────────────────────────────────
+          const SizedBox(height: 20),
+          _sectionLabel('ACCOUNT'),
+          const SizedBox(height: 8),
+          _buildGroup(
+            borderColor: colors.error.withAlpha(25),
+            bgColor: colors.error.withAlpha(10),
+            children: [
+              _settingsRow(
+                icon: Icons.logout_rounded,
+                iconColor: colors.error,
+                label: 'Logout',
+                value: 'Sign out of your account',
+                onTap: _logout,
+                colors: colors,
+                labelColor: colors.error,
+              ),
+              _divider(colors),
+              _settingsRow(
+                icon: Icons.delete_forever_rounded,
+                iconColor: colors.error,
+                label: 'Delete Account',
+                value: 'Permanently delete everything',
+                onTap: _confirmDeleteAccount,
+                colors: colors,
+                labelColor: colors.error,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COUNSELOR ROW
+  // ─────────────────────────────────────────────────────────────
+
+  Widget _counselorRow(
+    ColorScheme colors,
+    Brightness brightness,
+    Color personaColor,
+    bool isDark,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: _onCounselorAvatarTap,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                _activePersona.avatarAsset(brightness),
+                width: 34,
+                height: 34,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: personaColor.withAlpha(31),
+                  ),
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: personaColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: InkWell(
+              onTap: _showCounselorPicker,
+              borderRadius: BorderRadius.circular(8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Counselor & Theme',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: colors.onSurface,
+                          ),
+                        ),
+                        Text(
+                          '${_activePersona.displayName} · ${_activePersona.specialtyLabel}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colors.onSurface.withAlpha(92),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                    color: colors.onSurface.withAlpha(46),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // SHARED COMPONENTS
+  // ─────────────────────────────────────────────────────────────
+
+  Widget _sectionLabel(String label) => Text(
+    label,
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 1.5,
+      color: Theme.of(context).colorScheme.onSurface.withAlpha(77),
+    ),
+  );
+
+  Widget _buildGroup({
+    required Color borderColor,
+    required Color bgColor,
+    required List<Widget> children,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _infoChip({
+    required ColorScheme colors,
+    required Color personaColor,
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+    bool locked = false,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Opacity(
+          opacity: locked ? 0.4 : 1.0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            decoration: BoxDecoration(
+              color: colors.surfaceVariant.withAlpha(128),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colors.outline.withAlpha(18)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 15, color: personaColor),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (!locked)
+                  Icon(
+                    Icons.edit_rounded,
+                    size: 12,
+                    color: colors.onSurface.withAlpha(56),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Divider(
-        height: 1,
-        thickness: 1,
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+  Widget _settingsRow({
+    IconData? icon,
+    Color? iconColor,
+    Widget? leadingWidget,
+    required String label,
+    required String value,
+    required VoidCallback? onTap,
+    required ColorScheme colors,
+    Color? labelColor,
+  }) {
+    final leading =
+        leadingWidget ??
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: iconColor!.withAlpha(31),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 17, color: iconColor),
+        );
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          children: [
+            leading,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: labelColor ?? colors.onSurface,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colors.onSurface.withAlpha(92),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: colors.onSurface.withAlpha(46),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _buildFriendsList(ColorScheme colors, Color personaColor) {
+    return StreamBuilder<List<String>>(
+      stream: SocialService.getMutualFriendUids(),
+      builder: (context, snapshot) {
+        final uids = snapshot.data ?? [];
+        if (uids.isEmpty) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: colors.surfaceVariant.withAlpha(40),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colors.outline.withAlpha(15)),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.people_outline_rounded,
+                  color: colors.onSurface.withAlpha(60),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'No mutual friends yet',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colors.onSurface.withAlpha(100),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return SizedBox(
+          height: 90,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: uids.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (ctx, i) {
+              return FutureBuilder<Map<String, dynamic>?>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uids[i])
+                    .get()
+                    .then((doc) => doc.data()),
+                builder: (ctx, userSnap) {
+                  final data = userSnap.data;
+                  final name = data?['displayName'] ?? 'User';
+                  return Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 26,
+                        backgroundColor: personaColor.withAlpha(30),
+                        child: Text(
+                          name.substring(0, 1).toUpperCase(),
+                          style: TextStyle(
+                            color: personaColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: 60,
+                        child: Text(
+                          name.split(' ')[0],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 11),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSocialSearch() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const SocialSearchSheet(),
+    );
+  }
+
+  Widget _divider(ColorScheme colors) => Padding(
+    padding: const EdgeInsets.only(left: 60),
+    child: Divider(
+      height: 1,
+      thickness: 1,
+      color: colors.outline.withAlpha(18),
+    ),
+  );
 }

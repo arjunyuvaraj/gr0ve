@@ -193,395 +193,404 @@ class _NewsScreenState extends State<NewsScreen> {
     final nonSearchFiltersCount =
         selectedCategories.length + selectedTags.length;
 
-    return Column(
-      children: [
-        // Custom Header
-        CustomHeader(title: 'NEWS'),
-        Text(
-          'All articles are provided by Academy chronicle'.capitalized,
-          style: context.text.labelSmall?.copyWith(
-            color: context.colors.onSurface.withAlpha(100),
-            fontStyle: FontStyle.italic,
-            fontSize: 10,
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: Column(
+        children: [
+          // Custom Header
+          CustomHeader(title: 'NEWS'),
+          Text(
+            'All articles are provided by Academy chronicle'.capitalized,
+            style: context.text.labelSmall?.copyWith(
+              color: context.colors.onSurface.withAlpha(100),
+              fontStyle: FontStyle.italic,
+              fontSize: 10,
+            ),
           ),
-        ),
-        // Search and controls bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Row(
-            children: [
-              // Search bar
-              Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: searchQuery.isNotEmpty
-                          ? theme.primaryColor
-                          : (isDark
-                                ? Colors.grey.shade800
-                                : Colors.grey.shade300),
-                      width: searchQuery.isNotEmpty ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      TextField(
-                        onChanged: (value) {
-                          setState(() => searchQuery = value);
-                          _applyFilters();
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search articles...',
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade500,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            size: 20,
-                            color: searchQuery.isNotEmpty
-                                ? theme.primaryColor
-                                : Colors.grey.shade500,
-                          ),
-                          suffixIcon: searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.clear_rounded,
-                                    size: 20,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  onPressed: () {
-                                    setState(() => searchQuery = "");
-                                    _applyFilters();
-                                  },
-                                )
-                              : null,
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
+          // Search and controls bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                // Search bar
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.grey.shade900
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: searchQuery.isNotEmpty
+                            ? theme.primaryColor
+                            : (isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade300),
+                        width: searchQuery.isNotEmpty ? 1.5 : 1,
                       ),
-                      if (searchQuery.isNotEmpty && searchQuery.length > 0)
-                        Positioned(
-                          right: 48,
-                          top: 6,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor,
-                              shape: BoxShape.circle,
+                    ),
+                    child: Stack(
+                      children: [
+                        TextField(
+                          onChanged: (value) {
+                            setState(() => searchQuery = value);
+                            _applyFilters();
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search articles...',
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade500,
                             ),
-                            constraints: const BoxConstraints(
-                              minWidth: 6,
-                              minHeight: 6,
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              size: 20,
+                              color: searchQuery.isNotEmpty
+                                  ? theme.primaryColor
+                                  : Colors.grey.shade500,
+                            ),
+                            suffixIcon: searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.clear_rounded,
+                                      size: 20,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                    onPressed: () {
+                                      setState(() => searchQuery = "");
+                                      _applyFilters();
+                                    },
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
                             ),
                           ),
                         ),
-                    ],
+                        if (searchQuery.isNotEmpty && searchQuery.length > 0)
+                          Positioned(
+                            right: 48,
+                            top: 6,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 6,
+                                minHeight: 6,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(width: 8),
+                const SizedBox(width: 8),
 
-              // Filter button
-              _ActionButton(
-                icon: Icons.tune_rounded,
-                isActive: showFilters,
-                badge: nonSearchFiltersCount > 0 ? nonSearchFiltersCount : null,
-                onTap: () => setState(() => showFilters = !showFilters),
-              ),
+                // Filter button
+                _ActionButton(
+                  icon: Icons.tune_rounded,
+                  isActive: showFilters,
+                  badge: nonSearchFiltersCount > 0
+                      ? nonSearchFiltersCount
+                      : null,
+                  onTap: () => setState(() => showFilters = !showFilters),
+                ),
 
-              const SizedBox(width: 8),
+                const SizedBox(width: 8),
 
-              // Sort button
-              _ActionButton(
-                icon: Icons.sort_rounded,
-                onTap: () => _showSortMenu(context),
-              ),
-            ],
+                // Sort button
+                _ActionButton(
+                  icon: Icons.sort_rounded,
+                  onTap: () => _showSortMenu(context),
+                ),
+              ],
+            ),
           ),
-        ),
 
-        // Filter chips (compact view when filters active)
-        if (!showFilters && activeFiltersCount > 0)
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  // Selected categories
-                  ...selectedCategories.map(
-                    (cat) => _ActiveFilterChip(
-                      label: cat,
-                      onRemove: () {
-                        setState(() {
-                          selectedCategories.remove(cat);
-                          _applyFilters();
-                        });
-                      },
-                    ),
-                  ),
-                  // Selected tags
-                  ...selectedTags.map(
-                    (tag) => _ActiveFilterChip(
-                      label: tag,
-                      onRemove: () {
-                        setState(() {
-                          selectedTags.remove(tag);
-                          _applyFilters();
-                        });
-                      },
-                    ),
-                  ),
-                  // Clear all button
-                  TextButton.icon(
-                    onPressed: _clearAllFilters,
-                    icon: const Icon(Icons.clear_all_rounded, size: 16),
-                    label: const Text('Clear'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+          // Filter chips (compact view when filters active)
+          if (!showFilters && activeFiltersCount > 0)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    // Selected categories
+                    ...selectedCategories.map(
+                      (cat) => _ActiveFilterChip(
+                        label: cat,
+                        onRemove: () {
+                          setState(() {
+                            selectedCategories.remove(cat);
+                            _applyFilters();
+                          });
+                        },
                       ),
-                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                    // Selected tags
+                    ...selectedTags.map(
+                      (tag) => _ActiveFilterChip(
+                        label: tag,
+                        onRemove: () {
+                          setState(() {
+                            selectedTags.remove(tag);
+                            _applyFilters();
+                          });
+                        },
+                      ),
+                    ),
+                    // Clear all button
+                    TextButton.icon(
+                      onPressed: _clearAllFilters,
+                      icon: const Icon(Icons.clear_all_rounded, size: 16),
+                      label: const Text('Clear'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // Filter panel (expandable)
+          if (showFilters)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey.shade900 : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Filter header
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.filter_list_rounded,
+                              size: 18,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Filters',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (activeFiltersCount > 0) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '$activeFiltersCount',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        if (activeFiltersCount > 0)
+                          TextButton(
+                            onPressed: _clearAllFilters,
+                            child: const Text('Clear All'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  Divider(height: 1, color: Colors.grey.shade200),
+
+                  // Filter content - scrollable
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Categories
+                          if (availableCategories.isNotEmpty) ...[
+                            _FilterSection(
+                              title: 'Categories',
+                              icon: Icons.category_rounded,
+                              children: availableCategories.map((category) {
+                                final isSelected = selectedCategories.contains(
+                                  category,
+                                );
+                                return _FilterChipItem(
+                                  label: category,
+                                  isSelected: isSelected,
+                                  onTap: () {
+                                    setState(() {
+                                      if (isSelected) {
+                                        selectedCategories.remove(category);
+                                      } else {
+                                        selectedCategories.add(category);
+                                      }
+                                      _applyFilters();
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+
+                          // Tags
+                          if (availableTags.isNotEmpty) ...[
+                            _FilterSection(
+                              title: 'Tags',
+                              icon: Icons.local_offer_rounded,
+                              children: availableTags.take(20).map((tag) {
+                                final isSelected = selectedTags.contains(tag);
+                                return _FilterChipItem(
+                                  label: tag,
+                                  isSelected: isSelected,
+                                  onTap: () {
+                                    setState(() {
+                                      if (isSelected) {
+                                        selectedTags.remove(tag);
+                                      } else {
+                                        selectedTags.add(tag);
+                                      }
+                                      _applyFilters();
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
 
-        // Filter panel (expandable)
-        if (showFilters)
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.5,
-            ),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey.shade900 : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Filter header
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.filter_list_rounded,
-                            size: 18,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Filters',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (activeFiltersCount > 0) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '$activeFiltersCount',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
+          const SizedBox(height: 16),
+
+          Expanded(
+            child: isLoading
+                ? const PremiumLoadingIndicator()
+                : _filteredArticles.isEmpty
+                ? _buildEmptyState(activeFiltersCount > 0)
+                : RefreshIndicator(
+                    onRefresh: _loadArticles,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isWide = constraints.maxWidth > 800;
+
+                        if (isWide) {
+                          return GridView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 500,
+                                  mainAxisSpacing: 12,
+                                  crossAxisSpacing: 12,
+                                  mainAxisExtent:
+                                      90, // Card height is 84 + some padding
                                 ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (activeFiltersCount > 0)
-                        TextButton(
-                          onPressed: _clearAllFilters,
-                          child: const Text('Clear All'),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                Divider(height: 1, color: Colors.grey.shade200),
-
-                // Filter content - scrollable
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Categories
-                        if (availableCategories.isNotEmpty) ...[
-                          _FilterSection(
-                            title: 'Categories',
-                            icon: Icons.category_rounded,
-                            children: availableCategories.map((category) {
-                              final isSelected = selectedCategories.contains(
-                                category,
+                            itemCount:
+                                _displayedArticles.length +
+                                (_displayedArticles.length <
+                                        _filteredArticles.length
+                                    ? 1
+                                    : 0),
+                            itemBuilder: (context, index) {
+                              if (index >= _displayedArticles.length) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return _NewsCard(
+                                article: _displayedArticles[index],
                               );
-                              return _FilterChipItem(
-                                label: category,
-                                isSelected: isSelected,
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      selectedCategories.remove(category);
-                                    } else {
-                                      selectedCategories.add(category);
-                                    }
-                                    _applyFilters();
-                                  });
-                                },
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                            },
+                          );
+                        }
 
-                        // Tags
-                        if (availableTags.isNotEmpty) ...[
-                          _FilterSection(
-                            title: 'Tags',
-                            icon: Icons.local_offer_rounded,
-                            children: availableTags.take(20).map((tag) {
-                              final isSelected = selectedTags.contains(tag);
-                              return _FilterChipItem(
-                                label: tag,
-                                isSelected: isSelected,
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      selectedTags.remove(tag);
-                                    } else {
-                                      selectedTags.add(tag);
-                                    }
-                                    _applyFilters();
-                                  });
-                                },
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        const SizedBox(height: 16),
-
-        Expanded(
-          child: isLoading
-              ? const PremiumLoadingIndicator()
-              : _filteredArticles.isEmpty
-              ? _buildEmptyState(activeFiltersCount > 0)
-              : RefreshIndicator(
-                  onRefresh: _loadArticles,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isWide = constraints.maxWidth > 800;
-
-                      if (isWide) {
-                        return GridView.builder(
+                        return ListView.separated(
                           controller: _scrollController,
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 500,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                                mainAxisExtent:
-                                    90, // Card height is 84 + some padding
-                              ),
                           itemCount:
                               _displayedArticles.length +
                               (_displayedArticles.length <
                                       _filteredArticles.length
                                   ? 1
                                   : 0),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 10),
                           itemBuilder: (context, index) {
                             if (index >= _displayedArticles.length) {
                               return const Center(
-                                child: CircularProgressIndicator(),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
                             }
-                            return _NewsCard(
-                              article: _displayedArticles[index],
-                            );
+
+                            final article = _displayedArticles[index];
+                            return _NewsCard(article: article);
                           },
                         );
-                      }
-
-                      return ListView.separated(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                        itemCount:
-                            _displayedArticles.length +
-                            (_displayedArticles.length <
-                                    _filteredArticles.length
-                                ? 1
-                                : 0),
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          if (index >= _displayedArticles.length) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-
-                          final article = _displayedArticles[index];
-                          return _NewsCard(article: article);
-                        },
-                      );
-                    },
+                      },
+                    ),
                   ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 

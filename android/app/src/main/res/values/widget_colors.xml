@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/values/widget_colors.xml -->
+<!--
+    Add these to your existing res/values/colors.xml, or create
+    this file if you don't have one yet.
+-->
+<resources>
+    <!-- gr0ve palette — matches iOS swift colors exactly -->
+    <color name="gr0ve_green">#33E580</color>   <!-- 0.20 0.90 0.50 -->
+    <color name="gr0ve_red">#F87070</color>     <!-- 0.97 0.44 0.44 -->
+    <color name="gr0ve_amber">#FABF24</color>   <!-- 0.98 0.75 0.14 -->
+    <color name="gr0ve_accent">#4A90D9</color>  <!-- default accent blue -->
+
+    <!-- Widget surface colors — auto light/dark via night qualifier -->
+    <color name="widget_background">#FFFFFFFF</color>
+    <color name="widget_card_bg">#FFF5F5F5</color>
+    <color name="widget_primary_text">#FF1C1C1E</color>
+    <color name="widget_secondary_text">#FF8E8E93</color>
+    <color name="widget_progress_bg">#1A000000</color>
+</resources>

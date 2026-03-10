@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/xml/schedule_widget_info.xml -->
+<!--
+    updatePeriodMillis is 60000 (1 min) — minimum Android allows is 30 min
+    for battery reasons, but home_widget's background callback handles
+    more frequent updates pushed from Flutter itself.
+    The 30-min OS fallback is just a safety net.
+-->
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/widget_schedule"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/schedule_widget_description" />

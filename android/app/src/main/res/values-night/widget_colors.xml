@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/values-night/widget_colors.xml  ← note the -night qualifier folder -->
+<!--
+    Dark mode overrides. Create the folder:
+    android/app/src/main/res/values-night/
+    and put this file inside it.
+-->
+<resources>
+    <color name="widget_background">#FF1C1C1E</color>
+    <color name="widget_card_bg">#FF2C2C2E</color>
+    <color name="widget_primary_text">#FFFFFFFF</color>
+    <color name="widget_secondary_text">#FF8E8E93</color>
+    <color name="widget_progress_bg">#1AFFFFFF</color>
+</resources>

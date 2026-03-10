@@ -333,91 +333,97 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || !user.emailVerified) {
-      return _buildVerifyEmailState(context, user);
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
+        child: _buildVerifyEmailState(context, user),
+      );
     }
 
-    return Column(
-      children: [
-        CustomHeader(title: "Teachers"),
-        const SizedBox(height: 16),
-        Column(
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Search teachers...',
-                prefixIcon: const Icon(Icons.search_rounded),
-              ),
-              onChanged: (v) {
-                searchQuery = v;
-                setState(() => filteredTeachers = _applyFilters());
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              decoration: const InputDecoration(isDense: true),
-              value: selectedPeriod,
-              items: periodOptions
-                  .map(
-                    (p) =>
-                        DropdownMenuItem(value: p, child: Text("Period: $p")),
-                  )
-                  .toList(),
-              onChanged: (v) {
-                selectedPeriod = v!;
-                setState(() => filteredTeachers = _applyFilters());
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: isLoading
-              ? const PremiumLoadingIndicator()
-              : ValueListenableBuilder<Set<String>>(
-                  valueListenable: StarredTeacherService.starredTeachers,
-                  builder: (_, starred, __) {
-                    final ordered = _ordered(starred);
-                    return RefreshIndicator(
-                      onRefresh: () => _loadAbsences(silent: true),
-                      child: ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: ordered.length,
-                        itemBuilder: (context, index) {
-                          final t = ordered[index];
-                          final name = t['name'];
-                          return TweenAnimationBuilder<double>(
-                            duration: Duration(
-                              milliseconds: 300 + (index % 10) * 50,
-                            ),
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.translate(
-                                  offset: Offset(0, 20 * (1 - value)),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: CustomTeacherCard(
-                              name: name,
-                              department: t['department'],
-                              email: t['email'],
-                              status: formatStatusString(_statusFor(name)),
-                              showStar: true,
-                              starred: starred.contains(name),
-                              onStarTap: () =>
-                                  StarredTeacherService.toggleTeacher(name),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
+      child: Column(
+        children: [
+          const CustomHeader(title: "Teachers"),
+          const SizedBox(height: 16),
+          Column(
+            children: [
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search teachers...',
+                  prefixIcon: const Icon(Icons.search_rounded),
                 ),
-        ),
-      ],
+                onChanged: (v) {
+                  searchQuery = v;
+                  setState(() => filteredTeachers = _applyFilters());
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                decoration: const InputDecoration(isDense: true),
+                value: selectedPeriod,
+                items: periodOptions
+                    .map(
+                      (p) =>
+                          DropdownMenuItem(value: p, child: Text("Period: $p")),
+                    )
+                    .toList(),
+                onChanged: (v) {
+                  selectedPeriod = v!;
+                  setState(() => filteredTeachers = _applyFilters());
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: isLoading
+                ? const PremiumLoadingIndicator()
+                : ValueListenableBuilder<Set<String>>(
+                    valueListenable: StarredTeacherService.starredTeachers,
+                    builder: (_, starred, __) {
+                      final ordered = _ordered(starred);
+                      return RefreshIndicator(
+                        onRefresh: () => _loadAbsences(silent: true),
+                        child: ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: ordered.length,
+                          itemBuilder: (context, index) {
+                            final t = ordered[index];
+                            final name = t['name'];
+                            return TweenAnimationBuilder<double>(
+                              duration: Duration(
+                                milliseconds: 300 + (index % 10) * 50,
+                              ),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 20 * (1 - value)),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: CustomTeacherCard(
+                                name: name,
+                                department: t['department'],
+                                email: t['email'],
+                                status: formatStatusString(_statusFor(name)),
+                                showStar: true,
+                                starred: starred.contains(name),
+                                onStarTap: () =>
+                                    StarredTeacherService.toggleTeacher(name),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
