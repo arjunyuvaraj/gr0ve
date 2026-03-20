@@ -18,6 +18,20 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
   void initState() {
     super.initState();
     _selected = ProfilePictureService.activeVariant.value;
+    // Listen for changes from other sources
+    ProfilePictureService.activeVariant.addListener(_onVariantChanged);
+  }
+
+  @override
+  void dispose() {
+    ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
+    super.dispose();
+  }
+
+  void _onVariantChanged() {
+    if (mounted) {
+      setState(() => _selected = ProfilePictureService.activeVariant.value);
+    }
   }
 
   @override
@@ -215,8 +229,11 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
+                // Save the selected variant
                 await ProfilePictureService.setVariant(_selected);
-                if (context.mounted) Navigator.pop(context);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: pc,

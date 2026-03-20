@@ -57,7 +57,6 @@ const List<ProfileVariant> _allVariants = [
   // Hidden counselors — only default shown until unlocked
   ProfileVariant(key: 'default', persona: CounselorPersona.abies),
   ProfileVariant(key: 'default', persona: CounselorPersona.cedite),
-  ProfileVariant(key: 'default', persona: CounselorPersona.ash),
 ];
 
 /// All variants the user is currently allowed to see.
@@ -74,7 +73,8 @@ List<ProfileVariant> get availableVariants => _allVariants.where((v) {
 // ─────────────────────────────────────────────────────────────
 
 class ProfilePictureService {
-  static const _firestoreField = 'selected_profile_picture'; // single string id
+  static const _firestoreField =
+      'selected_profile_picture'; // stores variant ID
 
   /// The variant the user has chosen — counselor-agnostic.
   static final ValueNotifier<ProfileVariant> activeVariant =
@@ -115,7 +115,16 @@ class ProfilePictureService {
       final id = doc.data()?[_firestoreField] as String?;
       if (id != null) {
         final match = _allVariants.where((v) => v.id == id).firstOrNull;
-        if (match != null) activeVariant.value = match;
+        if (match != null) {
+          activeVariant.value = match;
+          if (match.persona.isHidden &&
+              !CounselorPersonaService.isPersonaUnlocked(match.persona)) {
+            // Fallback to grover default if unlocked persona was removed
+            activeVariant.value = _allVariants.firstWhere(
+              (v) => v.persona == CounselorPersona.grover && v.isDefault,
+            );
+          }
+        }
       }
     } catch (_) {}
   }
@@ -125,9 +134,9 @@ class ProfilePictureService {
     if (user == null) return;
     try {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        _firestoreField: variant.id,
-        // Keep active_profile_picture in sync for social search
-        'active_profile_picture': variant.assetPath(Brightness.light),
+        _firestoreField: variant.id, // Save stable ID, not theme-specific path
+        'active_counselor_persona': variant.persona.name,
+        'active_profile_variant': variant.key,
       }, SetOptions(merge: true));
     } catch (_) {}
   }

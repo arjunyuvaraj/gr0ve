@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:gr0ve/features/links/widgets/add_link_dialog.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:gr0ve/features/easter_eggs/ash_screen.dart'; // ADDED
 
 class LinksScreen extends StatefulWidget {
   const LinksScreen({super.key});
@@ -126,26 +125,6 @@ class _LinksScreenState extends State<LinksScreen> {
         ),
       );
     }
-  }
-
-  // ADDED: Easter egg trigger
-  void _openAshScreen() {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (ctx, animation, _) => AshScreen(
-          onUnlocked: () {
-            if (Navigator.canPop(ctx)) Navigator.pop(ctx);
-          },
-        ),
-        transitionsBuilder: (ctx, animation, _, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(parent: animation, curve: Curves.easeIn),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 600),
-      ),
-    );
   }
 
   Future<void> _addLink() async {
@@ -520,12 +499,10 @@ class _LinksScreenState extends State<LinksScreen> {
                     onPressed: () => _editLink(link),
                   ),
                   const SizedBox(width: 8),
-                  // MODIFIED: Added long press for Ash easter egg
                   _buildIconButton(
                     icon: HugeIcons.strokeRoundedDelete02,
                     color: colors.error.withOpacity(0.3),
                     onPressed: () => _removeLink(link),
-                    onLongPress: _openAshScreen, // ADDED
                   ),
                 ],
               ),
@@ -603,12 +580,10 @@ class _LinksScreenState extends State<LinksScreen> {
                         onPressed: () => _editLink(link),
                       ),
                       const SizedBox(width: 2),
-                      // MODIFIED: Added long press for Ash easter egg
                       _buildIconButton(
                         icon: HugeIcons.strokeRoundedDelete02,
                         color: colors.error.withOpacity(0.7),
                         onPressed: () => _removeLink(link),
-                        onLongPress: _openAshScreen, // ADDED
                       ),
                     ],
                   ),
@@ -624,13 +599,11 @@ class _LinksScreenState extends State<LinksScreen> {
     required List<List<dynamic>> icon,
     required Color color,
     required VoidCallback onPressed,
-    VoidCallback? onLongPress, // ADDED
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        onLongPress: onLongPress, // ADDED
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(8),

@@ -6,7 +6,6 @@ import 'package:gr0ve/features/counselor/screens/counselor_chat_view.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_persona_picker.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_voice_screen.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_welcome_view.dart';
-import 'package:gr0ve/features/counselor/screens/voice_test.dart';
 import 'package:gr0ve/features/counselor/services/counselor_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/legal/legal.dart';
@@ -15,8 +14,6 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/easter_eggs/abies_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 class CounselorScreen extends StatefulWidget {
   const CounselorScreen({super.key});
@@ -42,10 +39,6 @@ class _CounselorScreenState extends State<CounselorScreen>
 
   late AnimationController _randomBtnCtrl;
   late Animation<double> _randomBtnScale;
-
-  bool _isHomeworkHelp = false;
-  String? _selectedImagePath;
-  final ImagePicker _picker = ImagePicker();
 
   // ══════════════════════════════════════════════════════════════════════════
   // INITIALIZATION
@@ -89,10 +82,7 @@ class _CounselorScreenState extends State<CounselorScreen>
     ]);
     final persona = results[0] as CounselorPersona;
     final profile = results[1] as UserProfile;
-    final history = await ChatHistoryService.load(
-      persona,
-      isHomework: _isHomeworkHelp,
-    );
+    final history = await ChatHistoryService.load(persona);
     KnowledgeBaseService.load();
     CourseCatalogService.buildPromptString(academy: profile.academy);
 
@@ -182,14 +172,10 @@ class _CounselorScreenState extends State<CounselorScreen>
         speaker: current.speaker,
         timestamp: current.timestamp,
         isLoading: false,
-        imagePath: current.imagePath,
       );
     });
     _scrollToBottom();
   }
-
-  void _removeMsg(String id) =>
-      setState(() => _messages.removeWhere((m) => m.id == id));
 
   // ══════════════════════════════════════════════════════════════════════════
   // SEND MESSAGE
@@ -197,24 +183,16 @@ class _CounselorScreenState extends State<CounselorScreen>
 
   Future<void> _send(String text) async {
     final trimmed = text.trim();
-    if ((trimmed.isEmpty && _selectedImagePath == null) || _isTyping) return;
+    if (trimmed.isEmpty || _isTyping) return;
 
     _controller.clear();
-    final imagePath = _selectedImagePath;
-    final isHomeworkHelp = _isHomeworkHelp;
 
     setState(() {
       _hasStarted = true;
       _isTyping = true;
       _messages.add(
-        ChatMessage(
-          text: trimmed,
-          isUser: true,
-          timestamp: DateTime.now(),
-          imagePath: imagePath,
-        ),
+        ChatMessage(text: trimmed, isUser: true, timestamp: DateTime.now()),
       );
-      _selectedImagePath = null;
     });
     _scrollToBottom();
 
@@ -229,15 +207,29 @@ class _CounselorScreenState extends State<CounselorScreen>
       } else {
         final closureState = await OllamaCounselorService.sendMessage(
           history: _messages.where((m) => !m.isLoading).toList(),
-          question: trimmed.isEmpty ? "What's in this photo?" : trimmed,
+          question: trimmed,
           persona: _persona,
           profile: _profile,
           onToken: (token) => _appendToken(bubbleId, token),
-          isHomeworkHelp: isHomeworkHelp,
-          imagePath: imagePath,
         );
 
+        // Strip [[CLOSE]] marker from the displayed message
         if (closureState.shouldCloseScreen && mounted) {
+          final idx = _messages.indexWhere((m) => m.id == bubbleId);
+          if (idx >= 0) {
+            final current = _messages[idx];
+            setState(() {
+              _messages[idx] = ChatMessage(
+                id: current.id,
+                text: closureState.displayMessage,
+                isUser: false,
+                speaker: current.speaker,
+                timestamp: current.timestamp,
+                isLoading: false,
+              );
+            });
+          }
+
           print('[CounselorScreen] Closing window due to conversation end');
           await Future.delayed(const Duration(milliseconds: 2500));
           if (mounted) {
@@ -246,7 +238,7 @@ class _CounselorScreenState extends State<CounselorScreen>
         }
       }
 
-      ChatHistoryService.save(_persona, _messages, isHomework: isHomeworkHelp);
+      ChatHistoryService.save(_persona, _messages);
     } catch (e) {
       _appendToken(bubbleId, 'Could not reach the counselor service.');
       print('[CounselorScreen] Error: $e');
@@ -259,30 +251,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     await _randomBtnCtrl.forward();
     await _randomBtnCtrl.reverse();
     _send(randomQuestion(_persona));
-  }
-
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-        if (!_isHomeworkHelp) {
-          _isHomeworkHelp = true;
-          _initialize();
-        }
-      });
-    }
-  }
-
-  Future<void> _toggleHomeworkHelp() async {
-    setState(() {
-      _isHomeworkHelp = !_isHomeworkHelp;
-      _selectedImagePath = null;
-    });
-    await _initialize();
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -458,7 +426,7 @@ class _CounselorScreenState extends State<CounselorScreen>
   // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> _clearHistory() async {
-    await ChatHistoryService.clear(_persona, isHomework: _isHomeworkHelp);
+    await ChatHistoryService.clear(_persona);
     setState(() {
       _messages.clear();
       _hasStarted = false;
@@ -613,39 +581,6 @@ class _CounselorScreenState extends State<CounselorScreen>
             ),
           ),
           const Spacer(),
-          GestureDetector(
-            onTap: _toggleHomeworkHelp,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerHighest.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: colors.outline.withOpacity(0.1)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _modePill(
-                    active: !_isHomeworkHelp,
-                    icon: HugeIcons.strokeRoundedChatBot,
-                    label: 'Counselor',
-                    activeColor: pc,
-                    colors: colors,
-                  ),
-                  _modePill(
-                    active: _isHomeworkHelp,
-                    icon: HugeIcons.strokeRoundedBook02,
-                    label: 'Homework',
-                    activeColor: colors.primary,
-                    colors: colors,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
           if (_hasStarted)
             GestureDetector(
               onTap: () => _confirmClear(colors, Theme.of(context).textTheme),
@@ -783,82 +718,16 @@ class _CounselorScreenState extends State<CounselorScreen>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_selectedImagePath != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12, left: 4),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colors.primary.withOpacity(0.3),
-                        ),
-                        image: DecorationImage(
-                          image: FileImage(File(_selectedImagePath!)),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: -8,
-                      right: -8,
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedImagePath = null),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: colors.error,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: colors.surface, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            size: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (_isHomeworkHelp)
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHighest.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colors.outline.withOpacity(0.1),
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.add_a_photo_rounded,
-                        color: colors.primary,
-                        size: 20,
-                      ),
-                    ),
-                  ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: colors.surfaceContainerHighest.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(22),
                       border: Border.all(
-                        color: _isHomeworkHelp
-                            ? colors.primary.withOpacity(0.2)
-                            : colors.outline.withOpacity(0.1),
+                        color: colors.outline.withOpacity(0.1),
                       ),
                     ),
                     child: TextField(
@@ -869,9 +738,7 @@ class _CounselorScreenState extends State<CounselorScreen>
                       minLines: 1,
                       style: textTheme.bodyMedium,
                       decoration: InputDecoration(
-                        hintText: _isHomeworkHelp
-                            ? 'Analyze homework/notes...'
-                            : 'Ask ${_persona.displayName}...',
+                        hintText: 'Ask ${_persona.displayName}...',
                         hintStyle: textTheme.bodyMedium?.copyWith(
                           color: colors.onSurface.withOpacity(0.3),
                         ),
@@ -885,22 +752,21 @@ class _CounselorScreenState extends State<CounselorScreen>
                     ),
                   ),
                 ),
-                if (!_isHomeworkHelp)
-                  GestureDetector(
-                    onTap: _openVoiceMode,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 48,
-                      height: 48,
-                      margin: const EdgeInsets.only(left: 8),
-                      decoration: BoxDecoration(
-                        color: pc.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: pc.withOpacity(0.3)),
-                      ),
-                      child: Icon(Icons.mic_rounded, color: pc, size: 22),
+                GestureDetector(
+                  onTap: _openVoiceMode,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 48,
+                    height: 48,
+                    margin: const EdgeInsets.only(left: 8),
+                    decoration: BoxDecoration(
+                      color: pc.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: pc.withOpacity(0.3)),
                     ),
+                    child: Icon(Icons.mic_rounded, color: pc, size: 22),
                   ),
+                ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _isTyping ? null : () => _send(_controller.text),
@@ -934,57 +800,6 @@ class _CounselorScreenState extends State<CounselorScreen>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // MODE PILL
-  // ──────────────────────────────────────────────────────────────────────────
-
-  Widget _modePill({
-    required bool active,
-    required List<List<dynamic>> icon,
-    required String label,
-    required Color activeColor,
-    required ColorScheme colors,
-  }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: active ? activeColor : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: active
-            ? [
-                BoxShadow(
-                  color: activeColor.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: Row(
-        children: [
-          HugeIcon(
-            icon: icon,
-            size: 14,
-            color: active ? Colors.white : colors.onSurface.withOpacity(0.3),
-          ),
-          if (active) ...[
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }

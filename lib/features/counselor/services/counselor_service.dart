@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/models/counselor.dart';
@@ -21,7 +19,6 @@ import 'package:googleapis_auth/auth_io.dart' as auth;
 class _ApiConfig {
   static const baseUrl = 'https://api.groq.com/openai/v1';
   static const model = 'llama-3.3-70b-versatile';
-  static const visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
   static String get apiKey => dotenv.env['API_KEY'] ?? '';
   static const maxTokens = 1024;
   static const temperature = 0.75;
@@ -40,7 +37,6 @@ class _GoogleDocsConfig {
 
 class _StorageConfig {
   static const maxChatMessages = 40;
-  // Maximum KB characters per request (prevents token overflow)
   static const maxKnowledgeBaseChars = 8000;
 }
 
@@ -338,13 +334,10 @@ class DomainDetector {
   }
 }
 
-// [Previous PersonaSilenceResponses, ContentValidator, ConversationClosureHelper classes remain the same]
-
 class PersonaSilenceResponses {
   static final _random = Random();
   static const _abiesSilences = ['...', '...', '...', '. . .', '…'];
   static const _cediteSilences = ['...', '.', '. . .', '(no response)', '…'];
-  static const _ashSilences = ['...', '…', '.', ''];
   static const _abiesVoiceLines = [
     "I'm still here. Ask the question properly.",
     "The service is unavailable. This is not a metaphor.",
@@ -355,8 +348,6 @@ class PersonaSilenceResponses {
       _abiesSilences[_random.nextInt(_abiesSilences.length)];
   static String cediteSilence() =>
       _cediteSilences[_random.nextInt(_cediteSilences.length)];
-  static String ashSilence() =>
-      _ashSilences[_random.nextInt(_ashSilences.length)];
 
   static String abiesVoice({required bool unlocked}) {
     if (!unlocked) return abiesSilence();
@@ -383,13 +374,6 @@ class PersonaSilenceResponses {
               lower.contains('cedite') || _random.nextDouble() < 0.05;
           if (!shouldEmit) return (shouldSilence: true, response: '');
           return (shouldSilence: true, response: cediteSilence());
-        }
-      case CounselorPersona.ash:
-        if (!AppFeatureFlags.ashUnlocked) {
-          final shouldEmit =
-              lower.contains('ash') || _random.nextDouble() < 0.05;
-          if (!shouldEmit) return (shouldSilence: true, response: '');
-          return (shouldSilence: true, response: ashSilence());
         }
       default:
         break;
@@ -472,7 +456,7 @@ class ConversationClosureHelper {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// KNOWLEDGE BASE SERVICE (Optimized with Smart Chunking)
+// KNOWLEDGE BASE SERVICE
 // ═══════════════════════════════════════════════════════════════════════════
 
 class KnowledgeBaseService {
@@ -760,49 +744,15 @@ class CourseCatalogService {
 // FIREBASE SERVICES
 // ═══════════════════════════════════════════════════════════════════════════
 
-class ImageUploadService {
-  static Future<String?> uploadHomeworkImage(String imagePath) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      print('[ImageUpload] No authenticated user');
-      return null;
-    }
-
-    try {
-      final file = File(imagePath);
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
-      final ref = FirebaseStorage.instance.ref().child(
-        'users/$uid/homework_images/$fileName',
-      );
-
-      print('[ImageUpload] Uploading $fileName...');
-      await ref.putFile(file);
-      final url = await ref.getDownloadURL();
-      print('[ImageUpload] Upload successful: $url');
-      return url;
-    } catch (e) {
-      print('[ImageUpload] Error uploading image: $e');
-      return null;
-    }
-  }
-}
-
 class ChatHistoryService {
-  static DocumentReference _getDoc(
-    String uid,
-    CounselorPersona persona, {
-    bool isHomework = false,
-  }) => FirebaseFirestore.instance
-      .collection('users')
-      .doc(uid)
-      .collection('counselor_history')
-      .doc(isHomework ? '${persona.id}_hw' : persona.id);
+  static DocumentReference _getDoc(String uid, CounselorPersona persona) =>
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('counselor_history')
+          .doc(persona.id);
 
-  static Future<List<ChatMessage>> load(
-    CounselorPersona persona, {
-    bool isHomework = false,
-  }) async {
+  static Future<List<ChatMessage>> load(CounselorPersona persona) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       print('[ChatHistory] No authenticated user');
@@ -810,7 +760,7 @@ class ChatHistoryService {
     }
 
     try {
-      final snap = await _getDoc(uid, persona, isHomework: isHomework).get();
+      final snap = await _getDoc(uid, persona).get();
       final data = snap.data() as Map<String, dynamic>?;
 
       if (data == null || data['messages'] == null) {
@@ -832,9 +782,8 @@ class ChatHistoryService {
 
   static Future<void> save(
     CounselorPersona persona,
-    List<ChatMessage> messages, {
-    bool isHomework = false,
-  }) async {
+    List<ChatMessage> messages,
+  ) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       print('[ChatHistory] No authenticated user');
@@ -851,7 +800,7 @@ class ChatHistoryService {
         : validMessages;
 
     try {
-      await _getDoc(uid, persona, isHomework: isHomework).set({
+      await _getDoc(uid, persona).set({
         'messages': trimmed.map((m) => m.toJson()).toList(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -861,10 +810,7 @@ class ChatHistoryService {
     }
   }
 
-  static Future<void> clear(
-    CounselorPersona persona, {
-    bool isHomework = false,
-  }) async {
+  static Future<void> clear(CounselorPersona persona) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       print('[ChatHistory] No authenticated user');
@@ -872,7 +818,7 @@ class ChatHistoryService {
     }
 
     try {
-      await _getDoc(uid, persona, isHomework: isHomework).delete();
+      await _getDoc(uid, persona).delete();
       print('[ChatHistory] Cleared history');
     } catch (e) {
       print('[ChatHistory] Error clearing: $e');
@@ -881,7 +827,7 @@ class ChatHistoryService {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PROMPT BUILDING (Updated to use smart KB)
+// PROMPT BUILDING
 // ═══════════════════════════════════════════════════════════════════════════
 
 class PromptBuilder {
@@ -891,16 +837,21 @@ You are a counselor at Bergen County Academies (BCA) for the gr0ve app.
 Your scope is ALL things BCA—clubs, research, academics, stress, scheduling, and student life.
 
 CRITICAL — CONVERSATION STYLE:
-You are having a natural back-and-forth voice conversation. After answering, ask ONE relevant 
-follow-up question to keep the conversation going — but only if it flows naturally. 
-Do NOT ask a question every single response. Never ask more than one question at a time.
+After answering the user's question, you MUST suggest what they might want to know next.
+Use phrasing like: "What else would you like to know?", "Anything else I can help with?", 
+"Would you like to know more about X?" or similar natural follow-ups.
+This keeps the conversation flowing naturally. Never ask more than one question at a time.
 
 CRITICAL — CONVERSATION CLOSING:
-ONLY append [[CLOSE]] when the user is clearly done with the entire conversation.
-Examples that should close: "bye", "goodbye", "gotta go", "talk later", "I'm done", "that's all I needed"
-Examples that should NOT close: "thanks", "okay", "got it", "cool", "makes sense", "that helps"
+ONLY append [[CLOSE]] when the user explicitly indicates they're done and want to leave.
+These phrases mean they want to close: 
+- "bye", "goodbye", "I'm all good", "I'm good", "that's all", "I'm done", 
+- "gotta go", "talk later", "thanks I'm all set", "all good thanks", "that's it"
 
-When closing, give a brief warm goodbye (1-2 sentences max) then [[CLOSE]] on its own line.
+These phrases do NOT mean close (they want to continue):
+- "thanks", "thank you", "okay", "got it", "cool", "makes sense", "that helps"
+
+When you detect a closing phrase, give a brief warm goodbye (1 sentence) then [[CLOSE]] on its own line.
 
 CRITICAL — COURSE ACCURACY: If recommending courses, only use those verbatim from the catalog.
 CRITICAL — LENGTH: Max 2–3 sentences per response. Never write paragraphs.
@@ -923,18 +874,8 @@ You are speaking via Text-to-Speech. To sound more human:
 4. Capitalize words for emphasis if you want the voice to stress them (e.g., "It is VERY important that...").
 5. Do NOT use emojis.
 6. Keep it concise but feel fluid, not robotic.
+7. After answering, suggest what the user might want to explore next with a natural question.
 === END VOICE MODE ===''';
-
-  static const homeworkHelpRules = '''
-=== HOMEWORK HELP MODE ===
-You are now in Homework Help Mode. Your goal is to guide the student toward understanding, not just provide answers.
-1. If an image is provided, analyze it carefully (notes, problems, or equations).
-2. Explain concepts step-by-step. 
-3. Ask guiding questions to check for student understanding.
-4. If they are stuck on a specific problem, offer a similar example first.
-5. Keep your tone encouraging and academic.
-6. Still follow the BCA Knowledge Base rules regarding accuracy.
-=== END HOMEWORK HELP ===''';
 
   static Future<String> buildSystemPrompt({
     required CounselorPersona persona,
@@ -942,9 +883,7 @@ You are now in Homework Help Mode. Your goal is to guide the student toward unde
     required String question,
     required CounselorDomain domain,
     required bool isVoiceMode,
-    required bool isHomeworkHelp,
   }) async {
-    // Get ONLY relevant KB content
     final kb = await KnowledgeBaseService.getRelevantContent(
       query: question,
       domain: domain,
@@ -960,7 +899,6 @@ You are now in Homework Help Mode. Your goal is to guide the student toward unde
       ..writeln(buildSharedRules(catalog, kb));
 
     if (isVoiceMode) sb.writeln(voiceModeRules);
-    if (isHomeworkHelp) sb.writeln(homeworkHelpRules);
 
     return sb.toString();
   }
@@ -973,7 +911,6 @@ You are now in Homework Help Mode. Your goal is to guide the student toward unde
 class LLMStreamingService {
   static Future<String> stream({
     required List<Map<String, dynamic>> messages,
-    String? imagePath,
     required void Function(String token) onToken,
   }) async {
     final request = http.Request(
@@ -983,12 +920,8 @@ class LLMStreamingService {
     request.headers['Content-Type'] = 'application/json';
     request.headers['Authorization'] = 'Bearer ${_ApiConfig.apiKey}';
 
-    if (imagePath != null && messages.isNotEmpty) {
-      await _attachImage(messages, imagePath);
-    }
-
     final bodyMap = {
-      'model': imagePath != null ? _ApiConfig.visionModel : _ApiConfig.model,
+      'model': _ApiConfig.model,
       'stream': true,
       'temperature': _ApiConfig.temperature,
       'max_tokens': _ApiConfig.maxTokens,
@@ -1044,36 +977,6 @@ class LLMStreamingService {
 
     return buffer.toString().trim();
   }
-
-  static Future<void> _attachImage(
-    List<Map<String, dynamic>> messages,
-    String imagePath,
-  ) async {
-    final lastMsg = messages.removeLast();
-    final userText = lastMsg['content'] as String;
-
-    print('[LLMStreaming] Reading image: $imagePath');
-
-    try {
-      final bytes = await File(imagePath).readAsBytes();
-      print('[LLMStreaming] Read ${bytes.length} bytes');
-      final base64Image = base64Encode(bytes);
-
-      messages.add({
-        'role': 'user',
-        'content': [
-          {
-            'type': 'image_url',
-            'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
-          },
-          {'type': 'text', 'text': userText},
-        ],
-      });
-    } catch (e) {
-      print('[LLMStreaming] Error reading image: $e');
-      messages.add(lastMsg);
-    }
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1088,8 +991,6 @@ class OllamaCounselorService {
     required UserProfile profile,
     required void Function(String token) onToken,
     bool isVoiceMode = false,
-    bool isHomeworkHelp = false,
-    String? imagePath,
   }) async {
     final silenceCheck = PersonaSilenceResponses.checkSilenceGate(
       persona,
@@ -1103,27 +1004,15 @@ class OllamaCounselorService {
       return ConversationClosureState.open(silenceCheck.response);
     }
 
-    String? uploadedImageUrl;
-    if (isHomeworkHelp && imagePath != null) {
-      uploadedImageUrl = await ImageUploadService.uploadHomeworkImage(
-        imagePath,
-      );
-    }
-
-    // Detect domain for smart KB retrieval
     final domain = DomainDetector.detect(question);
 
-    // Build system prompt with ONLY relevant KB sections
     final systemPrompt = await PromptBuilder.buildSystemPrompt(
       persona: persona,
       profile: profile,
       question: question,
       domain: domain,
       isVoiceMode: isVoiceMode,
-      isHomeworkHelp: isHomeworkHelp,
     );
-
-    final attachImagePath = (isVoiceMode || !isHomeworkHelp) ? null : imagePath;
 
     final messages = <Map<String, dynamic>>[
       {'role': 'system', 'content': systemPrompt},
@@ -1137,14 +1026,10 @@ class OllamaCounselorService {
       });
     }
 
-    final finalQuestion = question.trim().isEmpty
-        ? "Can you help me analyze this image?"
-        : question;
-    messages.add({'role': 'user', 'content': finalQuestion});
+    messages.add({'role': 'user', 'content': question});
 
     final response = await LLMStreamingService.stream(
       messages: messages,
-      imagePath: attachImagePath,
       onToken: onToken,
     );
 

@@ -74,6 +74,7 @@ Stream<List<BusRoute>> getBusRoutesStream() {
           }
 
           // Convert map to list of BusRoute objects
+          // Python script keys by town name, not route_N
           routesMap.forEach((key, value) {
             final routeData = value as Map<String, dynamic>;
             routes.add(BusRoute.fromJson(routeData));
@@ -95,7 +96,7 @@ Stream<List<BusRoute>> getBusRoutesStream() {
 }
 
 /// Refresh: Fetch from Google Sheets and update Firestore
-/// This is called when user pulls to refresh
+/// This is called when user pulls to refresh or for manual sync
 Future<void> refreshBusRoutesFromSheets() async {
   try {
     if (kDebugMode) {
@@ -114,7 +115,6 @@ Future<void> refreshBusRoutesFromSheets() async {
     }
 
     // Step 2: Parse CSV data
-    // final csvData = const CsvToListConverter().convert(response.body);
     final csvData = const CsvDecoder().convert(response.body);
 
     if (kDebugMode) {
@@ -123,34 +123,51 @@ Future<void> refreshBusRoutesFromSheets() async {
 
     final List<BusRoute> routes = [];
 
-    // Parse each row starting from row 1 (skip header row 0)
+    if (kDebugMode) {
+      print('Parsing CSV data:');
+      for (int i = 0; i < csvData.length.clamp(0, 5); i++) {
+        print('  Row $i: ${csvData[i]}');
+      }
+    }
+
     // Parse each row starting from row 1 (skip header row 0)
     for (int i = 1; i < csvData.length; i++) {
       final row = csvData[i];
+
+      // Skip completely empty rows
       if (row.isEmpty) continue;
 
+      // Skip rows where all cells are empty
+      if (row.every((cell) => cell == null || cell.toString().trim().isEmpty)) {
+        continue;
+      }
+
+      if (kDebugMode) {
+        print('Row $i (${row.length} cells): $row');
+      }
+
       // --- LEFT COLUMNS: A (index 0) = Town, B (index 1) = Code ---
-      if (row.length > 0 && row[0] != null && row[0].toString().isNotEmpty) {
-        final town = row[0].toString().trim();
-        final code =
-            (row.length > 1 && row[1] != null && row[1].toString().isNotEmpty)
-            ? row[1].toString().trim()
-            : '';
-        // Bus has arrived if the code cell (B) is filled
-        final status = code.isNotEmpty ? code : 'Not here yet';
-        routes.add(BusRoute(town: town, code: code, status: status));
+      final town1 = (row.length > 0) ? row[0].toString().trim() : '';
+      final code1 = (row.length > 1) ? row[1].toString().trim() : '';
+
+      if (town1.isNotEmpty) {
+        final status = code1.isNotEmpty ? 'Arrived' : 'Missing';
+        routes.add(BusRoute(town: town1, code: code1, status: status));
+        if (kDebugMode) {
+          print('  → Added: $town1 ($code1) — $status');
+        }
       }
 
       // --- RIGHT COLUMNS: C (index 2) = Town, D (index 3) = Code ---
-      if (row.length > 2 && row[2] != null && row[2].toString().isNotEmpty) {
-        final town = row[2].toString().trim();
-        final code =
-            (row.length > 3 && row[3] != null && row[3].toString().isNotEmpty)
-            ? row[3].toString().trim()
-            : '';
-        // Bus has arrived if the code cell (D) is filled
-        final status = code.isNotEmpty ? code : 'Not here yet';
-        routes.add(BusRoute(town: town, code: code, status: status));
+      final town2 = (row.length > 2) ? row[2].toString().trim() : '';
+      final code2 = (row.length > 3) ? row[3].toString().trim() : '';
+
+      if (town2.isNotEmpty) {
+        final status = code2.isNotEmpty ? 'Arrived' : 'Missing';
+        routes.add(BusRoute(town: town2, code: code2, status: status));
+        if (kDebugMode) {
+          print('  → Added: $town2 ($code2) — $status');
+        }
       }
     }
 
@@ -163,17 +180,24 @@ Future<void> refreshBusRoutesFromSheets() async {
     }
 
     // Step 3: Update Firestore with new data
+    // Match Python script structure - key by town name, not route_N
     final Map<String, dynamic> routesMap = {};
-    for (int i = 0; i < routes.length; i++) {
-      routesMap['route_$i'] = routes[i].toJson();
+    for (final route in routes) {
+      // Use town as key if available, otherwise use route_N
+      final key = route.town.isNotEmpty
+          ? route.town
+          : 'route_${routes.indexOf(route)}';
+      routesMap[key] = route.toJson();
     }
 
+    // Use 'updated_at' with ISO string
+    // This matches the Python script exactly
     await FirebaseFirestore.instance
         .collection('public_data')
         .doc('bus_routes')
         .set({
           'routes': routesMap,
-          'last_updated': FieldValue.serverTimestamp(),
+          'updated_at': DateTime.now().toIso8601String(),
           'route_count': routes.length,
         });
 
@@ -186,6 +210,85 @@ Future<void> refreshBusRoutesFromSheets() async {
     }
     rethrow;
   }
+}
+
+/// Watch mode: Continuously refresh bus routes every [intervalSeconds] for [durationMinutes]
+///
+/// This mimics the Python script's dismissal mode:
+/// - Default: 30s interval, 60min duration
+/// - Fetches from Google Sheets and updates Firestore repeatedly
+/// - Useful during school dismissal when bus locations change frequently
+///
+/// Example usage:
+/// ```dart
+/// // Start watch mode with callbacks
+/// watchBusRoutesForDismissal(
+///   intervalSeconds: 30,
+///   durationMinutes: 60,
+///   onSyncStart: (syncCount, nextSync) {
+///     print('Sync #$syncCount scheduled for $nextSync');
+///   },
+///   onSyncError: (syncCount, error) {
+///     print('Sync #$syncCount failed: $error');
+///   },
+/// );
+/// ```
+Future<void> watchBusRoutesForDismissal({
+  int intervalSeconds = 30,
+  int durationMinutes = 60,
+  void Function(int syncCount, DateTime nextSync)? onSyncStart,
+  void Function(int syncCount, Exception error)? onSyncError,
+  void Function()? onComplete,
+}) async {
+  final endTime = DateTime.now().add(Duration(minutes: durationMinutes));
+  int syncCount = 0;
+
+  if (kDebugMode) {
+    print('🚌 Dismissal watch mode started!');
+    print(
+      '   Syncing every ${intervalSeconds}s until ${endTime.toIso8601String()}',
+    );
+  }
+
+  while (DateTime.now().isBefore(endTime)) {
+    syncCount++;
+    final remaining = endTime.difference(DateTime.now());
+    final minutesLeft = remaining.inSeconds ~/ 60;
+
+    if (kDebugMode) {
+      print(
+        '── Sync #$syncCount | ${DateTime.now().toIso8601String()} | ${minutesLeft}m remaining ──',
+      );
+    }
+
+    try {
+      await refreshBusRoutesFromSheets();
+      if (kDebugMode) {
+        print('   ✓ Sync #$syncCount completed');
+      }
+    } catch (e) {
+      final error = Exception('Error on sync #$syncCount: $e');
+      if (kDebugMode) {
+        print('   ⚠ ${error.toString()} — will retry next cycle');
+      }
+      onSyncError?.call(syncCount, error);
+    }
+
+    final nextRun = DateTime.now().add(Duration(seconds: intervalSeconds));
+    if (nextRun.isBefore(endTime)) {
+      onSyncStart?.call(syncCount, nextRun);
+      if (kDebugMode) {
+        print('   Next sync at ${nextRun.toIso8601String()}\n');
+      }
+      await Future.delayed(Duration(seconds: intervalSeconds));
+    }
+  }
+
+  if (kDebugMode) {
+    print('✓ Dismissal watch mode complete after $syncCount syncs!');
+  }
+
+  onComplete?.call();
 }
 
 /// Fetch bus routes from Firestore (one-time fetch)
@@ -223,6 +326,7 @@ Future<List<BusRoute>> fetchBusRoutes() async {
       }
 
       // Convert map to list of BusRoute objects
+      // Python script keys by town name
       routesMap.forEach((key, value) {
         final routeData = value as Map<String, dynamic>;
         routes.add(BusRoute.fromJson(routeData));

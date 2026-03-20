@@ -64,10 +64,6 @@ const _voiceConfigs = {
     voiceId: 'Stephen',
     engine: 'generative',
   ),
-  CounselorPersona.ash: _PollyVoiceConfig(
-    voiceId: 'Ruth',
-    engine: 'generative',
-  ),
 };
 
 /// Natural conversation fillers per persona
@@ -114,7 +110,6 @@ const _fillerWords = {
     'Okay — ',
     'Right, so — ',
   ],
-  CounselorPersona.ash: ['Yeah — ', 'Hmm. ', 'Okay so — ', 'Right — ', 'So — '],
 };
 
 String _addFiller(String text, CounselorPersona persona) {

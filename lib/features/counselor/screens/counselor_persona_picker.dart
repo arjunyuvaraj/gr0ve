@@ -137,7 +137,6 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
         CounselorPersona.sakura => const Color(0xFFFAF0FA),
         CounselorPersona.abies => const Color(0xFFEEF2FA),
         CounselorPersona.cedite => const Color(0xFFF4EEF8),
-        CounselorPersona.ash => const Color(0xFFF5F5F5),
       };
     }
     return switch (p) {
@@ -147,7 +146,6 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
       CounselorPersona.sakura => const Color(0xFF0E070E),
       CounselorPersona.abies => const Color(0xFF05080F),
       CounselorPersona.cedite => const Color(0xFF0A0510),
-      CounselorPersona.ash => const Color(0xFF090909),
     };
   }
 
@@ -614,30 +612,6 @@ class _BottomContent extends StatelessWidget {
               ),
             ],
 
-            if (persona == CounselorPersona.ash) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.lock_open_rounded,
-                    size: 12,
-                    color: pc.withOpacity(0.45),
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      'One of the Forgotten Trees. She already knows you.',
-                      style: TextStyle(
-                        color: pc.withOpacity(0.45),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
             const SizedBox(height: 10),
 
             SizedBox(
@@ -713,13 +687,6 @@ class _BottomContent extends StatelessWidget {
           'every detail people assume no one noticed.\n\n'
           'His advice is usually useful, rarely complete. '
           'He expects you to verify the rest yourself.',
-    CounselorPersona.ash =>
-      'Ash arrived so quietly that no one recalls the moment. '
-          'The others never question it; the thought simply never lingers.\n\n'
-          'She has watched many plans unfold — some steady, some fragile. '
-          'What remained afterward taught her clarity.\n\n'
-          'Ask the question that matters. '
-          'She will answer exactly that, nothing more.',
   };
 }
 
@@ -838,8 +805,6 @@ class _WorldPainter extends CustomPainter {
         _paintAbies(canvas, size);
       case CounselorPersona.cedite:
         _paintCedite(canvas, size);
-      case CounselorPersona.ash:
-        _paintAsh(canvas, size);
     }
   }
 
@@ -1273,118 +1238,6 @@ class _WorldPainter extends CustomPainter {
         Paint()
           ..color = _c.withOpacity(0.18 * pulse * boost)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-      );
-    }
-  }
-
-  void _paintAsh(Canvas canvas, Size size) {
-    final boost = isDark ? 1.0 : 2.2;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(0, -0.6),
-          radius: 0.85,
-          colors: [
-            _c.withOpacity(0.14 * boost),
-            _c.withOpacity(0.05 * boost),
-            Colors.transparent,
-          ],
-          stops: const [0, 0.55, 1.0],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
-    );
-
-    canvas.drawRect(
-      Rect.fromLTWH(0, size.height * 0.82, size.width, size.height * 0.18),
-      Paint()
-        ..shader =
-            LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                _c.withOpacity(0.04 * boost),
-                _c.withOpacity(0.10 * boost),
-              ],
-              stops: const [0, 0.4, 1.0],
-            ).createShader(
-              Rect.fromLTWH(
-                0,
-                size.height * 0.82,
-                size.width,
-                size.height * 0.18,
-              ),
-            ),
-    );
-
-    for (final e in embers) {
-      final progress = ((t * e.speed + e.phase) % 1.0);
-      final y = progress * (size.height + e.radius * 4) - e.radius;
-      final x =
-          e.x * size.width +
-          sin(t * e.wobbleSpeed + e.phase * pi * 2) * e.sway +
-          cos(t * e.wobbleSpeed * 0.55 + e.phase * 3.1) * e.sway * 0.4;
-      final flicker = 0.55 + 0.45 * sin(t * e.flickerSpeed + e.phase * 7.3);
-      final fade = progress < 0.05
-          ? progress / 0.05
-          : progress > 0.88
-          ? (1 - progress) / 0.12
-          : 1.0;
-      final a = e.opacity * fade * flicker * boost;
-      if (a < 0.005) continue;
-
-      canvas.drawCircle(
-        Offset(x, y),
-        e.radius * 3.5,
-        Paint()
-          ..color = _c.withOpacity(a * 0.12)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 2.8),
-      );
-      canvas.drawCircle(
-        Offset(x, y),
-        e.radius * 1.6,
-        Paint()
-          ..color = _c.withOpacity(a * 0.35)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 1.1),
-      );
-      canvas.drawCircle(
-        Offset(x, y),
-        e.radius * 0.55,
-        Paint()..color = _c.withOpacity((a * 1.4).clamp(0.0, 1.0)),
-      );
-
-      if (e.radius > 1.4) {
-        final trailLen = e.radius * (3.5 + 2.0 * flicker);
-        final shader = LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [_c.withOpacity(a * 0.55), Colors.transparent],
-        ).createShader(Rect.fromPoints(Offset(x, y), Offset(x, y - trailLen)));
-        canvas.drawLine(
-          Offset(x, y),
-          Offset(x + sin(e.phase * 4.2) * e.radius * 0.8, y - trailLen),
-          Paint()
-            ..shader = shader
-            ..strokeWidth = e.radius * 0.45
-            ..strokeCap = StrokeCap.round,
-        );
-      }
-    }
-
-    final rng = Random(33);
-    final staticPts = List.generate(
-      10,
-      (_) => Offset(
-        rng.nextDouble() * size.width,
-        rng.nextDouble() * size.height * 0.75,
-      ),
-    );
-    for (final pt in staticPts) {
-      final flicker = 0.4 + 0.6 * sin(t * 0.06 + pt.dx * 0.012);
-      canvas.drawCircle(
-        pt,
-        0.6,
-        Paint()..color = _c.withOpacity(0.04 * flicker * boost),
       );
     }
   }

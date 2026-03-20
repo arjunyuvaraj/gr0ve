@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gr0ve/core/theme/persona_theme.dart';
-import 'package:gr0ve/features/account/screens/account_screen.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
 import 'package:gr0ve/features/absence/screens/absence_screen.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';

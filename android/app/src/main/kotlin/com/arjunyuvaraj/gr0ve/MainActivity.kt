@@ -17,7 +17,6 @@ class MainActivity : FlutterActivity() {
         "MainActivitySakura",
         "MainActivityAbies",
         "MainActivityCedite",
-        "MainActivityAsh",
     )
 
     private var pendingAlias: String? = null

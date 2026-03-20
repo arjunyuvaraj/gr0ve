@@ -55,7 +55,7 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       print('Full data: $data');
     }
 
-    // Get the date - store with lowercase 'date' key to match Firestore
+    // FIXED: Python writes 'date' (lowercase), so read 'date' (lowercase)
     if (data.containsKey('date')) {
       absenceMap['date'] = data['date'].toString();
       if (kDebugMode) {
@@ -67,7 +67,7 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       }
     }
 
-    // Get teacher absences
+    // FIXED: Python writes 'teachers' (lowercase), containing a map of teacher -> status
     if (data.containsKey('teachers')) {
       final teachers = data['teachers'] as Map<String, dynamic>;
       if (kDebugMode) {
@@ -113,9 +113,13 @@ Stream<Map<String, String>> streamTeacherAbsences() {
         if (!doc.exists || doc.data() == null) return <String, String>{};
         final data = doc.data()!;
         final Map<String, String> result = {};
+
+        // FIXED: Match Python script - lowercase 'date'
         if (data.containsKey('date')) {
           result['date'] = data['date'].toString();
         }
+
+        // FIXED: Match Python script - lowercase 'teachers'
         if (data.containsKey('teachers')) {
           final teachers = data['teachers'] as Map<String, dynamic>;
           teachers.forEach((key, value) {

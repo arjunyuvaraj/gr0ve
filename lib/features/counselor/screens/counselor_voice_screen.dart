@@ -74,7 +74,6 @@ class _VoiceThemeManager {
     CounselorPersona.sakura: Color(0xFFFDF8FD),
     CounselorPersona.abies: Color(0xFFF7F6FB),
     CounselorPersona.cedite: Color(0xFFF9F7FC),
-    CounselorPersona.ash: Color(0xFFF5F5F5),
   };
 
   static const _darkBackgrounds = {
@@ -84,7 +83,6 @@ class _VoiceThemeManager {
     CounselorPersona.sakura: Color(0xFF0E070E),
     CounselorPersona.abies: Color(0xFF05080F),
     CounselorPersona.cedite: Color(0xFF0A0510),
-    CounselorPersona.ash: Color(0xFF090909),
   };
 }
 
@@ -371,10 +369,50 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
     }
   }
 
+  bool _isClosingMessage(String userMessage) {
+    final lower = userMessage.toLowerCase().trim();
+
+    // Check if message CONTAINS any closing keywords (not just exact matches)
+    final closingKeywords = [
+      'bye',
+      'goodbye',
+      'see ya',
+      'talk to you later',
+      'ttyl',
+      'catch ya',
+      'gotta go',
+      'see you',
+      'bye bye',
+      'that\'s all',
+      'that is all',
+      'we\'re done',
+      'i\'m done',
+      'i am done',
+      'thanks',
+      'thank you',
+      'thx',
+      'appreciate it',
+    ];
+
+    for (final keyword in closingKeywords) {
+      if (lower.contains(keyword)) {
+        debugPrint('[Voice] Matched closing keyword: "$keyword"');
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future<void> _fetchAndPlayResponse(String userText) async {
     _messages.add(
       ChatMessage(text: userText, isUser: true, timestamp: DateTime.now()),
     );
+
+    // Check if user's message is a closing message
+    final userSaidClosing = _isClosingMessage(userText);
+    debugPrint('[Voice] User said: "$userText"');
+    debugPrint('[Voice] Is closing? $userSaidClosing');
 
     try {
       final closureState = await OllamaCounselorService.sendMessage(
@@ -388,8 +426,16 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
 
       if (!mounted) return;
 
-      final responseText = closureState.displayMessage;
+      var responseText = closureState.displayMessage;
+      if (responseText.isNotEmpty) {
+        final preview = responseText.length > 50
+            ? responseText.substring(0, 50)
+            : responseText;
+        debugPrint('[Voice] Got response: "$preview"');
+      }
+
       if (responseText.isEmpty) {
+        debugPrint('[Voice] Response was empty');
         _setPhase(_VoicePhase.idle);
         return;
       }
@@ -405,11 +451,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
       );
 
       // Save to Firebase
-      await ChatHistoryService.save(
-        widget.persona,
-        _messages,
-        isHomework: false,
-      );
+      await ChatHistoryService.save(widget.persona, _messages);
 
       widget.onHistoryUpdated(_messages);
 
@@ -417,11 +459,14 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
         setState(() => _lastResponse = responseText);
       }
 
-      await _playResponse(responseText, closureState.shouldCloseScreen);
-    } catch (e) {
+      // Close if either user said goodbye OR AI detected conversation end
+      final shouldClose = userSaidClosing || closureState.shouldCloseScreen;
+      await _playResponse(responseText, shouldClose);
+    } catch (e, st) {
       debugPrint('[Voice] Error fetching response: $e');
+      debugPrint('[Voice] Stack trace: $st');
       if (mounted) {
-        _showError('Failed to get response');
+        _showError('Failed to get response: $e');
         _setPhase(_VoicePhase.idle);
       }
     }
@@ -430,21 +475,48 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   Future<void> _playResponse(String text, bool shouldClose) async {
     _setPhase(_VoicePhase.speaking);
 
-    await PollyService.speak(
-      text: text,
-      persona: widget.persona,
-      onReady: () => _setPhase(_VoicePhase.speaking),
-      onDone: () {
-        if (mounted) {
-          if (shouldClose) {
-            Navigator.pop(context);
-          } else {
-            _setPhase(_VoicePhase.idle);
-            Future.delayed(const Duration(milliseconds: 300), _startListening);
+    try {
+      final preview = text.length > 50 ? text.substring(0, 50) : text;
+      debugPrint(
+        '[Voice] _playResponse: shouldClose=$shouldClose, text="$preview..."',
+      );
+
+      await PollyService.speak(
+        text: text,
+        persona: widget.persona,
+        onReady: () {
+          debugPrint('[Voice] Audio started playing');
+          _setPhase(_VoicePhase.speaking);
+        },
+        onDone: () {
+          debugPrint(
+            '[Voice] Audio finished playing, shouldClose=$shouldClose',
+          );
+          if (mounted) {
+            if (shouldClose) {
+              debugPrint('[Voice] ✓ User said goodbye, closing screen');
+              Navigator.pop(context);
+            } else {
+              debugPrint(
+                '[Voice] User did not say goodbye, resuming listening',
+              );
+              _setPhase(_VoicePhase.idle);
+              Future.delayed(
+                const Duration(milliseconds: 300),
+                _startListening,
+              );
+            }
           }
-        }
-      },
-    );
+        },
+      );
+    } catch (e, st) {
+      debugPrint('[Voice] Error in _playResponse: $e');
+      debugPrint('[Voice] Stack: $st');
+      if (mounted) {
+        _showError('Playback error: $e');
+        _setPhase(_VoicePhase.idle);
+      }
+    }
   }
 
   void _setPhase(_VoicePhase p) {
@@ -751,9 +823,15 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   }
 
   Widget _buildResponseBox(Color pc, _VoiceTheme theme, bool isLight) {
-    final displayText = _lastResponse.length > 160
-        ? '${_lastResponse.substring(0, 160)}…'
-        : _lastResponse;
+    String displayText = _lastResponse;
+    try {
+      if (displayText.length > 160) {
+        displayText = '${displayText.substring(0, 160)}…';
+      }
+    } catch (e) {
+      debugPrint('[Voice] Error truncating response: $e');
+      // If truncation fails, just show what we have
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),

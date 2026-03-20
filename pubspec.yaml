@@ -72,7 +72,6 @@ flutter:
     - assets/profile/sakura/
     - assets/profile/abies/
     - assets/profile/cedite/
-    - assets/profile/ash/
     - assets/images/school_map.png
     - shorebird.yaml
     - .env

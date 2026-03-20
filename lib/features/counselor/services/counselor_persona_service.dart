@@ -20,7 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
 import 'package:flutter_dynamic_launcher_icon/flutter_dynamic_launcher_icon.dart';
 
-enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite, ash }
+enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite }
 
 extension CounselorPersonaExtension on CounselorPersona {
   String get id => name;
@@ -29,7 +29,6 @@ extension CounselorPersonaExtension on CounselorPersona {
   bool get isHidden => switch (this) {
     CounselorPersona.abies => true,
     CounselorPersona.cedite => true,
-    CounselorPersona.ash => true,
     _ => false,
   };
 
@@ -40,7 +39,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.sakura => 'Sakura',
     CounselorPersona.abies => 'Abies',
     CounselorPersona.cedite => 'Cedite',
-    CounselorPersona.ash => 'Ash',
   };
 
   // Specialty label — display only, no functional routing.
@@ -51,7 +49,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.sakura => 'Art Credits',
     CounselorPersona.abies => 'Memory',
     CounselorPersona.cedite => 'Connections',
-    CounselorPersona.ash => 'Clarity',
   };
 
   List<String> get defaultAcademies => switch (this) {
@@ -71,7 +68,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.sakura => const Color(0xFFDC8FE8),
     CounselorPersona.abies => const Color(0xFF00C8FF),
     CounselorPersona.cedite => const Color(0xFF7B2FBE),
-    CounselorPersona.ash => const Color(0xFFB61C1C),
   };
 
   Color get primaryDark => switch (this) {
@@ -81,7 +77,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.sakura => const Color(0xFFEEC3F5),
     CounselorPersona.abies => const Color(0xFF00C8FF),
     CounselorPersona.cedite => const Color(0xFFB47EE5),
-    CounselorPersona.ash => const Color(0xFFB61C1C),
   };
 
   Color primary(Brightness brightness) =>
@@ -116,7 +111,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.sakura => 'sakura',
     CounselorPersona.abies => 'abies',
     CounselorPersona.cedite => 'cedite',
-    CounselorPersona.ash => 'ash',
   };
 
   String get androidAlias => switch (this) {
@@ -126,7 +120,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.sakura => 'MainActivitySakura',
     CounselorPersona.abies => 'MainActivityAbies',
     CounselorPersona.cedite => 'MainActivityCedite',
-    CounselorPersona.ash => 'MainActivityAsh',
   };
 
   // personalityPrompt is still present in persona_voice.dart (tone layer).
@@ -147,15 +140,12 @@ class AppFeatureFlags {
   AppFeatureFlags._();
 
   // Global flags (from app_config/feature_flags)
-  static bool _ashUnlockedGlobal = false;
   static bool _cediteUnlockedGlobal = false;
 
   // Per-user flags (from user document)
-  static bool _ashUnlockedUser = false;
   static bool _cediteUnlockedUser = false;
 
   // Both must be true for the persona to be visible
-  static bool get ashUnlocked => _ashUnlockedGlobal && _ashUnlockedUser;
   static bool get cediteUnlocked =>
       _cediteUnlockedGlobal && _cediteUnlockedUser;
 
@@ -168,11 +158,9 @@ class AppFeatureFlags {
           .doc('feature_flags')
           .get();
       final data = doc.data() ?? {};
-      _ashUnlockedGlobal = (data['ash_unlocked'] as bool?) ?? false;
       _cediteUnlockedGlobal = (data['cedite_unlocked'] as bool?) ?? false;
     } catch (_) {
       // Default to locked if Firestore is unreachable.
-      _ashUnlockedGlobal = false;
       _cediteUnlockedGlobal = false;
     }
   }
@@ -186,22 +174,10 @@ class AppFeatureFlags {
           .doc(uid)
           .get();
       final data = doc.data() ?? {};
-      _ashUnlockedUser = (data['ash_unlocked'] as bool?) ?? false;
       _cediteUnlockedUser = (data['cedite_unlocked'] as bool?) ?? false;
     } catch (_) {
-      _ashUnlockedUser = false;
       _cediteUnlockedUser = false;
     }
-  }
-
-  /// Mark Ash as unlocked for current user (called when user earns it).
-  static Future<void> markAshUnlocked(String uid) async {
-    _ashUnlockedUser = true;
-    try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'ash_unlocked': true,
-      });
-    } catch (_) {}
   }
 
   /// Mark Cedite as unlocked for current user (called when user earns it).
@@ -237,15 +213,12 @@ class CounselorPersonaService {
   // Ash / Cedite are gated via AppFeatureFlags (both global + per-user).
   // These getters delegate to AppFeatureFlags which checks both layers.
   static bool get cediteUnlocked => AppFeatureFlags.cediteUnlocked;
-  static bool get ashUnlocked => AppFeatureFlags.ashUnlocked;
-
   static CounselorPersona _fromString(String? s) => CounselorPersona.values
       .firstWhere((p) => p.id == s, orElse: () => CounselorPersona.grover);
 
   static bool _isUnlocked(CounselorPersona p) => switch (p) {
     CounselorPersona.abies => _abiesUnlocked,
     CounselorPersona.cedite => AppFeatureFlags.cediteUnlocked,
-    CounselorPersona.ash => AppFeatureFlags.ashUnlocked,
     _ => true,
   };
 
@@ -321,7 +294,6 @@ class CounselorPersonaService {
   /// Mark Ash as unlocked for the current user.
   static Future<void> markAshUnlocked() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) await AppFeatureFlags.markAshUnlocked(uid);
   }
 
   /// Mark Cedite as unlocked for the current user.
