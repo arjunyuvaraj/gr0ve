@@ -337,7 +337,6 @@ class DomainDetector {
 class PersonaSilenceResponses {
   static final _random = Random();
   static const _abiesSilences = ['...', '...', '...', '. . .', '…'];
-  static const _cediteSilences = ['...', '.', '. . .', '(no response)', '…'];
   static const _abiesVoiceLines = [
     "I'm still here. Ask the question properly.",
     "The service is unavailable. This is not a metaphor.",
@@ -346,8 +345,6 @@ class PersonaSilenceResponses {
 
   static String abiesSilence() =>
       _abiesSilences[_random.nextInt(_abiesSilences.length)];
-  static String cediteSilence() =>
-      _cediteSilences[_random.nextInt(_cediteSilences.length)];
 
   static String abiesVoice({required bool unlocked}) {
     if (!unlocked) return abiesSilence();
@@ -367,13 +364,6 @@ class PersonaSilenceResponses {
               lower.contains('abies') || _random.nextDouble() < 0.05;
           if (!shouldEmit) return (shouldSilence: true, response: '');
           return (shouldSilence: true, response: abiesSilence());
-        }
-      case CounselorPersona.cedite:
-        if (!AppFeatureFlags.cediteUnlocked) {
-          final shouldEmit =
-              lower.contains('cedite') || _random.nextDouble() < 0.05;
-          if (!shouldEmit) return (shouldSilence: true, response: '');
-          return (shouldSilence: true, response: cediteSilence());
         }
       default:
         break;

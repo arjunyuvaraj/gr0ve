@@ -63,7 +63,7 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
-                      "Something went wrong. Clubs remain elusive.",
+                      "Something went wrong. Groups remain elusive.",
                       style: context.text.bodyMedium,
                     ),
                   );
@@ -89,7 +89,7 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 110),
                       itemCount: clubs.isEmpty ? 4 : clubs.length + 2,
                       itemBuilder: (context, index) {
                         // Index 0: Join Code Card

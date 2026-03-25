@@ -93,13 +93,27 @@ class _BusScreenState extends State<BusScreen> {
         children: [
           const CustomHeader(title: "Buses"),
           const SizedBox(height: 16),
-          TextField(
-            onChanged: (value) {
-              setState(() => searchQuery = value);
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                ),
+              );
             },
-            decoration: const InputDecoration(
-              hintText: 'Search buses or parking spots...',
-              prefixIcon: Icon(Icons.search_rounded),
+            child: TextField(
+              onChanged: (value) {
+                setState(() => searchQuery = value);
+              },
+              decoration: const InputDecoration(
+                hintText: 'Search buses or parking spots...',
+                prefixIcon: Icon(Icons.search_rounded),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -170,25 +184,42 @@ class _BusScreenState extends State<BusScreen> {
                           onRefresh: _refreshBusData,
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(bottom: 110),
                             child: Wrap(
                               spacing: 16,
                               runSpacing: 16,
-                              children: orderedRoutes.map((route) {
+                              children: List.generate(orderedRoutes.length, (index) {
+                                final route = orderedRoutes[index];
                                 final isStarred = starredTowns.contains(
                                   route.town,
                                 );
 
-                                return SizedBox(
-                                  width: cardWidth,
-                                  child: CustomBusCard(
-                                    route: route,
-                                    starred: isStarred,
-                                    onStarTap: () => StarredBusService
-                                        .toggleTown(route.town),
-                                    isLoggedIn: isLoggedIn,
+                                return TweenAnimationBuilder<double>(
+                                  duration: const Duration(milliseconds: 600),
+                                  curve: Curves.easeOutCubic,
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  builder: (context, value, child) {
+                                    return Opacity(
+                                      opacity: value,
+                                      child: Transform.translate(
+                                        offset: Offset(0, 15 * (1 - value)),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  key: ValueKey('${route.town}_${route.code}_bus_anim'),
+                                  child: SizedBox(
+                                    width: cardWidth,
+                                    child: CustomBusCard(
+                                      route: route,
+                                      starred: isStarred,
+                                      onStarTap: () => StarredBusService
+                                          .toggleTown(route.town),
+                                      isLoggedIn: isLoggedIn,
+                                    ),
                                   ),
                                 );
-                              }).toList(),
+                              }),
                             ),
                           ),
                         );

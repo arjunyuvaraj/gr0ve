@@ -8,6 +8,7 @@ import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/links/screens/link_screen.dart';
 import 'package:gr0ve/features/authentication/screen/bergen_onboarding_screen.dart';
 import 'package:gr0ve/features/news/screens/news_screen.dart';
+import 'package:gr0ve/features/changelog/screens/changelog_screen.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
@@ -61,13 +62,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   // Feature flags
   bool _enableClubs = false;
+  bool _enableCounselor = false;
 
   // Onboarding state
   bool _isCheckingOnboarding = true;
   bool _needsOnboarding = false;
 
   // IDs hidden from the nav bar — accessible via More > Extra
-  static const _extraScreenIds = {'lunch_menu', 'news', 'help'};
+  static const _extraScreenIds = {'lunch_menu', 'news', 'help', 'changelog'};
 
   @override
   void initState() {
@@ -77,8 +79,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
     _checkOnboarding();
     _determineUserRole();
     _checkAdminStatus();
-    _loadVersionInfo();
     _loadFeatureFlags();
+    _loadVersionInfo();
     _loadNavigationOrder();
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
@@ -159,7 +161,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   }
 
   // ============================================================================
-  // FEATURE FLAGS
+  // FEATURE FLAGS & REMOTE CONFIG
   // ============================================================================
 
   Future<void> _loadFeatureFlags() async {
@@ -177,6 +179,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
         setState(() {
           _enableClubs = (data?['enable_clubs'] ?? false) || isBetaTester;
+          _enableCounselor = (data?['enable_counselor'] ?? false) || isBetaTester;
           _buildNavigation();
         });
       }
@@ -275,16 +278,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
             screen: const BusScreen(),
           ),
           NavConfig(
-            id: 'help',
-            iconData: HugeIcons.strokeRoundedHelpCircle,
-            label: 'Help',
-            screen: const Center(child: Text('Help Screen')),
-          ),
-          NavConfig(
             id: 'account',
             iconData: HugeIcons.strokeRoundedUser,
             label: 'Account',
             screen: AccountScreen(onCustomizeNavigation: _showReorderMenu),
+          ),
+          NavConfig(
+            id: 'changelog',
+            iconData: HugeIcons.strokeRoundedClock01,
+            label: 'Changelog',
+            screen: const ChangelogScreen(),
           ),
         ];
 
@@ -335,6 +338,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: 'Help',
             screen: const HelpScreen(),
           ),
+          NavConfig(
+            id: 'changelog',
+            iconData: HugeIcons.strokeRoundedClock01,
+            label: 'Changelog',
+            screen: const ChangelogScreen(),
+          ),
         ];
 
         if (isAdmin) {
@@ -347,33 +356,35 @@ class _NavigationScreenState extends State<NavigationScreen> {
               isAdminOnly: true,
             ),
             NavConfig(
-              id: 'club_requests',
+              id: 'group_requests',
               iconData: HugeIcons.strokeRoundedUserQuestion01,
-              label: 'Club Requests',
+              label: 'Group Requests',
               screen: const AdminPanelScreen(),
               isAdminOnly: true,
-              notificationKey: 'club_requests',
+              notificationKey: 'group_requests',
             ),
           ]);
         }
 
-        baseNav.add(
-          NavConfig(
-            id: 'counselor',
-            iconData: HugeIcons.strokeRoundedMentor,
-            label: 'Counselor',
-            screen: const CounselorScreen(),
-          ),
-        );
-
         if (_enableClubs) {
           baseNav.add(
             NavConfig(
-              id: 'clubs',
+              id: 'groups',
               iconData: HugeIcons.strokeRoundedUserGroup,
-              label: 'Clubs',
+              label: 'Groups',
               screen: const ClubScreen(),
               showClubNotifications: true,
+            ),
+          );
+        }
+
+        if (_enableCounselor) {
+          baseNav.add(
+            NavConfig(
+              id: 'counselor',
+              iconData: HugeIcons.strokeRoundedAiChat02,
+              label: 'Counselor',
+              screen: const CounselorScreen(),
             ),
           );
         }
@@ -398,34 +409,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
       case UserRole.parent:
         return [
           NavConfig(
-            id: 'home',
-            iconData: HugeIcons.strokeRoundedHome01,
-            label: 'Home',
-            screen: const HomeScreen(),
-          ),
-          NavConfig(
             id: 'bus',
             iconData: HugeIcons.strokeRoundedBus02,
             label: 'Bus',
             screen: const BusScreen(),
-          ),
-          NavConfig(
-            id: 'lunch_menu',
-            iconData: HugeIcons.strokeRoundedRestaurant02,
-            label: 'Lunch Menu',
-            screen: const LunchMenuScreen(),
-          ),
-          NavConfig(
-            id: 'links',
-            iconData: HugeIcons.strokeRoundedLink01,
-            label: 'Links',
-            screen: const LinksScreen(),
-          ),
-          NavConfig(
-            id: 'help',
-            iconData: HugeIcons.strokeRoundedHelpCircle,
-            label: 'Help',
-            screen: const Center(child: Text('Help Screen')),
           ),
           NavConfig(
             id: 'account',
@@ -793,7 +780,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     ),
                     const Spacer(),
                     Text(
-                      'Lunch, News, Help',
+                      'Lunch, News, Help...',
                       style: TextStyle(
                         color: colors.onSurface.withOpacity(0.35),
                         fontSize: 12,
@@ -841,6 +828,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       'lunch_menu': "Today's cafeteria menu",
       'news': 'Bergen Community news & updates',
       'help': 'FAQs and support resources',
+      'changelog': 'Version highlights and updates',
     };
 
     return Container(

@@ -227,7 +227,7 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
               isBCA
                   ? 'BCA Event'
                   : isClub
-                  ? 'Club Event'
+                  ? 'Group Event'
                   : _getCategoryLabel(widget.event.personalCategory),
               colors,
               text,

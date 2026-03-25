@@ -107,22 +107,21 @@ class LayoutService {
 
   static void _updateCurrentLayout() {
     final now = DateTime.now();
-    final hour = now.hour;
-    final minute = now.minute;
+    final totalMinutes = now.hour * 60 + now.minute;
 
-    // School: Before 15:00 (3:00 PM)
-    if ((hour <= 16 && minute <= 10)) {
+    // School: Before 4:10 PM (16:10 = 970 minutes)
+    if (totalMinutes < 970) {
       if (currentLayout.value != schoolLayout.value) {
         currentLayout.value = schoolLayout.value;
       }
     }
-    // Afternoon: 15:00 to 17:30 (5:30 PM)
-    else if ((hour >= 16 && minute > 10) || (hour == 17 && minute < 30)) {
+    // Afternoon: 4:10 PM to 5:30 PM (17:30 = 1050 minutes)
+    else if (totalMinutes < 1050) {
       if (currentLayout.value != afternoonLayout.value) {
         currentLayout.value = afternoonLayout.value;
       }
     }
-    // Evening: After 17:30
+    // Evening: After 5:30 PM
     else {
       if (currentLayout.value != eveningLayout.value) {
         currentLayout.value = eveningLayout.value;

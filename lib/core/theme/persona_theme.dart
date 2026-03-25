@@ -49,7 +49,7 @@ class PersonaTheme {
         : const Color(0xFF1A1D1F);
     final onSurfaceVariant = isDark
         ? const Color(0xFF9AA0A6)
-        : const Color(0xFF6F767E);
+        : const Color(0xFF454C52);
     final errorContainer = isDark
         ? const Color(0xFF3D1F1F)
         : const Color(0xFFFFEBEE);

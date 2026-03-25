@@ -110,209 +110,238 @@ class _CalendarScreenState extends State<CalendarScreen> {
             itemBuilder: (context, page) {
               final selectedDate = _getDateForPage(page);
               return SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 120),
                 child: Column(
                   children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colors.outline.withOpacity(0.15),
-                          width: 1.5,
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colors.outline.withOpacity(0.15),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.primary.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colors.primary.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _getMonthAbbrev(selectedDate.month),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    color: colors.primary,
-                                    letterSpacing: 0.5,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _getMonthAbbrev(selectedDate.month),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: colors.primary,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${selectedDate.day}',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w900,
-                                    color: colors.primary,
-                                    height: 1,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${selectedDate.day}',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      color: colors.primary,
+                                      height: 1,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getWeekday(selectedDate),
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.onSurface.withOpacity(0.8),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _getWeekday(selectedDate),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.onSurface.withOpacity(0.8),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                ValueListenableBuilder<int>(
-                                  valueListenable:
-                                      CalendarService.eventsVersion,
-                                  builder: (_, __, ___) {
-                                    final events =
-                                        CalendarService.getEventsForDate(
-                                          selectedDate,
-                                        );
-                                    return Row(
-                                      children: [
-                                        Icon(
-                                          Icons.event_rounded,
-                                          size: 14,
-                                          color: colors.onSurface.withOpacity(
-                                            0.5,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          '${events.length} event${events.length != 1 ? 's' : ''}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
+                                  const SizedBox(height: 4),
+                                  ValueListenableBuilder<int>(
+                                    valueListenable:
+                                        CalendarService.eventsVersion,
+                                    builder: (_, __, ___) {
+                                      final events =
+                                          CalendarService.getEventsForDate(
+                                            selectedDate,
+                                          );
+                                      return Row(
+                                        children: [
+                                          Icon(
+                                            Icons.event_rounded,
+                                            size: 14,
                                             color: colors.onSurface.withOpacity(
                                               0.5,
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '${events.length} event${events.length != 1 ? 's' : ''}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: colors.onSurface.withOpacity(
+                                                0.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.swipe_rounded,
+                                  size: 16,
+                                  color: colors.primary.withOpacity(0.5),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.chevron_left_rounded,
+                                  size: 14,
+                                  color: colors.primary.withOpacity(0.3),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 14,
+                                  color: colors.primary.withOpacity(0.3),
                                 ),
                               ],
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.swipe_rounded,
-                                size: 16,
-                                color: colors.primary.withOpacity(0.5),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.chevron_left_rounded,
-                                size: 14,
-                                color: colors.primary.withOpacity(0.3),
-                              ),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 14,
-                                color: colors.primary.withOpacity(0.3),
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          if (user != null && user.emailVerified)
-                            Expanded(
-                              child: InkWell(
-                                onTap: _showAddEventDialog,
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colors.primary.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: colors.primary.withOpacity(0.2),
-                                      width: 1,
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(0, 15 * (1 - value)),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            if (user != null && user.emailVerified)
+                              Expanded(
+                                child: InkWell(
+                                  onTap: _showAddEventDialog,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.primary.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: colors.primary.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_rounded,
+                                          size: 18,
+                                          color: colors.primary,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Add Event',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.primary,
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.add_rounded,
-                                        size: 18,
-                                        color: colors.primary,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'Add Event',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: colors.primary,
-                                          letterSpacing: 0.3,
-                                        ),
-                                      ),
-                                    ],
+                                ),
+                              ),
+                            const SizedBox(width: 12),
+                            InkWell(
+                              onTap: () => setState(
+                                () => _isCalendarExpanded = !_isCalendarExpanded,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.surface.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: colors.outline.withOpacity(0.1),
+                                  ),
+                                ),
+                                child: AnimatedRotation(
+                                  turns: _isCalendarExpanded ? 0.5 : 0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Icon(
+                                    Icons.calendar_month_rounded,
+                                    color: colors.primary,
+                                    size: 18,
                                   ),
                                 ),
                               ),
                             ),
-                          const SizedBox(width: 12),
-                          InkWell(
-                            onTap: () => setState(
-                              () => _isCalendarExpanded = !_isCalendarExpanded,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.surface.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: colors.outline.withOpacity(0.1),
-                                ),
-                              ),
-                              child: AnimatedRotation(
-                                turns: _isCalendarExpanded ? 0.5 : 0,
-                                duration: const Duration(milliseconds: 200),
-                                child: Icon(
-                                  Icons.calendar_month_rounded,
-                                  color: colors.primary,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -503,17 +532,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             );
                           }
                           return Column(
-                            children: events
-                                .map(
-                                  (event) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: CalendarEventCard(
-                                      event: event,
-                                      onTap: () => _showEventDetails(event),
+                            children: List.generate(events.length, (index) {
+                              final event = events[index];
+                              return TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 600),
+                                curve: Curves.easeOutCubic,
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                builder: (context, value, child) {
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(0, 15 * (1 - value)),
+                                      child: child,
                                     ),
+                                  );
+                                },
+                                // Stagger each card's entry starting after the main header
+                                key: ValueKey('${event.id}_animation'),
+                                onEnd: () {}, 
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: CalendarEventCard(
+                                    event: event,
+                                    onTap: () => _showEventDetails(event),
                                   ),
-                                )
-                                .toList(),
+                                ),
+                              );
+                            }),
                           );
                         },
                       ),

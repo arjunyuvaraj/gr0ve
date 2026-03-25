@@ -73,7 +73,6 @@ class _VoiceThemeManager {
     CounselorPersona.rowan: Color(0xFFFAF6F2),
     CounselorPersona.sakura: Color(0xFFFDF8FD),
     CounselorPersona.abies: Color(0xFFF7F6FB),
-    CounselorPersona.cedite: Color(0xFFF9F7FC),
   };
 
   static const _darkBackgrounds = {
@@ -82,7 +81,6 @@ class _VoiceThemeManager {
     CounselorPersona.rowan: Color(0xFF0E0704),
     CounselorPersona.sakura: Color(0xFF0E070E),
     CounselorPersona.abies: Color(0xFF05080F),
-    CounselorPersona.cedite: Color(0xFF0A0510),
   };
 }
 
@@ -388,10 +386,10 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
       'we\'re done',
       'i\'m done',
       'i am done',
-      'thanks',
-      'thank you',
-      'thx',
-      'appreciate it',
+      'i\'m good',
+      'i am good',
+      'that\'s it',
+      'nothing else',
     ];
 
     for (final keyword in closingKeywords) {

@@ -185,7 +185,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     }
   }
 
-  Future<void> _leaveClub() async {
+  Future<void> _leaveGroup() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -262,7 +262,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       body: SafeArea(
         child: Column(
           children: [
-            _clubHeader(),
+            _groupHeader(),
             const SizedBox(height: 16),
             _tabSelector(),
             const SizedBox(height: 16),
@@ -290,7 +290,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     return null;
   }
 
-  Widget _clubHeader() {
+  Widget _groupHeader() {
     final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(32, 12, 32, 12),
@@ -339,7 +339,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       ),
       child: IconButton(
         icon: const Icon(Icons.logout_rounded, color: Colors.red),
-        onPressed: _leaveClub,
+        onPressed: _leaveGroup,
         tooltip: 'Leave Group',
       ),
     );
@@ -620,10 +620,70 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
-          itemCount: announcements.length,
-          itemBuilder: (context, i) => _buildAnnouncementCard(announcements[i]),
+          itemCount: announcements.length + (_isModOrAdmin ? 1 : 0),
+          itemBuilder: (context, i) {
+            if (_isModOrAdmin) {
+              if (i == 0) return _quickPostBar();
+              return _buildAnnouncementCard(announcements[i - 1]);
+            }
+            return _buildAnnouncementCard(announcements[i]);
+          },
         );
       },
+    );
+  }
+
+  Widget _quickPostBar() {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.campaign_rounded, color: colors.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: GestureDetector(
+              onTap: _showPostAnnouncementDialog,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.onSurface.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Post an announcement...',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurface.withOpacity(0.4),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

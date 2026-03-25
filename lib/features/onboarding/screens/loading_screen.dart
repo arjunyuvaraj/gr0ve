@@ -1,0 +1,265 @@
+import 'package:flutter/material.dart';
+import 'package:gr0ve/core/extensions/context_extensions.dart';
+
+class LogoLoadingScreen extends StatefulWidget {
+  const LogoLoadingScreen({super.key});
+
+  @override
+  State<LogoLoadingScreen> createState() => _LogoLoadingScreenState();
+}
+
+class _LogoLoadingScreenState extends State<LogoLoadingScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  // Staggered animations - optimized with early termination
+  late Animation<double> _logoOpacity;
+  late Animation<double> _logoScale;
+  late Animation<double> _logoGlow;
+
+  late List<Animation<double>> _treeOpacities;
+  late List<Animation<double>> _treeScales;
+  late List<Animation<double>> _treeRotations;
+  late List<Animation<Offset>> _treeSlides;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    // Logo animations
+    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+      ),
+    );
+
+    _logoScale = Tween<double>(begin: 0.75, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.35, curve: Curves.easeOutBack),
+      ),
+    );
+
+    // Subtle glow pulse on logo
+    _logoGlow = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.2, 0.5, curve: Curves.easeInOut),
+      ),
+    );
+
+    // Tree animations with staggered timing
+    _treeOpacities = List.generate(4, (index) {
+      double start = 0.4 + (index * 0.1);
+      double end = (start + 0.2).clamp(0.0, 1.0);
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(start, end, curve: Curves.easeOut),
+        ),
+      );
+    });
+
+    _treeScales = List.generate(4, (index) {
+      double start = 0.4 + (index * 0.1);
+      double end = (start + 0.3).clamp(0.0, 1.0);
+      return Tween<double>(begin: 0.3, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(start, end, curve: Curves.elasticOut),
+        ),
+      );
+    });
+
+    // Subtle rotation for organic feel
+    _treeRotations = List.generate(4, (index) {
+      double start = 0.4 + (index * 0.1);
+      double end = (start + 0.25).clamp(0.0, 1.0);
+      final direction = index.isEven ? 1.0 : -1.0;
+      return Tween<double>(begin: 0.0, end: direction * 6.0).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(start, end, curve: Curves.easeOut),
+        ),
+      );
+    });
+
+    // Subtle slide-up effect
+    _treeSlides = List.generate(4, (index) {
+      double start = 0.4 + (index * 0.1);
+      double end = (start + 0.3).clamp(0.0, 1.0);
+      return Tween<Offset>(
+        begin: const Offset(0, 0.15),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(start, end, curve: Curves.easeOut),
+        ),
+      );
+    });
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final text = context.text;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final trees = ['grover', 'aspen', 'rowan', 'sakura'];
+
+    return Scaffold(
+      backgroundColor: colors.surface,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo with glow effect
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _logoOpacity.value,
+                  child: Transform.scale(
+                    scale: _logoScale.value,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Glow background
+                        if (_logoGlow.value > 0.01)
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.primary.withOpacity(
+                                    0.15 * _logoGlow.value,
+                                  ),
+                                  blurRadius: 40,
+                                  spreadRadius: 10,
+                                ),
+                              ],
+                            ),
+                          ),
+                        // Logo text
+                        Text(
+                          "gr0ve",
+                          style: text.displayLarge?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 60),
+            // Trees with enhanced animations
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(4, (index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      final asset =
+                          'assets/app_icons/png/${trees[index]}_${isDark ? 'dark' : 'light'}.png';
+                      final opacity = _treeOpacities[index].value;
+
+                      return Transform.translate(
+                        offset: _treeSlides[index].value * 20,
+                        child: Opacity(
+                          opacity: opacity,
+                          child: Transform.rotate(
+                            angle:
+                                (_treeRotations[index].value * 3.14159) / 180.0,
+                            child: Transform.scale(
+                              scale: _treeScales[index].value,
+                              child: Container(
+                                width: 54,
+                                height: 54,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: _buildTreeShadow(
+                                    isDark: isDark,
+                                    colors: colors,
+                                    opacity: opacity,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.asset(asset, fit: BoxFit.cover),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build optimized shadow based on theme
+  List<BoxShadow> _buildTreeShadow({
+    required bool isDark,
+    required dynamic colors,
+    required double opacity,
+  }) {
+    if (isDark) {
+      return [
+        BoxShadow(
+          color: colors.primary.withOpacity(0.15 * opacity),
+          blurRadius: 16,
+          spreadRadius: 1,
+        ),
+        BoxShadow(
+          color: colors.primary.withOpacity(0.08 * opacity),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: const Offset(0, 2),
+        ),
+      ];
+    } else {
+      return [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08 * opacity),
+          blurRadius: 12,
+          spreadRadius: 0,
+          offset: const Offset(0, 4),
+        ),
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04 * opacity),
+          blurRadius: 6,
+          spreadRadius: 0,
+          offset: const Offset(0, 2),
+        ),
+      ];
+    }
+  }
+}

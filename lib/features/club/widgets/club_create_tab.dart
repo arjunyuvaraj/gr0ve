@@ -44,7 +44,7 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Submitted for review')));
+        ).showSnackBar(const SnackBar(content: Text('Group submitted for review')));
       }
     } catch (e) {
       if (mounted) {
@@ -64,7 +64,7 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
+      padding: const EdgeInsets.fromLTRB(32, 24, 32, 110),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

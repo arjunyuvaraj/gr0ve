@@ -192,6 +192,7 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
                 : RefreshIndicator(
                     onRefresh: _fetchTodayMenu,
                     child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 90),
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,21 +202,41 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
                               String? lastStation;
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: filteredItems.map((entry) {
+                                children: filteredItems.asMap().entries.map((itemEntry) {
+                                  final index = itemEntry.key;
+                                  final entry = itemEntry.value;
                                   final widgets = <Widget>[];
 
                                   if (entry.station.isNotEmpty &&
                                       entry.station != lastStation) {
                                     widgets.add(
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 24,
-                                          bottom: 12,
+                                      TweenAnimationBuilder<double>(
+                                        duration: Duration(
+                                          milliseconds: 400 + (index % 10) * 50,
                                         ),
-                                        child: Text(
-                                          entry.station,
-                                          style: textSize.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.w600,
+                                        curve: Curves.easeOutCubic,
+                                        tween: Tween(begin: 0.0, end: 1.0),
+                                        builder: (context, value, child) {
+                                          return Opacity(
+                                            opacity: value,
+                                            child: Transform.translate(
+                                              offset:
+                                                  Offset(0, 15 * (1 - value)),
+                                              child: child,
+                                            ),
+                                          );
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 24,
+                                            bottom: 12,
+                                          ),
+                                          child: Text(
+                                            entry.station,
+                                            style:
+                                                textSize.titleMedium?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -223,7 +244,25 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
                                     lastStation = entry.station;
                                   }
 
-                                  widgets.add(_MenuItemCard(item: entry.food));
+                                  widgets.add(
+                                    TweenAnimationBuilder<double>(
+                                      duration: Duration(
+                                        milliseconds: 500 + (index % 10) * 50,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                      tween: Tween(begin: 0.0, end: 1.0),
+                                      builder: (context, value, child) {
+                                        return Opacity(
+                                          opacity: value,
+                                          child: Transform.translate(
+                                            offset: Offset(0, 20 * (1 - value)),
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                      child: _MenuItemCard(item: entry.food),
+                                    ),
+                                  );
 
                                   return Column(
                                     crossAxisAlignment:
@@ -493,84 +532,114 @@ class _MenuItemCard extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Material(
-        shadowColor: colors.onSurface.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(24),
-        child: InkWell(
-          onTap: () => _showNutritionDialog(context),
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(24),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.surface.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colors.outline.withOpacity(0.08),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors.shadow.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.name,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            onTap: () => _showNutritionDialog(context),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ),
-                    ),
-                    Icon(
-                      Icons.info_outline,
-                      size: 20,
-                      color: colors.onSurface.withOpacity(0.3),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16,
+                          color: colors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (item.description.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      item.description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.onSurface.withOpacity(0.5),
+                        height: 1.3,
+                      ),
                     ),
                   ],
-                ),
-                if (item.description.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    item.description,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.5),
-                    ),
-                  ),
-                ],
-                if (item.icons.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: item.icons.map((icon) {
-                      final info = _getAllergenInfo(icon.help);
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: info['color'],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            info['icon'] as Widget,
-                            const SizedBox(width: 4),
-                            Text(
-                              info['label'],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
+                  if (item.icons.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: item.icons.map((icon) {
+                        final info = _getAllergenInfo(icon.help);
+                        final Color allergenColor = info['color'] as Color;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: allergenColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: allergenColor.withOpacity(0.2),
+                              width: 1,
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                (info['icon'] as Icon).icon,
+                                size: 10,
+                                color: allergenColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                info['label'],
+                                style: TextStyle(
+                                  color: allergenColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

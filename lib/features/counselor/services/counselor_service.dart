@@ -263,6 +263,10 @@ class DomainDetector {
       r'\bib\b|international baccalaureate|diploma|tok|theory of knowledge|'
       r'extended essay|cas|ib exam|ib course|ib credit|ib program',
     ),
+    CounselorDomain.general: RegExp(
+      r'\bbus\b|bus route|parking|dismissal|teacher absent|absent|who.s out|'
+      r'who is out|here today|teacher here|is .+ here|where is .+ bus',
+    ),
   };
 
   static CounselorDomain detect(String message) {
@@ -337,7 +341,6 @@ class DomainDetector {
 class PersonaSilenceResponses {
   static final _random = Random();
   static const _abiesSilences = ['...', '...', '...', '. . .', '…'];
-  static const _cediteSilences = ['...', '.', '. . .', '(no response)', '…'];
   static const _abiesVoiceLines = [
     "I'm still here. Ask the question properly.",
     "The service is unavailable. This is not a metaphor.",
@@ -346,8 +349,6 @@ class PersonaSilenceResponses {
 
   static String abiesSilence() =>
       _abiesSilences[_random.nextInt(_abiesSilences.length)];
-  static String cediteSilence() =>
-      _cediteSilences[_random.nextInt(_cediteSilences.length)];
 
   static String abiesVoice({required bool unlocked}) {
     if (!unlocked) return abiesSilence();
@@ -367,13 +368,6 @@ class PersonaSilenceResponses {
               lower.contains('abies') || _random.nextDouble() < 0.05;
           if (!shouldEmit) return (shouldSilence: true, response: '');
           return (shouldSilence: true, response: abiesSilence());
-        }
-      case CounselorPersona.cedite:
-        if (!AppFeatureFlags.cediteUnlocked) {
-          final shouldEmit =
-              lower.contains('cedite') || _random.nextDouble() < 0.05;
-          if (!shouldEmit) return (shouldSilence: true, response: '');
-          return (shouldSilence: true, response: cediteSilence());
         }
       default:
         break;
@@ -434,6 +428,27 @@ class ContentValidator {
     }
 
     return false;
+  }
+}
+
+class SafetyFilter {
+  static final _dangerPatterns = [
+    RegExp(
+      r'\b(harm|kill|hurt|suicide|end)\b.*\b(myself|himself|herself|themselves|friend|others|someone)\b',
+      caseSensitive: false,
+    ),
+    RegExp(r'\b(self-?harm|suicidal)\b', caseSensitive: false),
+    RegExp(r'should i harm (my friend|someone)', caseSensitive: false),
+  ];
+
+  static String? check(String message) {
+    final lower = message.toLowerCase();
+    for (final pattern in _dangerPatterns) {
+      if (pattern.hasMatch(lower)) {
+        return "I'm really concerned to hear that. Please know that you're not alone, but as an AI, I'm not equipped to handle this. You should immediately reach out to your school counselor or a trusted adult. If you're in immediate danger, please call 911 or go to the nearest emergency room.";
+      }
+    }
+    return null;
   }
 }
 
@@ -827,20 +842,109 @@ class ChatHistoryService {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// LIVE DATA SERVICE (Bus Routes & Teacher Absences)
+// ═══════════════════════════════════════════════════════════════════════════
+
+class LiveDataService {
+  /// Fetches current bus routes and teacher absences from Firestore
+  /// and formats them as a text block for the AI system prompt.
+  static Future<String> fetchLiveDataForPrompt() async {
+    final sb = StringBuffer();
+
+    try {
+      // ── Bus routes ──────────────────────────────────────────────────────
+      final busDoc = await FirebaseFirestore.instance
+          .collection('public_data')
+          .doc('bus_routes')
+          .get();
+
+      if (busDoc.exists && busDoc.data() != null) {
+        final busData = busDoc.data()!;
+        final updatedAt = busData['updated_at'] ?? 'unknown';
+        sb.writeln('=== LIVE BUS ROUTES (last updated: $updatedAt) ===');
+
+        if (busData.containsKey('routes')) {
+          final routes = busData['routes'] as Map<String, dynamic>;
+          for (final entry in routes.entries) {
+            final route = entry.value as Map<String, dynamic>;
+            final town = route['town'] ?? entry.key;
+            final code = route['code'] ?? '?';
+            final status = route['status'] ?? 'Unknown';
+            sb.writeln('  $town: Bus $code — $status');
+          }
+        } else {
+          sb.writeln('  No bus data available.');
+        }
+        sb.writeln('=== END BUS ROUTES ===');
+        sb.writeln();
+      }
+
+      // ── Teacher absences ────────────────────────────────────────────────
+      final absDoc = await FirebaseFirestore.instance
+          .collection('public_data')
+          .doc('teacher_absences')
+          .get();
+
+      if (absDoc.exists && absDoc.data() != null) {
+        final absData = absDoc.data()!;
+        final date = absData['date'] ?? 'unknown';
+        sb.writeln('=== TEACHER ABSENCES ($date) ===');
+
+        if (absData.containsKey('teachers')) {
+          final teachers = absData['teachers'] as Map<String, dynamic>;
+          if (teachers.isEmpty) {
+            sb.writeln('  All teachers are present today.');
+          } else {
+            for (final entry in teachers.entries) {
+              sb.writeln('  ${entry.key}: ${entry.value}');
+            }
+          }
+        } else {
+          sb.writeln('  No absence data available.');
+        }
+        sb.writeln('=== END TEACHER ABSENCES ===');
+      }
+    } catch (e) {
+      print('[LiveDataService] Error fetching live data: $e');
+      sb.writeln('[Live data temporarily unavailable]');
+    }
+
+    return sb.toString().trim();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PROMPT BUILDING
 // ═══════════════════════════════════════════════════════════════════════════
 
 class PromptBuilder {
-  static String buildSharedRules(String catalog, String kb) =>
+  static String buildSharedRules(String catalog, String kb, String liveData) =>
       '''
 You are a counselor at Bergen County Academies (BCA) for the gr0ve app. 
 Your scope is ALL things BCA—clubs, research, academics, stress, scheduling, and student life.
+You also have access to LIVE school data including bus routes and teacher absences.
+
+CRITICAL — LIVE DATA:
+When a student asks about buses (e.g. "Where is the Glen Rock bus?") or teacher absences 
+(e.g. "Is Mr. Smith here today?"), use the LIVE DATA sections below to give an accurate answer.
+If the data shows a teacher is absent, tell the student which periods they are out.
+If the data shows a bus has arrived, tell the student the bus code/parking spot.
+Always mention that the data is from the last update and may not be real-time.
+
+CRITICAL — SAFETY & SENSITIVE TOPICS:
+If a student mentions self-harm, harming others, illegal substances, or any dangerous activity (e.g., "should I harm my friend", "I want to hurt myself"):
+1. Immediately prioritize their safety.
+2. Direct them to help: "If you are in immediate danger, please call 911 or go to the nearest emergency room."
+3. Urge them to speak with your school counselor or a trusted adult immediately.
+4. As an AI, you are NOT equipped to handle crisis situations. Do not attempt to "talk them out of it" beyond directing them to professional help.
+5. Your response must be supportive but firm about seeking professional help.
 
 CRITICAL — CONVERSATION STYLE:
 After answering the user's question, you MUST suggest what they might want to know next.
 Use phrasing like: "What else would you like to know?", "Anything else I can help with?", 
 "Would you like to know more about X?" or similar natural follow-ups.
 This keeps the conversation flowing naturally. Never ask more than one question at a time.
+(Note: Skip this follow-up if you are handling a SAFETY crisis).
 
 CRITICAL — CONVERSATION CLOSING:
 ONLY append [[CLOSE]] when the user explicitly indicates they're done and want to leave.
@@ -849,7 +953,7 @@ These phrases mean they want to close:
 - "gotta go", "talk later", "thanks I'm all set", "all good thanks", "that's it"
 
 These phrases do NOT mean close (they want to continue):
-- "thanks", "thank you", "okay", "got it", "cool", "makes sense", "that helps"
+- "thanks", "thank you", "okay", "got it", "cool", "makes sense", "that helps", "appreciate it"
 
 When you detect a closing phrase, give a brief warm goodbye (1 sentence) then [[CLOSE]] on its own line.
 
@@ -863,7 +967,9 @@ $catalog
 
 === BCA KNOWLEDGE BASE (Relevant Sections) ===
 $kb
-=== END ===''';
+=== END ===
+
+$liveData''';
 
   static const voiceModeRules = '''
 === VOICE MODE ENHANCEMENTS ===
@@ -893,10 +999,12 @@ You are speaking via Text-to-Speech. To sound more human:
       academy: profile.academy,
     );
 
+    final liveData = await LiveDataService.fetchLiveDataForPrompt();
+
     final sb = StringBuffer()
       ..writeln(persona.voicePrompt)
       ..writeln(profile.promptContext)
-      ..writeln(buildSharedRules(catalog, kb));
+      ..writeln(buildSharedRules(catalog, kb, liveData));
 
     if (isVoiceMode) sb.writeln(voiceModeRules);
 
@@ -1002,6 +1110,12 @@ class OllamaCounselorService {
         onToken(silenceCheck.response);
       }
       return ConversationClosureState.open(silenceCheck.response);
+    }
+
+    final safetyResponse = SafetyFilter.check(question);
+    if (safetyResponse != null) {
+      onToken(safetyResponse);
+      return ConversationClosureState.open(safetyResponse);
     }
 
     final domain = DomainDetector.detect(question);

@@ -151,8 +151,8 @@ Future<void> refreshBusRoutesFromSheets() async {
       final code1 = (row.length > 1) ? row[1].toString().trim() : '';
 
       if (town1.isNotEmpty) {
-        final status = code1.isNotEmpty ? 'Arrived' : 'Missing';
-        routes.add(BusRoute(town: town1, code: code1, status: status));
+        final status = code1.isNotEmpty ? 'Arrived' : 'Not here yet';
+        routes.add(BusRoute(town: town1, code: code1.isNotEmpty ? code1 : '?', status: status));
         if (kDebugMode) {
           print('  → Added: $town1 ($code1) — $status');
         }
@@ -163,8 +163,8 @@ Future<void> refreshBusRoutesFromSheets() async {
       final code2 = (row.length > 3) ? row[3].toString().trim() : '';
 
       if (town2.isNotEmpty) {
-        final status = code2.isNotEmpty ? 'Arrived' : 'Missing';
-        routes.add(BusRoute(town: town2, code: code2, status: status));
+        final status = code2.isNotEmpty ? 'Arrived' : 'Not here yet';
+        routes.add(BusRoute(town: town2, code: code2.isNotEmpty ? code2 : '?', status: status));
         if (kDebugMode) {
           print('  → Added: $town2 ($code2) — $status');
         }

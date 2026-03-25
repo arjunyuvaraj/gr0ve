@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'package:intl/intl.dart';
@@ -32,150 +33,116 @@ class NewsArticle {
 class NewsService {
   static const baseUrl = 'https://academychronicle.org/feed/';
 
-  /// Fetch all articles by paginating through the RSS feed
+  /// Fetch only the first page of articles by default. 
+  /// Use [fetchPage] for specific pages.
   Future<List<NewsArticle>> fetchArticles() async {
-    List<NewsArticle> allArticles = [];
-    int page = 1;
-    bool hasMorePages = true;
-
-    while (hasMorePages && page <= 10) {
-      try {
-        final pageArticles = await _fetchPage(page);
-
-        if (pageArticles.isEmpty) {
-          hasMorePages = false;
-        } else {
-          allArticles.addAll(pageArticles);
-          page++;
-
-          if (pageArticles.length < 10) {
-            hasMorePages = false;
-          }
-        }
-      } catch (e) {
-        print('Error fetching page $page: $e');
-        hasMorePages = false;
-      }
-    }
-
-    // Remove duplicates based on link
-    final uniqueArticles = <String, NewsArticle>{};
-    for (var article in allArticles) {
-      if (!uniqueArticles.containsKey(article.link)) {
-        uniqueArticles[article.link] = article;
-      }
-    }
-
-    final articles = uniqueArticles.values.toList();
-
-    // Sort newest first
-    articles.sort((a, b) {
-      if (a.published == null && b.published == null) return 0;
-      if (a.published == null) return 1;
-      if (b.published == null) return -1;
-      return b.published!.compareTo(a.published!);
-    });
-
-    return articles;
+    return fetchPage(1);
   }
 
   /// Fetch a single page of articles with all metadata
-  Future<List<NewsArticle>> _fetchPage(int page) async {
+  Future<List<NewsArticle>> fetchPage(int page) async {
     final url = page == 1 ? baseUrl : '$baseUrl?paged=$page';
 
-    final response = await http
-        .get(
-          Uri.parse(url),
-          headers: {
-            'User-Agent':
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          },
-        )
-        .timeout(const Duration(seconds: 10));
+    try {
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
-    if (response.statusCode != 200) {
-      print('Failed to fetch page $page: ${response.statusCode}');
-      return [];
-    }
+      if (response.statusCode != 200) {
+        if (kDebugMode) print('Failed to fetch page $page: ${response.statusCode}');
+        return [];
+      }
 
-    final document = xml.XmlDocument.parse(response.body);
-    final items = document.findAllElements('item');
+      final document = xml.XmlDocument.parse(response.body);
+      final items = document.findAllElements('item');
 
-    List<NewsArticle> articles = [];
+      List<NewsArticle> articles = [];
 
-    for (var item in items) {
-      // Basic fields
-      final title = item.getElement('title')?.innerText ?? 'No title';
-      final link = item.getElement('link')?.innerText ?? '';
-      final author =
-          item.getElement('dc:creator')?.innerText ?? 'Academy Chronicle';
+      for (var item in items) {
+        // Basic fields
+        final title = item.getElement('title')?.innerText ?? 'No title';
+        final link = item.getElement('link')?.innerText ?? '';
+        final author =
+            item.getElement('dc:creator')?.innerText ?? 'Academy Chronicle';
 
-      // Parse publication date
-      final pubDate = item.getElement('pubDate')?.innerText;
-      DateTime? published = _parseDate(pubDate);
+        // Parse publication date
+        final pubDate = item.getElement('pubDate')?.innerText;
+        DateTime? published = _parseDate(pubDate);
 
-      // Content
-      final description = item.getElement('description')?.innerText ?? '';
-      final contentEncoded =
-          item.getElement('content:encoded')?.innerText ?? '';
-      final content = contentEncoded.isNotEmpty ? contentEncoded : description;
+        // Content
+        final description = item.getElement('description')?.innerText ?? '';
+        final contentEncoded =
+            item.getElement('content:encoded')?.innerText ?? '';
+        final content = contentEncoded.isNotEmpty ? contentEncoded : description;
 
-      // Excerpt (description is typically the excerpt)
-      final excerpt = description;
+        // Excerpt (description is typically the excerpt)
+        final excerpt = description;
 
-      // Categories and Tags
-      // In WordPress RSS, both categories and tags are in <category> elements
-      final List<String> categories = [];
-      final List<String> tags = [];
+        // Categories and Tags
+        final List<String> categories = [];
+        final List<String> tags = [];
 
-      final categoryElements = item.findElements('category');
-      for (var categoryElement in categoryElements) {
-        final domain = categoryElement.getAttribute('domain');
-        final categoryValue = categoryElement.innerText;
+        final categoryElements = item.findElements('category');
+        for (var categoryElement in categoryElements) {
+          final domain = categoryElement.getAttribute('domain');
+          final categoryValue = categoryElement.innerText;
 
-        if (categoryValue.isNotEmpty) {
-          if (domain == 'category') {
-            categories.add(categoryValue);
-          } else if (domain == 'post_tag') {
-            tags.add(categoryValue);
-          } else {
-            // If no domain specified, treat as category
-            categories.add(categoryValue);
+          if (categoryValue.isNotEmpty) {
+            if (domain == 'category') {
+              categories.add(categoryValue);
+            } else if (domain == 'post_tag') {
+              tags.add(categoryValue);
+            } else {
+              categories.add(categoryValue);
+            }
           }
         }
+
+        // Featured Image
+        String? featuredImage = _extractFeaturedImage(item, content);
+
+        // Comment count
+        int? commentCount;
+        final commentRssElement = item.getElement('slash:comments');
+        if (commentRssElement != null) {
+          commentCount = int.tryParse(commentRssElement.innerText);
+        }
+
+        articles.add(
+          NewsArticle(
+            title: title,
+            link: link,
+            content: content,
+            author: author,
+            published: published,
+            categories: categories,
+            tags: tags,
+            featuredImage: featuredImage,
+            excerpt: excerpt,
+            commentCount: commentCount,
+          ),
+        );
       }
 
-      // Featured Image
-      // WordPress can include featured images in multiple ways:
-      // 1. <media:content> tag
-      // 2. <enclosure> tag
-      // 3. First image in content:encoded
-      String? featuredImage = _extractFeaturedImage(item, content);
+      // Sort newest first within the page
+      articles.sort((a, b) {
+        if (a.published == null && b.published == null) return 0;
+        if (a.published == null) return 1;
+        if (b.published == null) return -1;
+        return b.published!.compareTo(a.published!);
+      });
 
-      // Comment count (if available)
-      int? commentCount;
-      final commentRssElement = item.getElement('slash:comments');
-      if (commentRssElement != null) {
-        commentCount = int.tryParse(commentRssElement.innerText);
-      }
-
-      articles.add(
-        NewsArticle(
-          title: title,
-          link: link,
-          content: content,
-          author: author,
-          published: published,
-          categories: categories,
-          tags: tags,
-          featuredImage: featuredImage,
-          excerpt: excerpt,
-          commentCount: commentCount,
-        ),
-      );
+      return articles;
+    } catch (e) {
+      if (kDebugMode) print('Error fetching news page $page: $e');
+      return [];
     }
-
-    return articles;
   }
 
   /// Parse date from various formats
@@ -248,7 +215,7 @@ class NewsService {
 
     for (int page = 1; page <= pagesNeeded; page++) {
       try {
-        final pageArticles = await _fetchPage(page);
+        final pageArticles = await fetchPage(page);
 
         if (pageArticles.isEmpty) break;
 

@@ -26,42 +26,53 @@
 			<string>AppIcon</string>
 		</dict>
 		<key>CFBundleAlternateIcons</key>
-		<dict>
-			<key>aspen</key>
-			<dict>
-				<key>CFBundleIconFiles</key>
-				<array>
-					<string>aspen</string>
-				</array>
-				<key>UIPrerenderedIcon</key>
-				<false/>
-			</dict>
-			<key>rowan</key>
-			<dict>
-				<key>CFBundleIconFiles</key>
-				<array>
-					<string>rowan</string>
-				</array>
-				<key>UIPrerenderedIcon</key>
-				<false/>
-			</dict>
-			<key>sakura</key>
-			<dict>
-				<key>CFBundleIconFiles</key>
-				<array>
-					<string>sakura</string>
-				</array>
-				<key>UIPrerenderedIcon</key>
-				<false/>
-			</dict>
-			<key>abies</key>
-			<dict>
-				<key>CFBundleIconFiles</key>
-				<array><string>abies</string></array>
-				<key>UIPrerenderedIcon</key>
-				<false/>
-			</dict>
-		</dict>
+<dict>
+    <key>grover</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>grover</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
+    <key>aspen</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>aspen</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
+    <key>rowan</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>rowan</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
+    <key>sakura</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>sakura</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
+    <key>abies</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>abies</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
+</dict>
 	</dict>
 	<key>NSAppTransportSecurity</key>
 	<dict>

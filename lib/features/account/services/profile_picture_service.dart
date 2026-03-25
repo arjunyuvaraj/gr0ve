@@ -56,7 +56,6 @@ const List<ProfileVariant> _allVariants = [
   ProfileVariant(key: 'pixel', persona: CounselorPersona.sakura),
   // Hidden counselors — only default shown until unlocked
   ProfileVariant(key: 'default', persona: CounselorPersona.abies),
-  ProfileVariant(key: 'default', persona: CounselorPersona.cedite),
 ];
 
 /// All variants the user is currently allowed to see.
@@ -87,6 +86,7 @@ class ProfilePictureService {
   // ── Init ────────────────────────────────────────────────────
 
   static Future<void> init() async {
+    debugPrint('[ProfilePictureService] Initializing...');
     await _loadFromFirestore();
   }
 
@@ -95,6 +95,13 @@ class ProfilePictureService {
   /// Sets any variant regardless of active counselor, persists to Firestore.
   static Future<void> setVariant(ProfileVariant variant) async {
     activeVariant.value = variant;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Sync with photoURL for compatibility (using light mode asset as default)
+      try {
+        await user.updatePhotoURL(variant.assetPath(Brightness.light));
+      } catch (_) {}
+    }
     await _persistToFirestore(variant);
   }
 
@@ -116,7 +123,16 @@ class ProfilePictureService {
       if (id != null) {
         final match = _allVariants.where((v) => v.id == id).firstOrNull;
         if (match != null) {
+          debugPrint('[ProfilePictureService] Loaded variant: ${match.id}');
           activeVariant.value = match;
+
+          // Sync local photoURL if it doesn't match and we're online
+          if (user.photoURL != match.assetPath(Brightness.light)) {
+            try {
+              await user.updatePhotoURL(match.assetPath(Brightness.light));
+            } catch (_) {}
+          }
+
           if (match.persona.isHidden &&
               !CounselorPersonaService.isPersonaUnlocked(match.persona)) {
             // Fallback to grover default if unlocked persona was removed

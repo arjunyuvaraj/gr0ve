@@ -217,7 +217,7 @@ class _LinksScreenState extends State<LinksScreen> {
     }
 
     return ListView(
-      padding: const EdgeInsets.only(top: 24, bottom: 16),
+      padding: const EdgeInsets.only(top: 24, bottom: 110),
       children: [
         const CustomHeader(title: "LINKS"),
         const SizedBox(height: 32),

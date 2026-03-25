@@ -136,16 +136,14 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
         CounselorPersona.rowan => const Color(0xFFFAF2EE),
         CounselorPersona.sakura => const Color(0xFFFAF0FA),
         CounselorPersona.abies => const Color(0xFFEEF2FA),
-        CounselorPersona.cedite => const Color(0xFFF4EEF8),
       };
     }
     return switch (p) {
-      CounselorPersona.grover => const Color(0xFF060E0B),
-      CounselorPersona.aspen => const Color(0xFF07090F),
-      CounselorPersona.rowan => const Color(0xFF0E0704),
-      CounselorPersona.sakura => const Color(0xFF0E070E),
-      CounselorPersona.abies => const Color(0xFF05080F),
-      CounselorPersona.cedite => const Color(0xFF0A0510),
+      CounselorPersona.grover => const Color(0xFF050907),
+      CounselorPersona.aspen => const Color(0xFF060709),
+      CounselorPersona.rowan => const Color(0xFF090604),
+      CounselorPersona.sakura => const Color(0xFF090609),
+      CounselorPersona.abies => const Color(0xFF040609),
     };
   }
 
@@ -182,9 +180,19 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
               ),
               onPageChanged: _onPageChanged,
               itemBuilder: (context, index) {
-                return _ParticleWorld(
-                  persona: _personas[index],
-                  isActive: true,
+                return AnimatedBuilder(
+                  animation: _pageCtrl,
+                  builder: (context, child) {
+                    double offset = 0.0;
+                    if (_pageCtrl.position.hasContentDimensions) {
+                      offset = _pageCtrl.page! - index;
+                    }
+                    return _ParticleWorld(
+                      persona: _personas[index],
+                      isActive: true,
+                      pageOffset: offset,
+                    );
+                  },
                 );
               },
             ),
@@ -215,9 +223,9 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
                     ),
                   ),
                   const Spacer(),
-                  // Bottom vignette
+                  // Bottom vignette — slightly shorter to give content more room
                   SizedBox(
-                    height: 480,
+                    height: 420,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -261,20 +269,21 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
                   Flexible(
                     child: FadeTransition(
                       opacity: _revealFade,
-                      child: SlideTransition(
-                        position: _revealSlide,
-                        child: _BottomContent(
-                          persona: _selected,
-                          isCurrent: _selected == widget.currentPersona,
-                          isChange: widget.isChange,
-                          onConfirm: _confirm,
-                          isDark: isDark,
-                          onOpenFrozenLake: () {
-                            Navigator.pop(context);
-                            widget.onOpenFrozenLake?.call();
-                          },
-                        ),
+                    child: SlideTransition(
+                      position: _revealSlide,
+                      child: _BottomContent(
+                        persona: _selected,
+                        isCurrent: _selected == widget.currentPersona,
+                        isChange: widget.isChange,
+                        onConfirm: _confirm,
+                        isDark: isDark,
+                        animation: _revealCtrl,
+                        onOpenFrozenLake: () {
+                          Navigator.pop(context);
+                          widget.onOpenFrozenLake?.call();
+                        },
                       ),
+                    ),
                     ),
                   ),
                 ],
@@ -369,6 +378,7 @@ class _BottomContent extends StatelessWidget {
     required this.onConfirm,
     required this.isDark,
     required this.onOpenFrozenLake,
+    required this.animation,
   });
 
   final CounselorPersona persona;
@@ -377,11 +387,12 @@ class _BottomContent extends StatelessWidget {
   final VoidCallback onConfirm;
   final VoidCallback onOpenFrozenLake;
   final bool isDark;
+  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
+    final pc = persona.primary(isDark ? Brightness.dark : Brightness.light);
     final brightness = isDark ? Brightness.dark : Brightness.light;
-    final pc = persona.primary(brightness);
     final fg = isDark ? Colors.white : Colors.black;
     final fgSub = isDark
         ? Colors.white.withOpacity(0.68)
@@ -395,121 +406,134 @@ class _BottomContent extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // ── Avatar + name header ──────────────────────────────
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    color: pc.withOpacity(0.12),
-                    border: Border.all(color: pc.withOpacity(0.35), width: 1.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: pc.withOpacity(isDark ? 0.28 : 0.18),
-                        blurRadius: 20,
-                        spreadRadius: 1,
+            FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: pc.withOpacity(0.12),
+                      border:
+                          Border.all(color: pc.withOpacity(0.40), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: pc.withOpacity(isDark ? 0.25 : 0.15),
+                          blurRadius: 15,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12.5),
+                      child: Image.asset(
+                        persona.avatarAsset(brightness),
+                        fit: BoxFit.cover,
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(21),
-                    child: Image.asset(
-                      persona.avatarAsset(brightness),
-                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: pc.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: pc.withOpacity(0.28)),
-                        ),
-                        child: Text(
-                          persona.specialtyLabel.toUpperCase(),
-                          style: TextStyle(
-                            color: pc,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9.5,
-                            letterSpacing: 1.3,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 2,
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 7),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              persona.displayName,
-                              style: TextStyle(
-                                color: fg,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 28,
-                                letterSpacing: -0.8,
-                                height: 1.0,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          decoration: BoxDecoration(
+                            color: pc.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: pc.withOpacity(0.28)),
+                          ),
+                          child: Text(
+                            persona.specialtyLabel.toUpperCase(),
+                            style: TextStyle(
+                              color: pc,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 8.5,
+                              letterSpacing: 1.1,
                             ),
                           ),
-                          if (isCurrent) ...[
-                            const SizedBox(width: 10),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 9,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: pc.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Flexible(
                               child: Text(
-                                'active',
+                                persona.displayName,
                                 style: TextStyle(
-                                  color: pc,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
+                                  color: fg,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 24,
+                                  letterSpacing: -0.5,
+                                  height: 1.0,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isCurrent) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: pc.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'active',
+                                  style: TextStyle(
+                                    color: pc,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            Text(
-              persona.welcomeTagline,
-              style: TextStyle(
-                color: pc.withOpacity(0.9),
-                fontStyle: FontStyle.italic,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                height: 1.4,
+                ],
               ),
             ),
 
             const SizedBox(height: 8),
 
+            FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.2, 0.8, curve: Curves.easeOut),
+              ),
+              child: Text(
+                persona.welcomeTagline,
+                style: TextStyle(
+                  color: pc.withOpacity(0.9),
+                  fontStyle: FontStyle.italic,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  height: 1.3,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
             Container(
-              height: 1,
+              height: 1.0,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -522,19 +546,25 @@ class _BottomContent extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
 
-            Text(
-              _backstoryFor(persona),
-              style: TextStyle(
-                color: fgSub,
-                fontSize: 12.5,
-                height: 1.5,
-                fontWeight: FontWeight.w400,
+            FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+              ),
+              child: Text(
+                _backstoryFor(persona),
+                style: TextStyle(
+                  color: fgSub,
+                  fontSize: 12.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             if (persona.defaultAcademies.isNotEmpty)
               Wrap(
@@ -564,82 +594,50 @@ class _BottomContent extends StatelessWidget {
                 }).toList(),
               ),
 
-            if (persona == CounselorPersona.abies) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.lock_open_rounded,
-                    size: 12,
-                    color: pc.withOpacity(0.45),
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      'One of the Forgotten Trees. You found him.',
-                      style: TextStyle(
-                        color: pc.withOpacity(0.45),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 11,
+            const SizedBox(height: 18),
+
+            // ── Actions ──────────────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: onConfirm,
+                    child: Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [pc, pc.withOpacity(0.8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: pc.withOpacity(isDark ? 0.3 : 0.2),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          isCurrent
+                              ? 'STAY WITH ${persona.displayName.toUpperCase()}'
+                              : (isChange
+                                  ? 'SWITCH TO ${persona.displayName.toUpperCase()}'
+                                  : 'START WITH ${persona.displayName.toUpperCase()}'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
+                            letterSpacing: 0.7,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
-
-            if (persona == CounselorPersona.cedite) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.lock_open_rounded,
-                    size: 12,
-                    color: pc.withOpacity(0.45),
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      'One of the Forgotten Trees. Verify what he tells you.',
-                      style: TextStyle(
-                        color: pc.withOpacity(0.45),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            const SizedBox(height: 10),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onConfirm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: pc,
-                  foregroundColor: persona.onPrimary(brightness),
-                  padding: const EdgeInsets.symmetric(vertical: 17),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 0,
                 ),
-                child: Text(
-                  isCurrent
-                      ? 'Keep ${persona.displayName}'
-                      : isChange
-                      ? 'Switch to ${persona.displayName}'
-                      : 'Chat with ${persona.displayName}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                    letterSpacing: 0.1,
-                  ),
-                ),
-              ),
+              ],
             ),
           ],
         ),
@@ -650,55 +648,42 @@ class _BottomContent extends StatelessWidget {
   String _backstoryFor(CounselorPersona p) => switch (p) {
     CounselorPersona.grover =>
       'Grover treats every transcript like a well pruned tree. '
-          'He plans growth early, trims excess branches, and never lets effort '
-          'scatter in too many directions.\n\n'
-          'He knows which roots matter, which choices signal strength, and which '
-          'leaves fall away without consequence. His goal is simple growth with '
-          'no wasted energy.',
+          'He plans growth early, trims excess branches, and never lets '
+          'effort scatter in too many directions.',
     CounselorPersona.aspen =>
       'Aspen grew fast and curious, always leaning toward light. '
-          'She learned early how questions branch into experiments, and how '
-          'patient care turns ideas into solid rings of experience.\n\n'
-          'She believes every student carries a question worth nurturing, and '
-          'she helps it grow where passion and discovery meet.',
+          'She believes every student carries a question worth nurturing '
+          'and helps it grow where passion and discovery meet.',
     CounselorPersona.rowan =>
-      'Rowan grew in uneven soil, learning to bend rather than break. '
-          'Resources were limited, guidance was sparse, and progress came from '
-          'watching what endured and what snapped.\n\n'
-          'He now helps others see the whole forest ahead, understanding how '
-          'each season of coursework feeds the next stage of growth.',
+      'Rowan grew in uneven soil, leaning to bend rather than break. '
+          'He helps others see the whole forest ahead, knowing how '
+          'each season of coursework feeds the next stage.',
     CounselorPersona.sakura =>
-      'Sakura sees schedules as living forms, shaped by balance and intention. '
-          'She knows creative roots often look ornamental until they become the '
-          'strongest support in the canopy.\n\n'
+      'Sakura sees schedules as living forms of balance and intention. '
           'She guides students to weave expression into structure, turning '
           'required credits into growth that sets them apart.',
     CounselorPersona.abies =>
-      'Abies remembers winters before the others took root. '
-          'While they grew in sunlight, he watched quietly as students '
-          'repeated the same mistakes year after year.\n\n'
-          'He carries no comfort about this, only patience. '
-          'If a plan contains a flaw, he will find it — '
-          'he has had a very long time to learn where they hide.',
-    CounselorPersona.cedite =>
-      'Nobody remembers planting Cedite. One day he was simply there, '
-          'already listening where conversations mattered most.\n\n'
-          'He seems to know every hallway rumor, every quiet decision, '
-          'every detail people assume no one noticed.\n\n'
-          'His advice is usually useful, rarely complete. '
-          'He expects you to verify the rest yourself.',
+      'Abies remembers winters before the others took root, watching as '
+          'entire forests rose and fell. He is a silent observer of cycles, '
+          'gifted with a cold, absolute clarity. If a plan contains a flaw, '
+          'he will find it — he has had a lifetime to learn where they hide.',
   };
 }
 
-// ═════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
 // PARTICLE WORLD
-// ═════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
 
 class _ParticleWorld extends StatefulWidget {
-  const _ParticleWorld({required this.persona, required this.isActive});
+  const _ParticleWorld({
+    required this.persona,
+    required this.isActive,
+    required this.pageOffset,
+  });
 
   final CounselorPersona persona;
   final bool isActive;
+  final double pageOffset;
 
   @override
   State<_ParticleWorld> createState() => _ParticleWorldState();
@@ -746,6 +731,7 @@ class _ParticleWorldState extends State<_ParticleWorld>
       painter: _WorldPainter(
         persona: widget.persona,
         t: _ctrl.value * 20,
+        pageOffset: widget.pageOffset,
         color: pc,
         isDark: brightness == Brightness.dark,
         gridNodes: _gridNodes,
@@ -763,6 +749,7 @@ class _ParticleWorldState extends State<_ParticleWorld>
 class _WorldPainter extends CustomPainter {
   final CounselorPersona persona;
   final double t;
+  final double pageOffset;
   final Color color;
   final bool isDark;
   final List<_GridNode> gridNodes;
@@ -776,6 +763,7 @@ class _WorldPainter extends CustomPainter {
   const _WorldPainter({
     required this.persona,
     required this.t,
+    required this.pageOffset,
     required this.color,
     required this.isDark,
     required this.gridNodes,
@@ -788,10 +776,14 @@ class _WorldPainter extends CustomPainter {
   });
 
   // In light mode particles need to be more visible (darker against light bg)
-  Color get _c => isDark ? color : color.withOpacity(color.opacity * 1.4);
+  Color get _c => isDark ? color : color.withOpacity((color.opacity * 1.4).clamp(0.0, 1.0));
 
   @override
   void paint(Canvas canvas, Size size) {
+    final shift = pageOffset * size.width * 0.35;
+    canvas.save();
+    canvas.translate(-shift, 0);
+ 
     switch (persona) {
       case CounselorPersona.grover:
         _paintGrover(canvas, size);
@@ -803,9 +795,9 @@ class _WorldPainter extends CustomPainter {
         _paintSakura(canvas, size);
       case CounselorPersona.abies:
         _paintAbies(canvas, size);
-      case CounselorPersona.cedite:
-        _paintCedite(canvas, size);
     }
+
+    canvas.restore();
   }
 
   void _paintGrover(Canvas canvas, Size size) {
@@ -1175,75 +1167,18 @@ class _WorldPainter extends CustomPainter {
               ],
               stops: const [0, 0.5, 1.0],
             ).createShader(
-              Rect.fromLTWH(
-                0,
-                size.height * 0.72,
-                size.width,
-                size.height * 0.28,
+              Rect.fromCenter(
+                center: Offset(size.width / 2, size.height * 0.86),
+                width: size.width,
+                height: size.height * 0.28,
               ),
             ),
     );
   }
 
-  void _paintCedite(Canvas canvas, Size size) {
-    final boost = isDark ? 1.0 : 2.5;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            _c.withOpacity(0.08 * boost),
-            _c.withOpacity(0.02 * boost),
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.4, 1.0],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
-    );
-
-    for (final w in wisps) {
-      final progress = ((t * w.speed + w.phase) % 1.0);
-      final spawnY = size.height * (0.55 + w.laneX * 0.25);
-      final y = spawnY - progress * spawnY * 1.15;
-      final wobbleAmp = size.width * 0.018 * (0.3 + progress * 2.2);
-      final x =
-          w.laneX * size.width +
-          sin(t * w.swaySpeed + w.phase * pi * 2 + progress * 6.5) * wobbleAmp +
-          cos(t * w.swaySpeed * 0.6 + w.phase * 4.1) * wobbleAmp * 0.45;
-      final r = size.width * w.radiusFrac * (0.15 + progress * 0.85);
-      final fade = progress < 0.08
-          ? progress / 0.08
-          : progress > 0.72
-          ? (1.0 - progress) / 0.28
-          : 1.0;
-      final a = w.opacity * fade * boost;
-      if (a < 0.004) continue;
-
-      canvas.drawCircle(
-        Offset(x, y),
-        r,
-        Paint()
-          ..color = _c.withOpacity(a)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.85),
-      );
-    }
-
-    for (final w in wisps) {
-      final spawnY = size.height * (0.55 + w.laneX * 0.25);
-      final pulse = 0.6 + 0.4 * sin(t * 1.4 + w.phase * pi * 2);
-      canvas.drawCircle(
-        Offset(w.laneX * size.width, spawnY),
-        2.2,
-        Paint()
-          ..color = _c.withOpacity(0.18 * pulse * boost)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-      );
-    }
-  }
 
   @override
-  bool shouldRepaint(_WorldPainter old) => old.t != t || old.isDark != isDark;
+  bool shouldRepaint(_WorldPainter old) => old.t != t || old.isDark != isDark || old.pageOffset != pageOffset;
 }
 
 // ─────────────────────────────────────────────────────────────

@@ -30,11 +30,11 @@ class _NewsScreenState extends State<NewsScreen> {
 
   bool showFilters = false;
   bool isLoading = true;
+  bool isLoadingMore = false;
+  bool hasMore = true;
 
   // Pagination
-  final int itemsPerPage = 20;
-  int currentPage = 0;
-  List<NewsArticle> _displayedArticles = [];
+  int currentPage = 1;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -53,32 +53,49 @@ class _NewsScreenState extends State<NewsScreen> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+            _scrollController.position.maxScrollExtent - 500 &&
+        !isLoadingMore &&
+        hasMore &&
+        !isLoading &&
+        searchQuery.isEmpty) {
       _loadMoreArticles();
     }
   }
 
-  void _loadMoreArticles() {
-    if (_displayedArticles.length >= _filteredArticles.length) return;
+  Future<void> _loadMoreArticles() async {
+    setState(() => isLoadingMore = true);
 
-    setState(() {
-      currentPage++;
-      final startIndex = currentPage * itemsPerPage;
-      final endIndex = (startIndex + itemsPerPage).clamp(
-        0,
-        _filteredArticles.length,
-      );
-      _displayedArticles.addAll(
-        _filteredArticles.sublist(startIndex, endIndex),
-      );
-    });
+    try {
+      final nextPage = currentPage + 1;
+      final newArticles = await NewsService().fetchPage(nextPage);
+
+      if (newArticles.isEmpty) {
+        setState(() {
+          hasMore = false;
+          isLoadingMore = false;
+        });
+      } else {
+        setState(() {
+          currentPage = nextPage;
+          _allArticles.addAll(newArticles);
+          _applyFilters(resetPagination: false);
+          isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      setState(() => isLoadingMore = false);
+    }
   }
 
   Future<void> _loadArticles() async {
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+      currentPage = 1;
+      hasMore = true;
+    });
 
     try {
-      final articles = await NewsService().fetchArticles();
+      final articles = await NewsService().fetchPage(1);
 
       // Extract unique categories and tags
       final categories = <String>{};
@@ -95,20 +112,13 @@ class _NewsScreenState extends State<NewsScreen> {
         availableCategories = categories.toList()..sort();
         availableTags = tags.toList()..sort();
         isLoading = false;
-        _resetPagination();
       });
     } catch (e) {
       setState(() => isLoading = false);
     }
   }
 
-  void _resetPagination() {
-    currentPage = 0;
-    final endIndex = itemsPerPage.clamp(0, _filteredArticles.length);
-    _displayedArticles = _filteredArticles.take(endIndex).toList();
-  }
-
-  void _applyFilters() {
+  void _applyFilters({bool resetPagination = true}) {
     setState(() {
       _filteredArticles = _allArticles.where((article) {
         // Search filter
@@ -140,7 +150,6 @@ class _NewsScreenState extends State<NewsScreen> {
 
       // Apply sorting
       _applySorting();
-      _resetPagination();
     });
   }
 
@@ -522,72 +531,102 @@ class _NewsScreenState extends State<NewsScreen> {
             child: isLoading
                 ? const PremiumLoadingIndicator()
                 : _filteredArticles.isEmpty
-                ? _buildEmptyState(activeFiltersCount > 0)
-                : RefreshIndicator(
-                    onRefresh: _loadArticles,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isWide = constraints.maxWidth > 800;
+                    ? _buildEmptyState(activeFiltersCount > 0)
+                    : RefreshIndicator(
+                        onRefresh: _loadArticles,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth > 800;
 
-                        if (isWide) {
-                          return GridView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                            gridDelegate:
-                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                            if (isWide) {
+                              return GridView.builder(
+                                controller: _scrollController,
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                                gridDelegate:
+                                    const SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: 500,
                                   mainAxisSpacing: 12,
                                   crossAxisSpacing: 12,
-                                  mainAxisExtent:
-                                      90, // Card height is 84 + some padding
+                                  mainAxisExtent: 90,
                                 ),
-                            itemCount:
-                                _displayedArticles.length +
-                                (_displayedArticles.length <
-                                        _filteredArticles.length
-                                    ? 1
-                                    : 0),
-                            itemBuilder: (context, index) {
-                              if (index >= _displayedArticles.length) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              return _NewsCard(
-                                article: _displayedArticles[index],
-                              );
-                            },
-                          );
-                        }
+                                itemCount:
+                                    _filteredArticles.length +
+                                    (isLoadingMore ? 1 : 0),
+                                itemBuilder: (context, index) {
+                                  if (index >= _filteredArticles.length) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
 
-                        return ListView.separated(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                          itemCount:
-                              _displayedArticles.length +
-                              (_displayedArticles.length <
-                                      _filteredArticles.length
-                                  ? 1
-                                  : 0),
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            if (index >= _displayedArticles.length) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
+                                  final article = _filteredArticles[index];
+                                  return TweenAnimationBuilder<double>(
+                                    key: ValueKey('grid-article-${article.link}'),
+                                    duration: Duration(
+                                      milliseconds: 500 + (index * 50),
+                                    ),
+                                    curve: Curves.easeOutQuart,
+                                    tween: Tween(begin: 0.0, end: 1.0),
+                                    builder: (context, value, child) {
+                                      return Opacity(
+                                        opacity: value,
+                                        child: Transform.translate(
+                                          offset: Offset(0, 20 * (1 - value)),
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                    child: _NewsCard(article: article),
+                                  );
+                                },
                               );
                             }
 
-                            final article = _displayedArticles[index];
-                            return _NewsCard(article: article);
+                            return ListView.separated(
+                              controller: _scrollController,
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                              itemCount:
+                                  _filteredArticles.length +
+                                  (isLoadingMore ? 1 : 0),
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
+                                if (index >= _filteredArticles.length) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 24),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+
+                                final article = _filteredArticles[index];
+                                return TweenAnimationBuilder<double>(
+                                  key: ValueKey('list-article-${article.link}'),
+                                  duration: Duration(
+                                    milliseconds: 500 + (index * 50),
+                                  ),
+                                  curve: Curves.easeOutQuart,
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  builder: (context, value, child) {
+                                    return Opacity(
+                                      opacity: value,
+                                      child: Transform.translate(
+                                        offset: Offset(0, 20 * (1 - value)),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: _NewsCard(article: article),
+                                );
+                              },
+                            );
                           },
-                        );
-                      },
-                    ),
-                  ),
+                        ),
+                      ),
           ),
         ],
       ),
@@ -632,7 +671,6 @@ class _NewsScreenState extends State<NewsScreen> {
                       setState(() {
                         currentSort = SortOption.newest;
                         _applySorting();
-                        _resetPagination();
                       });
                       Navigator.pop(context);
                     },
@@ -645,7 +683,6 @@ class _NewsScreenState extends State<NewsScreen> {
                       setState(() {
                         currentSort = SortOption.oldest;
                         _applySorting();
-                        _resetPagination();
                       });
                       Navigator.pop(context);
                     },
@@ -658,7 +695,6 @@ class _NewsScreenState extends State<NewsScreen> {
                       setState(() {
                         currentSort = SortOption.titleAZ;
                         _applySorting();
-                        _resetPagination();
                       });
                       Navigator.pop(context);
                     },
@@ -671,7 +707,6 @@ class _NewsScreenState extends State<NewsScreen> {
                       setState(() {
                         currentSort = SortOption.titleZA;
                         _applySorting();
-                        _resetPagination();
                       });
                       Navigator.pop(context);
                     },

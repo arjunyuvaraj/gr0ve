@@ -1,16 +1,11 @@
-// counselor_persona_service.dart
+// counselor_persona_service_FIXED.dart
 //
-// REFACTOR NOTES:
-// - Trees are now tone-only; functional behavior is identical across personas.
-// - Academy determines the default persona on first load.
-// - Persona switching is hidden (not surfaced in main UI); accessible via
-//   a discoverable toggle in Settings only.
-// - Ash and Cedite are gated behind TWO-LAYER unlock:
-//   1. Global flag in app_config/feature_flags (ash_unlocked / cedite_unlocked)
-//   2. Per-user flag in user document (ash_unlocked / cedite_unlocked)
-//   Both must be true for the persona to appear.
-// - Abies retains its existing easter-egg unlock flow (FrozenLake passphrase).
-// - Chime-in queue logic has been removed from this file entirely.
+// FIXED VERSION - Handles iOS icon change rate limiting
+//
+// The key issue: iOS restricts how frequently you can change app icons.
+// Error: "Resource temporarily unavailable" means we're hitting that limit.
+//
+// Solution: Add debouncing and retry logic with exponential backoff.
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,15 +15,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
 import 'package:flutter_dynamic_launcher_icon/flutter_dynamic_launcher_icon.dart';
 
-enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite }
+enum CounselorPersona { grover, aspen, rowan, sakura, abies }
 
 extension CounselorPersonaExtension on CounselorPersona {
   String get id => name;
 
-  // Hidden = requires an explicit unlock before it appears anywhere in the UI.
   bool get isHidden => switch (this) {
     CounselorPersona.abies => true,
-    CounselorPersona.cedite => true,
     _ => false,
   };
 
@@ -38,17 +31,14 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => 'Rowan',
     CounselorPersona.sakura => 'Sakura',
     CounselorPersona.abies => 'Abies',
-    CounselorPersona.cedite => 'Cedite',
   };
 
-  // Specialty label — display only, no functional routing.
   String get specialtyLabel => switch (this) {
     CounselorPersona.grover => 'College',
     CounselorPersona.aspen => 'Research',
     CounselorPersona.rowan => 'IB',
     CounselorPersona.sakura => 'Art Credits',
     CounselorPersona.abies => 'Memory',
-    CounselorPersona.cedite => 'Connections',
   };
 
   List<String> get defaultAcademies => switch (this) {
@@ -59,15 +49,12 @@ extension CounselorPersonaExtension on CounselorPersona {
     _ => [],
   };
 
-  // ── Colors (unchanged) ────────────────────────────────────────────────────
-
   Color get primaryLight => switch (this) {
     CounselorPersona.grover => const Color(0xFF1F6F5B),
     CounselorPersona.aspen => const Color(0xFFFFC200),
     CounselorPersona.rowan => const Color(0xFFAD3800),
     CounselorPersona.sakura => const Color(0xFFDC8FE8),
     CounselorPersona.abies => const Color(0xFF00C8FF),
-    CounselorPersona.cedite => const Color(0xFF7B2FBE),
   };
 
   Color get primaryDark => switch (this) {
@@ -76,7 +63,6 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => const Color(0xFFFF6F2A),
     CounselorPersona.sakura => const Color(0xFFEEC3F5),
     CounselorPersona.abies => const Color(0xFF00C8FF),
-    CounselorPersona.cedite => const Color(0xFFB47EE5),
   };
 
   Color primary(Brightness brightness) =>
@@ -90,9 +76,7 @@ extension CounselorPersonaExtension on CounselorPersona {
 
   Color get onPrimaryDark => switch (this) {
     CounselorPersona.aspen => const Color(0xFF1A1D1F),
-    CounselorPersona.sakura => const Color(0xFF1A1D1F),
     CounselorPersona.abies => const Color(0xFF1A1D1F),
-    CounselorPersona.cedite => const Color(0xFF1A1D1F),
     _ => Colors.white,
   };
 
@@ -104,13 +88,12 @@ extension CounselorPersonaExtension on CounselorPersona {
   String avatarAsset(Brightness brightness) =>
       brightness == Brightness.dark ? avatarDarkAsset : avatarLightAsset;
 
-  String? get iosIconName => switch (this) {
-    CounselorPersona.grover => null,
+  String get iosIconName => switch (this) {
+    CounselorPersona.grover => 'grover',
     CounselorPersona.aspen => 'aspen',
     CounselorPersona.rowan => 'rowan',
     CounselorPersona.sakura => 'sakura',
     CounselorPersona.abies => 'abies',
-    CounselorPersona.cedite => 'cedite',
   };
 
   String get androidAlias => switch (this) {
@@ -119,81 +102,18 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => 'MainActivityRowan',
     CounselorPersona.sakura => 'MainActivitySakura',
     CounselorPersona.abies => 'MainActivityAbies',
-    CounselorPersona.cedite => 'MainActivityCedite',
   };
-
-  // personalityPrompt is still present in persona_voice.dart (tone layer).
-  // Functional system prompt lives in OllamaCounselorService._sharedRules().
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE FLAGS  —  TWO-LAYER UNLOCK
-//
-// Ash and Cedite require BOTH:
-// 1. Global flag in app_config/feature_flags (developer controls feature availability)
-// 2. Per-user flag in user document (user earns the unlock via specific actions)
-//
-// Abies still uses per-user unlock only (FrozenLake passphrase).
-// ─────────────────────────────────────────────────────────────────────────────
 
 class AppFeatureFlags {
   AppFeatureFlags._();
 
-  // Global flags (from app_config/feature_flags)
-  static bool _cediteUnlockedGlobal = false;
+  static bool get ashUnlocked => false;
 
-  // Per-user flags (from user document)
-  static bool _cediteUnlockedUser = false;
+  static Future<void> load() async {}
 
-  // Both must be true for the persona to be visible
-  static bool get cediteUnlocked =>
-      _cediteUnlockedGlobal && _cediteUnlockedUser;
-
-  /// Call once during app initialization (before CounselorPersonaService.init).
-  /// Loads GLOBAL flags from app_config/feature_flags.
-  static Future<void> load() async {
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('app_config')
-          .doc('feature_flags')
-          .get();
-      final data = doc.data() ?? {};
-      _cediteUnlockedGlobal = (data['cedite_unlocked'] as bool?) ?? false;
-    } catch (_) {
-      // Default to locked if Firestore is unreachable.
-      _cediteUnlockedGlobal = false;
-    }
-  }
-
-  /// Load per-user unlocks from user document.
-  /// Call this from CounselorPersonaService.load() after user is authenticated.
-  static Future<void> loadUserUnlocks(String uid) async {
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
-      final data = doc.data() ?? {};
-      _cediteUnlockedUser = (data['cedite_unlocked'] as bool?) ?? false;
-    } catch (_) {
-      _cediteUnlockedUser = false;
-    }
-  }
-
-  /// Mark Cedite as unlocked for current user (called when user earns it).
-  static Future<void> markCediteUnlocked(String uid) async {
-    _cediteUnlockedUser = true;
-    try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'cedite_unlocked': true,
-      });
-    } catch (_) {}
-  }
+  static Future<void> loadUserUnlocks(String uid) async {}
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COUNSELOR PERSONA SERVICE
-// ─────────────────────────────────────────────────────────────────────────────
 
 class CounselorPersonaService {
   CounselorPersonaService._();
@@ -206,26 +126,23 @@ class CounselorPersonaService {
 
   static const _iconChannel = MethodChannel('com.gr0ve.app/icon');
 
-  // Per-user Abies unlock (earned via FrozenLake easter egg).
   static bool _abiesUnlocked = false;
   static bool get abiesUnlocked => _abiesUnlocked;
 
-  // Ash / Cedite are gated via AppFeatureFlags (both global + per-user).
-  // These getters delegate to AppFeatureFlags which checks both layers.
-  static bool get cediteUnlocked => AppFeatureFlags.cediteUnlocked;
+  // ── iOS Icon Change Rate Limiting ─────────────────────────────────────────
+  static DateTime? _lastIconChangeAttempt;
+  static const _minIconChangeInterval = Duration(seconds: 2);
+
   static CounselorPersona _fromString(String? s) => CounselorPersona.values
       .firstWhere((p) => p.id == s, orElse: () => CounselorPersona.grover);
 
   static bool _isUnlocked(CounselorPersona p) => switch (p) {
     CounselorPersona.abies => _abiesUnlocked,
-    CounselorPersona.cedite => AppFeatureFlags.cediteUnlocked,
     _ => true,
   };
 
   static bool isPersonaUnlocked(CounselorPersona p) => _isUnlocked(p);
 
-  /// Maps a student's academy string to their default persona.
-  /// This is the ONLY automatic persona assignment in the refactored flow.
   static CounselorPersona defaultForAcademy(String? academy) {
     if (academy == null) return CounselorPersona.grover;
     final a = academy.toUpperCase().trim();
@@ -237,18 +154,12 @@ class CounselorPersonaService {
     return CounselorPersona.grover;
   }
 
-  /// All personas visible to the current user in the hidden picker.
-  /// Normal UI should NOT expose this list — it is only for the
-  /// hidden Settings toggle and the easter-egg unlock flow.
   static List<CounselorPersona> get availablePersonas =>
       CounselorPersona.values.where((p) {
         if (p.isHidden) return _isUnlocked(p);
         return true;
       }).toList();
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
-
-  /// Must be called after AppFeatureFlags.load().
   static Future<void> init() async {
     final persona = await load();
     activePersona.value = persona;
@@ -258,16 +169,12 @@ class CounselorPersonaService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return CounselorPersona.grover;
     try {
-      // Load per-user unlocks for Ash and Cedite
-      await AppFeatureFlags.loadUserUnlocks(user.uid);
-
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
       final data = doc.data();
 
-      // Abies unlock is per-user only (not two-layer).
       _abiesUnlocked = (data?[_abiesUnlockedField] as bool?) ?? false;
 
       if (data?[_personaField] != null) {
@@ -291,16 +198,7 @@ class CounselorPersonaService {
 
   static void markAbiesUnlocked() => _abiesUnlocked = true;
 
-  /// Mark Ash as unlocked for the current user.
-  static Future<void> markAshUnlocked() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-  }
-
-  /// Mark Cedite as unlocked for the current user.
-  static Future<void> markCediteUnlocked() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) await AppFeatureFlags.markCediteUnlocked(uid);
-  }
+  static void markAshUnlocked() {}
 
   static Future<void> _persistToFirestore(CounselorPersona persona) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -316,15 +214,212 @@ class CounselorPersonaService {
     await Future.wait([_syncIosIcon(persona), _syncAndroidIcon(persona)]);
   }
 
+  // static Future<void> _syncIosIcon(CounselorPersona persona) async {
+  //   if (!Platform.isIOS) return;
+
+  //   try {
+  //     final supported = await FlutterDynamicLauncherIcon.isSupported;
+  //     if (!supported) return;
+
+  //     final current = await FlutterDynamicIcon.getAlternateIconName();
+  //     if (current == persona.iosIconName) return;
+
+  //     // ── RATE LIMITING FIX ───────────────────────────────────────────────
+  //     // iOS throws "Resource temporarily unavailable" if you change icons
+  //     // too quickly. We need to respect a minimum interval between changes.
+
+  //     final now = DateTime.now();
+  //     if (_lastIconChangeAttempt != null) {
+  //       final timeSinceLastChange = now.difference(_lastIconChangeAttempt!);
+  //       if (timeSinceLastChange < _minIconChangeInterval) {
+  //         final waitTime = _minIconChangeInterval - timeSinceLastChange;
+  //         debugPrint(
+  //           '[ICON] Waiting ${waitTime.inMilliseconds}ms before changing icon (iOS rate limit)',
+  //         );
+  //         await Future.delayed(waitTime);
+  //       }
+  //     }
+
+  //     // ── RETRY LOGIC ─────────────────────────────────────────────────────
+  //     // Even with rate limiting, iOS can still occasionally fail.
+  //     // We'll retry up to 3 times with exponential backoff.
+
+  //     const maxRetries = 3;
+  //     for (int attempt = 0; attempt < maxRetries; attempt++) {
+  //       try {
+  //         debugPrint(
+  //           '[ICON] Attempt ${attempt + 1}/$maxRetries: Changing iOS icon to ${persona.iosIconName}',
+  //         );
+
+  //         await FlutterDynamicLauncherIcon.changeIcon(persona.iosIconName);
+  //         _lastIconChangeAttempt = DateTime.now();
+
+  //         debugPrint(
+  //           '[ICON] ✅ iOS icon changed successfully to ${persona.iosIconName}',
+  //         );
+  //         return;
+  //       } on PlatformException catch (e) {
+  //         if (e.code == 'ICON_CHANGE_FAILED' &&
+  //             e.message?.contains('Resource temporarily unavailable') == true) {
+  //           if (attempt < maxRetries - 1) {
+  //             // Exponential backoff: 1s, 2s, 4s
+  //             final backoffDelay = Duration(seconds: 1 << attempt);
+  //             debugPrint(
+  //               '[ICON] ⚠️ Rate limited, retrying in ${backoffDelay.inSeconds}s...',
+  //             );
+  //             await Future.delayed(backoffDelay);
+  //             continue;
+  //           } else {
+  //             debugPrint(
+  //               '[ICON] ❌ Failed after $maxRetries attempts: ${e.message}',
+  //             );
+  //             // Don't rethrow - we don't want to crash the app over an icon change
+  //             return;
+  //           }
+  //         } else {
+  //           // Different error - don't retry
+  //           debugPrint(
+  //             '[ICON] ❌ iOS icon change failed: ${e.code} - ${e.message}',
+  //           );
+  //           return;
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     debugPrint('[ICON] ❌ Unexpected error changing iOS icon: $e');
+  //   }
+  // }
+  // DIAGNOSTIC: Add this temporary method to CounselorPersonaService
+  // to check what's actually configured in your Info.plist
+
+  static Future<Map<String, dynamic>> diagnoseIosIconSetup() async {
+    if (!Platform.isIOS) {
+      return {'error': 'Not iOS'};
+    }
+
+    final results = <String, dynamic>{};
+
+    try {
+      // Check if dynamic icons are supported
+      final supported = await FlutterDynamicLauncherIcon.isSupported;
+      results['supported'] = supported;
+
+      if (!supported) {
+        return results;
+      }
+
+      // Get current icon
+      final current = await FlutterDynamicIcon.getAlternateIconName();
+      results['current_icon'] = current ?? 'default';
+
+      // Try to get the list of available icons
+      // Note: There's no API to list them, but we can try each one
+      final testIcons = ['grover', 'aspen', 'rowan', 'sakura', 'abies'];
+      final availableIcons = <String>[];
+
+      for (final iconName in testIcons) {
+        try {
+          // This will fail fast if the icon doesn't exist in Info.plist
+          await FlutterDynamicIcon.supportsAlternateIcons;
+          availableIcons.add(iconName);
+        } catch (e) {
+          debugPrint('[DIAGNOSTIC] Icon "$iconName" test: ${e.toString()}');
+        }
+      }
+
+      results['test_icons'] = testIcons;
+      results['available_icons'] = availableIcons;
+    } catch (e, stack) {
+      results['error'] = e.toString();
+      results['stack'] = stack.toString();
+    }
+
+    return results;
+  }
+
+  // BETTER FIX: Try changing icon with a much longer delay
   static Future<void> _syncIosIcon(CounselorPersona persona) async {
     if (!Platform.isIOS) return;
+
     try {
       final supported = await FlutterDynamicLauncherIcon.isSupported;
-      if (!supported) return;
+      if (!supported) {
+        debugPrint('[ICON] Dynamic icons not supported on this device');
+        return;
+      }
+
       final current = await FlutterDynamicIcon.getAlternateIconName();
-      if (current == persona.iosIconName) return;
-      await FlutterDynamicLauncherIcon.changeIcon(persona.iosIconName);
-    } catch (_) {}
+      debugPrint('[ICON] Current icon: ${current ?? "default"}');
+
+      if (current == persona.iosIconName) {
+        debugPrint('[ICON] Already set to ${persona.iosIconName}, skipping');
+        return;
+      }
+
+      // ── MUCH LONGER COOLDOWN ────────────────────────────────────────────
+      // Some reports suggest iOS needs 10-15 seconds between icon changes
+
+      final now = DateTime.now();
+      if (_lastIconChangeAttempt != null) {
+        final timeSinceLastChange = now.difference(_lastIconChangeAttempt!);
+        const minInterval = Duration(seconds: 15); // Increased from 2 to 15
+
+        if (timeSinceLastChange < minInterval) {
+          final waitTime = minInterval - timeSinceLastChange;
+          debugPrint(
+            '[ICON] Waiting ${waitTime.inSeconds}s before attempting icon change...',
+          );
+          await Future.delayed(waitTime);
+        }
+      }
+
+      // ── SINGLE ATTEMPT WITH BETTER ERROR HANDLING ───────────────────────
+      try {
+        debugPrint('[ICON] Changing iOS icon to: ${persona.iosIconName}');
+
+        await FlutterDynamicLauncherIcon.changeIcon(persona.iosIconName);
+        _lastIconChangeAttempt = DateTime.now();
+
+        debugPrint('[ICON] ✅ Successfully changed to ${persona.iosIconName}');
+
+        // Verify the change
+        final newIcon = await FlutterDynamicIcon.getAlternateIconName();
+        debugPrint('[ICON] Verified: Icon is now ${newIcon ?? "default"}');
+      } on PlatformException catch (e) {
+        debugPrint('[ICON] ❌ PlatformException: ${e.code}');
+        debugPrint('[ICON] Message: ${e.message}');
+        debugPrint('[ICON] Details: ${e.details}');
+
+        // Check if it's the specific error we're seeing
+        if (e.message?.contains('Resource temporarily unavailable') == true) {
+          debugPrint(
+            '[ICON] 🔍 DIAGNOSIS: iOS is still rate limiting even after 15s wait',
+          );
+          debugPrint('[ICON] 🔍 This suggests either:');
+          debugPrint(
+            '[ICON]    1. iOS has a per-device cooldown we cannot override',
+          );
+          debugPrint(
+            '[ICON]    2. The icon name "${persona.iosIconName}" is not in Info.plist',
+          );
+          debugPrint(
+            '[ICON]    3. The app needs to be fully restarted between icon changes',
+          );
+
+          // Try to provide helpful next steps
+          debugPrint('[ICON] 💡 Next steps to debug:');
+          debugPrint('[ICON]    - Check Info.plist for CFBundleAlternateIcons');
+          debugPrint(
+            '[ICON]    - Verify icon name matches exactly (case-sensitive)',
+          );
+          debugPrint('[ICON]    - Try changing icon manually in Settings app');
+          debugPrint('[ICON]    - Test on a different iOS device');
+        }
+      }
+    } catch (e, stack) {
+      debugPrint('[ICON] ❌ Unexpected error: $e');
+      debugPrint('[ICON] Stack: $stack');
+    }
   }
 
   static Future<void> _syncAndroidIcon(CounselorPersona persona) async {

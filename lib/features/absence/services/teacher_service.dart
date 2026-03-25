@@ -375,6 +375,18 @@ String formatStatusString(String status) {
   for (final part in parts) {
     if (part.toUpperCase() == "IGS") {
       items.add("IGS");
+    } else if (part.contains('-')) {
+      // Handle range parts like "2-9"
+      final rangeParts = part.split('-').map((e) => e.trim()).toList();
+      if (rangeParts.length == 2) {
+        final start = int.tryParse(rangeParts[0]);
+        final end = int.tryParse(rangeParts[1]);
+        if (start != null && end != null && end >= start) {
+          for (int n = start; n <= end; n++) {
+            items.add(n);
+          }
+        }
+      }
     } else {
       final num = int.tryParse(part);
       if (num != null) items.add(num);

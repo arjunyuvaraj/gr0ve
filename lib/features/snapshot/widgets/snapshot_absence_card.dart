@@ -44,12 +44,7 @@ class SnapshotAbsenceCard extends StatelessWidget {
                   return SnapshotTile(
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.star_border_rounded,
-                          color: c.onSurface.withOpacity(0.3),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 9),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Star teachers in the Teachers tab.',
@@ -102,12 +97,7 @@ class SnapshotAbsenceCard extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.star_rounded,
-                              color: c.primary,
-                              size: 12,
-                            ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 name,

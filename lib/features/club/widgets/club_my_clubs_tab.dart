@@ -77,7 +77,7 @@ class _ClubMyClubsTabState extends State<ClubMyClubsTab> {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 110),
           itemCount: clubs.length,
           itemBuilder: (context, index) {
             final club = clubs[index];

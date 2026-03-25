@@ -140,63 +140,7 @@
 
         <meta-data android:name="flutterEmbedding" android:value="2"/>
 
-        <!-- ── gr0ve Widgets ──────────────────────────────────────────────── -->
-        <!-- These MUST be inside <application>, not outside it             -->
-
-        <receiver
-            android:name=".BusWidget"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/bus_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".TeacherWidget"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/teacher_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".ScheduleWidget"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/schedule_widget_info" />
-        </receiver>
-
-        <!-- home_widget bridge — called by WidgetBridgeService._update() -->
-        <receiver
-            android:name=".Gr0veWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/bus_widget_info" />
-        </receiver>
-
-        <service
-            android:name=".BusWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
-
-        <service
-            android:name=".TeacherWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
+        <!-- Android widgets completely removed -->
 
     </application>
 

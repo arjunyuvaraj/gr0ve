@@ -102,47 +102,52 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = FirebaseAuth.instance.currentUser?.displayName;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Column(
         children: [
           // Personalized Greeting Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _getGreeting().toUpperCase(),
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 4.0,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    _getGreeting().toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 4.0,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    ),
                   ),
-                ),
-                Text(
-                  (name?.split(' ').first ?? "GR0VE").toUpperCase(),
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontSize: 42,
-                    height: 1.1,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.0,
+                  Text(
+                    (name?.split(' ').first ?? "GR0VE").toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                      fontSize: 42,
+                      height: 1.1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _getDateString().toUpperCase(),
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 2.0,
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  const SizedBox(height: 2),
+                  Text(
+                    _getDateString().toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2.0,
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Content
           Expanded(
@@ -155,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onRefresh: _initData,
                         child: ReorderableListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
+                          padding: const EdgeInsets.fromLTRB(4, 0, 4, 110),
                           itemCount: layout.length,
                           proxyDecorator: (widget, index, animation) {
                             return Material(
@@ -191,13 +196,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             current.insert(newI, item);
 
                             final now = DateTime.now();
-                            final hour = now.hour;
-                            final minute = now.minute;
+                            final totalMinutes = now.hour * 60 + now.minute;
 
                             TimePeriod activePeriod;
-                            if (hour < 15) {
+                            if (totalMinutes < 970) {
                               activePeriod = TimePeriod.school;
-                            } else if (hour < 17 || (hour == 17 && minute < 30)) {
+                            } else if (totalMinutes < 1050) {
                               activePeriod = TimePeriod.afternoon;
                             } else {
                               activePeriod = TimePeriod.evening;
@@ -207,47 +211,64 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           itemBuilder: (ctx, i) {
                             final id = layout[i];
-                            return Padding(
+                            return TweenAnimationBuilder<double>(
                               key: ValueKey(id.name),
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 600,
+                              duration: Duration(milliseconds: 600 + (i * 100)),
+                              curve: Curves.easeOutQuart,
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 30 * (1 - value)),
+                                    child: child,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildSectionTile(
-                                        id.label.toUpperCase(),
-                                        id.icon,
-                                      ),
-                                      switch (id) {
-                                        CardId.countdown =>
-                                          const SnapshotCountdownCard(
-                                            compact: false,
-                                          ),
-                                        CardId.absence =>
-                                          const SnapshotAbsenceCard(
-                                            compact: false,
-                                          ),
-                                        CardId.buses => const SnapshotBusCard(
-                                          compact: false,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Center(
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 600,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _buildSectionTile(
+                                          id.label.toUpperCase(),
+                                          id.icon,
                                         ),
-                                        CardId.weather =>
-                                          const SnapshotWeatherCard(
-                                            compact: false,
-                                          ),
-                                        CardId.upcoming =>
-                                          const SnapshotUpcomingCard(
-                                            compact: false,
-                                          ),
-                                        CardId.pomodoro =>
-                                          const SnapshotPomodoroCard(
-                                            compact: false,
-                                          ),
-                                      },
-                                    ],
+                                        _PressScaleWrapper(
+                                          child: switch (id) {
+                                            CardId.countdown =>
+                                              const SnapshotCountdownCard(
+                                                compact: false,
+                                              ),
+                                            CardId.absence =>
+                                              const SnapshotAbsenceCard(
+                                                compact: false,
+                                              ),
+                                            CardId.buses => const SnapshotBusCard(
+                                              compact: false,
+                                            ),
+                                            CardId.weather =>
+                                              const SnapshotWeatherCard(
+                                                compact: false,
+                                              ),
+                                            CardId.upcoming =>
+                                              const SnapshotUpcomingCard(
+                                                compact: false,
+                                              ),
+                                            CardId.pomodoro =>
+                                              const SnapshotPomodoroCard(
+                                                compact: false,
+                                              ),
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -260,48 +281,51 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // Subtle Footer Edit Button
           Padding(
-            padding: const EdgeInsets.only(bottom: 24, top: 16),
+            padding: const EdgeInsets.only(bottom: 24, top: 0),
             child: Center(
-              child: InkWell(
-                onTap: () => _showLayoutSettings(context),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withOpacity(0.1),
+              child: UnconstrainedBox(
+                child: InkWell(
+                  onTap: () => _showLayoutSettings(context),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedPaintBoard,
-                        size: 14,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
                         color: Theme.of(
-                           context,
-                        ).colorScheme.onSurface.withOpacity(0.3),
+                          context,
+                        ).colorScheme.outline.withOpacity(0.1),
+                        width: 1,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "EDIT DASHBOARD",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedPaintBoard,
+                          size: 14,
                           color: Theme.of(
-                            context,
+                             context,
                           ).colorScheme.onSurface.withOpacity(0.3),
-                          letterSpacing: 1.2,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          "EDIT DASHBOARD",
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.3),
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -332,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSectionTile(String title, dynamic icon) {
     final colors = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Row(
         children: [
           Container(
@@ -393,6 +417,52 @@ class _HomeScreenState extends State<HomeScreen> {
       'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
     ];
     return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTERACTIVE UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PressScaleWrapper extends StatefulWidget {
+  const _PressScaleWrapper({required this.child});
+  final Widget child;
+
+  @override
+  State<_PressScaleWrapper> createState() => _PressScaleWrapperState();
+}
+
+class _PressScaleWrapperState extends State<_PressScaleWrapper>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.975).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) => _ctrl.reverse(),
+      onTapCancel: () => _ctrl.reverse(),
+      child: ScaleTransition(scale: _scale, child: widget.child),
+    );
   }
 }
 

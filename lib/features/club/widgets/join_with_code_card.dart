@@ -56,7 +56,7 @@ class JoinWithCodeCard extends StatelessWidget {
             controller: controller,
             textCapitalization: TextCapitalization.characters,
             decoration: InputDecoration(
-              hintText: "Enter club code",
+              hintText: "Enter group code",
               prefixIcon: const Icon(Icons.password_rounded),
             ),
           ),
@@ -64,7 +64,7 @@ class JoinWithCodeCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           CustomPrimaryButton(
-            label: isLoading ? "Joining..." : "Join club",
+            label: isLoading ? "Joining..." : "Join group",
             onTap: isLoading ? () {} : onJoinPressed,
           ),
         ],

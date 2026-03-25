@@ -84,7 +84,7 @@ class _JoinCodeDialogState extends State<JoinCodeDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Enter the 6-character join code provided by the club admin:',
+              'Enter the 6-character join code provided by the group admin:',
               style: context.text.bodyMedium?.copyWith(
                 color: context.colors.onSurface.withOpacity(0.7),
                 height: 1.4,

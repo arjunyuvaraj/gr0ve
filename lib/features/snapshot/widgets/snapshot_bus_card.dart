@@ -22,6 +22,7 @@ class SnapshotBusCard extends StatelessWidget {
     if (bus.status case final s?) {
       return switch (s.toLowerCase()) {
         'arrived' => 'Arrived',
+        'not here yet' => 'Not here yet',
         'delayed' => 'Delayed',
         'en_route' || 'enroute' => 'En Route',
         _ => 'Scheduled',
@@ -114,8 +115,7 @@ class SnapshotBusCard extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.star_rounded, color: c.primary, size: 12),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

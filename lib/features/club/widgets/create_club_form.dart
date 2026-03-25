@@ -31,7 +31,7 @@ class CreateClubForm extends StatelessWidget {
                 controller: nameController,
                 decoration: const InputDecoration(
                   labelText: 'Group name',
-                  hintText: 'e.g. Robotics Club',
+                  hintText: 'e.g. Robotics Group',
                 ),
                 validator: (v) => v == null || v.trim().length < 3
                     ? 'Name is too short'

@@ -224,7 +224,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Club event added successfully'),
+              content: Text('Group event added successfully'),
               behavior: SnackBarBehavior.floating,
             ),
           );

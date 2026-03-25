@@ -26,6 +26,7 @@ class NotificationService {
   final List<StreamSubscription> _subscriptions = [];
   final Set<String> _processedIds = {};
   final Map<String, DateTime> _notifiedBuses = {};
+  final Map<String, DateTime> _lastShownPayloads = {};
   Timer? _busCheckTimer;
 
   void Function(NotificationResponse)? _onNotificationTapCallback;
@@ -831,6 +832,17 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
+    // Deduplicate by payload within a short window (5 seconds)
+    if (payload != null) {
+      final now = DateTime.now();
+      final lastShown = _lastShownPayloads[payload];
+      if (lastShown != null && now.difference(lastShown).inSeconds < 5) {
+        print('[NOTIF] Skipping duplicate notification for payload: $payload');
+        return;
+      }
+      _lastShownPayloads[payload] = now;
+    }
+
     try {
       await _notifications.show(
         id: id,

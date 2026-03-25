@@ -60,10 +60,6 @@ const _voiceConfigs = {
     voiceId: 'Matthew',
     engine: 'generative',
   ),
-  CounselorPersona.cedite: _PollyVoiceConfig(
-    voiceId: 'Stephen',
-    engine: 'generative',
-  ),
 };
 
 /// Natural conversation fillers per persona
@@ -102,13 +98,6 @@ const _fillerWords = {
     'Yeah, so — ',
     'Hmm. ',
     'Right — ',
-  ],
-  CounselorPersona.cedite: [
-    'Alright, so — ',
-    'Yes — ',
-    'Hmm. ',
-    'Okay — ',
-    'Right, so — ',
   ],
 };
 

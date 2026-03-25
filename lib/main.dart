@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -25,8 +26,8 @@ import 'package:gr0ve/core/helper/landing_decider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gr0ve/core/helper/teacher_utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:gr0ve/services/widget_bridge_service.dart';
 import 'configuration/firebase_options.dart';
+import 'package:gr0ve/features/onboarding/screens/loading_screen.dart';
 
 // ── Services that need to boot on login ──────────────────────────────────────
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
@@ -35,50 +36,64 @@ import 'package:gr0ve/features/calendar/services/calendar_service.dart';
 import 'package:gr0ve/features/home/services/layout_service.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_pomodoro_card.dart'
     show PomPrefsService;
+import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 
 // Global navigator key for handling notification taps
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase first as everything depends on it
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Load teacher list from Firestore (kept for backwards compat with teacher_utils)
-  try {
-    teacherList = await fetchTeacherListFromFirebase();
-  } catch (e) {
-    if (kDebugMode) print('Error loading teachers: $e');
-    teacherList = {};
-  }
-  absenceList = {};
+  // 1. Background tasks (Non-critical, don't block UI)
+  _backgroundInit();
 
-  await NotificationService().initialize();
-  await AppFeatureFlags.load();
-  await CounselorPersonaService.init();
-  await dotenv.load(fileName: ".env");
-  debugPrint('[ENV] API_KEY = ${dotenv.env['API_KEY']}');
-  debugPrint('[ENV] All keys: ${dotenv.env.keys.toList()}');
+  // 2. Critical UI initialization (Needed for initial theme/env)
+  await Future.wait([
+    NotificationService().initialize(),
+    AppFeatureFlags.load(),
+    CounselorPersonaService.init(),
+    ProfilePictureService.init(),
+    dotenv.load(fileName: ".env"),
+  ]);
+
+  if (kDebugMode) {
+    debugPrint('[ENV] API_KEY = ${dotenv.env['API_KEY']?.substring(0, 5)}...');
+  }
+
   runApp(const MyApp());
+}
+
+/// Tasks that can run in the background after/during boot without blocking runApp
+void _backgroundInit() {
+  fetchTeacherListFromFirebase()
+      .then((list) {
+        teacherList = list;
+        if (kDebugMode)
+          print('[BOOT] Teacher list loaded: ${list.length} entries');
+      })
+      .catchError((e) {
+        if (kDebugMode) print('[BOOT] Error loading teachers: $e');
+        teacherList = {};
+      });
+  absenceList = {};
 }
 
 // ── Boots every service that feeds snapshot cards + home screen widgets ───────
 Future<void> _bootUserServices(User user) async {
   if (kDebugMode) print('[BOOT] Booting services for ${user.uid}');
 
-  // Run everything in parallel — order doesn't matter
+  // Run everything in parallel — order ydoesn't matter
   await Future.wait([
     StarredTeacherService.load(),
     StarredBusService.load(),
     CalendarService.loadAllEvents(),
     LayoutService.load(),
     PomPrefsService.load(),
+    ProfilePictureService.init(),
   ]);
-
-  // Boot widget bridge AFTER starred services are loaded so the first
-  // push to iOS already has the correct starred buses/teachers.
-  if (!kIsWeb) {
-    await WidgetBridgeService.init();
-  }
 
   if (kDebugMode) print('[BOOT] All services ready');
 }
@@ -88,7 +103,7 @@ void _teardownUserServices() {
   StarredTeacherService.reset();
   StarredBusService.reset();
   CalendarService.reset();
-  if (!kIsWeb) WidgetBridgeService.stop();
+  NotificationService().stopListening();
 }
 
 class MyApp extends StatefulWidget {
@@ -99,6 +114,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _showLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -109,12 +126,18 @@ class _MyAppState extends State<MyApp> {
         // Boot all snapshot-card data sources as soon as the user is known
         _bootUserServices(user);
       } else {
-        NotificationService().stopListening();
         _teardownUserServices();
       }
     });
 
     _setupNotificationTapHandler();
+
+    // Show splash animation for 1.2 seconds instead of 2.5
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted) {
+        setState(() => _showLoading = false);
+      }
+    });
   }
 
   void _setupNotificationTapHandler() {
@@ -195,15 +218,17 @@ class _MyAppState extends State<MyApp> {
           darkTheme: PersonaTheme.dark(persona),
           themeMode: ThemeMode.system,
           debugShowCheckedModeBanner: false,
-          home: Builder(
-            builder: (context) => LandingDecider(
-              landingPage: kIsWeb
-                  ? const LandingWebsiteScreen()
-                  : const LandingScreen(),
-              loginPage: const LoginScreen(),
-              navigationRoute: '/navigation',
-            ),
-          ),
+          home: _showLoading
+              ? const LogoLoadingScreen()
+              : Builder(
+                  builder: (context) => LandingDecider(
+                    landingPage: kIsWeb
+                        ? const LandingWebsiteScreen()
+                        : const LandingScreen(),
+                    loginPage: const LoginScreen(),
+                    navigationRoute: '/navigation',
+                  ),
+                ),
           routes: {
             '/home': (context) => const HomeScreen(),
             '/teacher_absence': (context) => const AbsenceScreen(),

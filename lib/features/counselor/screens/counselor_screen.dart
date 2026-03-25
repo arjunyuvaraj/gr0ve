@@ -14,6 +14,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/easter_eggs/abies_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:gr0ve/core/widgets/misc/email_verification_gate.dart';
 
 class CounselorScreen extends StatefulWidget {
   const CounselorScreen({super.key});
@@ -515,16 +516,49 @@ class _CounselorScreenState extends State<CounselorScreen>
       );
     }
 
-    return Column(
-      children: [
-        _buildHeader(colors, textTheme, brightness, pc),
-        Expanded(
-          child: _hasStarted
-              ? _buildChatView(colors, textTheme, brightness)
-              : _buildWelcomeView(colors, textTheme, brightness),
+    return Scaffold(
+      body: EmailVerificationGate(
+        description: "Please verify your email address to talk with the counselor.",
+        child: Column(
+          children: [
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutCubic,
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: _buildHeader(colors, textTheme, brightness, pc),
+            ),
+            Expanded(
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 15 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _hasStarted
+                    ? _buildChatView(colors, textTheme, brightness)
+                    : _buildWelcomeView(colors, textTheme, brightness),
+              ),
+            ),
+            _buildInputBar(colors, textTheme, pc),
+          ],
         ),
-        _buildInputBar(colors, textTheme, pc),
-      ],
+      ),
     );
   }
 
@@ -706,8 +740,9 @@ class _CounselorScreenState extends State<CounselorScreen>
   // ──────────────────────────────────────────────────────────────────────────
 
   Widget _buildInputBar(ColorScheme colors, TextTheme textTheme, Color pc) {
+    final isWide = MediaQuery.of(context).size.width > 900;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, isWide ? 20 : 75),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: colors.outline.withOpacity(0.07)),

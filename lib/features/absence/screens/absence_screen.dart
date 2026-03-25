@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/cards/custom_teacher_card.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/features/absence/services/teacher_service.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
+import 'package:gr0ve/core/widgets/misc/email_verification_gate.dart'; // Added this import
 
 class AbsenceScreen extends StatefulWidget {
   const AbsenceScreen({super.key});
@@ -150,13 +150,57 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       }
 
       if (selectedPeriod != "All") {
-        return _statusFor(
-          name,
-        ).toLowerCase().contains(selectedPeriod.toLowerCase());
+        final rawStatus = _statusFor(name);
+        if (rawStatus == 'Present') return false;
+
+        if (selectedPeriod == "IGS") {
+          return rawStatus.toUpperCase().contains("IGS");
+        }
+
+        // Expand ranges so "Periods 2-9" matches period 3, 4, 5, etc.
+        final periodNum = int.tryParse(selectedPeriod);
+        if (periodNum != null) {
+          return _statusContainsPeriod(rawStatus, periodNum);
+        }
+
+        return rawStatus.toLowerCase().contains(selectedPeriod.toLowerCase());
       }
 
       return true;
     }).toList();
+  }
+
+  /// Check if a raw status string (e.g. "Periods 2-9" or "Periods 5-9")
+  /// includes a specific period number.
+  bool _statusContainsPeriod(String rawStatus, int period) {
+    if (rawStatus.toLowerCase() == 'all day') return true;
+
+    // Extract the period portion after "Period(s) "
+    final match = RegExp(r'Period[s]?\s+(.+)', caseSensitive: false)
+        .firstMatch(rawStatus);
+    if (match == null) return false;
+
+    final periodsString = match.group(1)!;
+    final parts = periodsString.split(RegExp(r'[,&]')).map((e) => e.trim());
+
+    for (final part in parts) {
+      if (part.toUpperCase() == 'IGS') continue;
+      if (part.contains('-')) {
+        final rangeParts = part.split('-').map((e) => e.trim()).toList();
+        if (rangeParts.length == 2) {
+          final start = int.tryParse(rangeParts[0]);
+          final end = int.tryParse(rangeParts[1]);
+          if (start != null && end != null && period >= start && period <= end) {
+            return true;
+          }
+        }
+      } else {
+        final num = int.tryParse(part);
+        if (num == period) return true;
+      }
+    }
+
+    return false;
   }
 
   List<Map<String, dynamic>> _ordered(Set<String> starred) {
@@ -176,173 +220,23 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     });
   }
 
-  Widget _buildVerifyEmailState(BuildContext context, User? user) {
-    final colors = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.email_rounded, size: 48, color: Colors.orange),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              "Verify Your Email",
-              style: text.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                fontSize: 24,
-                color: colors.onSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Please verify your email address to view teacher absences",
-              style: text.bodyMedium?.copyWith(
-                color: colors.onSurface.withOpacity(0.6),
-                fontSize: 15,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            InkWell(
-              onTap: () async {
-                if (user != null && !user.emailVerified) {
-                  try {
-                    await user.sendEmailVerification();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text(
-                            "Verification email sent! Check your inbox.",
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Error: ${e.toString()}"),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  }
-                }
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.send_rounded, size: 20, color: colors.primary),
-                    const SizedBox(width: 10),
-                    Text(
-                      "Send Verification",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: colors.primary,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            InkWell(
-              onTap: () async {
-                await user?.reload();
-                setState(() {
-                  // Rebuild to check email verification status
-                });
-                if (context.mounted && user?.emailVerified == true) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text(
-                        "Email verified! Loading teachers...",
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: colors.primary,
-                    ),
-                  );
-                }
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.surface.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colors.outline.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.refresh_rounded,
-                      size: 20,
-                      color: colors.primary,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      "I've Verified My Email",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: colors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  String formatStatusString(String status) {
+    if (status.isEmpty) return 'No status';
+    return status.split(' ').map((word) {
+      if (word.isEmpty) return '';
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || !user.emailVerified) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
-        child: _buildVerifyEmailState(context, user),
-      );
-    }
-
-    return Padding(
+    return EmailVerificationGate(
+      description: "Please verify your email address to view teacher absences.",
       padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
-      child: Column(
-        children: [
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 32, 0),
+        child: Column(
+          children: [
           const CustomHeader(title: "Teachers"),
           const SizedBox(height: 16),
           Column(
@@ -387,6 +281,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                         onRefresh: () => _loadAbsences(silent: true),
                         child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(bottom: 110),
                           itemCount: ordered.length,
                           itemBuilder: (context, index) {
                             final t = ordered[index];
@@ -423,6 +318,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                   ),
           ),
         ],
+        ),
       ),
     );
   }

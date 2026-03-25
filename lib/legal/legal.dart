@@ -15,14 +15,14 @@ final List<Map<String, String>> termsAndPolicySections = [
   // DISCLAIMERS
   // ═════════════════════════════════════════════════════════════════
   {
-    "title": "⚠️ IMPORTANT DISCLAIMERS",
+    "title": "IMPORTANT DISCLAIMERS",
     "content":
         "This app provides information in good faith, but accuracy is NOT guaranteed. Please read carefully:",
   },
   {
     "title": "Counselor Information",
     "content":
-        "The Counselor feature is NOT 100% accurate. Information is provided as guidance only. Always verify with official sources (counselors, school office) before making decisions. The Forgotten Trees (Abies, Cedite, Ash) are entertainment only and should never be relied upon.",
+        "The Counselor feature is NOT 100% accurate. Information is provided as guidance only. Always verify with official sources (counselors, school office) before making decisions. The Forgotten Trees (Abies, Ash) are entertainment only and should never be relied upon.",
   },
   {
     "title": "Absences",
