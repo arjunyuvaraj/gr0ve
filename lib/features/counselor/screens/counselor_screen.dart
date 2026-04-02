@@ -200,10 +200,9 @@ class _CounselorScreenState extends State<CounselorScreen>
     final bubbleId = _addStreamingBubble(_persona);
 
     try {
-      if (_persona == CounselorPersona.abies &&
-          !CounselorPersonaService.abiesUnlocked) {
-        await Future.delayed(const Duration(milliseconds: 1200));
-        final line = abiesVoiceLine(unlocked: false);
+      if (_persona.isHidden && !CounselorPersonaService.isPersonaUnlocked(_persona)) {
+        await Future.delayed(const Duration(milliseconds: 600));
+        final line = _persona.lockedVoiceLine(unlocked: false);
         _appendToken(bubbleId, line);
       } else {
         final closureState = await OllamaCounselorService.sendMessage(
@@ -315,7 +314,7 @@ class _CounselorScreenState extends State<CounselorScreen>
     final colors = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
-    final pc = CounselorPersona.abies.primary(brightness);
+    final pc = colors.primary;
 
     showModalBottomSheet(
       context: context,
@@ -468,7 +467,7 @@ class _CounselorScreenState extends State<CounselorScreen>
     final brightness = Theme.of(context).brightness;
     final colors = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final pc = _persona.primary(brightness);
+    final pc = colors.primary;
 
     if (_isInitializing) {
       return Center(child: CircularProgressIndicator(color: pc));
@@ -517,8 +516,10 @@ class _CounselorScreenState extends State<CounselorScreen>
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: EmailVerificationGate(
-        description: "Please verify your email address to talk with the counselor.",
+        description:
+            "Please verify your email address to talk with the counselor.",
         child: Column(
           children: [
             TweenAnimationBuilder<double>(
@@ -556,6 +557,7 @@ class _CounselorScreenState extends State<CounselorScreen>
               ),
             ),
             _buildInputBar(colors, textTheme, pc),
+            SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
           ],
         ),
       ),
@@ -650,7 +652,7 @@ class _CounselorScreenState extends State<CounselorScreen>
       brightness: brightness,
       colors: colors,
       textTheme: textTheme,
-      pc: _persona.primary(brightness),
+      pc: colors.primary,
       greeting: _persona.welcomeGreeting(_profile.greetingName),
       profile: _profile,
       randomBtnScale: _randomBtnScale,
@@ -741,18 +743,22 @@ class _CounselorScreenState extends State<CounselorScreen>
 
   Widget _buildInputBar(ColorScheme colors, TextTheme textTheme, Color pc) {
     final isWide = MediaQuery.of(context).size.width > 900;
+    final viewInsets = MediaQuery.of(context).viewInsets;
+    final bottomPadding = viewInsets.bottom > 0
+        ? 12.0
+        : (isWide ? 20.0 : MediaQuery.of(context).padding.bottom + 8.0);
+
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 10, 20, isWide ? 20 : 75),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: colors.outline.withOpacity(0.07)),
         ),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -835,7 +841,6 @@ class _CounselorScreenState extends State<CounselorScreen>
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

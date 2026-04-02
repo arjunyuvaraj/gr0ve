@@ -47,6 +47,7 @@ class _StorageConfig {
 class GoogleDocsClient {
   static auth.AutoRefreshingAuthClient? _authClient;
   static docs.DocsApi? _docsApi;
+  // ignore: unused_field
   static drive.DriveApi? _driveApi;
 
   static Future<void> initialize() async {

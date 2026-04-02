@@ -26,7 +26,7 @@ class ChangelogScreen extends StatelessWidget {
           const CustomHeader(title: "CHANGELOG"),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               children: [
                 // Version header with overlapping avatars
                 Container(

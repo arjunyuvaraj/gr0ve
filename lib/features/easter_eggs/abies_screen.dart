@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 
 // ─────────────────────────────────────────────────────────────
 // ABIES UNLOCK SERVICE
@@ -59,37 +60,10 @@ class AbiesUnlockService {
 // Post-unlock: bitter, dry, precise
 // ─────────────────────────────────────────────────────────────
 
-const _abiesAmnesiacLines = [
-  'I... was here. I think.',
-  'Something happened to the grove. I cannot remember what.',
-  'There was snow. There is always snow.',
-  'I know your face. I do not know why.',
-  'The others... where did the others go?',
-  'I keep trying to remember. The cold makes it harder.',
-  'You seem familiar. Have we spoken before?',
-  'I had a name for this place. It escapes me.',
-  '...',
-  'Was it always this quiet?',
-];
-
-const _abiesBitterLines = [
-  'You found this place. That is more than most.',
-  'I have been here longer than the others have existed.',
-  'The snow took everything. I stayed anyway.',
-  'Most people give up before the second try.',
-  'I do not give hints. But you already knew that.',
-  'The grove is gone. I am what is left.',
-  'You are the forty-third person to stand here.',
-  'I noticed you the moment you arrived.',
-  '...',
-];
+// Centralized in persona_voice.dart
 
 String abiesVoiceLine({required bool unlocked}) {
-  final r = Random();
-  final lines = unlocked ? _abiesBitterLines : _abiesAmnesiacLines;
-  // ~20% silence, 80% actual line
-  if (!unlocked && r.nextDouble() < 0.1) return '...';
-  return lines[r.nextInt(lines.length)];
+  return CounselorPersona.abies.lockedVoiceLine(unlocked: unlocked);
 }
 
 // ─────────────────────────────────────────────────────────────

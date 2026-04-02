@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
+import 'dart:async';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
 import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
@@ -14,7 +17,11 @@ import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_persona_picker.dart';
 import 'package:gr0ve/features/authentication/services/authentication_service.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
+import 'package:gr0ve/features/easter_eggs/cedite_screen.dart';
+import 'package:gr0ve/features/easter_eggs/ash_screen.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/services/settings/accessibility_service.dart';
+import 'package:gr0ve/services/settings/theme_color_service.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onCustomizeNavigation;
@@ -36,8 +43,10 @@ class _AccountScreenState extends State<AccountScreen> {
   String? userAcademy;
 
   CounselorPersona _activePersona = CounselorPersonaService.activePersona.value;
-
-
+  AppThemeColor _activeAppColor = ThemeColorService.activeColor.value;
+  int _versionTapCount = 0;
+  Offset _jitterOffset = Offset.zero;
+  late final Timer? _jitterTimer;
 
   @override
   void initState() {
@@ -46,12 +55,34 @@ class _AccountScreenState extends State<AccountScreen> {
     ProfilePictureService.activeVariant.addListener(_onVariantChanged);
     FirebaseAnalytics.instance.logEvent(name: 'screen_account');
     CounselorPersonaService.activePersona.addListener(_onPersonaChanged);
+    ThemeColorService.activeColor.addListener(_onAppColorChanged);
+    _startJitterTimer();
+  }
+
+  void _startJitterTimer() {
+    _jitterTimer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
+      if (_activePersona == CounselorPersona.cedite) {
+        if (Random().nextDouble() > 0.8) {
+          setState(() {
+            _jitterOffset = Offset(
+              (Random().nextDouble() - 0.5) * 4,
+              (Random().nextDouble() - 0.5) * 4,
+            );
+          });
+          Future.delayed(const Duration(milliseconds: 50), () {
+            if (mounted) setState(() => _jitterOffset = Offset.zero);
+          });
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     CounselorPersonaService.activePersona.removeListener(_onPersonaChanged);
     ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
+    ThemeColorService.activeColor.removeListener(_onAppColorChanged);
+    _jitterTimer?.cancel();
     super.dispose();
   }
 
@@ -70,6 +101,13 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  void _onAppColorChanged() {
+    if (mounted) {
+      setState(() {
+        _activeAppColor = ThemeColorService.activeColor.value;
+      });
+    }
+  }
 
   Future<void> _loadUserData() async {
     setState(() => loading = true);
@@ -122,6 +160,347 @@ class _AccountScreenState extends State<AccountScreen> {
       isScrollControlled: true,
       builder: (_) => const ProfilePicturePickerSheet(),
     );
+  }
+
+  Future<void> _showAppColorPicker() async {
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(ctx).colorScheme.outline.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'App Theme Color',
+              style: Theme.of(
+                ctx,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Choose your favorite accent color for the app.',
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(ctx).colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ),
+            const SizedBox(height: 24),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.85,
+              ),
+              itemCount: AppThemeColor.values.length,
+              itemBuilder: (context, index) {
+                final color = AppThemeColor.values[index];
+                final isSelected = color == _activeAppColor;
+                final brightness = Theme.of(ctx).brightness;
+                return GestureDetector(
+                  onTap: () {
+                    if (color == AppThemeColor.custom) {
+                      _showCustomColorPicker();
+                    } else {
+                      ThemeColorService.setColor(color);
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? color.color(brightness).withOpacity(0.12)
+                          : Theme.of(
+                              ctx,
+                            ).colorScheme.surfaceVariant.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? color.color(brightness)
+                            : Theme.of(
+                                ctx,
+                              ).colorScheme.outline.withOpacity(0.1),
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: color.color(brightness),
+                            shape: BoxShape.circle,
+                            border: isSelected
+                                ? null
+                                : Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                          ),
+                          child: isSelected
+                              ? const Icon(
+                                  Icons.check,
+                                  size: 12,
+                                  color: Colors.white,
+                                )
+                              : (color == AppThemeColor.custom
+                                    ? const Icon(
+                                        Icons.add,
+                                        size: 12,
+                                        color: Colors.white,
+                                      )
+                                    : null),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          color.displayName,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: isSelected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: isSelected
+                                ? color.color(brightness)
+                                : Theme.of(ctx).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCustomColorPicker() async {
+    Color selectedColor = ThemeColorService.customColorValue;
+    String hexInput = selectedColor.value
+        .toRadixString(16)
+        .padLeft(8, '0')
+        .substring(2)
+        .toUpperCase();
+    final controller = TextEditingController(text: hexInput);
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          final surfaceColor = Theme.of(ctx).colorScheme.surface;
+          final contrast = _getContrastRatio(selectedColor, surfaceColor);
+          final isAccessible =
+              contrast >= 3.0; // 3:1 is minimum for large text/ui elements
+
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(ctx).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          ctx,
+                        ).colorScheme.outline.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Custom Theme Color',
+                    style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Enter a hex code to create your own style.',
+                    style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(
+                        ctx,
+                      ).colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: selectedColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Theme.of(
+                              ctx,
+                            ).colorScheme.outline.withOpacity(0.1),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: selectedColor.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          isAccessible
+                              ? Icons.check_circle_rounded
+                              : Icons.warning_amber_rounded,
+                          color: contrast > 4.5
+                              ? Colors.white
+                              : (selectedColor.computeLuminance() > 0.5
+                                    ? Colors.black
+                                    : Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomTextField(
+                              hintText: 'HEX (e.g. FF5733)',
+                              controller: controller,
+                              obscureText: false,
+                              onChange: (val) {
+                                try {
+                                  String cleanHex = val
+                                      .replaceAll('#', '')
+                                      .trim();
+                                  if (cleanHex.length == 6) {
+                                    final newColor = Color(
+                                      int.parse('FF$cleanHex', radix: 16),
+                                    );
+                                    setModalState(() {
+                                      selectedColor = newColor;
+                                      hexInput = cleanHex;
+                                    });
+                                  }
+                                } catch (_) {}
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    (isAccessible
+                                            ? Colors.green
+                                            : Colors.orange)
+                                        .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isAccessible
+                                        ? Icons.verified_user_rounded
+                                        : Icons.info_outline_rounded,
+                                    size: 12,
+                                    color: isAccessible
+                                        ? Colors.green
+                                        : Colors.orange,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    isAccessible
+                                        ? "Good contrast (${contrast.toStringAsFixed(1)}:1)"
+                                        : "Low contrast (${contrast.toStringAsFixed(1)}:1)",
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: isAccessible
+                                          ? Colors.green
+                                          : Colors.orange,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomPrimaryButton(
+                      label: 'Save Custom Color',
+                      onTap: () {
+                        ThemeColorService.setCustomColor(selectedColor);
+                        Navigator.pop(ctx);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  double _getRelativeLuminance(Color color) {
+    double r = color.red / 255.0;
+    double g = color.green / 255.0;
+    double b = color.blue / 255.0;
+    r = r <= 0.03928 ? r / 12.92 : pow((r + 0.055) / 1.055, 2.4).toDouble();
+    g = g <= 0.03928 ? g / 12.92 : pow((g + 0.055) / 1.055, 2.4).toDouble();
+    b = b <= 0.03928 ? b / 12.92 : pow((b + 0.055) / 1.055, 2.4).toDouble();
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  double _getContrastRatio(Color color1, Color color2) {
+    final l1 = _getRelativeLuminance(color1);
+    final l2 = _getRelativeLuminance(color2);
+    return (max(l1, l2) + 0.05) / (min(l1, l2) + 0.05);
   }
 
   Future<void> _sendVerificationEmail() async {
@@ -556,7 +935,7 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     }
 
-    final personaColor = _activePersona.primary(brightness);
+    final appColor = colors.primary;
 
     return SingleChildScrollView(
       child: Column(
@@ -575,20 +954,97 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               );
             },
-            child: _buildHero(colors, brightness, isDark, personaColor, theme),
+            child: _buildHero(colors, brightness, isDark, appColor, theme),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
             child: Column(
               children: [
-                _buildBody(colors, brightness, isDark, personaColor),
-                const SizedBox(
-                  height: 120,
-                ), // ADDED: Bottom padding for nav bar
+                _buildBody(colors, brightness, isDark, appColor),
+                const SizedBox(height: 48),
+                _buildVersionInfo(colors),
+                const SizedBox(height: 120),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVersionInfo(ColorScheme colors) {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          setState(() => _versionTapCount++);
+          if (_versionTapCount == 7 && _activePersona == CounselorPersona.ash) {
+            _showAshWarning();
+          }
+          if (_versionTapCount == 10 && !CounselorPersonaService.ashUnlocked) {
+            _showAshUnlockPuzzle();
+          }
+        },
+        child: Text(
+          'v1.2.0 (Stable)\nBuilt with ❤️ by gr0ve',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 10,
+            color: colors.onSurface.withAlpha(50),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAshWarning() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1212),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFFC43D3D), width: 1),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFC43D3D)),
+            SizedBox(width: 12),
+            Text('A Silent Warning', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: const Text(
+          'I have seen the end of this path. The growth you seek is hollow if built on shifting sands. '
+          'Remember: when the fire fades, only what was truly earned remains.',
+          style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'I understand.',
+              style: TextStyle(color: Color(0xFFC43D3D)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAshUnlockPuzzle() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AshRuinScreen(
+          onUnlocked: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Persona Unlocked: Ash (The Ruin)'),
+                backgroundColor: Color(0xFFC43D3D),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -624,8 +1080,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  personaColor.withAlpha(isDark ? 140 : 97),
-                  personaColor.withAlpha(isDark ? 25 : 13),
+                  colors.primary.withAlpha(isDark ? 140 : 97),
+                  colors.primary.withAlpha(isDark ? 25 : 13),
                 ],
               ),
             ),
@@ -644,7 +1100,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     height: avatarSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: personaColor, width: 3),
+                      border: Border.all(color: colors.primary, width: 3),
                       color: colors.surface,
                     ),
                   ),
@@ -660,11 +1116,11 @@ class _AccountScreenState extends State<AccountScreen> {
                         errorBuilder: (_, __, ___) => Container(
                           width: avatarSize - 8,
                           height: avatarSize - 8,
-                          color: personaColor.withAlpha(38),
+                          color: colors.primary.withAlpha(38),
                           child: Icon(
                             Icons.person_rounded,
                             size: 32,
-                            color: personaColor,
+                            color: colors.primary,
                           ),
                         ),
                       ),
@@ -678,7 +1134,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       width: 22,
                       height: 22,
                       decoration: BoxDecoration(
-                        color: personaColor,
+                        color: colors.primary,
                         shape: BoxShape.circle,
                         border: Border.all(color: colors.surface, width: 2),
                       ),
@@ -829,16 +1285,18 @@ class _AccountScreenState extends State<AccountScreen> {
                     children: [
                       _infoChip(
                         colors: colors,
-                        personaColor: personaColor,
+                        personaColor: colors.primary,
                         icon: Icons.school_rounded,
-                        label: userGrade != null ? 'Grade $userGrade' : 'Set grade',
+                        label: userGrade != null
+                            ? 'Grade $userGrade'
+                            : 'Set grade',
                         onTap: isEmailVerified ? _updateGrade : null,
                         locked: !isEmailVerified,
                       ),
                       const SizedBox(width: 8),
                       _infoChip(
                         colors: colors,
-                        personaColor: personaColor,
+                        personaColor: colors.primary,
                         icon: Icons.apartment_rounded,
                         label: userAcademy ?? 'Set academy',
                         onTap: isEmailVerified ? _updateAcademy : null,
@@ -895,7 +1353,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             child: Icon(
                               Icons.person_rounded,
                               size: 18,
-                              color: personaColor,
+                              color: colors.primary,
                             ),
                           ),
                         ),
@@ -903,6 +1361,15 @@ class _AccountScreenState extends State<AccountScreen> {
                       label: 'Profile Picture',
                       value: _activeVariant.displayName,
                       onTap: _showProfilePicturePicker,
+                      colors: colors,
+                    ),
+                    _divider(colors),
+                    _settingsRow(
+                      icon: Icons.palette_rounded,
+                      iconColor: _activeAppColor.color(brightness),
+                      label: 'App Primary Color',
+                      value: _activeAppColor.displayName,
+                      onTap: _showAppColorPicker,
                       colors: colors,
                     ),
                   ],
@@ -977,6 +1444,58 @@ class _AccountScreenState extends State<AccountScreen> {
                       onTap: widget.onCustomizeNavigation,
                       colors: colors,
                     ),
+                    _divider(colors),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: AccessibilityService.autoVoiceGreeting,
+                      builder: (context, autoGreet, child) {
+                        return _settingsRow(
+                          icon: Icons.record_voice_over_rounded,
+                          iconColor: colors.primary,
+                          label: 'Voice Encounter Greeting',
+                          value:
+                              'Counselor speaks first when you open Voice Mode',
+                          onTap: () =>
+                              AccessibilityService.toggleAutoVoiceGreeting(
+                                !autoGreet,
+                              ),
+                          colors: colors,
+                          trailingWidget: Switch(
+                            value: autoGreet,
+                            onChanged: (val) =>
+                                AccessibilityService.toggleAutoVoiceGreeting(
+                                  val,
+                                ),
+                            activeColor: colors.primary,
+                          ),
+                        );
+                      },
+                    ),
+                    _divider(colors),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: AccessibilityService.accessibleColors,
+                      builder: (context, isAccessible, child) {
+                        return _settingsRow(
+                          icon: Icons.contrast_rounded,
+                          iconColor: colors.primary,
+                          label: 'Accessible Colors',
+                          value:
+                              'Use high-contrast, color-safe themes across the app',
+                          onTap: () =>
+                              AccessibilityService.toggleAccessibleColors(
+                                !isAccessible,
+                              ),
+                          colors: colors,
+                          trailingWidget: Switch(
+                            value: isAccessible,
+                            onChanged: (val) =>
+                                AccessibilityService.toggleAccessibleColors(
+                                  val,
+                                ),
+                            activeColor: colors.primary,
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -1043,33 +1562,43 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _counselorRow(
     ColorScheme colors,
     Brightness brightness,
-    Color personaColor,
+    Color appColor,
     bool isDark,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: _showCounselorPicker,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                _activePersona.avatarAsset(brightness),
-                width: 34,
-                height: 34,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+          Transform.translate(
+            offset: _activePersona == CounselorPersona.cedite
+                ? _jitterOffset
+                : Offset.zero,
+            child: GestureDetector(
+              onTap: _showCounselorPicker,
+              onDoubleTap: () {
+                if (!CounselorPersonaService.cediteUnlocked) {
+                  _showCediteUnlockPuzzle();
+                }
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  _activePersona.avatarAsset(brightness),
                   width: 34,
                   height: 34,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: personaColor.withAlpha(31),
-                  ),
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 18,
-                    color: personaColor,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: colors.primary.withAlpha(31),
+                    ),
+                    child: Icon(
+                      Icons.person_rounded,
+                      size: 18,
+                      color: colors.primary,
+                    ),
                   ),
                 ),
               ),
@@ -1121,6 +1650,24 @@ class _AccountScreenState extends State<AccountScreen> {
   // ─────────────────────────────────────────────────────────────
   // SHARED COMPONENTS
   // ─────────────────────────────────────────────────────────────
+
+  void _showCediteUnlockPuzzle() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CediteShadowScreen(
+          onUnlocked: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Persona Unlocked: Cedite (The Shadow)'),
+                backgroundColor: Color(0xFF9F72D8),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   Widget _sectionLabel(String label) => Text(
     label,
@@ -1201,6 +1748,7 @@ class _AccountScreenState extends State<AccountScreen> {
     IconData? icon,
     Color? iconColor,
     Widget? leadingWidget,
+    Widget? trailingWidget,
     required String label,
     required String value,
     required VoidCallback? onTap,
@@ -1250,11 +1798,12 @@ class _AccountScreenState extends State<AccountScreen> {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 16,
-              color: colors.onSurface.withAlpha(46),
-            ),
+            trailingWidget ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: colors.onSurface.withAlpha(46),
+                ),
           ],
         ),
       ),

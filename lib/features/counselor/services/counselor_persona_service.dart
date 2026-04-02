@@ -7,6 +7,7 @@
 //
 // Solution: Add debouncing and retry logic with exponential backoff.
 
+import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,13 +16,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
 import 'package:flutter_dynamic_launcher_icon/flutter_dynamic_launcher_icon.dart';
 
-enum CounselorPersona { grover, aspen, rowan, sakura, abies }
+enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite, ash }
 
 extension CounselorPersonaExtension on CounselorPersona {
   String get id => name;
 
   bool get isHidden => switch (this) {
-    CounselorPersona.abies => true,
+    CounselorPersona.abies ||
+    CounselorPersona.cedite ||
+    CounselorPersona.ash => true,
     _ => false,
   };
 
@@ -31,14 +34,18 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => 'Rowan',
     CounselorPersona.sakura => 'Sakura',
     CounselorPersona.abies => 'Abies',
+    CounselorPersona.cedite => 'Cedite',
+    CounselorPersona.ash => 'Ash',
   };
 
   String get specialtyLabel => switch (this) {
-    CounselorPersona.grover => 'College',
-    CounselorPersona.aspen => 'Research',
-    CounselorPersona.rowan => 'IB',
-    CounselorPersona.sakura => 'Art Credits',
+    CounselorPersona.grover => 'ATCS & AEDT',
+    CounselorPersona.aspen => 'AAST & AMST',
+    CounselorPersona.rowan => 'ABF & ACAHA',
+    CounselorPersona.sakura => 'AVPA',
     CounselorPersona.abies => 'Memory',
+    CounselorPersona.cedite => 'Truth',
+    CounselorPersona.ash => 'Future',
   };
 
   List<String> get defaultAcademies => switch (this) {
@@ -46,7 +53,9 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.aspen => ['AAST', 'AMST'],
     CounselorPersona.rowan => ['ABF', 'ACAHA'],
     CounselorPersona.sakura => ['AVPA'],
-    _ => [],
+    CounselorPersona.abies => [],
+    CounselorPersona.cedite => [],
+    CounselorPersona.ash => [],
   };
 
   Color get primaryLight => switch (this) {
@@ -55,6 +64,8 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => const Color(0xFFAD3800),
     CounselorPersona.sakura => const Color(0xFFDC8FE8),
     CounselorPersona.abies => const Color(0xFF00C8FF),
+    CounselorPersona.cedite => const Color(0xFF9F72D8),
+    CounselorPersona.ash => const Color(0xFFC43D3D),
   };
 
   Color get primaryDark => switch (this) {
@@ -63,6 +74,8 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => const Color(0xFFFF6F2A),
     CounselorPersona.sakura => const Color(0xFFEEC3F5),
     CounselorPersona.abies => const Color(0xFF00C8FF),
+    CounselorPersona.cedite => const Color(0xFFB388EB),
+    CounselorPersona.ash => const Color(0xFFE55B5B),
   };
 
   Color primary(Brightness brightness) =>
@@ -85,8 +98,9 @@ extension CounselorPersonaExtension on CounselorPersona {
 
   String get avatarLightAsset => 'assets/app_icons/png/${id}_light.png';
   String get avatarDarkAsset => 'assets/app_icons/png/${id}_dark.png';
-  String avatarAsset(Brightness brightness) =>
-      brightness == Brightness.dark ? avatarDarkAsset : avatarLightAsset;
+  String avatarAsset(Brightness brightness) => brightness == Brightness.dark
+      ? 'assets/app_icons/png/${id}_dark.png'
+      : 'assets/app_icons/png/${id}_light.png';
 
   String get iosIconName => switch (this) {
     CounselorPersona.grover => 'grover',
@@ -94,6 +108,8 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => 'rowan',
     CounselorPersona.sakura => 'sakura',
     CounselorPersona.abies => 'abies',
+    CounselorPersona.cedite => 'cedite',
+    CounselorPersona.ash => 'ash',
   };
 
   String get androidAlias => switch (this) {
@@ -102,6 +118,8 @@ extension CounselorPersonaExtension on CounselorPersona {
     CounselorPersona.rowan => 'MainActivityRowan',
     CounselorPersona.sakura => 'MainActivitySakura',
     CounselorPersona.abies => 'MainActivityAbies',
+    CounselorPersona.cedite => 'MainActivityCedite',
+    CounselorPersona.ash => 'MainActivityAsh',
   };
 }
 
@@ -123,14 +141,25 @@ class CounselorPersonaService {
 
   static const _personaField = 'counselor_persona';
   static const _abiesUnlockedField = 'abies_unlocked';
+  static const _cediteUnlockedField = 'cedite_unlocked';
+  static const _ashUnlockedField = 'ash_unlocked';
+  static const _ashLockedForeverField = 'ash_locked_forever';
 
   static const _iconChannel = MethodChannel('com.gr0ve.app/icon');
 
   static bool _abiesUnlocked = false;
+  static bool _cediteUnlocked = false;
+  static bool _ashUnlocked = false;
+  static bool _ashLockedForever = false;
+
   static bool get abiesUnlocked => _abiesUnlocked;
+  static bool get cediteUnlocked => _cediteUnlocked;
+  static bool get ashUnlocked => _ashUnlocked;
+  static bool get ashLockedForever => _ashLockedForever;
 
   // ── iOS Icon Change Rate Limiting ─────────────────────────────────────────
   static DateTime? _lastIconChangeAttempt;
+  // ignore: unused_field
   static const _minIconChangeInterval = Duration(seconds: 2);
 
   static CounselorPersona _fromString(String? s) => CounselorPersona.values
@@ -138,6 +167,8 @@ class CounselorPersonaService {
 
   static bool _isUnlocked(CounselorPersona p) => switch (p) {
     CounselorPersona.abies => _abiesUnlocked,
+    CounselorPersona.cedite => _cediteUnlocked,
+    CounselorPersona.ash => _ashUnlocked,
     _ => true,
   };
 
@@ -163,6 +194,8 @@ class CounselorPersonaService {
   static Future<void> init() async {
     final persona = await load();
     activePersona.value = persona;
+    // Ensure app icon is synced on startup
+    await _syncAppIcon(persona);
   }
 
   static Future<CounselorPersona> load() async {
@@ -176,6 +209,9 @@ class CounselorPersonaService {
       final data = doc.data();
 
       _abiesUnlocked = (data?[_abiesUnlockedField] as bool?) ?? false;
+      _cediteUnlocked = (data?[_cediteUnlockedField] as bool?) ?? false;
+      _ashUnlocked = (data?[_ashUnlockedField] as bool?) ?? false;
+      _ashLockedForever = (data?[_ashLockedForeverField] as bool?) ?? false;
 
       if (data?[_personaField] != null) {
         final saved = _fromString(data![_personaField] as String?);
@@ -196,9 +232,35 @@ class CounselorPersonaService {
     await Future.wait([_persistToFirestore(persona), _syncAppIcon(persona)]);
   }
 
-  static void markAbiesUnlocked() => _abiesUnlocked = true;
+  static void markAbiesUnlocked() {
+    _abiesUnlocked = true;
+    _persistUnlock(_abiesUnlockedField);
+  }
 
-  static void markAshUnlocked() {}
+  static void markCediteUnlocked() {
+    _cediteUnlocked = true;
+    _persistUnlock(_cediteUnlockedField);
+  }
+
+  static void markAshUnlocked() {
+    _ashUnlocked = true;
+    _persistUnlock(_ashUnlockedField);
+  }
+
+  static void lockAshForever() {
+    _ashLockedForever = true;
+    _persistUnlock(_ashLockedForeverField);
+  }
+
+  static Future<void> _persistUnlock(String field) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {field: true},
+      );
+    } catch (_) {}
+  }
 
   static Future<void> _persistToFirestore(CounselorPersona persona) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -210,87 +272,13 @@ class CounselorPersonaService {
     } catch (_) {}
   }
 
+  static Future<void> syncAppIcon(CounselorPersona persona) async {
+    await _syncAppIcon(persona);
+  }
+
   static Future<void> _syncAppIcon(CounselorPersona persona) async {
     await Future.wait([_syncIosIcon(persona), _syncAndroidIcon(persona)]);
   }
-
-  // static Future<void> _syncIosIcon(CounselorPersona persona) async {
-  //   if (!Platform.isIOS) return;
-
-  //   try {
-  //     final supported = await FlutterDynamicLauncherIcon.isSupported;
-  //     if (!supported) return;
-
-  //     final current = await FlutterDynamicIcon.getAlternateIconName();
-  //     if (current == persona.iosIconName) return;
-
-  //     // ── RATE LIMITING FIX ───────────────────────────────────────────────
-  //     // iOS throws "Resource temporarily unavailable" if you change icons
-  //     // too quickly. We need to respect a minimum interval between changes.
-
-  //     final now = DateTime.now();
-  //     if (_lastIconChangeAttempt != null) {
-  //       final timeSinceLastChange = now.difference(_lastIconChangeAttempt!);
-  //       if (timeSinceLastChange < _minIconChangeInterval) {
-  //         final waitTime = _minIconChangeInterval - timeSinceLastChange;
-  //         debugPrint(
-  //           '[ICON] Waiting ${waitTime.inMilliseconds}ms before changing icon (iOS rate limit)',
-  //         );
-  //         await Future.delayed(waitTime);
-  //       }
-  //     }
-
-  //     // ── RETRY LOGIC ─────────────────────────────────────────────────────
-  //     // Even with rate limiting, iOS can still occasionally fail.
-  //     // We'll retry up to 3 times with exponential backoff.
-
-  //     const maxRetries = 3;
-  //     for (int attempt = 0; attempt < maxRetries; attempt++) {
-  //       try {
-  //         debugPrint(
-  //           '[ICON] Attempt ${attempt + 1}/$maxRetries: Changing iOS icon to ${persona.iosIconName}',
-  //         );
-
-  //         await FlutterDynamicLauncherIcon.changeIcon(persona.iosIconName);
-  //         _lastIconChangeAttempt = DateTime.now();
-
-  //         debugPrint(
-  //           '[ICON] ✅ iOS icon changed successfully to ${persona.iosIconName}',
-  //         );
-  //         return;
-  //       } on PlatformException catch (e) {
-  //         if (e.code == 'ICON_CHANGE_FAILED' &&
-  //             e.message?.contains('Resource temporarily unavailable') == true) {
-  //           if (attempt < maxRetries - 1) {
-  //             // Exponential backoff: 1s, 2s, 4s
-  //             final backoffDelay = Duration(seconds: 1 << attempt);
-  //             debugPrint(
-  //               '[ICON] ⚠️ Rate limited, retrying in ${backoffDelay.inSeconds}s...',
-  //             );
-  //             await Future.delayed(backoffDelay);
-  //             continue;
-  //           } else {
-  //             debugPrint(
-  //               '[ICON] ❌ Failed after $maxRetries attempts: ${e.message}',
-  //             );
-  //             // Don't rethrow - we don't want to crash the app over an icon change
-  //             return;
-  //           }
-  //         } else {
-  //           // Different error - don't retry
-  //           debugPrint(
-  //             '[ICON] ❌ iOS icon change failed: ${e.code} - ${e.message}',
-  //           );
-  //           return;
-  //         }
-  //       }
-  //     }
-  //   } catch (e) {
-  //     debugPrint('[ICON] ❌ Unexpected error changing iOS icon: $e');
-  //   }
-  // }
-  // DIAGNOSTIC: Add this temporary method to CounselorPersonaService
-  // to check what's actually configured in your Info.plist
 
   static Future<Map<String, dynamic>> diagnoseIosIconSetup() async {
     if (!Platform.isIOS) {

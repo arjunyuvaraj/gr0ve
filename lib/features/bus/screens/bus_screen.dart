@@ -184,7 +184,6 @@ class _BusScreenState extends State<BusScreen> {
                           onRefresh: _refreshBusData,
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.only(bottom: 110),
                             child: Wrap(
                               spacing: 16,
                               runSpacing: 16,

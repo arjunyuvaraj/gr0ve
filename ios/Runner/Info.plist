@@ -72,6 +72,24 @@
         <key>UIPrerenderedIcon</key>
         <false/>
     </dict>
+    <key>cedite</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>cedite</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
+    <key>ash</key>
+    <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+            <string>ash</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+    </dict>
 </dict>
 	</dict>
 	<key>NSAppTransportSecurity</key>

@@ -76,7 +76,7 @@ class SnapshotAbsenceCard extends StatelessWidget {
 
                 return Column(
                   children: starred.map((name) {
-                    final t = teachers.values.firstWhere(
+                    teachers.values.firstWhere(
                       (t) => (t['name'] as String?) == name,
                       orElse: () => {'name': name, 'department': ''},
                     );

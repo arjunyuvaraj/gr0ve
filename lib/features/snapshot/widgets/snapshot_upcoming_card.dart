@@ -47,18 +47,6 @@ class SnapshotUpcomingCard extends StatefulWidget {
 }
 
 class _SnapshotUpcomingCardState extends State<SnapshotUpcomingCard> {
-  bool _showAdd = false;
-  final _tc = TextEditingController(), _sc = TextEditingController();
-  DateTime? _picked;
-  String _type = 'test';
-
-  @override
-  void dispose() {
-    _tc.dispose();
-    _sc.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext ctx) {
     final c = Theme.of(ctx).colorScheme;

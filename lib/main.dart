@@ -37,6 +37,9 @@ import 'package:gr0ve/features/home/services/layout_service.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_pomodoro_card.dart'
     show PomPrefsService;
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
+import 'package:gr0ve/services/settings/accessibility_service.dart';
+import 'package:gr0ve/services/settings/theme_color_service.dart';
+import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 
 // Global navigator key for handling notification taps
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -56,6 +59,8 @@ void main() async {
     AppFeatureFlags.load(),
     CounselorPersonaService.init(),
     ProfilePictureService.init(),
+    AccessibilityService.init(),
+    ThemeColorService.init(),
     dotenv.load(fileName: ".env"),
   ]);
 
@@ -132,8 +137,8 @@ class _MyAppState extends State<MyApp> {
 
     _setupNotificationTapHandler();
 
-    // Show splash animation for 1.2 seconds instead of 2.5
-    Future.delayed(const Duration(milliseconds: 1200), () {
+    // Show splash animation for 1.8 seconds so the full tree stagger finishes
+    Future.delayed(const Duration(milliseconds: 1800), () {
       if (mounted) {
         setState(() => _showLoading = false);
       }
@@ -208,49 +213,69 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<CounselorPersona>(
-      valueListenable: CounselorPersonaService.activePersona,
-      builder: (context, persona, _) {
-        return MaterialApp(
-          title: 'Gr0ve',
-          navigatorKey: navigatorKey,
-          theme: PersonaTheme.light(persona),
-          darkTheme: PersonaTheme.dark(persona),
-          themeMode: ThemeMode.system,
-          debugShowCheckedModeBanner: false,
-          home: _showLoading
-              ? const LogoLoadingScreen()
-              : Builder(
-                  builder: (context) => LandingDecider(
-                    landingPage: kIsWeb
-                        ? const LandingWebsiteScreen()
-                        : const LandingScreen(),
-                    loginPage: const LoginScreen(),
-                    navigationRoute: '/navigation',
+    return ValueListenableBuilder<bool>(
+      valueListenable: AccessibilityService.accessibleColors,
+      builder: (context, isAccessible, _) {
+        return ValueListenableBuilder<CounselorPersona>(
+          valueListenable: CounselorPersonaService.activePersona,
+          builder: (context, persona, _) {
+            return ValueListenableBuilder<AppThemeColor>(
+              valueListenable: ThemeColorService.activeColor,
+              builder: (context, themeColor, _) {
+                return MaterialApp(
+                  title: 'Gr0ve',
+                  navigatorKey: navigatorKey,
+                  theme: PersonaTheme.light(
+                    persona,
+                    themeColor,
+                    isAccessible: isAccessible,
                   ),
-                ),
-          routes: {
-            '/home': (context) => const HomeScreen(),
-            '/teacher_absence': (context) => const AbsenceScreen(),
-            '/landing': (context) => const LandingScreen(),
-            '/login': (context) => const LoginScreen(),
-            '/admin': (context) => const AdminPanelScreen(),
-            '/register': (context) => const RegisterScreen(),
-            '/navigation': (context) => const NavigationScreen(),
-            '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-            '/help': (context) => const HelpScreen(),
-            '/lunch_menu': (context) => const LunchMenuScreen(),
-            '/links': (context) => const LinksScreen(),
-            '/terms': (context) => const TermsOfServiceScreen(),
-          },
-          onGenerateRoute: (settings) {
-            if (settings.name == '/club/join-requests') {
-              final groupId = settings.arguments as String;
-              return MaterialPageRoute(
-                builder: (context) => JoinRequestsScreen(groupId: groupId),
-              );
-            }
-            return null;
+                  darkTheme: PersonaTheme.dark(
+                    persona,
+                    themeColor,
+                    isAccessible: isAccessible,
+                  ),
+                  themeMode: ThemeMode.system,
+                  debugShowCheckedModeBanner: false,
+                  builder: (context, child) {
+                    return SchoolClosedOverlay(child: child!);
+                  },
+                  home: _showLoading
+                      ? const LogoLoadingScreen()
+                      : LandingDecider(
+                          landingPage: kIsWeb
+                              ? const LandingWebsiteScreen()
+                              : const LandingScreen(),
+                          loginPage: const LoginScreen(),
+                          navigationRoute: '/navigation',
+                        ),
+                  routes: {
+                    '/home': (context) => const HomeScreen(),
+                    '/teacher_absence': (context) => const AbsenceScreen(),
+                    '/landing': (context) => const LandingScreen(),
+                    '/login': (context) => const LoginScreen(),
+                    '/admin': (context) => const AdminPanelScreen(),
+                    '/register': (context) => const RegisterScreen(),
+                    '/navigation': (context) => const NavigationScreen(),
+                    '/privacy_policy': (context) => const PrivacyPolicyScreen(),
+                    '/help': (context) => const HelpScreen(),
+                    '/lunch_menu': (context) => const LunchMenuScreen(),
+                    '/links': (context) => const LinksScreen(),
+                    '/terms': (context) => const TermsOfServiceScreen(),
+                  },
+                  onGenerateRoute: (settings) {
+                    if (settings.name == '/club/join-requests') {
+                      final groupId = settings.arguments as String;
+                      return MaterialPageRoute(
+                        builder: (context) =>
+                            JoinRequestsScreen(groupId: groupId),
+                      );
+                    }
+                    return null;
+                  },
+                );
+              },
+            );
           },
         );
       },

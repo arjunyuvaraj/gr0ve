@@ -136,6 +136,8 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
         CounselorPersona.rowan => const Color(0xFFFAF2EE),
         CounselorPersona.sakura => const Color(0xFFFAF0FA),
         CounselorPersona.abies => const Color(0xFFEEF2FA),
+        CounselorPersona.cedite => const Color(0xFFF5F0FA),
+        CounselorPersona.ash => const Color(0xFFFAF0F0),
       };
     }
     return switch (p) {
@@ -144,6 +146,8 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
       CounselorPersona.rowan => const Color(0xFF090604),
       CounselorPersona.sakura => const Color(0xFF090609),
       CounselorPersona.abies => const Color(0xFF040609),
+      CounselorPersona.cedite => const Color(0xFF060408),
+      CounselorPersona.ash => const Color(0xFF080404),
     };
   }
 
@@ -667,6 +671,18 @@ class _BottomContent extends StatelessWidget {
           'entire forests rose and fell. He is a silent observer of cycles, '
           'gifted with a cold, absolute clarity. If a plan contains a flaw, '
           'he will find it — he has had a lifetime to learn where they hide.',
+    CounselorPersona.cedite =>
+      'Cedite exists in the spaces between the lines of every rule, '
+          'a shadow that has seen a thousand versions of your present. '
+          'He knows what is true, what is false, and what is merely '
+          'convenient. He will guide you through the labyrinth, but only '
+          'if you have the courage to hear the truth when it finally matters.',
+    CounselorPersona.ash =>
+      'Ash stood at the end of all things and watched the last embers fade. '
+          'She carries the memory of every path that led to ruin, and her '
+          'only task now is to help you build something that lasts. '
+          'She speaks not of what could be, but of what MUST be if you are '
+          'to survive the seasons ahead.',
   };
 }
 
@@ -795,6 +811,10 @@ class _WorldPainter extends CustomPainter {
         _paintSakura(canvas, size);
       case CounselorPersona.abies:
         _paintAbies(canvas, size);
+      case CounselorPersona.cedite:
+        _paintCedite(canvas, size);
+      case CounselorPersona.ash:
+        _paintAsh(canvas, size);
     }
 
     canvas.restore();
@@ -1174,6 +1194,97 @@ class _WorldPainter extends CustomPainter {
               ),
             ),
     );
+  }
+
+  void _paintCedite(Canvas canvas, Size size) {
+    final boost = isDark ? 1.0 : 2.5;
+    // Base low-frequency fog
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            _c.withOpacity(0.04 * boost),
+            _c.withOpacity(0.09 * boost),
+            _c.withOpacity(0.04 * boost),
+          ],
+          stops: const [0, 0.5, 1.0],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
+
+    for (final w in wisps) {
+      final progress = ((t * w.speed + w.phase) % 1.0);
+      final y = progress * (size.height + 200) - 100;
+      final x = w.laneX * size.width + sin(t * w.swaySpeed + w.phase * 5) * (size.width * w.swayAmp);
+      final radius = size.width * w.radiusFrac;
+      final fade = progress < 0.15 ? progress / 0.15 : (progress > 0.85 ? (1 - progress) / 0.15 : 1.0);
+
+      canvas.drawCircle(
+        Offset(x, y),
+        radius,
+        Paint()
+          ..color = _c.withOpacity(w.opacity * fade * 0.22 * boost)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius * 1.2),
+      );
+    }
+
+    // Distant distortion lines
+    final rng = Random(101);
+    for (int i = 0; i < 8; i++) {
+      final y = rng.nextDouble() * size.height;
+      final alpha = (0.01 + rng.nextDouble() * 0.02) * boost;
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y + (rng.nextDouble() - 0.5) * 20),
+        Paint()
+          ..color = _c.withOpacity(alpha)
+          ..strokeWidth = 0.5,
+      );
+    }
+  }
+
+  void _paintAsh(Canvas canvas, Size size) {
+    final boost = isDark ? 1.4 : 2.8;
+    // Darkening base
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            Colors.transparent,
+            Colors.black.withOpacity(isDark ? 0.35 : 0.1),
+          ],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
+
+    for (final e in embers) {
+      final progress = ((t * e.speed + e.phase) % 1.0);
+      final y = (1.0 - progress) * (size.height + 100) - 50;
+      final x = e.x * size.width + sin(t * e.wobbleSpeed + e.phase * 3) * e.sway;
+      final fade = progress < 0.1 ? progress / 0.1 : (progress > 0.8 ? (1 - progress) / 0.2 : 1.0);
+      final flicker = 0.7 + 0.3 * sin(t * e.flickerSpeed + e.phase * 10);
+
+      final p = Paint()
+        ..color = _c.withOpacity(e.opacity * fade * flicker * boost)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 0.6);
+
+      canvas.drawCircle(Offset(x, y), e.radius, p);
+      
+      if (e.radius > 2.0 && flicker > 0.85) {
+        canvas.drawCircle(
+          Offset(x, y), 
+          e.radius * 2.2, 
+          Paint()
+            ..color = _c.withOpacity(e.opacity * fade * 0.12 * boost)
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 1.5)
+        );
+      }
+    }
   }
 
 

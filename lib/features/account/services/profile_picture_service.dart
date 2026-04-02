@@ -22,6 +22,13 @@ class ProfileVariant {
   /// Brightness-aware asset path.
   String assetPath(Brightness brightness) {
     final mode = brightness == Brightness.dark ? 'dark' : 'light';
+    if (key == 'dawn') {
+      return 'assets/app_icons/png/dawn_$mode.png';
+    }
+    // Use app icons for hidden personas' default PFPs
+    if (persona.isHidden && isDefault) {
+      return 'assets/app_icons/png/${persona.name}_$mode.png';
+    }
     return 'assets/profile/${persona.name}/${persona.name}_${mode}_$key.png';
   }
 
@@ -56,13 +63,17 @@ const List<ProfileVariant> _allVariants = [
   ProfileVariant(key: 'pixel', persona: CounselorPersona.sakura),
   // Hidden counselors — only default shown until unlocked
   ProfileVariant(key: 'default', persona: CounselorPersona.abies),
+  ProfileVariant(key: 'default', persona: CounselorPersona.cedite),
+  ProfileVariant(key: 'default', persona: CounselorPersona.ash),
+  // Special
+  ProfileVariant(key: 'dawn', persona: CounselorPersona.grover),
 ];
 
 /// All variants the user is currently allowed to see.
 List<ProfileVariant> get availableVariants => _allVariants.where((v) {
   if (v.persona.isHidden &&
       !CounselorPersonaService.isPersonaUnlocked(v.persona)) {
-    return v.isDefault; // only show default until hidden counselor unlocked
+    return false; // completely hide if locked
   }
   return true;
 }).toList();

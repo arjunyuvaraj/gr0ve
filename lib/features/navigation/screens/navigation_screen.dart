@@ -87,6 +87,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
     ProfilePictureService.activeVariant.addListener(_onVariantChanged);
   }
 
+
+
   void _onVariantChanged() {
     if (mounted) setState(() {});
   }
@@ -1037,14 +1039,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     horizontal: 48,
                     vertical: 32,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 100), // Height of floating nav + safety
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: KeyedSubtree(
-                        key: ValueKey<String>(_selectedTabId),
-                        child: _screens[_selectedIndex],
-                      ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: KeyedSubtree(
+                      key: ValueKey<String>(_selectedTabId),
+                      child: _screens[_selectedIndex],
                     ),
                   ),
                 ),
@@ -1174,14 +1173,26 @@ class _NavigationScreenState extends State<NavigationScreen> {
         bottom: false,
         child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 100), // Room for floating nav
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) =>
-                    FadeTransition(opacity: animation, child: child),
-                child: KeyedSubtree(
-                  key: ValueKey<String>(_selectedTabId),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: KeyedSubtree(
+                key: ValueKey<String>(_selectedTabId),
+                // Inject nav-bar clearance so every screen's scrollable content
+                // stops above the floating pill. Nav pill sits at bottom:20
+                // with all(10) padding + 28px icons + 24px v-pad ≈ 120px total.
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    // padding is used by SafeArea / scroll views for auto-insets
+                    padding: MediaQuery.of(context).padding.copyWith(
+                      bottom: 120,
+                    ),
+                    // viewPadding is used by Scaffold, keyboard, etc.
+                    viewPadding: MediaQuery.of(context).viewPadding.copyWith(
+                      bottom: 120,
+                    ),
+                  ),
                   child: _screens[_selectedIndex],
                 ),
               ),

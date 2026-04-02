@@ -47,6 +47,7 @@ class _StorageConfig {
 class GoogleDocsClient {
   static auth.AutoRefreshingAuthClient? _authClient;
   static docs.DocsApi? _docsApi;
+  // ignore: unused_field
   static drive.DriveApi? _driveApi;
 
   static Future<void> initialize() async {
@@ -990,16 +991,15 @@ You are speaking via Text-to-Speech. To sound more human:
     required CounselorDomain domain,
     required bool isVoiceMode,
   }) async {
-    final kb = await KnowledgeBaseService.getRelevantContent(
-      query: question,
-      domain: domain,
-    );
+    final results = await Future.wait([
+      KnowledgeBaseService.getRelevantContent(query: question, domain: domain),
+      CourseCatalogService.buildPromptString(academy: profile.academy),
+      LiveDataService.fetchLiveDataForPrompt(),
+    ]);
 
-    final catalog = await CourseCatalogService.buildPromptString(
-      academy: profile.academy,
-    );
-
-    final liveData = await LiveDataService.fetchLiveDataForPrompt();
+    final kb = results[0];
+    final catalog = results[1];
+    final liveData = results[2];
 
     final sb = StringBuffer()
       ..writeln(persona.voicePrompt)

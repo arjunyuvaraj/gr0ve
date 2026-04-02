@@ -150,7 +150,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
     final colors = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 

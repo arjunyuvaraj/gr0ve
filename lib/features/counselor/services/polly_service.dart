@@ -60,6 +60,14 @@ const _voiceConfigs = {
     voiceId: 'Matthew',
     engine: 'generative',
   ),
+  CounselorPersona.cedite: _PollyVoiceConfig(
+    voiceId: 'Brian',
+    engine: 'generative',
+  ),
+  CounselorPersona.ash: _PollyVoiceConfig(
+    voiceId: 'Danielle',
+    engine: 'generative',
+  ),
 };
 
 /// Natural conversation fillers per persona
@@ -81,8 +89,8 @@ const _fillerWords = {
   CounselorPersona.rowan: [
     'Right — ',
     'Look, so — ',
-    'Yeah, honestly — ',
-    'Okay — ',
+    'Yeah, — ',
+    'Honestly? ',
     'Fair enough. ',
   ],
   CounselorPersona.sakura: [
@@ -98,6 +106,20 @@ const _fillerWords = {
     'Yeah, so — ',
     'Hmm. ',
     'Right — ',
+  ],
+  CounselorPersona.cedite: [
+    'Or so you think — ',
+    'A curious perspective... ',
+    'Perhaps. ',
+    'The truth is... well — ',
+    'Fascinating. ',
+  ],
+  CounselorPersona.ash: [
+    'I remember — ',
+    'It feels so long ago — ',
+    'The silence... ',
+    'It\'s all so fragile — ',
+    'Before it all fades — ',
   ],
 };
 
@@ -123,6 +145,7 @@ class _AwsV4Signer {
     required this.accessKey,
     required this.secretKey,
     required this.region,
+    // ignore: unused_element_parameter
     this.service = 'polly',
   });
 
@@ -657,8 +680,8 @@ class PollyService {
         // Cleanup after playback finishes (with timeout)
         Future.delayed(const Duration(seconds: 30), () {
           try {
-            if (audioFile != null && audioFile!.existsSync()) {
-              audioFile!.deleteSync();
+            if (audioFile != null && audioFile.existsSync()) {
+              audioFile.deleteSync();
               debugPrint('[Polly] Cleaned up temp file after 30s');
             }
           } catch (_) {}

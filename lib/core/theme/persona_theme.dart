@@ -2,41 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gr0ve/core/helper/helper_functions.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
-
-// ─────────────────────────────────────────────────────────────
-// PERSONA THEME BUILDER
-//
-// Generates a full ThemeData for light or dark mode using
-// whichever persona is active. Drop-in replacement for the
-// static lightTheme / darkTheme you had before.
-//
-// Usage in main.dart:
-//   ValueListenableBuilder<CounselorPersona>(
-//     valueListenable: CounselorPersonaService.activePersona,
-//     builder: (context, persona, _) {
-//       return MaterialApp(
-//         theme:     PersonaTheme.light(persona),
-//         darkTheme: PersonaTheme.dark(persona),
-//         ...
-//       );
-//     },
-//   )
-// ─────────────────────────────────────────────────────────────
+import 'package:gr0ve/services/settings/theme_color_service.dart';
 
 class PersonaTheme {
   const PersonaTheme._();
 
-  static ThemeData light(CounselorPersona persona) =>
-      _build(persona, Brightness.light);
+  static ThemeData light(CounselorPersona persona, AppThemeColor themeColor, {bool isAccessible = false}) =>
+      _build(persona, themeColor, Brightness.light, isAccessible: isAccessible);
 
-  static ThemeData dark(CounselorPersona persona) =>
-      _build(persona, Brightness.dark);
+  static ThemeData dark(CounselorPersona persona, AppThemeColor themeColor, {bool isAccessible = false}) =>
+      _build(persona, themeColor, Brightness.dark, isAccessible: isAccessible);
 
-  static ThemeData _build(CounselorPersona persona, Brightness brightness) {
+
+  static ThemeData _build(CounselorPersona persona, AppThemeColor themeColor, Brightness brightness, {bool isAccessible = false}) {
     final isDark = brightness == Brightness.dark;
-    print("IS DARK" + isDark.toString());
-    final primary = persona.primary(brightness);
-    final onPrimary = persona.onPrimary(brightness);
+    
+    // Primary color now comes from themeColor, NOT the persona directly
+    final primary = isAccessible 
+        ? const Color(0xFF0072B2) 
+        : themeColor.color(brightness);
+        
+    final onPrimary = themeColor.onColor(brightness);
 
     // ── Scaffold / surface colours (unchanged from your originals) ──
     final scaffoldBg = isDark
@@ -75,7 +61,7 @@ class PersonaTheme {
         onSecondary: onPrimary,
         surface: surface,
         onSurface: onSurface,
-        error: isDark ? const Color(0xFFFFB4B4) : const Color(0xFFC62828),
+        error: isAccessible ? const Color(0xFFD55E00) : (isDark ? const Color(0xFFFFB4B4) : const Color(0xFFC62828)),
         onError: Colors.white,
         tertiary: tertiary,
         onTertiary: onSurface,
@@ -295,6 +281,6 @@ class PersonaTheme {
 
 extension AppColorScheme on ColorScheme {
   Color get success => brightness == Brightness.dark
-      ? const Color(0xFF35B595)
-      : const Color(0xFF1F6F5B);
+      ? const Color(0xFF2ECC71) // Standard Emerald Green
+      : const Color(0xFF27AE60); // Standard Nephrite Green
 }

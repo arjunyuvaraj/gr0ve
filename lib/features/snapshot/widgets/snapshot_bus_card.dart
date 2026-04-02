@@ -19,7 +19,7 @@ class SnapshotBusCard extends StatelessWidget {
 
   String _statusLabel(BusRoute bus) {
     if (_isUnknown(bus)) return 'Unknown';
-    if (bus.status case final s?) {
+    if (bus.status case final s) {
       return switch (s.toLowerCase()) {
         'arrived' => 'Arrived',
         'not here yet' => 'Not here yet',
@@ -28,7 +28,6 @@ class SnapshotBusCard extends StatelessWidget {
         _ => 'Scheduled',
       };
     }
-    return 'Arrived';
   }
 
   // ── Semantic colors — never primary ──────────────────────────────────────

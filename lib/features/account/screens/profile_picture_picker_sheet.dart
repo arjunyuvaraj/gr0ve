@@ -191,11 +191,11 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                                   ),
                                 Flexible(
                                   child: Text(
-                                    // Show "CounselorName · Variant" so users know
-                                    // which counselor each picture belongs to
-                                    v.isDefault
-                                        ? v.persona.displayName
-                                        : '${v.persona.displayName} · ${v.displayName}',
+                                    v.key == 'dawn'
+                                        ? 'Dawn'
+                                        : v.isDefault
+                                            ? v.persona.displayName
+                                            : '${v.persona.displayName} · ${v.displayName}',
                                     textAlign: TextAlign.center,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,

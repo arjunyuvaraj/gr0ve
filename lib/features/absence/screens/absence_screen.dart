@@ -281,7 +281,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                         onRefresh: () => _loadAbsences(silent: true),
                         child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 110),
                           itemCount: ordered.length,
                           itemBuilder: (context, index) {
                             final t = ordered[index];

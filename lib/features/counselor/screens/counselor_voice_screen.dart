@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/counselor/services/polly_service.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -9,6 +8,7 @@ import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart
 import 'package:gr0ve/features/counselor/services/counselor_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/models/counselor.dart';
+import 'package:gr0ve/services/settings/accessibility_service.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ROUTE
@@ -60,28 +60,8 @@ class _VoiceScreenTransition extends StatelessWidget {
 
 class _VoiceThemeManager {
   static _VoiceTheme forPersona(CounselorPersona persona, bool isLight) {
-    final bgColor = isLight
-        ? _lightBackgrounds[persona] ?? const Color(0xFFFAFAFA)
-        : _darkBackgrounds[persona] ?? const Color(0xFF060E0B);
-
-    return isLight ? _VoiceTheme.light(bgColor) : _VoiceTheme.dark(bgColor);
+    return isLight ? _VoiceTheme.light() : _VoiceTheme.dark();
   }
-
-  static const _lightBackgrounds = {
-    CounselorPersona.grover: Color(0xFFFAFAFA),
-    CounselorPersona.aspen: Color(0xFFF8F9FA),
-    CounselorPersona.rowan: Color(0xFFFAF6F2),
-    CounselorPersona.sakura: Color(0xFFFDF8FD),
-    CounselorPersona.abies: Color(0xFFF7F6FB),
-  };
-
-  static const _darkBackgrounds = {
-    CounselorPersona.grover: Color(0xFF060E0B),
-    CounselorPersona.aspen: Color(0xFF07090F),
-    CounselorPersona.rowan: Color(0xFF0E0704),
-    CounselorPersona.sakura: Color(0xFF0E070E),
-    CounselorPersona.abies: Color(0xFF05080F),
-  };
 }
 
 @immutable
@@ -102,8 +82,8 @@ class _VoiceTheme {
     required this.waveformInactive,
   });
 
-  factory _VoiceTheme.light(Color bgColor) => _VoiceTheme(
-    bg: bgColor,
+  factory _VoiceTheme.light() => _VoiceTheme(
+    bg: const Color(0xFFFAFAFA),
     textPrimary: const Color(0xFF1F1F1F),
     textSecondary: const Color(0xFF666666),
     cardBg: Colors.black.withOpacity(0.04),
@@ -111,8 +91,8 @@ class _VoiceTheme {
     waveformInactive: Colors.black.withOpacity(0.12),
   );
 
-  factory _VoiceTheme.dark(Color bgColor) => _VoiceTheme(
-    bg: bgColor,
+  factory _VoiceTheme.dark() => _VoiceTheme(
+    bg: const Color(0xFF060D0C),
     textPrimary: Colors.white,
     textSecondary: Colors.white70,
     cardBg: Colors.white.withOpacity(0.06),
@@ -236,7 +216,12 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
       return;
     }
 
-    _playGreeting();
+    if (AccessibilityService.autoVoiceGreeting.value) {
+      _playGreeting();
+    } else {
+      _setPhase(_VoicePhase.idle);
+      Future.delayed(const Duration(milliseconds: 300), _startListening);
+    }
   }
 
   @override
@@ -575,7 +560,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
     final brightness = MediaQuery.of(context).platformBrightness;
     final isLight = brightness == Brightness.light;
     final theme = _VoiceThemeManager.forPersona(widget.persona, isLight);
-    final pc = widget.persona.primary(brightness);
+    final pc = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: theme.bg,

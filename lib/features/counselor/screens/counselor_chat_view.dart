@@ -63,7 +63,7 @@ class _MessageBubbleState extends State<MessageBubble>
   Widget build(BuildContext context) {
     final msg = widget.message;
     final persona = msg.speaker ?? widget.fallbackPersona;
-    final pc = persona.primary(widget.brightness);
+    final pc = widget.colors.primary;
 
     return FadeTransition(
       opacity: _fade,
@@ -299,7 +299,7 @@ class _ChimePromptBubbleState extends State<ChimePromptBubble>
 
   @override
   Widget build(BuildContext context) {
-    final accent = widget.persona.primary(widget.brightness);
+    final accent = widget.colors.primary;
     final invite = widget.persona.chimeInvite(
       widget.prevSpeakerName.isNotEmpty ? widget.prevSpeakerName : 'them',
     );

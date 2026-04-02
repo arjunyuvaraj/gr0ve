@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 
 class LogoLoadingScreen extends StatefulWidget {
@@ -11,6 +12,7 @@ class LogoLoadingScreen extends StatefulWidget {
 class _LogoLoadingScreenState extends State<LogoLoadingScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  String _version = '';
 
   // Staggered animations - optimized with early termination
   late Animation<double> _logoOpacity;
@@ -25,6 +27,9 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
   @override
   void initState() {
     super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _version = 'v${info.version} (${info.buildNumber})');
+    });
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -38,10 +43,10 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       ),
     );
 
-    _logoScale = Tween<double>(begin: 0.75, end: 1.0).animate(
+    _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.35, curve: Curves.easeOutBack),
+        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
       ),
     );
 
@@ -94,7 +99,7 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       double start = 0.4 + (index * 0.1);
       double end = (start + 0.3).clamp(0.0, 1.0);
       return Tween<Offset>(
-        begin: const Offset(0, 0.15),
+        begin: const Offset(0, 0.8),
         end: Offset.zero,
       ).animate(
         CurvedAnimation(
@@ -123,104 +128,128 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
 
     return Scaffold(
       backgroundColor: colors.surface,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo with glow effect
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _logoOpacity.value,
-                  child: Transform.scale(
-                    scale: _logoScale.value,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Glow background
-                        if (_logoGlow.value > 0.01)
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.primary.withOpacity(
-                                    0.15 * _logoGlow.value,
-                                  ),
-                                  blurRadius: 40,
-                                  spreadRadius: 10,
-                                ),
-                              ],
-                            ),
-                          ),
-                        // Logo text
-                        Text(
-                          "gr0ve",
-                          style: text.displayLarge?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 60),
-            // Trees with enhanced animations
-            Row(
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: AnimatedBuilder(
-                    animation: _controller,
-                    builder: (context, child) {
-                      final asset =
-                          'assets/app_icons/png/${trees[index]}_${isDark ? 'dark' : 'light'}.png';
-                      final opacity = _treeOpacities[index].value;
-
-                      return Transform.translate(
-                        offset: _treeSlides[index].value * 20,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: Transform.rotate(
-                            angle:
-                                (_treeRotations[index].value * 3.14159) / 180.0,
-                            child: Transform.scale(
-                              scale: _treeScales[index].value,
-                              child: Container(
-                                width: 54,
-                                height: 54,
+              children: [
+                // Logo with glow effect
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _logoOpacity.value,
+                      child: Transform.scale(
+                        scale: _logoScale.value,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Glow background
+                            if (_logoGlow.value > 0.01)
+                              Container(
+                                width: 120,
+                                height: 120,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: _buildTreeShadow(
-                                    isDark: isDark,
-                                    colors: colors,
-                                    opacity: opacity,
-                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: colors.primary.withOpacity(
+                                        0.15 * _logoGlow.value,
+                                      ),
+                                      blurRadius: 40,
+                                      spreadRadius: 10,
+                                    ),
+                                  ],
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Image.asset(asset, fit: BoxFit.cover),
+                              ),
+                            // Logo text
+                            Text(
+                              "gr0ve",
+                              style: text.displayLarge?.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 60),
+                // Trees with enhanced animations
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(4, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          final treeName = trees[index];
+                          final asset = 'assets/app_icons/png/${treeName}_${isDark ? 'dark' : 'light'}.png';
+                          final opacity = _treeOpacities[index].value;
+
+                          return Transform.translate(
+                            offset: _treeSlides[index].value * 20,
+                            child: Opacity(
+                              opacity: opacity,
+                              child: Transform.rotate(
+                                angle:
+                                    (_treeRotations[index].value * 3.14159) / 180.0,
+                                child: Transform.scale(
+                                  scale: _treeScales[index].value,
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: _buildTreeShadow(
+                                        isDark: isDark,
+                                        colors: colors,
+                                        opacity: opacity,
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Image.asset(asset, fit: BoxFit.cover),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
+                          );
+                        },
+                      ),
+                    );
+                  }),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: AnimatedOpacity(
+                opacity: _version.isEmpty ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 500),
+                child: Text(
+                  _version,
+                  textAlign: TextAlign.center,
+                  style: text.labelSmall?.copyWith(
+                    color: colors.onSurface.withOpacity(0.3),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 2.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
