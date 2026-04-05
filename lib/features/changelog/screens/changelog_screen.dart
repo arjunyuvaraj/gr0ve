@@ -3,9 +3,92 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/features/changelog/data/changelog_models.dart';
+import 'package:gr0ve/features/changelog/data/changelog_data.dart';
 
-class ChangelogScreen extends StatelessWidget {
+class ChangelogScreen extends StatefulWidget {
   const ChangelogScreen({super.key});
+
+  @override
+  State<ChangelogScreen> createState() => _ChangelogScreenState();
+}
+
+class _ChangelogScreenState extends State<ChangelogScreen> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: Column(
+        children: [
+          const CustomHeader(title: "CHANGELOG"),
+          Expanded(
+            child: Column(
+              children: [
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() => _currentPage = index);
+                    },
+                    itemCount: changelogVersions.length,
+                    itemBuilder: (context, index) {
+                      return _VersionPage(version: changelogVersions[index]);
+                    },
+                  ),
+                ),
+                // Page Indicator
+                if (changelogVersions.length > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(changelogVersions.length, (index) {
+                        final isSelected = _currentPage == index;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          height: 8,
+                          width: isSelected ? 24 : 8,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colors.primary
+                                : colors.onSurface.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VersionPage extends StatelessWidget {
+  final ChangelogVersion version;
+
+  const _VersionPage({required this.version});
 
   @override
   Widget build(BuildContext context) {
@@ -19,191 +102,133 @@ class ChangelogScreen extends StatelessWidget {
       CounselorPersona.sakura,
     ];
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: Column(
-        children: [
-          const CustomHeader(title: "CHANGELOG"),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-              children: [
-                // Version header with overlapping avatars
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.primary.withOpacity(0.15),
-                        colors.primary.withOpacity(0.02),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      children: [
+        // Version header with overlapping avatars
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colors.primary.withOpacity(0.15),
+                colors.primary.withOpacity(0.02),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: colors.primary.withOpacity(0.1)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: colors.primary.withOpacity(0.1)),
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Version ${version.version}',
+                      style: TextStyle(
+                        color: colors.onPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
+                  // Overlapping Avatars
+                  SizedBox(
+                    height: 36,
+                    width: 36.0 + (3 * 24.0),
+                    child: Stack(
+                      children: List.generate(basePersonas.length, (index) {
+                        return Positioned(
+                          right: index * 24.0,
+                          child: Container(
                             decoration: BoxDecoration(
-                              color: colors.primary,
-                              borderRadius: BorderRadius.circular(8),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colors.surface,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            child: Text(
-                              'Version 2.0.0',
-                              style: TextStyle(
-                                color: colors.onPrimary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                letterSpacing: 0.5,
+                            child: ClipOval(
+                              child: Image.asset(
+                                basePersonas[basePersonas.length - 1 - index]
+                                    .avatarAsset(Theme.of(context).brightness),
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                          // Overlapping Avatars
-                          SizedBox(
-                            height: 36,
-                            width: 36.0 + (3 * 24.0),
-                            child: Stack(
-                              children: List.generate(basePersonas.length, (
-                                index,
-                              ) {
-                                return Positioned(
-                                  right: index * 24.0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: colors.surface,
-                                        width: 2,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ClipOval(
-                                      child: Image.asset(
-                                        basePersonas[basePersonas.length -
-                                                1 -
-                                                index]
-                                            .avatarAsset(
-                                              Theme.of(context).brightness,
-                                            ),
-                                        width: 32,
-                                        height: 32,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'A whole new look & feel.',
-                        style: text.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                          color: colors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'We\'ve completely redesigned the entire app to make it faster, smoother, and more beautiful than ever. Here is what\'s new.',
-                        style: text.bodyMedium?.copyWith(
-                          color: colors.onSurface.withOpacity(0.7),
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
+                        );
+                      }),
+                    ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                version.tagline,
+                style: text.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  color: colors.onSurface,
                 ),
-
-                const SizedBox(height: 32),
-
-                // Feature 1
-                _buildFeatureCard(
-                  context: context,
-                  icon: HugeIcons.strokeRoundedTime03,
-                  title: 'Time-Adaptive Home',
-                  description:
-                      'Your dashboard now automatically adapts its layout based on the time of day: morning, school hours, and evening.',
-                  color: CounselorPersona.grover.primary(
-                    Theme.of(context).brightness,
-                  ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                version.description,
+                style: text.bodyMedium?.copyWith(
+                  color: colors.onSurface.withOpacity(0.7),
+                  height: 1.5,
                 ),
-
-                // Feature 2
-                _buildFeatureCard(
-                  context: context,
-                  icon: HugeIcons.strokeRoundedGridView,
-                  title: 'Customizable Navigation',
-                  description:
-                      'Reorder and hide navigation tabs to create a personalized experience that perfectly fits your daily needs.',
-                  color: CounselorPersona.aspen.primary(
-                    Theme.of(context).brightness,
-                  ),
-                ),
-
-                // Feature 3
-                _buildFeatureCard(
-                  context: context,
-                  icon: HugeIcons.strokeRoundedCalendar03,
-                  title: 'All-New Calendar',
-                  description:
-                      'A completely rebuilt calendar page to track your schedule, events, and assignments effortlessly in one place.',
-                  color: CounselorPersona.rowan.primary(
-                    Theme.of(context).brightness,
-                  ),
-                ),
-
-                // Feature 4
-                _buildFeatureCard(
-                  context: context,
-                  icon: HugeIcons.strokeRoundedUserCircle,
-                  title: 'Profile Pictures & More',
-                  description:
-                      'Personalize your account with expressive avatars. Who knows? You might even discover some hidden characters.',
-                  color: CounselorPersona.sakura.primary(
-                    Theme.of(context).brightness,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Features
+        ...version.features.map((feature) {
+          return _ChangelogFeatureCard(feature: feature);
+        }),
+
+        const SizedBox(height: 24),
+      ],
     );
   }
+}
 
-  Widget _buildFeatureCard({
-    required BuildContext context,
-    required dynamic icon,
-    required String title,
-    required String description,
-    required Color color,
-    Widget? bottomWidget,
-  }) {
+class _ChangelogFeatureCard extends StatelessWidget {
+  final ChangelogFeature feature;
+
+  const _ChangelogFeatureCard({required this.feature});
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final text = context.text;
+    final color = feature.color ?? colors.primary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -231,12 +256,12 @@ class ChangelogScreen extends StatelessWidget {
                   color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: HugeIcon(icon: icon, color: color, size: 24),
+                child: HugeIcon(icon: feature.icon, color: color, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  title,
+                  feature.title,
                   style: text.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -246,16 +271,12 @@ class ChangelogScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            description,
+            feature.description,
             style: text.bodyMedium?.copyWith(
               color: colors.onSurface.withOpacity(0.6),
               height: 1.4,
             ),
           ),
-          if (bottomWidget != null) ...[
-            const SizedBox(height: 16),
-            bottomWidget,
-          ],
         ],
       ),
     );

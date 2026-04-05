@@ -28,7 +28,8 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
   void initState() {
     super.initState();
     PackageInfo.fromPlatform().then((info) {
-      if (mounted) setState(() => _version = 'v${info.version} (${info.buildNumber})');
+      if (mounted)
+        setState(() => _version = 'Version ${info.version}: Orchard');
     });
     _controller = AnimationController(
       vsync: this,
@@ -189,7 +190,8 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                         animation: _controller,
                         builder: (context, child) {
                           final treeName = trees[index];
-                          final asset = 'assets/app_icons/png/${treeName}_${isDark ? 'dark' : 'light'}.png';
+                          final asset =
+                              'assets/app_icons/png/${treeName}_${isDark ? 'dark' : 'light'}.png';
                           final opacity = _treeOpacities[index].value;
 
                           return Transform.translate(
@@ -198,7 +200,8 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                               opacity: opacity,
                               child: Transform.rotate(
                                 angle:
-                                    (_treeRotations[index].value * 3.14159) / 180.0,
+                                    (_treeRotations[index].value * 3.14159) /
+                                    180.0,
                                 child: Transform.scale(
                                   scale: _treeScales[index].value,
                                   child: Container(
@@ -214,7 +217,10 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
-                                      child: Image.asset(asset, fit: BoxFit.cover),
+                                      child: Image.asset(
+                                        asset,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),

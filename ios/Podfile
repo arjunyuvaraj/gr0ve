@@ -30,6 +30,7 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
 
+  pod 'SwiftTryCatch', :git => 'https://github.com/williamFalcon/SwiftTryCatch.git', :commit => '6effaa3'
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths

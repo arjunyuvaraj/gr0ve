@@ -132,22 +132,6 @@ class HelpScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 24),
-
-                  // Changelog section
-                  Text(
-                    "WHAT'S NEW",
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: colors.onSurface.withOpacity(0.5),
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  ChangelogPager(changelogEntries: changelogEntries),
-
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

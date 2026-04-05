@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -71,6 +72,9 @@ const List<ProfileVariant> _allVariants = [
 
 /// All variants the user is currently allowed to see.
 List<ProfileVariant> get availableVariants => _allVariants.where((v) {
+  if (v.key == 'dawn') {
+    return DawnUnlockService.isUnlocked.value;
+  }
   if (v.persona.isHidden &&
       !CounselorPersonaService.isPersonaUnlocked(v.persona)) {
     return false; // completely hide if locked

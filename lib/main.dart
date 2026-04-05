@@ -23,6 +23,7 @@ import 'package:gr0ve/legal/terms_screen.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:gr0ve/features/absence/services/teacher_service.dart';
 import 'package:gr0ve/core/helper/landing_decider.dart';
+import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gr0ve/core/helper/teacher_utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -98,6 +99,7 @@ Future<void> _bootUserServices(User user) async {
     LayoutService.load(),
     PomPrefsService.load(),
     ProfilePictureService.init(),
+    DawnUnlockService.init(),
   ]);
 
   if (kDebugMode) print('[BOOT] All services ready');

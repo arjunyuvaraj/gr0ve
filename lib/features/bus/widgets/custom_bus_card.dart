@@ -7,6 +7,8 @@ class CustomBusCard extends StatelessWidget {
   final bool starred;
   final GestureTapCallback onStarTap;
   final bool isLoggedIn;
+  final bool isAdmin;
+  final VoidCallback? onEditTap;
 
   const CustomBusCard({
     super.key,
@@ -14,6 +16,8 @@ class CustomBusCard extends StatelessWidget {
     required this.starred,
     required this.onStarTap,
     required this.isLoggedIn,
+    this.isAdmin = false,
+    this.onEditTap,
   });
 
   @override
@@ -80,6 +84,31 @@ class CustomBusCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (isAdmin) ...[
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: onEditTap,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.edit_rounded,
+                          size: 14,
+                          color: colors.primary.withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Edit Details',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colors.primary.withOpacity(0.7),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

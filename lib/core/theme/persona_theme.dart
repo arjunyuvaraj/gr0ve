@@ -7,21 +7,35 @@ import 'package:gr0ve/services/settings/theme_color_service.dart';
 class PersonaTheme {
   const PersonaTheme._();
 
-  static ThemeData light(CounselorPersona persona, AppThemeColor themeColor, {bool isAccessible = false}) =>
+  static ThemeData light(
+    CounselorPersona persona,
+    AppThemeColor themeColor, {
+    bool isAccessible = false,
+  }) =>
       _build(persona, themeColor, Brightness.light, isAccessible: isAccessible);
 
-  static ThemeData dark(CounselorPersona persona, AppThemeColor themeColor, {bool isAccessible = false}) =>
+  static ThemeData dark(
+    CounselorPersona persona,
+    AppThemeColor themeColor, {
+    bool isAccessible = false,
+  }) =>
       _build(persona, themeColor, Brightness.dark, isAccessible: isAccessible);
 
-
-  static ThemeData _build(CounselorPersona persona, AppThemeColor themeColor, Brightness brightness, {bool isAccessible = false}) {
+  static ThemeData _build(
+    CounselorPersona persona,
+    AppThemeColor themeColor,
+    Brightness brightness, {
+    bool isAccessible = false,
+  }) {
     final isDark = brightness == Brightness.dark;
-    
-    // Primary color now comes from themeColor, NOT the persona directly
-    final primary = isAccessible 
-        ? const Color(0xFF0072B2) 
-        : themeColor.color(brightness);
-        
+
+    // Primary color: counselorSync uses the active persona's colour, otherwise use themeColor
+    final primary = isAccessible
+        ? const Color(0xFF0072B2)
+        : (themeColor == AppThemeColor.counselorSync
+              ? persona.primary(brightness)
+              : themeColor.color(brightness));
+
     final onPrimary = themeColor.onColor(brightness);
 
     // ── Scaffold / surface colours (unchanged from your originals) ──
@@ -40,7 +54,7 @@ class PersonaTheme {
         ? const Color(0xFF3D1F1F)
         : const Color(0xFFFFEBEE);
     final onErrorContainer = isDark
-        ? const Color(0xFFFFB4B4)
+        ? const Color(0xFFFF8A8A)
         : const Color(0xFFC62828);
 
     // Input fill uses surface in dark, tertiary in light
@@ -61,7 +75,9 @@ class PersonaTheme {
         onSecondary: onPrimary,
         surface: surface,
         onSurface: onSurface,
-        error: isAccessible ? const Color(0xFFD55E00) : (isDark ? const Color(0xFFFFB4B4) : const Color(0xFFC62828)),
+        error: isAccessible
+            ? const Color(0xFFD55E00)
+            : (isDark ? const Color(0xFFFFB4B4) : const Color(0xFFC62828)),
         onError: Colors.white,
         tertiary: tertiary,
         onTertiary: onSurface,
@@ -281,6 +297,6 @@ class PersonaTheme {
 
 extension AppColorScheme on ColorScheme {
   Color get success => brightness == Brightness.dark
-      ? const Color(0xFF2ECC71) // Standard Emerald Green
-      : const Color(0xFF27AE60); // Standard Nephrite Green
+      ? const Color(0xFF35B595) // Grover Green
+      : const Color(0xFF1F6F5B);
 }

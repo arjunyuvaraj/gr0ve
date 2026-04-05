@@ -13,8 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
-import 'package:flutter_dynamic_launcher_icon/flutter_dynamic_launcher_icon.dart';
+import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
 
 enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite, ash }
 
@@ -247,9 +246,9 @@ class CounselorPersonaService {
     _persistUnlock(_ashUnlockedField);
   }
 
-  static void lockAshForever() {
+  static Future<void> lockAshForever() async {
     _ashLockedForever = true;
-    _persistUnlock(_ashLockedForeverField);
+    await _persistUnlock(_ashLockedForeverField);
   }
 
   static Future<void> _persistUnlock(String field) async {
@@ -289,7 +288,7 @@ class CounselorPersonaService {
 
     try {
       // Check if dynamic icons are supported
-      final supported = await FlutterDynamicLauncherIcon.isSupported;
+      final supported = await FlutterDynamicIconPlus.supportsAlternateIcons;
       results['supported'] = supported;
 
       if (!supported) {
@@ -297,7 +296,7 @@ class CounselorPersonaService {
       }
 
       // Get current icon
-      final current = await FlutterDynamicIcon.getAlternateIconName();
+      final current = await FlutterDynamicIconPlus.alternateIconName;
       results['current_icon'] = current ?? 'default';
 
       // Try to get the list of available icons
@@ -308,7 +307,7 @@ class CounselorPersonaService {
       for (final iconName in testIcons) {
         try {
           // This will fail fast if the icon doesn't exist in Info.plist
-          await FlutterDynamicIcon.supportsAlternateIcons;
+          await FlutterDynamicIconPlus.supportsAlternateIcons;
           availableIcons.add(iconName);
         } catch (e) {
           debugPrint('[DIAGNOSTIC] Icon "$iconName" test: ${e.toString()}');
@@ -330,13 +329,13 @@ class CounselorPersonaService {
     if (!Platform.isIOS) return;
 
     try {
-      final supported = await FlutterDynamicLauncherIcon.isSupported;
+      final supported = await FlutterDynamicIconPlus.supportsAlternateIcons;
       if (!supported) {
         debugPrint('[ICON] Dynamic icons not supported on this device');
         return;
       }
 
-      final current = await FlutterDynamicIcon.getAlternateIconName();
+      final current = await FlutterDynamicIconPlus.alternateIconName;
       debugPrint('[ICON] Current icon: ${current ?? "default"}');
 
       if (current == persona.iosIconName) {
@@ -344,13 +343,11 @@ class CounselorPersonaService {
         return;
       }
 
-      // ── MUCH LONGER COOLDOWN ────────────────────────────────────────────
-      // Some reports suggest iOS needs 10-15 seconds between icon changes
-
+      // ── MINIMAL COOLDOWN ────────────────────────────────────────────────
       final now = DateTime.now();
       if (_lastIconChangeAttempt != null) {
         final timeSinceLastChange = now.difference(_lastIconChangeAttempt!);
-        const minInterval = Duration(seconds: 15); // Increased from 2 to 15
+        const minInterval = Duration(seconds: 3);
 
         if (timeSinceLastChange < minInterval) {
           final waitTime = minInterval - timeSinceLastChange;
@@ -361,48 +358,21 @@ class CounselorPersonaService {
         }
       }
 
-      // ── SINGLE ATTEMPT WITH BETTER ERROR HANDLING ───────────────────────
+      // ── CHANGE ATTEMPT ──────────────────────────────────────────────────
       try {
         debugPrint('[ICON] Changing iOS icon to: ${persona.iosIconName}');
 
-        await FlutterDynamicLauncherIcon.changeIcon(persona.iosIconName);
+        // 'grover' is our default icon in Info.plist (AppIcon) or the primary one.
+        // On iOS, setting it to null reverts to CFBundlePrimaryIcon.
+        await FlutterDynamicIconPlus.setAlternateIconName(
+          iconName: persona.iosIconName == 'grover' ? null : persona.iosIconName,
+        );
         _lastIconChangeAttempt = DateTime.now();
 
         debugPrint('[ICON] ✅ Successfully changed to ${persona.iosIconName}');
-
-        // Verify the change
-        final newIcon = await FlutterDynamicIcon.getAlternateIconName();
-        debugPrint('[ICON] Verified: Icon is now ${newIcon ?? "default"}');
       } on PlatformException catch (e) {
         debugPrint('[ICON] ❌ PlatformException: ${e.code}');
         debugPrint('[ICON] Message: ${e.message}');
-        debugPrint('[ICON] Details: ${e.details}');
-
-        // Check if it's the specific error we're seeing
-        if (e.message?.contains('Resource temporarily unavailable') == true) {
-          debugPrint(
-            '[ICON] 🔍 DIAGNOSIS: iOS is still rate limiting even after 15s wait',
-          );
-          debugPrint('[ICON] 🔍 This suggests either:');
-          debugPrint(
-            '[ICON]    1. iOS has a per-device cooldown we cannot override',
-          );
-          debugPrint(
-            '[ICON]    2. The icon name "${persona.iosIconName}" is not in Info.plist',
-          );
-          debugPrint(
-            '[ICON]    3. The app needs to be fully restarted between icon changes',
-          );
-
-          // Try to provide helpful next steps
-          debugPrint('[ICON] 💡 Next steps to debug:');
-          debugPrint('[ICON]    - Check Info.plist for CFBundleAlternateIcons');
-          debugPrint(
-            '[ICON]    - Verify icon name matches exactly (case-sensitive)',
-          );
-          debugPrint('[ICON]    - Try changing icon manually in Settings app');
-          debugPrint('[ICON]    - Test on a different iOS device');
-        }
       }
     } catch (e, stack) {
       debugPrint('[ICON] ❌ Unexpected error: $e');

@@ -12,6 +12,7 @@ import 'package:gr0ve/features/changelog/screens/changelog_screen.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
+import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 
 // Import your screens
 import 'package:gr0ve/features/account/screens/account_screen.dart';
@@ -85,6 +86,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
     ProfilePictureService.activeVariant.addListener(_onVariantChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) DawnUnlockService.checkAndUnlock(context);
+    });
   }
 
 
@@ -1194,6 +1198,29 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     ),
                   ),
                   child: _screens[_selectedIndex],
+                ),
+              ),
+            ),
+            // Mask for the bottom area to prevent content from being visible behind/below the pill
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 110,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
+                      stops: const [0.0, 0.3, 1.0],
+                    ),
+                  ),
                 ),
               ),
             ),

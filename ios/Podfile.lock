@@ -1316,8 +1316,9 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - Flutter (1.0.0)
-  - flutter_dynamic_icon (0.0.1):
+  - flutter_dynamic_icon_plus (1.0.0):
     - Flutter
+    - SwiftTryCatch
   - flutter_dynamic_launcher_icon (0.0.1):
     - Flutter
   - flutter_local_notifications (0.0.1):
@@ -1499,6 +1500,7 @@ PODS:
     - CwlCatchException
     - Flutter
     - FlutterMacOS
+  - SwiftTryCatch (1.0.0)
   - url_launcher_ios (0.0.1):
     - Flutter
 
@@ -1511,7 +1513,7 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
-  - flutter_dynamic_icon (from `.symlinks/plugins/flutter_dynamic_icon/ios`)
+  - flutter_dynamic_icon_plus (from `.symlinks/plugins/flutter_dynamic_icon_plus/ios`)
   - flutter_dynamic_launcher_icon (from `.symlinks/plugins/flutter_dynamic_launcher_icon/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
@@ -1521,6 +1523,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
+  - SwiftTryCatch (from `https://github.com/williamFalcon/SwiftTryCatch.git`, commit `6effaa3`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -1572,8 +1575,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
-  flutter_dynamic_icon:
-    :path: ".symlinks/plugins/flutter_dynamic_icon/ios"
+  flutter_dynamic_icon_plus:
+    :path: ".symlinks/plugins/flutter_dynamic_icon_plus/ios"
   flutter_dynamic_launcher_icon:
     :path: ".symlinks/plugins/flutter_dynamic_launcher_icon/ios"
   flutter_local_notifications:
@@ -1592,8 +1595,16 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   speech_to_text:
     :path: ".symlinks/plugins/speech_to_text/darwin"
+  SwiftTryCatch:
+    :commit: 6effaa3
+    :git: https://github.com/williamFalcon/SwiftTryCatch.git
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+
+CHECKOUT OPTIONS:
+  SwiftTryCatch:
+    :commit: 6effaa3
+    :git: https://github.com/williamFalcon/SwiftTryCatch.git
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
@@ -1622,7 +1633,7 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 9d2fa84a46676302b89dbd5e6e62bce2fe376909
   FirebaseStorage: 3ba2348d876c295236cdd9f408a62d3f9ff8e6b5
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_dynamic_icon: 9b73b8d673f589e913991cc025c007823c59ed19
+  flutter_dynamic_icon_plus: 3ddd12bc2316b98ffdd4048e9cdd3cf51e02095d
   flutter_dynamic_launcher_icon: 4938f52504820660b50a2a766ea9d59305d8b041
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
@@ -1643,8 +1654,9 @@ SPEC CHECKSUMS:
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   speech_to_text: 3b313d98516d3d0406cea424782ec25470c59d19
+  SwiftTryCatch: 2f4ef36cf5396bdb450006b70633dbce5260d3b3
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
-PODFILE CHECKSUM: 53a6aebc29ccee84c41f92f409fc20cd4ca011f1
+PODFILE CHECKSUM: 0da374a8b96b5f6a46c5d4f80ace12b42280c57d
 
 COCOAPODS: 1.16.2

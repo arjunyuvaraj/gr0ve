@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TERMS OF SERVICE DATA
@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 final List<Map<String, String>> termsAndPolicySections = [
   {
     "title": "Gr0ve Terms of Service & Privacy Policy",
-    "content": "Last Updated: January 13, 2026",
+    "content": "Last Updated: April 5, 2026",
   },
   // ═════════════════════════════════════════════════════════════════
   // DISCLAIMERS
@@ -17,12 +17,12 @@ final List<Map<String, String>> termsAndPolicySections = [
   {
     "title": "IMPORTANT DISCLAIMERS",
     "content":
-        "This app provides information in good faith, but accuracy is NOT guaranteed. Please read carefully:",
+        "This app provides information in good faith, but accuracy is NOT guaranteed. Please read the following disclaimers carefully before using Gr0ve:",
   },
   {
     "title": "Counselor Information",
     "content":
-        "The Counselor feature is NOT 100% accurate. Information is provided as guidance only. Always verify with official sources (counselors, school office) before making decisions. The Forgotten Trees (Abies, Ash) are entertainment only and should never be relied upon.",
+        "The Counselor feature uses AI to generate responses and is NOT a substitute for professional mental health, academic, or legal advice. AI-generated responses may be inaccurate or incomplete. Always consult a qualified professional for important decisions. The Forgotten Trees personas (Abies, Ash) are entertainment features only and must not be relied upon for any guidance.",
   },
   {
     "title": "Absences",
@@ -76,12 +76,12 @@ final List<Map<String, String>> termsAndPolicySections = [
   {
     "title": "06. Data Storage & Security",
     "content":
-        "All data is stored locally on the user's device, except for authentication credentials stored securely by Firebase Authentication. Reasonable safeguards are in place to protect locally stored data. Sensitive information such as passwords are never stored in plain text.",
+        "Account-related data (acceptance of terms, preferences) is stored in Firebase Firestore. Authentication credentials are managed by Firebase Authentication. All data is processed and stored using Google Firebase services which comply with standard security practices. Sensitive information such as passwords are never stored in plain text by the app.",
   },
   {
-    "title": "07. Children's Privacy",
+    "title": "07. Children's Privacy (COPPA)",
     "content":
-        "Gr0ve is intended for students of Bergen County Academies, generally aged 13 and above. The app does not knowingly collect information from children under the age of 13. If a child under 13 creates an account by mistake, parents may request deletion via the support contact below.",
+        "Gr0ve is intended for students of Bergen County Academies, generally aged 13 and above. This app does not target children under 13 and does not knowingly collect personal information from children under 13. If a parent or guardian believes a child under 13 has created an account, they should contact us at gr0ve.bca@gmail.com to request data deletion immediately.",
   },
   {
     "title": "08. Policy Updates",
@@ -146,6 +146,35 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
           ? (currentScroll / maxScroll).clamp(0, 1)
           : 1;
     });
+  }
+
+  Future<void> _handleDecline() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Decline Terms?'),
+        content: const Text(
+          'Declining the Terms of Service means you cannot use Gr0ve. You will be signed out.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Go Back'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'Sign Out',
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await FirebaseAuth.instance.signOut();
+      if (mounted) Navigator.pop(context);
+    }
   }
 
   @override
@@ -225,7 +254,7 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
                       final isHeader = index == 0;
                       final isSectionBreak =
                           title.startsWith('PRIVACY POLICY') ||
-                          title.startsWith('⚠️ IMPORTANT DISCLAIMERS');
+                          title.startsWith('IMPORTANT DISCLAIMERS');
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,69 +383,66 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
                 ),
                 const SizedBox(height: 16),
 
-                // Buttons
-                if (widget.isBlockingCounselorAccess)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _hasRead
-                          ? () async {
-                              await TermsOfServiceService.acceptTerms();
-                              if (mounted) Navigator.pop(context);
-                              widget.onAccepted?.call();
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        disabledBackgroundColor: colors.primary.withOpacity(
-                          0.35,
-                        ),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Accept & Continue',
-                        style: textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
+                // Accept button (both modes)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _hasRead
+                        ? () async {
+                            await TermsOfServiceService.acceptTerms();
+                            if (mounted) Navigator.pop(context);
+                            widget.onAccepted?.call();
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      disabledBackgroundColor:
+                          colors.primary.withOpacity(0.35),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                  )
-                else
+                    child: Text(
+                      widget.isBlockingCounselorAccess
+                          ? 'Accept & Continue'
+                          : 'I Understand',
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Decline button (blocking mode only)
+                if (widget.isBlockingCounselorAccess) ...[
+                  const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _hasRead
-                          ? () async {
-                              await TermsOfServiceService.acceptTerms();
-                              if (mounted) Navigator.pop(context);
-                              widget.onAccepted?.call();
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        disabledBackgroundColor: colors.primary.withOpacity(
-                          0.35,
+                    child: OutlinedButton(
+                      onPressed: _handleDecline,
+                      style: OutlinedButton.styleFrom(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(
+                          color: colors.outline.withOpacity(0.3),
                         ),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       child: Text(
-                        'I Understand',
+                        'Decline',
                         style: textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: colors.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -425,6 +451,7 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
     );
   }
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TERMS OF SERVICE SERVICE

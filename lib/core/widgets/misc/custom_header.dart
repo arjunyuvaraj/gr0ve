@@ -8,8 +8,9 @@ import 'package:gr0ve/features/privacy_policy/privacy_policy.dart';
 
 class CustomHeader extends StatelessWidget {
   final String title;
+  final Widget? action;
 
-  const CustomHeader({super.key, required this.title});
+  const CustomHeader({super.key, required this.title, this.action});
 
   String _getSarcasticSubtitle(String title) {
     final t = title.toUpperCase();
@@ -47,17 +48,31 @@ class CustomHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          displaySubtitle.toUpperCase(),
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 4.0,
-            color: context.colors.onSurface.withOpacity(0.5),
-          ),
-          textAlign: TextAlign.center,
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              children: [
+                Text(
+                  displaySubtitle.toUpperCase(),
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 4.0,
+                    color: context.colors.onSurface.withOpacity(0.5),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+            if (action != null)
+              Positioned(
+                right: 0,
+                child: action!,
+              ),
+          ],
         ),
-        const SizedBox(height: 8),
         Text(
           title.toUpperCase(),
           style: context.text.displayLarge?.copyWith(

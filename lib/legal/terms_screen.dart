@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/legal/legal.dart';
 
@@ -46,6 +47,40 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   Future<void> _acceptTerms() async {
     await TermsOfServiceService.acceptTerms();
     if (mounted) Navigator.pop(context);
+  }
+
+  Future<void> _declineTerms() async {
+    if (!widget.isBlocking) {
+      Navigator.pop(context);
+      return;
+    }
+    // Show confirmation before signing out
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Decline Terms?'),
+        content: const Text(
+          'Declining the Terms of Service means you cannot use Gr0ve. You will be signed out.'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Go Back'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'Sign Out',
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -220,7 +255,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                       // Decline button
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () => _declineTerms(),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             side: BorderSide(

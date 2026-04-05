@@ -10,6 +10,8 @@ class CustomTeacherCard extends StatefulWidget {
   final bool starred;
   final GestureTapCallback onStarTap;
   final bool showStar;
+  final bool isAdmin;
+  final VoidCallback? onEditTap;
 
   const CustomTeacherCard({
     super.key,
@@ -20,6 +22,8 @@ class CustomTeacherCard extends StatefulWidget {
     required this.starred,
     required this.onStarTap,
     required this.showStar,
+    this.isAdmin = false,
+    this.onEditTap,
   });
 
   @override
@@ -92,6 +96,19 @@ class _CustomTeacherCardState extends State<CustomTeacherCard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (widget.isAdmin) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: Icon(
+                            Icons.edit_rounded,
+                            size: 20,
+                            color: colors.primary.withOpacity(0.8),
+                          ),
+                          onPressed: widget.onEditTap,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,

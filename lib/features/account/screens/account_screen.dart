@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
 import 'dart:async';
+import 'dart:ui' as dart_ui;
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
 import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
@@ -22,6 +23,7 @@ import 'package:gr0ve/features/easter_eggs/ash_screen.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/services/settings/accessibility_service.dart';
 import 'package:gr0ve/services/settings/theme_color_service.dart';
+import 'package:gr0ve/features/account/screens/credits_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onCustomizeNavigation;
@@ -166,341 +168,327 @@ class _AccountScreenState extends State<AccountScreen> {
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(ctx).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(ctx).colorScheme.outline.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'App Theme Color',
-              style: Theme.of(
-                ctx,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Choose your favorite accent color for the app.',
-              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(ctx).colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 24),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 5,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 0.85,
-              ),
-              itemCount: AppThemeColor.values.length,
-              itemBuilder: (context, index) {
-                final color = AppThemeColor.values[index];
-                final isSelected = color == _activeAppColor;
-                final brightness = Theme.of(ctx).brightness;
-                return GestureDetector(
-                  onTap: () {
-                    if (color == AppThemeColor.custom) {
-                      _showCustomColorPicker();
-                    } else {
-                      ThemeColorService.setColor(color);
-                      Navigator.pop(ctx);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? color.color(brightness).withOpacity(0.12)
-                          : Theme.of(
-                              ctx,
-                            ).colorScheme.surfaceVariant.withOpacity(0.35),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? color.color(brightness)
-                            : Theme.of(
-                                ctx,
-                              ).colorScheme.outline.withOpacity(0.1),
-                        width: 2,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: color.color(brightness),
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? null
-                                : Border.all(
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                          ),
-                          child: isSelected
-                              ? const Icon(
-                                  Icons.check,
-                                  size: 12,
-                                  color: Colors.white,
-                                )
-                              : (color == AppThemeColor.custom
-                                    ? const Icon(
-                                        Icons.add,
-                                        size: 12,
-                                        color: Colors.white,
-                                      )
-                                    : null),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          color.displayName,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: isSelected
-                                ? FontWeight.w800
-                                : FontWeight.w600,
-                            color: isSelected
-                                ? color.color(brightness)
-                                : Theme.of(ctx).colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showCustomColorPicker() async {
-    Color selectedColor = ThemeColorService.customColorValue;
-    String hexInput = selectedColor.value
-        .toRadixString(16)
-        .padLeft(8, '0')
-        .substring(2)
-        .toUpperCase();
-    final controller = TextEditingController(text: hexInput);
-
-    await showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) {
-          final surfaceColor = Theme.of(ctx).colorScheme.surface;
-          final contrast = _getContrastRatio(selectedColor, surfaceColor);
-          final isAccessible =
-              contrast >= 3.0; // 3:1 is minimum for large text/ui elements
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (ctx) {
+        final colors = Theme.of(ctx).colorScheme;
+        final brightness = Theme.of(ctx).brightness;
+        final isDark = brightness == Brightness.dark;
 
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom,
-            ),
+        final regularColors = AppThemeColor.values.where((c) {
+          if (c == AppThemeColor.counselorSync) return false;
+          if (c == AppThemeColor.abies)
+            return CounselorPersonaService.abiesUnlocked;
+          if (c == AppThemeColor.cedite)
+            return CounselorPersonaService.cediteUnlocked;
+          if (c == AppThemeColor.ash)
+            return CounselorPersonaService.ashUnlocked;
+          return true;
+        }).toList();
+
+        return BackdropFilter(
+          filter: dart_ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: SafeArea(
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(ctx).colorScheme.surface,
+                color: isDark
+                    ? const Color(0xFF101010).withOpacity(0.7)
+                    : Colors.white.withOpacity(0.85),
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
+                  top: Radius.circular(32),
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: colors.outline.withOpacity(0.15),
+                    width: 1,
+                  ),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+              padding: const EdgeInsets.fromLTRB(0, 12, 0, 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
                     child: Container(
-                      width: 40,
-                      height: 4,
+                      width: 48,
+                      height: 5,
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          ctx,
-                        ).colorScheme.outline.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(2),
+                        color: colors.onSurface.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    'Custom Theme Color',
-                    style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Enter a hex code to create your own style.',
-                    style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(
-                        ctx,
-                      ).colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: selectedColor,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Theme.of(
-                              ctx,
-                            ).colorScheme.outline.withOpacity(0.1),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: selectedColor.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          isAccessible
-                              ? Icons.check_circle_rounded
-                              : Icons.warning_amber_rounded,
-                          color: contrast > 4.5
-                              ? Colors.white
-                              : (selectedColor.computeLuminance() > 0.5
-                                    ? Colors.black
-                                    : Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CustomTextField(
-                              hintText: 'HEX (e.g. FF5733)',
-                              controller: controller,
-                              obscureText: false,
-                              onChange: (val) {
-                                try {
-                                  String cleanHex = val
-                                      .replaceAll('#', '')
-                                      .trim();
-                                  if (cleanHex.length == 6) {
-                                    final newColor = Color(
-                                      int.parse('FF$cleanHex', radix: 16),
-                                    );
-                                    setModalState(() {
-                                      selectedColor = newColor;
-                                      hexInput = cleanHex;
-                                    });
-                                  }
-                                } catch (_) {}
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'App Theme',
+                          style: Theme.of(ctx).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
                               ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Select an accent color or sync with your counselor's persona.",
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                            color: colors.onSurface.withOpacity(0.6),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Sync Tile
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: GestureDetector(
+                      onTap: () {
+                        ThemeColorService.setColor(AppThemeColor.counselorSync);
+                        Navigator.pop(ctx);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient:
+                              _activeAppColor == AppThemeColor.counselorSync
+                              ? LinearGradient(
+                                  colors: [
+                                    colors.primary.withAlpha(isDark ? 50 : 35),
+                                    colors.primary.withAlpha(isDark ? 90 : 60),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                              : LinearGradient(
+                                  colors: [
+                                    colors.surfaceVariant.withAlpha(150),
+                                    colors.surfaceVariant.withAlpha(80),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color:
+                                _activeAppColor == AppThemeColor.counselorSync
+                                ? colors.primary.withAlpha(150)
+                                : colors.outline.withAlpha(30),
+                            width:
+                                _activeAppColor == AppThemeColor.counselorSync
+                                ? 1.5
+                                : 1,
+                          ),
+                          boxShadow:
+                              _activeAppColor == AppThemeColor.counselorSync
+                              ? [
+                                  BoxShadow(
+                                    color: colors.primary.withAlpha(50),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
                               decoration: BoxDecoration(
                                 color:
-                                    (isAccessible
-                                            ? Colors.green
-                                            : Colors.orange)
-                                        .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(6),
+                                    _activeAppColor ==
+                                        AppThemeColor.counselorSync
+                                    ? colors.primary
+                                    : colors.surface,
+                                shape: BoxShape.circle,
+                                boxShadow:
+                                    _activeAppColor ==
+                                        AppThemeColor.counselorSync
+                                    ? [
+                                        BoxShadow(
+                                          color: colors.primary.withAlpha(100),
+                                          blurRadius: 10,
+                                        ),
+                                      ]
+                                    : null,
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                              child: Icon(
+                                Icons.sync_rounded,
+                                size: 22,
+                                color:
+                                    _activeAppColor ==
+                                        AppThemeColor.counselorSync
+                                    ? Colors.white
+                                    : colors.onSurface.withOpacity(0.5),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    isAccessible
-                                        ? Icons.verified_user_rounded
-                                        : Icons.info_outline_rounded,
-                                    size: 12,
-                                    color: isAccessible
-                                        ? Colors.green
-                                        : Colors.orange,
-                                  ),
-                                  const SizedBox(width: 4),
                                   Text(
-                                    isAccessible
-                                        ? "Good contrast (${contrast.toStringAsFixed(1)}:1)"
-                                        : "Low contrast (${contrast.toStringAsFixed(1)}:1)",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: isAccessible
-                                          ? Colors.green
-                                          : Colors.orange,
-                                    ),
+                                    'Sync with Counselor',
+                                    style: Theme.of(ctx).textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color:
+                                              _activeAppColor ==
+                                                  AppThemeColor.counselorSync
+                                              ? colors.primary
+                                              : colors.onSurface,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Dynamic, persona-driven colors',
+                                    style: Theme.of(ctx).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: colors.onSurface.withOpacity(
+                                            0.5,
+                                          ),
+                                          fontSize: 11,
+                                        ),
                                   ),
                                 ],
                               ),
                             ),
+                            if (_activeAppColor == AppThemeColor.counselorSync)
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: colors.primary,
+                                size: 24,
+                              ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
+
                   const SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Text(
+                      'STATIC COLORS',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        color: colors.onSurface.withOpacity(0.4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Horizontal Color List
                   SizedBox(
-                    width: double.infinity,
-                    child: CustomPrimaryButton(
-                      label: 'Save Custom Color',
-                      onTap: () {
-                        ThemeColorService.setCustomColor(selectedColor);
-                        Navigator.pop(ctx);
-                        Navigator.pop(context);
+                    height: 110,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      itemCount: regularColors.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 14),
+                      itemBuilder: (ctx, i) {
+                        final color = regularColors[i];
+                        final isSelected = color == _activeAppColor;
+                        final colorValue = color.color(brightness);
+
+                        return GestureDetector(
+                          onTap: () {
+                            ThemeColorService.setColor(color);
+                            Navigator.pop(ctx);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutCubic,
+                            width: 86,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? colorValue.withOpacity(0.12)
+                                  : colors.surfaceContainerHighest.withOpacity(
+                                      0.3,
+                                    ),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? colorValue
+                                    : colors.outline.withOpacity(0.1),
+                                width: isSelected ? 2 : 1,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: colorValue.withOpacity(0.25),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: colorValue,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: colorValue.withOpacity(0.4),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: isSelected
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          size: 18,
+                                          color: Colors.white,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  color.displayName.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w900
+                                        : FontWeight.w700,
+                                    letterSpacing: 0.5,
+                                    color: isSelected
+                                        ? colorValue
+                                        : colors.onSurface.withOpacity(0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  double _getRelativeLuminance(Color color) {
-    double r = color.red / 255.0;
-    double g = color.green / 255.0;
-    double b = color.blue / 255.0;
-    r = r <= 0.03928 ? r / 12.92 : pow((r + 0.055) / 1.055, 2.4).toDouble();
-    g = g <= 0.03928 ? g / 12.92 : pow((g + 0.055) / 1.055, 2.4).toDouble();
-    b = b <= 0.03928 ? b / 12.92 : pow((b + 0.055) / 1.055, 2.4).toDouble();
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  }
-
-  double _getContrastRatio(Color color1, Color color2) {
-    final l1 = _getRelativeLuminance(color1);
-    final l2 = _getRelativeLuminance(color2);
-    return (max(l1, l2) + 0.05) / (min(l1, l2) + 0.05);
   }
 
   Future<void> _sendVerificationEmail() async {
@@ -984,14 +972,28 @@ class _AccountScreenState extends State<AccountScreen> {
             _showAshUnlockPuzzle();
           }
         },
-        child: Text(
-          'v1.2.0 (Stable)\nBuilt with ❤️ by gr0ve',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 10,
-            color: colors.onSurface.withAlpha(50),
-            letterSpacing: 0.5,
-          ),
+        child: Column(
+          children: [
+            Text(
+              'Built by the',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                color: colors.onSurface.withAlpha(50),
+                letterSpacing: 0.5,
+              ),
+            ),
+            Text(
+              'Almighty Grove Keeper',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                color: colors.onSurface.withAlpha(50),
+                letterSpacing: 0.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1060,18 +1062,22 @@ class _AccountScreenState extends State<AccountScreen> {
     Color personaColor,
     ThemeData theme,
   ) {
-    const double avatarSize = 86.0;
-    const double bannerHeight = 150.0;
-    const double overhang = avatarSize / 2;
-    // Extra space below banner for avatar overhang + name text
-    const double belowBannerHeight = overhang + 52.0;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth > 600;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final double avatarSize = isWide ? 100.0 : 86.0;
+    final double bannerHeight = isLandscape ? 120.0 : (isWide ? 180.0 : 150.0);
+    final double overhang = avatarSize / 2;
+    final double belowBannerHeight = overhang + 52.0;
 
     return SizedBox(
       height: bannerHeight + belowBannerHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // ── Banner — now truly edge-to-edge ──
+          // ── Banner ──
           Container(
             width: double.infinity,
             height: bannerHeight,
@@ -1090,7 +1096,7 @@ class _AccountScreenState extends State<AccountScreen> {
           // ── Avatar ─────────────────────────────────────────────
           Positioned(
             top: bannerHeight - overhang,
-            left: 16, // Aligned with the body content padding
+            left: isWide ? 32 : 16,
             child: GestureDetector(
               onTap: _showProfilePicturePicker,
               child: Stack(
@@ -1102,6 +1108,13 @@ class _AccountScreenState extends State<AccountScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(color: colors.primary, width: 3),
                       color: colors.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                   ),
                   Positioned(
@@ -1154,17 +1167,16 @@ class _AccountScreenState extends State<AccountScreen> {
           //    never overflows the available row width ──────────
           Positioned(
             top: bannerHeight + 8,
-            left: avatarSize + 28,
-            // Keep right edge within our content area (no bleed here)
-            right: 0,
+            left: avatarSize + (isWide ? 48 : 28),
+            right: 16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   user?.displayName ?? 'No name set',
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
+                    letterSpacing: -0.5,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1429,6 +1441,21 @@ class _AccountScreenState extends State<AccountScreen> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => const TermsOfServiceScreen(),
+                            ),
+                          );
+                        },
+                        colors: colors,
+                      ),
+                      _divider(colors),
+                      _settingsRow(
+                        icon: Icons.stars_rounded,
+                        iconColor: colors.primary,
+                        label: 'Credits',
+                        value: 'App icons and testers',
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const CreditsScreen(),
                             ),
                           );
                         },
@@ -1752,6 +1779,7 @@ class _AccountScreenState extends State<AccountScreen> {
     required String label,
     required String value,
     required VoidCallback? onTap,
+    VoidCallback? onDoubleTap,
     required ColorScheme colors,
     Color? labelColor,
   }) {
@@ -1769,6 +1797,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
     return InkWell(
       onTap: onTap,
+      onDoubleTap: onDoubleTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),

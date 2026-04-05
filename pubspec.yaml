@@ -2,7 +2,7 @@ name: gr0ve
 description: "For BCA"
 publish_to: "none"
 
-version: 2.0.0+33
+version: 2.1.0+34
 
 environment:
   sdk: ^3.9.2
@@ -31,7 +31,6 @@ dependencies:
   html: ^0.15.6
   flutter_html: ^3.0.0
   flutter_markdown: ^0.7.7+1
-  flutter_dynamic_icon: ^2.1.0
   flutter_dynamic_launcher_icon: ^0.0.2
   dotenv: ^4.2.0
   flutter_dotenv: ^6.0.0
@@ -45,6 +44,7 @@ dependencies:
   firebase_storage: ^13.1.0
   googleapis: ^11.4.0
   googleapis_auth: ^1.6.0
+  flutter_dynamic_icon_plus: ^1.4.0
 
 dev_dependencies:
   flutter_test:
