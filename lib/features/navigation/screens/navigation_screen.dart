@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_screen.dart';
+import 'package:gr0ve/features/grove/grove_screen.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/links/screens/link_screen.dart';
 import 'package:gr0ve/features/authentication/screen/bergen_onboarding_screen.dart';
@@ -64,6 +66,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   // Feature flags
   bool _enableClubs = false;
   bool _enableCounselor = false;
+  bool _isBetaTester = false;
 
   // Onboarding state
   bool _isCheckingOnboarding = true;
@@ -77,21 +80,28 @@ class _NavigationScreenState extends State<NavigationScreen> {
     super.initState();
     _selectedIndex = widget.initialIndex;
     _user = FirebaseAuth.instance.currentUser;
-    _checkOnboarding();
     _determineUserRole();
-    _checkAdminStatus();
-    _loadFeatureFlags();
-    _loadVersionInfo();
-    _loadNavigationOrder();
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
     ProfilePictureService.activeVariant.addListener(_onVariantChanged);
+    // Batch all async init into one method to parallelize Firestore reads
+    _initAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) DawnUnlockService.checkAndUnlock(context);
     });
   }
 
-
+  /// Parallelizes all async init work that was previously done sequentially.
+  Future<void> _initAll() async {
+    // Run all Firestore reads in parallel
+    await Future.wait([
+      _checkOnboarding(),
+      _checkAdminStatus(),
+      _loadFeatureFlags(),
+      _loadNavigationOrder(),
+      _loadVersionInfo(),
+    ]);
+  }
 
   void _onVariantChanged() {
     if (mounted) setState(() {});
@@ -120,7 +130,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Future<void> _checkOnboarding() async {
     if (_user == null) {
-      setState(() {
+      if (mounted) setState(() {
         _isCheckingOnboarding = false;
         _needsOnboarding = false;
       });
@@ -131,35 +141,30 @@ class _NavigationScreenState extends State<NavigationScreen> {
     final isBergenStudent = email.endsWith('@bergen.org');
 
     if (!isBergenStudent) {
-      setState(() {
+      if (mounted) setState(() {
         _isCheckingOnboarding = false;
         _needsOnboarding = false;
       });
       return;
     }
 
-    await _user!.reload();
-    _user = FirebaseAuth.instance.currentUser;
+    // Don't block on reload — use the current verification state
     final isEmailVerified = _user!.emailVerified;
 
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user!.uid)
-          .get();
-
-      final data = userDoc.data();
+      // Use cached user doc — already fetched during boot
+      final data = await UserDocCache.get();
       final hasGrade = data?['grade'] != null;
       final hasAcademy = data?['academy'] != null;
       final needsSetup = !isEmailVerified || !hasGrade || !hasAcademy;
 
-      setState(() {
+      if (mounted) setState(() {
         _needsOnboarding = needsSetup;
         _isCheckingOnboarding = false;
       });
     } catch (e) {
       print('[NAV] Error checking onboarding: $e');
-      setState(() {
+      if (mounted) setState(() {
         _needsOnboarding = false;
         _isCheckingOnboarding = false;
       });
@@ -177,18 +182,20 @@ class _NavigationScreenState extends State<NavigationScreen> {
           .doc('feature_flags')
           .get();
 
-      if (mounted && doc.exists) {
-        final data = doc.data();
-        final betaTesters = List<String>.from(data?['beta_testers'] ?? []);
-        final userEmail = _user?.email ?? '';
-        final isBetaTester = betaTesters.contains(userEmail);
+        if (mounted && doc.exists) {
+          final data = doc.data();
+          final betaTesters = List<String>.from(data?["beta_testers"] ?? []);
+          final userEmail = _user?.email ?? "";
+          final isBetaTester = betaTesters.contains(userEmail);
 
-        setState(() {
-          _enableClubs = (data?['enable_clubs'] ?? false) || isBetaTester;
-          _enableCounselor = (data?['enable_counselor'] ?? false) || isBetaTester;
-          _buildNavigation();
-        });
-      }
+          setState(() {
+            _isBetaTester = isBetaTester;
+            _enableClubs = (data?["enable_clubs"] ?? false) || isBetaTester;
+            _enableCounselor =
+                (data?["enable_counselor"] ?? false) || isBetaTester;
+            _buildNavigation();
+          });
+        }
     } catch (e) {
       print('[NAV] Error loading feature flags: $e');
     }
@@ -262,7 +269,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
 
     _screens = _navConfigs.map((c) => c.screen).toList();
-    
+
     // Sync index with selected ID
     final newIndex = _navConfigs.indexWhere((c) => c.id == _selectedTabId);
     if (newIndex != -1) {
@@ -349,6 +356,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
             iconData: HugeIcons.strokeRoundedClock01,
             label: 'Changelog',
             screen: const ChangelogScreen(),
+          ),
+          NavConfig(
+            id: 'grove',
+            label: 'Gr0ve',
+            iconData: HugeIcons.strokeRoundedPlant02, // or use a tree icon
+            screen: GroveScreen(isBetaTester: _isBetaTester),
           ),
         ];
 
@@ -1094,8 +1107,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.asset(
-                            ProfilePictureService.activeVariant.value
-                                .assetPath(Theme.of(context).brightness),
+                            ProfilePictureService.activeVariant.value.assetPath(
+                              Theme.of(context).brightness,
+                            ),
                             fit: BoxFit.cover,
                             height: 28,
                             width: 28,
@@ -1189,13 +1203,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
                     // padding is used by SafeArea / scroll views for auto-insets
-                    padding: MediaQuery.of(context).padding.copyWith(
-                      bottom: 120,
-                    ),
+                    padding: MediaQuery.of(
+                      context,
+                    ).padding.copyWith(bottom: 120),
                     // viewPadding is used by Scaffold, keyboard, etc.
-                    viewPadding: MediaQuery.of(context).viewPadding.copyWith(
-                      bottom: 120,
-                    ),
+                    viewPadding: MediaQuery.of(
+                      context,
+                    ).viewPadding.copyWith(bottom: 120),
                   ),
                   child: _screens[_selectedIndex],
                 ),
@@ -1214,8 +1228,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
-                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+                        Theme.of(
+                          context,
+                        ).scaffoldBackgroundColor.withOpacity(0.0),
+                        Theme.of(
+                          context,
+                        ).scaffoldBackgroundColor.withOpacity(0.8),
                         Theme.of(context).scaffoldBackgroundColor,
                       ],
                       stops: const [0.0, 0.3, 1.0],
@@ -1275,8 +1293,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.asset(
-                          ProfilePictureService.activeVariant.value
-                              .assetPath(Theme.of(context).brightness),
+                          ProfilePictureService.activeVariant.value.assetPath(
+                            Theme.of(context).brightness,
+                          ),
                           fit: BoxFit.cover,
                           height: 28,
                           width: 28,

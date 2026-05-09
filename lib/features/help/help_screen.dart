@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
-import 'package:gr0ve/features/changelog/data/changelog_entries.dart';
-import 'package:gr0ve/features/changelog/widgets/changelog_pager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HelpScreen extends StatelessWidget {

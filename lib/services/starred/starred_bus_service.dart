@@ -35,7 +35,6 @@ class StarredBusService {
         starredTowns.value = towns.cast<String>().toSet();
       }
     } else {
-      await _docRef(user.uid).set({'towns': []});
       starredTowns.value = {};
     }
 

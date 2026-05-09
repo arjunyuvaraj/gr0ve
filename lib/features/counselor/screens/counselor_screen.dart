@@ -426,11 +426,18 @@ class _CounselorScreenState extends State<CounselorScreen>
   // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> _clearHistory() async {
-    await ChatHistoryService.clear(_persona);
+    if (_isTyping) return; // Guard against clearing while a message is in flight
+
     setState(() {
       _messages.clear();
       _hasStarted = false;
     });
+
+    try {
+      await ChatHistoryService.clear(_persona);
+    } catch (e) {
+      print('[CounselorScreen] Error clearing history: $e');
+    }
   }
 
   void _confirmClear(ColorScheme colors, TextTheme textTheme) {
@@ -619,17 +626,23 @@ class _CounselorScreenState extends State<CounselorScreen>
           const Spacer(),
           if (_hasStarted)
             GestureDetector(
-              onTap: () => _confirmClear(colors, Theme.of(context).textTheme),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  size: 18,
-                  color: colors.onSurface.withOpacity(0.4),
+              behavior: HitTestBehavior.opaque,
+              onTap: _isTyping 
+                ? null 
+                : () => _confirmClear(colors, textTheme),
+              child: Opacity(
+                opacity: _isTyping ? 0.3 : 1.0,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedDelete02,
+                    size: 18,
+                    color: colors.onSurface.withOpacity(0.4),
+                  ),
                 ),
               ),
             ),

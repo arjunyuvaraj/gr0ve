@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
 import 'dart:async';
 import 'dart:ui' as dart_ui;
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
 import 'package:gr0ve/core/widgets/misc/custom_text_field.dart';
@@ -50,6 +53,12 @@ class _AccountScreenState extends State<AccountScreen> {
   Offset _jitterOffset = Offset.zero;
   late final Timer? _jitterTimer;
 
+  // Dev info
+  String _appVersion = '';
+  String _buildNumber = '';
+  String _fcmToken = '';
+  String _appIconName = '';
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +68,7 @@ class _AccountScreenState extends State<AccountScreen> {
     CounselorPersonaService.activePersona.addListener(_onPersonaChanged);
     ThemeColorService.activeColor.addListener(_onAppColorChanged);
     _startJitterTimer();
+    _loadDevInfo();
   }
 
   void _startJitterTimer() {
@@ -119,20 +129,34 @@ class _AccountScreenState extends State<AccountScreen> {
       final email = user!.email ?? '';
       isBergenStudent = email.endsWith('@bergen.org');
       try {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get();
-        if (userDoc.exists) {
-          final data = userDoc.data();
-          userGrade = data?['grade'];
-          userAcademy = data?['academy'];
+        final data = await UserDocCache.get();
+        if (data != null) {
+          userGrade = data['grade'];
+          userAcademy = data['academy'];
         }
       } catch (e) {
         debugPrint('Error loading user profile: $e');
       }
     }
-    setState(() => loading = false);
+    if (mounted) setState(() => loading = false);
+  }
+
+  Future<void> _loadDevInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final token = await FirebaseMessaging.instance.getToken() ?? 'N/A';
+      final currentPersona = CounselorPersonaService.activePersona.value;
+      if (mounted) {
+        setState(() {
+          _appVersion = packageInfo.version;
+          _buildNumber = packageInfo.buildNumber;
+          _fcmToken = token;
+          _appIconName = currentPersona.iosIconName;
+        });
+      }
+    } catch (e) {
+      debugPrint('[ACCOUNT] Error loading dev info: $e');
+    }
   }
 
   String _getDisplayEmail() {
@@ -1577,6 +1601,68 @@ class _AccountScreenState extends State<AccountScreen> {
               ],
             ),
           ),
+
+          // ── Dev Information section ───────────────────────────
+          const SizedBox(height: 20),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 15 * (1 - value)),
+                  child: child,
+                ),
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionLabel('DEV INFORMATION'),
+                const SizedBox(height: 8),
+                _buildGroup(
+                  borderColor: colors.outline.withAlpha(18),
+                  bgColor: colors.surfaceVariant.withAlpha(isDark ? 89 : 115),
+                  children: [
+                    _devInfoRow(
+                      label: 'UID',
+                      value: user?.uid ?? 'N/A',
+                      colors: colors,
+                    ),
+                    _divider(colors),
+                    _devInfoRow(
+                      label: 'App Version',
+                      value: _appVersion.isEmpty ? 'Loading...' : _appVersion,
+                      colors: colors,
+                    ),
+                    _divider(colors),
+                    _devInfoRow(
+                      label: 'Build Number',
+                      value: _buildNumber.isEmpty ? 'Loading...' : _buildNumber,
+                      colors: colors,
+                    ),
+                    _divider(colors),
+                    _devInfoRow(
+                      label: 'App Icon',
+                      value: _appIconName.isEmpty ? 'Loading...' : _appIconName,
+                      colors: colors,
+                    ),
+                    _divider(colors),
+                    _devInfoRow(
+                      label: 'FCM Token',
+                      value: _fcmToken.isEmpty
+                          ? 'Loading...'
+                          : '${_fcmToken.substring(0, _fcmToken.length.clamp(0, 24))}...',
+                      fullValue: _fcmToken,
+                      colors: colors,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1847,4 +1933,77 @@ class _AccountScreenState extends State<AccountScreen> {
       color: colors.outline.withAlpha(18),
     ),
   );
+
+  Widget _devInfoRow({
+    required String label,
+    required String value,
+    String? fullValue,
+    required ColorScheme colors,
+  }) {
+    final copyValue = fullValue ?? value;
+    return InkWell(
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: copyValue));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$label copied to clipboard'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: colors.primary.withAlpha(31),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.code_rounded,
+                size: 17,
+                color: colors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'JetBrains Mono',
+                      color: colors.onSurface.withAlpha(92),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.copy_rounded,
+              size: 14,
+              color: colors.onSurface.withAlpha(46),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

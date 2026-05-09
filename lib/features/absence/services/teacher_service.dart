@@ -210,9 +210,9 @@ String? handleEdgeCases(String name) {
     'smith(ms)': 'smith, ericka',
     'mssmith': 'smith, ericka',
     'ms.smith': 'smith, ericka',
-    'smith(mr)': 'smith, michael',
-    'mrsmith': 'smith, michael',
-    'mr.smith': 'smith, michael',
+    'smith(dr)': 'smith, michael',
+    'drsmith': 'smith, michael',
+    'dr.smith': 'smith, michael',
 
     'crane(ms)': 'crane, laura',
     'mscrane': 'crane, laura',

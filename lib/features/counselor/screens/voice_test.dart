@@ -1,29 +1,11 @@
-// voice_tester_screen.dart
-//
-// TESTING ONLY — remove before shipping.
-// Drop this anywhere in your app temporarily, e.g. add a button in
-// counselor_screen.dart that navigates to VoiceTesterScreen().
-//
-// Usage in counselor_screen.dart header (temporary):
-//   GestureDetector(
-//     onTap: () => Navigator.push(context,
-//       MaterialPageRoute(builder: (_) => const VoiceTesterScreen())),
-//     child: const Icon(Icons.science_outlined),
-//   )
-
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
-import 'package:path_provider/path_provider.dart';
-
-// ─────────────────────────────────────────────────────────────
-// AWS POLLY NEURAL VOICES
-// ─────────────────────────────────────────────────────────────
 
 const _pollyVoices = [
   {
@@ -285,13 +267,13 @@ class _VoiceTesterScreenState extends State<VoiceTesterScreen> {
         return;
       }
 
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/voice_test_$voiceId.mp3');
-      await file.writeAsBytes(response.bodyBytes);
-
       final freshPlayer = AudioPlayer();
       _activePlayer = freshPlayer;
-      await freshPlayer.setFilePath(file.path);
+      await freshPlayer.setAudioSource(
+        AudioSource.uri(
+          Uri.dataFromBytes(response.bodyBytes, mimeType: 'audio/mpeg'),
+        ),
+      );
 
       setState(() {
         _playingId = voiceId;

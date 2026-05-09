@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:gr0ve/features/bus/services/bus_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -347,8 +348,10 @@ class NotificationService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
+      // Store a single FCM token per user (overwrite, not append).
+      // This ensures each user has exactly ONE token associated with their account.
       await _firestore.collection('users').doc(user.uid).set({
-        'fcmTokens': FieldValue.arrayUnion([token]),
+        'fcmToken': token,
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
@@ -408,14 +411,44 @@ class NotificationService {
     await stopListening();
     _processedIds.clear();
 
-    await _listenForAnnouncements(user.uid);
-    await _listenForJoinRequests(user.uid);
-    await _listenForClubCreationRequests(user.uid);
-    await _listenForQAReplies(user.uid);
-    await _listenForNewQuestions(
-      user.uid,
-    ); // NEW: Notify staff of new questions
-    _startBusArrivalMonitoring();
+    // OPTIMIZATION: Fetch ALL active groups ONCE instead of 4 separate times.
+    // Previously each listener method fetched the full groups collection
+    // independently, resulting in 4× the Firestore reads.
+    final groupsSnapshot = await _firestore
+        .collection('groups')
+        .where('status', isEqualTo: 'active')
+        .get();
+
+    // OPTIMIZATION: Check membership for ALL groups in parallel (not sequential).
+    // Previously each listener did sequential `await` per group — N+1 pattern × 4.
+    final memberGroups = <String>[];  // groups the user is a member of
+    final staffGroups = <String, String>{};  // groupId -> groupName for admin/mod groups
+
+    final membershipFutures = groupsSnapshot.docs.map((groupDoc) async {
+      final memberDoc = await _firestore
+          .collection('groups')
+          .doc(groupDoc.id)
+          .collection('members')
+          .doc(user.uid)
+          .get();
+      if (memberDoc.exists) {
+        memberGroups.add(groupDoc.id);
+        final role = memberDoc.data()?['role'] as String? ?? 'member';
+        if (role == 'admin' || role == 'moderator') {
+          staffGroups[groupDoc.id] = groupDoc.data()['name'] ?? 'Group';
+        }
+      }
+    });
+    await Future.wait(membershipFutures);
+
+    print('[NOTIF] Resolved membership: ${memberGroups.length} groups, ${staffGroups.length} staff');
+
+    // Now set up all listeners using the pre-resolved data (no more redundant reads)
+    _listenForAnnouncementsResolved(user.uid, memberGroups);
+    _listenForJoinRequestsResolved(user.uid, staffGroups);
+    _listenForClubCreationRequestsResolved(user.uid);
+    _listenForQARepliesResolved(user.uid, groupsSnapshot, memberGroups, staffGroups);
+    _listenForNewQuestionsResolved(user.uid, staffGroups);
 
     print('[NOTIF] All listeners started');
   }
@@ -482,27 +515,11 @@ class NotificationService {
   }
 
   // ---------------------------------------------------------------------------
-  // Announcement listener
+  // Announcement listener (OPTIMIZED — accepts pre-resolved member groups)
   // ---------------------------------------------------------------------------
 
-  Future<void> _listenForAnnouncements(String userId) async {
+  void _listenForAnnouncementsResolved(String userId, List<String> memberGroups) {
     try {
-      final groupsSnapshot = await _firestore
-          .collection('groups')
-          .where('status', isEqualTo: 'active')
-          .get();
-
-      final memberGroups = <String>[];
-      for (var groupDoc in groupsSnapshot.docs) {
-        final memberDoc = await _firestore
-            .collection('groups')
-            .doc(groupDoc.id)
-            .collection('members')
-            .doc(userId)
-            .get();
-        if (memberDoc.exists) memberGroups.add(groupDoc.id);
-      }
-
       for (var groupId in memberGroups) {
         final sub = _firestore
             .collection('groups')
@@ -521,7 +538,6 @@ class NotificationService {
 
               final data = doc.data();
               final createdAt = data['createdAt'] as Timestamp?;
-              // We removed the authorId check so markers show for authors too
               if (createdAt == null) return;
               if (DateTime.now().difference(createdAt.toDate()).inSeconds > 10)
                 return;
@@ -547,43 +563,31 @@ class NotificationService {
   }
 
   // ---------------------------------------------------------------------------
-  // Q&A reply listener (NEW)
-  // Notifies a member when a staff member replies to one of their questions,
-  // and notifies staff when a member follows up on a question they've replied to.
+  // Q&A reply listener (OPTIMIZED — uses pre-resolved membership data)
   // ---------------------------------------------------------------------------
 
-  Future<void> _listenForQAReplies(String userId) async {
+  void _listenForQARepliesResolved(
+    String userId,
+    QuerySnapshot groupsSnapshot,
+    List<String> memberGroups,
+    Map<String, String> staffGroups,
+  ) {
     try {
-      final groupsSnapshot = await _firestore
-          .collection('groups')
-          .where('status', isEqualTo: 'active')
-          .get();
-
       for (final groupDoc in groupsSnapshot.docs) {
         final groupId = groupDoc.id;
-        final memberDoc = await _firestore
-            .collection('groups')
-            .doc(groupId)
-            .collection('members')
-            .doc(userId)
-            .get();
-        if (!memberDoc.exists) continue;
+        if (!memberGroups.contains(groupId)) continue;
 
-        final roleStr = memberDoc.data()?['role'] as String? ?? 'member';
-        final isStaff = roleStr == 'admin' || roleStr == 'moderator';
-        final groupName = groupDoc.data()['name'] ?? 'Group';
+        final isStaff = staffGroups.containsKey(groupId);
+        final groupName = (groupDoc.data() as Map<String, dynamic>)['name'] ?? 'Group';
 
         // Track per-question reply subscriptions dynamically
         final Map<String, StreamSubscription> questionReplySubs = {};
 
-        // REACTIVE: Watch the questions collection for this group
-        // Uses a Firestore collection group query for efficiency.
         final announcementsRef = _firestore
             .collection('groups')
             .doc(groupId)
             .collection('announcements');
 
-        // Subscribe to new announcements in real-time so we pick up future ones.
         final announcementSub = announcementsRef.snapshots().listen((
           announcementSnapshot,
         ) {
@@ -596,7 +600,6 @@ class NotificationService {
                     as String? ??
                 'Announcement';
 
-            // For this announcement, watch the relevant questions.
             Query questionsQuery = announcementsRef
                 .doc(announcementId)
                 .collection('questions');
@@ -608,7 +611,6 @@ class NotificationService {
               );
             }
 
-            // REACTIVE: Watch questions for new ones
             final questionSub = questionsQuery.snapshots().listen((
               questionsSnapshot,
             ) {
@@ -621,7 +623,6 @@ class NotificationService {
                         as String? ??
                     '';
 
-                // Watch this question's replies if not already watching it
                 final replySubKey = '$announcementId:$questionId';
                 if (questionReplySubs.containsKey(replySubKey)) continue;
 
@@ -657,7 +658,6 @@ class NotificationService {
                           10)
                         return;
 
-                      // Notify the question author
                       if (questionAuthorId == userId) {
                         _incrementUnreadCount('qa_replies');
                         _incrementClubQACount(groupId);
@@ -671,9 +671,7 @@ class NotificationService {
                           payload:
                               'qa_reply:$groupId:$announcementId:$questionId',
                         );
-                      }
-                      // Notify staff when a member follows up
-                      else if (isStaff && !isStaffReply) {
+                      } else if (isStaff && !isStaffReply) {
                         _incrementUnreadCount('qa_replies');
                         _incrementUnreadCount('unread_questions');
                         _incrementClubQACount(groupId);
@@ -706,33 +704,13 @@ class NotificationService {
   }
 
   // ---------------------------------------------------------------------------
-  // Join request listener
+  // Join request listener (OPTIMIZED — uses pre-resolved staff groups)
   // ---------------------------------------------------------------------------
 
-  Future<void> _listenForJoinRequests(String userId) async {
+  void _listenForJoinRequestsResolved(String userId, Map<String, String> staffGroups) {
     try {
-      final groupsSnapshot = await _firestore
-          .collection('groups')
-          .where('status', isEqualTo: 'active')
-          .get();
-
-      final adminGroups = <String>[];
-      for (var groupDoc in groupsSnapshot.docs) {
-        final memberDoc = await _firestore
-            .collection('groups')
-            .doc(groupDoc.id)
-            .collection('members')
-            .doc(userId)
-            .get();
-        if (memberDoc.exists) {
-          final role = memberDoc.data()?['role'] as String?;
-          if (role == 'admin' || role == 'moderator') {
-            adminGroups.add(groupDoc.id);
-          }
-        }
-      }
-
-      for (var groupId in adminGroups) {
+      for (var entry in staffGroups.entries) {
+        final groupId = entry.key;
         final sub = _firestore
             .collection('groups')
             .doc(groupId)
@@ -778,13 +756,13 @@ class NotificationService {
   }
 
   // ---------------------------------------------------------------------------
-  // Club creation request listener (platform admin)
+  // Club creation request listener (OPTIMIZED — uses UserDocCache)
   // ---------------------------------------------------------------------------
 
-  Future<void> _listenForClubCreationRequests(String userId) async {
+  void _listenForClubCreationRequestsResolved(String userId) {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
-      if (userDoc.data()?['isPlatformAdmin'] != true) return;
+      final data = UserDocCache.getCached();
+      if (data?['isPlatformAdmin'] != true) return;
 
       final sub = _firestore
           .collection('groupCreationRequests')
@@ -884,32 +862,16 @@ class NotificationService {
   }
 
   // ---------------------------------------------------------------------------
-  // New Question listener
+  // New Question listener (OPTIMIZED — uses pre-resolved staff groups)
   // Notifies mod/admin when a member asks a question in an announcement.
   // ---------------------------------------------------------------------------
 
-  Future<void> _listenForNewQuestions(String userId) async {
+  void _listenForNewQuestionsResolved(String userId, Map<String, String> staffGroups) {
     try {
-      final groupsSnapshot = await _firestore
-          .collection('groups')
-          .where('status', isEqualTo: 'active')
-          .get();
+      for (final entry in staffGroups.entries) {
+        final groupId = entry.key;
+        final groupName = entry.value;
 
-      for (final groupDoc in groupsSnapshot.docs) {
-        final groupId = groupDoc.id;
-        final memberDoc = await _firestore
-            .collection('groups')
-            .doc(groupId)
-            .collection('members')
-            .doc(userId)
-            .get();
-        if (!memberDoc.exists) continue;
-
-        final roleStr = memberDoc.data()?['role'] as String? ?? 'member';
-        final isStaff = roleStr == 'admin' || roleStr == 'moderator';
-        if (!isStaff) continue;
-
-        final groupName = groupDoc.data()['name'] ?? 'Group';
         final announcementsRef = _firestore
             .collection('groups')
             .doc(groupId)

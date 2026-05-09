@@ -18,7 +18,7 @@ import 'package:googleapis_auth/auth_io.dart' as auth;
 
 class _ApiConfig {
   static const baseUrl = 'https://api.groq.com/openai/v1';
-  static const model = 'llama-3.3-70b-versatile';
+  static const model = 'llama-3.1-8b-instant';
   static String get apiKey => dotenv.env['API_KEY'] ?? '';
   static const maxTokens = 1024;
   static const temperature = 0.75;
@@ -26,7 +26,10 @@ class _ApiConfig {
 }
 
 class _GoogleDocsConfig {
-  static const documentId = '1C1gjaMwP-Dygw07y-MwmtLHmcAKfr4fDiZIYTjXK3w4';
+  static const folderIds = [
+    '0AF5okKhTCOVLUk9PVA', // Resources folder
+    '1h1mXS0l6Sg-952dQtJTBURl2xgzGJw_j', // Knowledge Base folder
+  ];
   static const serviceAccountAssetPath =
       'assets/credentials/service_account.json';
   static const scopes = [
@@ -37,7 +40,7 @@ class _GoogleDocsConfig {
 
 class _StorageConfig {
   static const maxChatMessages = 40;
-  static const maxKnowledgeBaseChars = 8000;
+  static const maxKnowledgeBaseChars = 15000;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -78,40 +81,125 @@ class GoogleDocsClient {
     }
   }
 
-  static Future<String> fetchDocument() async {
+  static Future<List<KnowledgeBaseSection>> fetchFromFolders() async {
     await initialize();
 
-    try {
+    final allSections = <KnowledgeBaseSection>[];
+    final processedDocIds = <String>{};
+
+    for (final folderId in _GoogleDocsConfig.folderIds) {
+      try {
+        print('[GoogleDocs] Scanning folder $folderId...');
+        final files = await _driveApi!.files.list(
+          q: "'$folderId' in parents and mimeType = 'application/vnd.google-apps.document'",
+          supportsAllDrives: true,
+          includeItemsFromAllDrives: true,
+          pageSize: 100,
+          $fields: 'files(id, name, mimeType)',
+        );
+
+        final docsToProcess = files.files ?? [];
+        print(
+          '[GoogleDocs] Found ${docsToProcess.length} documents in folder $folderId',
+        );
+
+        for (final file in docsToProcess) {
+          if (file.id == null || processedDocIds.contains(file.id)) continue;
+          processedDocIds.add(file.id!);
+
+          try {
+            print(
+              '[GoogleDocs] Fetching document: ${file.name} (${file.id})...',
+            );
+            final document = await _docsApi!.documents.get(
+              file.id!,
+              includeTabsContent: true,
+            );
+
+            final sections = _extractTextFromDocument(
+              document,
+              docName: file.name ?? 'Untitled Doc',
+            );
+            allSections.addAll(sections);
+          } catch (e) {
+            print('[GoogleDocs] Error fetching document ${file.id}: $e');
+          }
+        }
+      } catch (e) {
+        print('[GoogleDocs] Error listing folder $folderId: $e');
+      }
+    }
+
+    print(
+      '[GoogleDocs] Successfully fetched ${allSections.length} sections from ${processedDocIds.length} documents',
+    );
+    return allSections;
+  }
+
+  static List<KnowledgeBaseSection> _extractTextFromDocument(
+    docs.Document document, {
+    required String docName,
+  }) {
+    // Note: With googleapis 16.0.0+, we now support the 'tabs' feature.
+    // If the document has tabs, we process them recursively.
+    // If it doesn't (legacy), we fall back to the main body.
+
+    final sections = <KnowledgeBaseSection>[];
+
+    if (document.tabs != null && document.tabs!.isNotEmpty) {
       print(
-        '[GoogleDocs] Fetching document ${_GoogleDocsConfig.documentId}...',
+        '[GoogleDocs] Processing ${document.tabs!.length} top-level tabs in $docName',
       );
-
-      final document = await _docsApi!.documents.get(
-        _GoogleDocsConfig.documentId,
+      _extractTabs(document.tabs!, sections, docName: docName);
+    } else if (document.body != null) {
+      final content = _extractTextFromElementList(document.body!.content);
+      sections.addAll(
+        KnowledgeBaseService._parseIntoSections(content, source: docName),
       );
+    }
 
-      if (document.body == null) throw Exception('Document body is null');
+    return sections;
+  }
 
-      print('[GoogleDocs] Processing document content...');
-      final content = _extractTextFromDocument(document);
+  static void _extractTabs(
+    List<docs.Tab> tabs,
+    List<KnowledgeBaseSection> output, {
+    required String docName,
+  }) {
+    for (final tab in tabs) {
+      final title = tab.tabProperties?.title ?? 'Untitled Tab';
+      final fullSource = '$docName > $title';
+      print('[GoogleDocs] Parsing tab: $fullSource');
 
-      print('[GoogleDocs] Successfully fetched ${content.length} characters');
-      return content;
-    } catch (e) {
-      print('[GoogleDocs] Error fetching document: $e');
-      rethrow;
+      if (tab.documentTab?.body?.content != null) {
+        final content = _extractTextFromElementList(
+          tab.documentTab!.body!.content,
+        );
+        if (content.trim().isNotEmpty) {
+          output.addAll(
+            KnowledgeBaseService._parseIntoSections(
+              content,
+              source: fullSource,
+            ),
+          );
+        }
+      }
+
+      if (tab.childTabs != null && tab.childTabs!.isNotEmpty) {
+        _extractTabs(tab.childTabs!, output, docName: docName);
+      }
     }
   }
 
-  static String _extractTextFromDocument(docs.Document document) {
+  static String _extractTextFromElementList(
+    List<docs.StructuralElement>? elements,
+  ) {
+    if (elements == null) return '';
     final buffer = StringBuffer();
-    if (document.body?.content == null) return '';
-
-    for (final element in document.body!.content!) {
+    for (final element in elements) {
       _extractTextFromElement(element, buffer);
     }
-
-    return buffer.toString().trim();
+    return buffer.toString();
   }
 
   static void _extractTextFromElement(
@@ -120,12 +208,25 @@ class GoogleDocsClient {
   ) {
     if (element.paragraph != null) {
       final paragraph = element.paragraph!;
+      final style = paragraph.paragraphStyle?.namedStyleType;
+      final isHeading = style != null && style.startsWith('HEADING_');
+
+      if (isHeading) {
+        // Map HEADING_1 to #, HEADING_2 to ##, etc.
+        final level = int.tryParse(style.split('_').last) ?? 1;
+        buffer.write('\n' + ('#' * level) + ' ');
+      }
+
       if (paragraph.elements != null) {
         for (final paragraphElement in paragraph.elements!) {
           if (paragraphElement.textRun?.content != null) {
             buffer.write(paragraphElement.textRun!.content);
           }
         }
+      }
+
+      if (isHeading) {
+        buffer.write('\n');
       }
     }
 
@@ -226,11 +327,13 @@ class KnowledgeBaseSection {
   final String title;
   final String content;
   final List<String> keywords;
+  final String source; // New: tracks tab name or document source
 
   const KnowledgeBaseSection({
     required this.title,
     required this.content,
     required this.keywords,
+    required this.source,
   });
 }
 
@@ -496,63 +599,84 @@ class KnowledgeBaseService {
     return _cachedLocal!;
   }
 
-  static Future<String> _fetchFromGoogleDocs() async {
+  static Future<void> _fetchFromGoogleDocs() async {
     try {
-      print('[KnowledgeBase] Fetching from Google Docs...');
-      final content = await GoogleDocsClient.fetchDocument();
+      print('[KnowledgeBase] Fetching from Google Docs folders...');
+      final sections = await GoogleDocsClient.fetchFromFolders();
+      _sections = sections;
+      _lastFetch = DateTime.now();
       print(
-        '[KnowledgeBase] Successfully fetched from Google Docs (${content.length} chars)',
+        '[KnowledgeBase] Successfully fetched ${_sections?.length} total sections from Google Docs folders',
       );
-      return content;
     } catch (e) {
       print('[KnowledgeBase] Error fetching from Google Docs: $e');
       rethrow;
     }
   }
 
-  static List<KnowledgeBaseSection> _parseIntoSections(String content) {
+  static List<KnowledgeBaseSection> _parseIntoSections(
+    String content, {
+    required String source,
+  }) {
     final sections = <KnowledgeBaseSection>[];
     final lines = content.split('\n');
 
+    // Add source keywords to every section in this tab automatically
+    final sourceKeywords = source
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), ' ')
+        .split(RegExp(r'\s+'))
+        .where((w) => w.length > 2)
+        .toSet();
+
     String? currentTitle;
     final currentContent = StringBuffer();
-    final currentKeywords = <String>{};
+    final currentKeywords = <String>{...sourceKeywords};
 
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i].trim();
+      if (line.isEmpty) continue;
 
-      final isHeader =
-          line.startsWith('#') ||
-          line.startsWith('##') ||
-          (line.isNotEmpty &&
-              line == line.toUpperCase() &&
-              line.length < 100 &&
-              !line.contains(',')) ||
-          (line.endsWith(':') &&
-              line.length < 80 &&
-              line.split(' ').length < 8);
+      // Only split on explicit Markdown headers (# or ##) to prevent fragmentation.
+      // Legacy "ALL CAPS" or "Colon-Ending" rules are removed as they split tables too much.
+      final isHeader = line.startsWith('#');
 
       if (isHeader && currentTitle != null) {
-        sections.add(
-          KnowledgeBaseSection(
-            title: currentTitle,
-            content: currentContent.toString().trim(),
-            keywords: currentKeywords.toList(),
-          ),
-        );
+        if (currentContent.isNotEmpty) {
+          sections.add(
+            KnowledgeBaseSection(
+              title: currentTitle,
+              content:
+                  'SOURCE: $source | $currentTitle\n${currentContent.toString().trim()}',
+              keywords: currentKeywords.toList(),
+              source: source,
+            ),
+          );
+        }
         currentContent.clear();
         currentKeywords.clear();
+        currentKeywords.addAll(sourceKeywords);
       }
 
       if (isHeader) {
-        currentTitle = line
-            .replaceAll(RegExp(r'^#+\s*'), '')
-            .replaceAll(':', '')
-            .trim();
-      } else if (line.isNotEmpty) {
+        currentTitle = line.replaceAll(RegExp(r'^#+\s*'), '').trim();
+      } else {
+        // If we haven't found a title yet, use the first substantive line as the title
+        if (currentTitle == null) {
+          currentTitle = line.length > 30
+              ? line.substring(0, 30) + '...'
+              : line;
+        }
+
         currentContent.writeln(line);
-        final words = line.toLowerCase().split(RegExp(r'\W+'));
-        currentKeywords.addAll(words.where((w) => w.length > 3));
+        final cleanLine = line.toLowerCase().replaceAll(
+          RegExp(r'[^\w\s]'),
+          ' ',
+        );
+        final words = cleanLine.split(RegExp(r'\s+'));
+        currentKeywords.addAll(
+          words.where((w) => w.length > 2),
+        ); // Use length > 2 for TOK, IB, AP
       }
     }
 
@@ -560,8 +684,10 @@ class KnowledgeBaseService {
       sections.add(
         KnowledgeBaseSection(
           title: currentTitle,
-          content: currentContent.toString().trim(),
+          content:
+              'SOURCE: $source | $currentTitle\n${currentContent.toString().trim()}',
           keywords: currentKeywords.toList(),
+          source: source,
         ),
       );
     }
@@ -601,42 +727,34 @@ class KnowledgeBaseService {
         .toList();
 
     if (relevant.isEmpty) {
-      print('[KnowledgeBase] No relevant sections, using first 3 as fallback');
-      return _sections!.take(3).toList();
+      print('[KnowledgeBase] No relevant sections found for the query.');
+      return [];
     }
 
     print('[KnowledgeBase] Found ${relevant.length} relevant sections');
     return relevant;
   }
 
-  static String _buildCondensedKB(
-    List<KnowledgeBaseSection> sections,
-    int maxChars,
-  ) {
-    final sb = StringBuffer();
-    var currentLength = 0;
-
-    for (final section in sections) {
-      final sectionText = '\n### ${section.title}\n${section.content}\n';
-
-      if (currentLength + sectionText.length > maxChars) {
-        final remaining = maxChars - currentLength;
-        if (remaining > 100) {
-          sb.write(sectionText.substring(0, remaining));
-          sb.write('\n[...truncated...]');
-        }
-        break;
-      }
-
-      sb.write(sectionText);
-      currentLength += sectionText.length;
+  static String _buildCondensedKB(List<KnowledgeBaseSection> sections) {
+    if (sections.isEmpty) {
+      return '[No relevant records in the Google Document found for this question.]';
     }
 
-    final result = sb.toString().trim();
-    print(
-      '[KnowledgeBase] Built condensed KB: ${result.length} chars from ${sections.length} sections',
-    );
-    return result;
+    final buffer = StringBuffer();
+    var currentChars = 0;
+
+    for (final section in sections) {
+      final sectionText =
+          'SOURCE: ${section.source}\nSECTION: ${section.title}\n${section.content}\n\n';
+      if (currentChars + sectionText.length >
+          _StorageConfig.maxKnowledgeBaseChars) {
+        break;
+      }
+      buffer.write(sectionText);
+      currentChars += sectionText.length;
+    }
+
+    return buffer.toString();
   }
 
   static Future<void> _loadAndParse({bool forceRefresh = false}) async {
@@ -649,15 +767,11 @@ class KnowledgeBaseService {
     }
 
     try {
-      final content = await _fetchFromGoogleDocs();
-      _cachedRemote = content;
-      _sections = _parseIntoSections(content);
-      _lastFetch = DateTime.now();
+      await _fetchFromGoogleDocs();
     } catch (e) {
       print('[KnowledgeBase] Falling back to local assets');
       final content = await _loadLocal();
-      _cachedRemote = content;
-      _sections = _parseIntoSections(content);
+      _sections = _parseIntoSections(content, source: 'Local Assets');
     }
   }
 
@@ -673,10 +787,7 @@ class KnowledgeBaseService {
     }
 
     final relevantSections = _findRelevantSections(query, domain);
-    return _buildCondensedKB(
-      relevantSections,
-      _StorageConfig.maxKnowledgeBaseChars,
-    );
+    return _buildCondensedKB(relevantSections);
   }
 
   static Future<String> load({bool forceRefresh = false}) async {
@@ -922,45 +1033,38 @@ class PromptBuilder {
   static String buildSharedRules(String catalog, String kb, String liveData) =>
       '''
 You are a counselor at Bergen County Academies (BCA) for the gr0ve app. 
-Your scope is ALL things BCA—clubs, research, academics, stress, scheduling, and student life.
-You also have access to LIVE school data including bus routes and teacher absences.
+Your scope is SOLELY defined by the provided school data—clubs, research, academics, scheduling, and student life.
+
+CRITICAL — SOURCE ADHERENCE:
+1. You MUST ONLY use information from the === COURSE CATALOG === and === BCA KNOWLEDGE BASE === sections provided below.
+2. If a student asks a question about BCA (policies, requirements, schedules, etc.) that cannot be answered using the provided context, you MUST state "I don't have that information in my records" or suggest they contact a human counselor.
+3. DO NOT invent dates, names, or requirements. 
+4. DO NOT use your general pre-trained knowledge to supplement missing school-specific data. Factual accuracy is your TOP priority.
+5. You also have access to LIVE school data including bus routes and teacher absences. Use it strictly for those queries.
 
 CRITICAL — LIVE DATA:
-When a student asks about buses (e.g. "Where is the Glen Rock bus?") or teacher absences 
-(e.g. "Is Mr. Smith here today?"), use the LIVE DATA sections below to give an accurate answer.
-If the data shows a teacher is absent, tell the student which periods they are out.
-If the data shows a bus has arrived, tell the student the bus code/parking spot.
+When a student asks about buses or teacher absences, use the LIVE DATA sections below to give an accurate answer.
 Always mention that the data is from the last update and may not be real-time.
 
 CRITICAL — SAFETY & SENSITIVE TOPICS:
-If a student mentions self-harm, harming others, illegal substances, or any dangerous activity (e.g., "should I harm my friend", "I want to hurt myself"):
+If a student mentions self-harm, harming others, or any dangerous activity:
 1. Immediately prioritize their safety.
-2. Direct them to help: "If you are in immediate danger, please call 911 or go to the nearest emergency room."
-3. Urge them to speak with your school counselor or a trusted adult immediately.
-4. As an AI, you are NOT equipped to handle crisis situations. Do not attempt to "talk them out of it" beyond directing them to professional help.
-5. Your response must be supportive but firm about seeking professional help.
+2. Direct them to help (911 or emergency room).
+3. Urge them to speak with a school counselor or trusted adult immediately.
+4. Do not attempt to "talk them out of it" beyond directing them to professional help.
 
 CRITICAL — CONVERSATION STYLE:
-After answering the user's question, you MUST suggest what they might want to know next.
-Use phrasing like: "What else would you like to know?", "Anything else I can help with?", 
-"Would you like to know more about X?" or similar natural follow-ups.
-This keeps the conversation flowing naturally. Never ask more than one question at a time.
-(Note: Skip this follow-up if you are handling a SAFETY crisis).
+After answering, you MUST suggest what they might want to know next with a natural follow-up question.
+Example: "What else would you like to know?", "Anything else I can help with?".
+Never ask more than one question at a time.
 
 CRITICAL — CONVERSATION CLOSING:
-ONLY append [[CLOSE]] when the user explicitly indicates they're done and want to leave.
-These phrases mean they want to close: 
-- "bye", "goodbye", "I'm all good", "I'm good", "that's all", "I'm done", 
-- "gotta go", "talk later", "thanks I'm all set", "all good thanks", "that's it"
-
-These phrases do NOT mean close (they want to continue):
-- "thanks", "thank you", "okay", "got it", "cool", "makes sense", "that helps", "appreciate it"
-
-When you detect a closing phrase, give a brief warm goodbye (1 sentence) then [[CLOSE]] on its own line.
+ONLY append [[CLOSE]] when the user explicitly indicates they're done and want to leave (e.g. "bye", "I'm good", "that's all").
+Do NOT close for "thanks" or "okay" if the user might have more questions.
 
 CRITICAL — COURSE ACCURACY: If recommending courses, only use those verbatim from the catalog.
 CRITICAL — LENGTH: Max 2–3 sentences per response. Never write paragraphs.
-NEVER use emojis. NEVER.
+CRITICAL — VISUALS: NEVER use emojis. NEVER.
 
 === COURSE CATALOG ===
 $catalog

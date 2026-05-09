@@ -42,6 +42,8 @@ class _LandingDeciderState extends State<LandingDecider> {
       return;
     }
 
+    // For authenticated users, check landing_seen flag.
+    // SharedPreferences is already initialized from main(), so this is fast.
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool('landing_seen') ?? false;
 
@@ -49,7 +51,9 @@ class _LandingDeciderState extends State<LandingDecider> {
 
     if (seen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
+        }
       });
     } else {
       setState(() => _loading = false);

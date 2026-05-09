@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 
 class NavigationPersistenceService {
   static const String _storageKey = 'nav_item_order';
@@ -13,14 +14,13 @@ class NavigationPersistenceService {
     final prefs = await SharedPreferences.getInstance();
     final localOrder = prefs.getStringList(_storageKey);
 
-    // 2. If user is logged in, try to fetch from Firestore if local is missing
+    // 2. If user is logged in, try cached user doc data
     final user = _auth.currentUser;
     if (user != null && !user.isAnonymous) {
       try {
-        final doc = await _firestore.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data();
-          final remoteOrder = (data?['navigation_order'] as List?)
+        final data = await UserDocCache.get();
+        if (data != null) {
+          final remoteOrder = (data['navigation_order'] as List?)
               ?.cast<String>();
           if (remoteOrder != null) {
             // Sync local if different (basic sync)

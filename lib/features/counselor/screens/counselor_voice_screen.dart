@@ -108,14 +108,6 @@ class _VoiceTheme {
 enum _VoicePhase { greeting, idle, listening, thinking, speaking }
 
 extension _VoicePhaseExt on _VoicePhase {
-  String get label => switch (this) {
-    _VoicePhase.greeting => 'Greeting',
-    _VoicePhase.idle => 'Ready',
-    _VoicePhase.listening => 'Listening',
-    _VoicePhase.thinking => 'Thinking',
-    _VoicePhase.speaking => 'Speaking',
-  };
-
   bool get isActive =>
       this == _VoicePhase.speaking || this == _VoicePhase.listening;
 
@@ -168,6 +160,9 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   Timer? _silenceTimer;
   String _accumulatedTranscript = '';
   DateTime? _lastSpeechDetected;
+
+  // Scroll controller to auto-scroll when content grows
+  final ScrollController _scrollCtrl = ScrollController();
 
   @override
   void initState() {
@@ -229,6 +224,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
     _pulseCtrl.dispose();
     _waveCtrl.dispose();
     _entryCtrl.dispose();
+    _scrollCtrl.dispose();
     _silenceTimer?.cancel();
     _stt.stop();
     PollyService.stop();
@@ -297,6 +293,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
 
     if (mounted) {
       setState(() => _transcript = _accumulatedTranscript);
+      _scrollToBottom();
     }
   }
 
@@ -355,7 +352,6 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   bool _isClosingMessage(String userMessage) {
     final lower = userMessage.toLowerCase().trim();
 
-    // Check if message CONTAINS any closing keywords (not just exact matches)
     final closingKeywords = [
       'bye',
       'goodbye',
@@ -392,7 +388,6 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
       ChatMessage(text: userText, isUser: true, timestamp: DateTime.now()),
     );
 
-    // Check if user's message is a closing message
     final userSaidClosing = _isClosingMessage(userText);
     debugPrint('[Voice] User said: "$userText"');
     debugPrint('[Voice] Is closing? $userSaidClosing');
@@ -423,7 +418,6 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
         return;
       }
 
-      // Add response to messages
       _messages.add(
         ChatMessage(
           text: responseText,
@@ -433,16 +427,17 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
         ),
       );
 
-      // Save to Firebase
       await ChatHistoryService.save(widget.persona, _messages);
-
       widget.onHistoryUpdated(_messages);
 
       if (mounted) {
-        setState(() => _lastResponse = responseText);
+        setState(() {
+          _lastResponse = responseText;
+          _transcript = '';
+        });
+        _scrollToBottom();
       }
 
-      // Close if either user said goodbye OR AI detected conversation end
       final shouldClose = userSaidClosing || closureState.shouldCloseScreen;
       await _playResponse(responseText, shouldClose);
     } catch (e, st) {
@@ -541,6 +536,18 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
     });
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        _scrollCtrl.animateTo(
+          _scrollCtrl.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red[700]),
@@ -548,11 +555,11 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   }
 
   String _statusText() => switch (_phase) {
-    _VoicePhase.greeting => 'Greeting…',
-    _VoicePhase.idle => '${widget.persona.displayName} is listening',
-    _VoicePhase.listening => 'You\'re speaking…',
-    _VoicePhase.thinking => 'Processing…',
-    _VoicePhase.speaking => '${widget.persona.displayName} is speaking',
+    _VoicePhase.greeting => '${widget.persona.displayName} is saying hi…',
+    _VoicePhase.idle => 'Go ahead, I\'m listening',
+    _VoicePhase.listening => 'I hear you…',
+    _VoicePhase.thinking => 'Just a sec…',
+    _VoicePhase.speaking => '${widget.persona.displayName} is talking',
   };
 
   @override
@@ -572,92 +579,106 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
             child: Column(
               children: [
                 _buildTopBar(theme, pc),
+                // Expanded + SingleChildScrollView prevents all overflow
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ScaleTransition(
-                        scale: _pulseScale,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            color: pc.withOpacity(isLight ? 0.08 : 0.10),
-                            border: Border.all(
-                              color: pc.withOpacity(
-                                _phase.isActive ? 0.6 : 0.25,
-                              ),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
+                  child: SingleChildScrollView(
+                    controller: _scrollCtrl,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 32),
+                        ScaleTransition(
+                          scale: _pulseScale,
+                          child: Container(
+                            width: 110,
+                            height: 110,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28),
+                              color: pc.withOpacity(isLight ? 0.08 : 0.10),
+                              border: Border.all(
                                 color: pc.withOpacity(
-                                  _phase == _VoicePhase.speaking ? 0.35 : 0.08,
+                                  _phase.isActive ? 0.6 : 0.25,
                                 ),
-                                blurRadius: _phase == _VoicePhase.speaking
-                                    ? 50
-                                    : 15,
-                                spreadRadius: _phase == _VoicePhase.speaking
-                                    ? 8
-                                    : 0,
+                                width: 1.5,
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(29),
-                            child: Image.asset(
-                              widget.persona.avatarAsset(brightness),
-                              fit: BoxFit.cover,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: pc.withOpacity(
+                                    _phase == _VoicePhase.speaking
+                                        ? 0.30
+                                        : 0.07,
+                                  ),
+                                  blurRadius: _phase == _VoicePhase.speaking
+                                      ? 44
+                                      : 14,
+                                  spreadRadius: _phase == _VoicePhase.speaking
+                                      ? 6
+                                      : 0,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(27),
+                              child: Image.asset(
+                                widget.persona.avatarAsset(brightness),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 22),
-                      Text(
-                        widget.persona.displayName,
-                        style: TextStyle(
-                          color: theme.textPrimary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 30,
-                          letterSpacing: -0.5,
+                        const SizedBox(height: 18),
+                        Text(
+                          widget.persona.displayName,
+                          style: TextStyle(
+                            color: theme.textPrimary,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 28,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        widget.persona.welcomeTagline,
-                        style: TextStyle(
-                          color: pc.withOpacity(isLight ? 0.5 : 0.65),
-                          fontStyle: FontStyle.italic,
-                          fontSize: 13,
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.persona.welcomeTagline,
+                          style: TextStyle(
+                            color: pc.withOpacity(isLight ? 0.5 : 0.65),
+                            fontStyle: FontStyle.italic,
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 40),
-                      _buildWaveform(pc, theme),
-                      const SizedBox(height: 32),
-                      Text(
-                        _statusText(),
-                        style: TextStyle(
-                          color: theme.textSecondary.withOpacity(0.6),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.3,
+                        const SizedBox(height: 36),
+                        _buildWaveform(pc, theme),
+                        const SizedBox(height: 20),
+                        Text(
+                          _statusText(),
+                          style: TextStyle(
+                            color: theme.textSecondary.withOpacity(0.55),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      if (_transcript.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: _buildTranscriptBox(theme),
-                        ),
-                      if (_transcript.isNotEmpty) const SizedBox(height: 16),
-                      if (_lastResponse.isNotEmpty &&
-                          _phase != _VoicePhase.listening)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: _buildResponseBox(pc, theme, isLight),
-                        ),
-                    ],
+                        // Transcript — shown while user speaks, hidden after
+                        if (_transcript.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: _buildTranscriptBox(theme),
+                          ),
+                        ],
+                        // Response — shown after counselor speaks
+                        if (_lastResponse.isNotEmpty &&
+                            _phase != _VoicePhase.listening) ...[
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: _buildResponseBox(pc, theme, isLight),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -689,66 +710,18 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.call_end_rounded,
-                    color: Color(0xFFFF5555),
+                  Icon(
+                    Icons.arrow_back_rounded,
+                    color: theme.textSecondary,
                     size: 14,
                   ),
                   const SizedBox(width: 7),
                   Text(
-                    'End call',
+                    'Back',
                     style: TextStyle(color: theme.textSecondary, fontSize: 13),
                   ),
                 ],
               ),
-            ),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color:
-                  (_phase == _VoicePhase.thinking
-                          ? const Color(0xFFFFAA33)
-                          : const Color(0xFF44DD88))
-                      .withOpacity(0.12),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color:
-                    (_phase == _VoicePhase.thinking
-                            ? const Color(0xFFFFAA33)
-                            : const Color(0xFF44DD88))
-                        .withOpacity(0.25),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color:
-                        (_phase == _VoicePhase.thinking
-                                ? const Color(0xFFFFAA33)
-                                : const Color(0xFF44DD88))
-                            .withOpacity(0.8),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _phase.label,
-                  style: TextStyle(
-                    color: _phase == _VoicePhase.thinking
-                        ? const Color(0xFFFFAA33)
-                        : const Color(0xFF44DD88),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -786,12 +759,14 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
 
   Widget _buildTranscriptBox(_VoiceTheme theme) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       decoration: BoxDecoration(
         color: theme.cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.cardBorder),
       ),
+      // No truncation — let the text wrap naturally
       child: Text(
         '"$_transcript"',
         textAlign: TextAlign.center,
@@ -806,17 +781,8 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   }
 
   Widget _buildResponseBox(Color pc, _VoiceTheme theme, bool isLight) {
-    String displayText = _lastResponse;
-    try {
-      if (displayText.length > 160) {
-        displayText = '${displayText.substring(0, 160)}…';
-      }
-    } catch (e) {
-      debugPrint('[Voice] Error truncating response: $e');
-      // If truncation fails, just show what we have
-    }
-
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
         color: pc.withOpacity(isLight ? 0.06 : 0.08),
@@ -824,7 +790,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
         border: Border.all(color: pc.withOpacity(isLight ? 0.12 : 0.15)),
       ),
       child: Text(
-        displayText,
+        _lastResponse,
         textAlign: TextAlign.center,
         style: TextStyle(
           color: theme.textSecondary.withOpacity(0.85),

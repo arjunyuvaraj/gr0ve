@@ -34,6 +34,7 @@ Meet Grover, Aspen, Rowan, and the rest of the gang.
 - **Daily Menu**: Browse today's offerings with full nutritional breakdowns.
 - **Safety First**: Integrated allergen tracking to keep you safe and informed.
 
+
 ---
 
 ## 🛠️ Technology Stack

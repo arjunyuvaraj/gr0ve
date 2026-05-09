@@ -17,10 +17,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart' as session;
@@ -42,31 +42,25 @@ class _PollyVoiceConfig {
 const _voiceConfigs = {
   CounselorPersona.grover: _PollyVoiceConfig(
     voiceId: 'Stephen',
-    engine: 'generative',
+    engine: 'neural',
   ),
-  CounselorPersona.aspen: _PollyVoiceConfig(
-    voiceId: 'Ruth',
-    engine: 'generative',
-  ),
+  CounselorPersona.aspen: _PollyVoiceConfig(voiceId: 'Ruth', engine: 'neural'),
   CounselorPersona.rowan: _PollyVoiceConfig(
     voiceId: 'Matthew',
-    engine: 'generative',
+    engine: 'neural',
   ),
-  CounselorPersona.sakura: _PollyVoiceConfig(
-    voiceId: 'Ruth',
-    engine: 'generative',
-  ),
+  CounselorPersona.sakura: _PollyVoiceConfig(voiceId: 'Ruth', engine: 'neural'),
   CounselorPersona.abies: _PollyVoiceConfig(
     voiceId: 'Matthew',
-    engine: 'generative',
+    engine: 'neural',
   ),
   CounselorPersona.cedite: _PollyVoiceConfig(
-    voiceId: 'Brian',
+    voiceId: 'Gregory',
     engine: 'generative',
   ),
   CounselorPersona.ash: _PollyVoiceConfig(
     voiceId: 'Danielle',
-    engine: 'generative',
+    engine: 'neural',
   ),
 };
 
@@ -648,44 +642,21 @@ class PollyService {
 
     int attempts = 0;
     bool loaded = false;
-    File? audioFile;
 
     while (attempts < 3 && !loaded && !_stopRequested) {
       try {
         attempts++;
         debugPrint('[Polly] ════════════ LOAD ATTEMPT $attempts ════════════');
 
-        final dir = Directory.systemTemp;
-        final fileName = 'polly_${DateTime.now().millisecondsSinceEpoch}.mp3';
-        audioFile = File('${dir.path}/$fileName');
-
-        debugPrint(
-          '[Polly] Writing ${mp3Bytes.length} bytes to ${audioFile.path}',
-        );
-        audioFile.writeAsBytesSync(mp3Bytes);
-
-        final fileSize = await audioFile.length();
-        debugPrint('[Polly] File size: $fileSize bytes');
-
-        debugPrint('[Polly] Calling setAudioSource (preload=false)...');
+        debugPrint('[Polly] Calling setAudioSource with data URI...');
         await player.setAudioSource(
-          AudioSource.file(audioFile.path),
+          AudioSource.uri(Uri.dataFromBytes(mp3Bytes, mimeType: 'audio/mpeg')),
           initialPosition: Duration.zero,
-          preload: false,
+          preload: true,
         );
 
         debugPrint('[Polly] ✓ setAudioSource completed');
         loaded = true;
-
-        // Cleanup after playback finishes (with timeout)
-        Future.delayed(const Duration(seconds: 30), () {
-          try {
-            if (audioFile != null && audioFile.existsSync()) {
-              audioFile.deleteSync();
-              debugPrint('[Polly] Cleaned up temp file after 30s');
-            }
-          } catch (_) {}
-        });
       } catch (e, st) {
         debugPrint('[Polly] ❌ Load attempt $attempts failed: $e');
         debugPrint('[Polly] Stack trace: $st');
@@ -719,8 +690,6 @@ class PollyService {
       debugPrint('[Polly] Calling play()...');
       await player.play();
       debugPrint('[Polly] ✓ play() completed');
-
-      // Don't call onDone here - wait for player state listener
     } catch (e) {
       debugPrint('[Polly] ❌ Play failed: $e');
       callOnDone();

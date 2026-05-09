@@ -18,7 +18,7 @@ import 'package:googleapis_auth/auth_io.dart' as auth;
 
 class _ApiConfig {
   static const baseUrl = 'https://api.groq.com/openai/v1';
-  static const model = 'llama-3.3-70b-versatile';
+  static const model = 'llama-3.1-8b-instant';
   static String get apiKey => dotenv.env['API_KEY'] ?? '';
   static const maxTokens = 1024;
   static const temperature = 0.75;

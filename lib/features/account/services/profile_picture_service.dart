@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/features/grove/grove_progress_service.dart';
 
 // ─────────────────────────────────────────────────────────────
 // PROFILE VARIANT MODEL
@@ -25,6 +27,10 @@ class ProfileVariant {
     final mode = brightness == Brightness.dark ? 'dark' : 'light';
     if (key == 'dawn') {
       return 'assets/app_icons/png/dawn_$mode.png';
+    }
+    // Story reward characters
+    if (key == 'newton' || key == 'darwin') {
+      return 'assets/app_icons/png/${key}_$mode.png';
     }
     // Use app icons for hidden personas' default PFPs
     if (persona.isHidden && isDefault) {
@@ -68,6 +74,9 @@ const List<ProfileVariant> _allVariants = [
   ProfileVariant(key: 'default', persona: CounselorPersona.ash),
   // Special
   ProfileVariant(key: 'dawn', persona: CounselorPersona.grover),
+  // Story rewards
+  ProfileVariant(key: 'newton', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'darwin', persona: CounselorPersona.grover),
 ];
 
 /// All variants the user is currently allowed to see.
@@ -75,12 +84,29 @@ List<ProfileVariant> get availableVariants => _allVariants.where((v) {
   if (v.key == 'dawn') {
     return DawnUnlockService.isUnlocked.value;
   }
+  // Story reward gating — check cached unlock status
+  if (v.key == 'newton' || v.key == 'darwin') {
+    return _storyUnlocks[v.key] ?? false;
+  }
   if (v.persona.isHidden &&
       !CounselorPersonaService.isPersonaUnlocked(v.persona)) {
     return false; // completely hide if locked
   }
   return true;
 }).toList();
+
+/// Cached story unlock status (populated during init)
+Map<String, bool> _storyUnlocks = {};
+
+/// Update story unlock cache at runtime (call after unlocking a story PFP)
+void markStoryPfpUnlocked(String key) {
+  _storyUnlocks[key] = true;
+}
+
+/// Helper to lock story PFP at runtime (used when resetting progress)
+void lockStoryPfp(String key) {
+  _storyUnlocks[key] = false;
+}
 
 // ─────────────────────────────────────────────────────────────
 // PROFILE PICTURE SERVICE
@@ -92,17 +118,27 @@ class ProfilePictureService {
 
   /// The variant the user has chosen — counselor-agnostic.
   static final ValueNotifier<ProfileVariant> activeVariant =
-      ValueNotifier<ProfileVariant>(
-        _allVariants.firstWhere(
-          (v) => v.persona == CounselorPersona.grover && v.isDefault,
-        ),
-      );
+      ValueNotifier<ProfileVariant>(defaultVariant);
+
+  static ProfileVariant get defaultVariant => _allVariants.firstWhere(
+    (v) => v.persona == CounselorPersona.grover && v.isDefault,
+  );
 
   // ── Init ────────────────────────────────────────────────────
 
-  static Future<void> init() async {
+  static Future<void> init({Map<String, dynamic>? cachedUserData}) async {
     debugPrint('[ProfilePictureService] Initializing...');
-    await _loadFromFirestore();
+    await _loadStoryUnlocks(cachedUserData: cachedUserData);
+    await _loadFromFirestore(cachedUserData: cachedUserData);
+  }
+
+  /// Load story unlock status from cached user doc
+  static Future<void> _loadStoryUnlocks({Map<String, dynamic>? cachedUserData}) async {
+    final data = cachedUserData ?? await UserDocCache.get();
+    for (final key in ['newton', 'darwin']) {
+      final field = 'story_${key}_unlocked';
+      _storyUnlocks[key] = (data?[field] as bool?) ?? false;
+    }
   }
 
   // ── Public API ───────────────────────────────────────────────
@@ -126,26 +162,21 @@ class ProfilePictureService {
 
   // ── Firestore ────────────────────────────────────────────────
 
-  static Future<void> _loadFromFirestore() async {
+  static Future<void> _loadFromFirestore({Map<String, dynamic>? cachedUserData}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final id = doc.data()?[_firestoreField] as String?;
+      final data = cachedUserData ?? await UserDocCache.get();
+      final id = data?[_firestoreField] as String?;
       if (id != null) {
         final match = _allVariants.where((v) => v.id == id).firstOrNull;
         if (match != null) {
           debugPrint('[ProfilePictureService] Loaded variant: ${match.id}');
           activeVariant.value = match;
 
-          // Sync local photoURL if it doesn't match and we're online
+          // Defer photoURL sync — don't block boot for this
           if (user.photoURL != match.assetPath(Brightness.light)) {
-            try {
-              await user.updatePhotoURL(match.assetPath(Brightness.light));
-            } catch (_) {}
+            user.updatePhotoURL(match.assetPath(Brightness.light)).catchError((_) {});
           }
 
           if (match.persona.isHidden &&

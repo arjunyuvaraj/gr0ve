@@ -121,10 +121,10 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.8,
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 0.75,
                 ),
                 itemCount: total,
                 itemBuilder: (context, i) {
@@ -155,9 +155,9 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                           // Image
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+                              padding: const EdgeInsets.fromLTRB(6, 6, 6, 4),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                                 child: Image.asset(
                                   v.assetPath(brightness),
                                   fit: BoxFit.cover,
@@ -182,17 +182,17 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                               children: [
                                 if (isActive)
                                   Padding(
-                                    padding: const EdgeInsets.only(right: 4),
+                                    padding: const EdgeInsets.only(right: 2),
                                     child: Icon(
                                       Icons.check_circle_rounded,
-                                      size: 11,
+                                      size: 10,
                                       color: pc,
                                     ),
                                   ),
                                 Flexible(
                                   child: Text(
-                                    v.key == 'dawn'
-                                        ? 'Dawn'
+                                    (v.key == 'dawn' || v.key == 'newton' || v.key == 'darwin')
+                                        ? v.displayName
                                         : v.isDefault
                                             ? v.persona.displayName
                                             : '${v.persona.displayName} · ${v.displayName}',
@@ -200,7 +200,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 9,
                                       fontWeight: isActive
                                           ? FontWeight.w700
                                           : FontWeight.w500,

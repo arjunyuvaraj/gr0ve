@@ -17,7 +17,6 @@ dependencies:
   url_launcher: ^6.3.2
   package_info_plus: ^8.0.0
   shared_preferences: ^2.5.4
-  gsheets: ^0.5.0
   firebase_auth: ^6.1.3
   firebase_core: ^4.3.0
   cloud_firestore: ^6.1.1
@@ -42,7 +41,7 @@ dependencies:
   audio_session: ^0.2.2
   image_picker: ^1.1.0
   firebase_storage: ^13.1.0
-  googleapis: ^11.4.0
+  googleapis: ^16.0.0
   googleapis_auth: ^1.6.0
   flutter_dynamic_icon_plus: ^1.4.0
 
@@ -71,5 +70,12 @@ flutter:
     - assets/profile/sakura/
     - assets/profile/abies/
     - assets/profile/cedite/
+    - assets/story/characters/
+    - assets/story/characters/ep0/
+    - assets/story/characters/ep1/
+    - assets/story/characters/ep2/
+    - assets/story/characters/ep2/sheep/
+    - assets/story/characters/ep2/baby/
+    - assets/story/inventory/
     - shorebird.yaml
     - .env

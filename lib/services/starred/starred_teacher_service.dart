@@ -35,7 +35,6 @@ class StarredTeacherService {
         starredTeachers.value = teachers.cast<String>().toSet();
       }
     } else {
-      await _docRef(user.uid).set({'teachers': []});
       starredTeachers.value = {};
     }
 

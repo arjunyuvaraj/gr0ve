@@ -1,0 +1,46 @@
+================================================================================
+                    GR0VE: THE SEED CARRIER'S JOURNEY
+                         EPISODE 0 & EPISODE 1
+================================================================================
+
+================================================================================
+EPISODE 0: THE DAWN
+================================================================================
+
+You wake on a branch of smooth, pale wood.
+The tree beneath you hums faintly—dying light trapped in bark.
+
+This is Dawn.
+And Dawn is fading.
+
+His voice is soft, like the last glow before true night:
+
+"Little bird. You feel it, don't you? The thinning air.
+This realm—my realm—exists between day and night.
+But the balance breaks. I cannot hold both anymore.
+
+I have one seed left. One chance.
+The gr0ve still stands, far from here.
+If you can reach it... if you can plant this seed...
+something of the threshold survives."
+
+[A seed appears in your inventory—warm, pulsing with fading light.]
+
+"And this—take my branch. It remembers the way.
+When you're lost, it will pull toward where you need to be.
+
+But listen carefully:
+The path is not straight.
+You will face orchards, lakes, canyons, clearings.
+Each will test you. Each will offer aid—or distraction.
+
+Trust the branch. Trust yourself.
+And whatever you do... reach the grove before this seed goes cold."
+
+[Dawn's light flickers once—then dims to ash-gray.]
+
+**INVENTORY:**
+✓ Dawn's Branch (glows when near correct paths)
+✓ Dawn's Seed (STATUS: Warm - 100%)
+
+> _

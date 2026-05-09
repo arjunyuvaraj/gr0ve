@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Added for kIsWeb
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/models/counselor.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
-import 'dart:io';
+import 'dart:io' as io; // Guarded usage
 
 // ─────────────────────────────────────────────────────────────
 // MESSAGE BUBBLE
@@ -135,10 +136,19 @@ class _MessageBubbleState extends State<MessageBubble>
         decoration: BoxDecoration(
           border: Border.all(color: Colors.white.withOpacity(0.2)),
         ),
-        child: Image.file(
-          File(path),
-          fit: BoxFit.cover,
-        ),
+        child: kIsWeb
+            ? Image.network(
+                path,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white,
+                ),
+              )
+            : Image.file(
+                io.File(path),
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }

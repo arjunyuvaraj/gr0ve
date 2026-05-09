@@ -29,6 +29,7 @@ import 'package:gr0ve/core/helper/teacher_utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'configuration/firebase_options.dart';
 import 'package:gr0ve/features/onboarding/screens/loading_screen.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 
 // ── Services that need to boot on login ──────────────────────────────────────
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
@@ -46,30 +47,49 @@ import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
+  final bootWatch = Stopwatch()..start();
   WidgetsFlutterBinding.ensureInitialized();
+  print('[BOOT] WidgetsBinding: ${bootWatch.elapsedMilliseconds}ms');
 
   // Initialize Firebase first as everything depends on it
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('[BOOT] Firebase.init: ${bootWatch.elapsedMilliseconds}ms');
 
-  // 1. Background tasks (Non-critical, don't block UI)
-  _backgroundInit();
-
-  // 2. Critical UI initialization (Needed for initial theme/env)
+  // 1. Critical UI-blocking init — ONLY local/instant services needed for
+  //    the very first frame (SharedPreferences reads, ~5ms each).
+  //    NO Firestore calls here — those require a gRPC channel that takes
+  //    hundreds of ms to establish on Android cold start.
   await Future.wait([
-    NotificationService().initialize(),
-    AppFeatureFlags.load(),
-    CounselorPersonaService.init(),
-    ProfilePictureService.init(),
-    AccessibilityService.init(),
-    ThemeColorService.init(),
-    dotenv.load(fileName: ".env"),
+    AccessibilityService.init(),   // SharedPreferences only
+    ThemeColorService.init(),       // SharedPreferences only
   ]);
+  print('[BOOT] SharedPrefs init: ${bootWatch.elapsedMilliseconds}ms');
 
-  if (kDebugMode) {
-    debugPrint('[ENV] API_KEY = ${dotenv.env['API_KEY']?.substring(0, 5)}...');
-  }
-
+  // 2. Render the app IMMEDIATELY — splash screen appears
   runApp(const MyApp());
+  print('[BOOT] runApp called: ${bootWatch.elapsedMilliseconds}ms');
+
+  // 3. Deferred init — everything that touches Firestore or network.
+  //    Runs AFTER the first frame is painted, so the user sees the splash
+  //    instantly instead of staring at a blank screen.
+  _deferredInit(bootWatch);
+}
+
+/// Services that can init after the first frame — Firestore, FCM, etc.
+/// All of these use ValueNotifiers, so the UI updates reactively when ready.
+void _deferredInit(Stopwatch bootWatch) {
+  // Load dotenv and feature flags — lightweight, non-blocking
+  dotenv.load(fileName: ".env").then((_) =>
+    print('[BOOT] dotenv ready: ${bootWatch.elapsedMilliseconds}ms'));
+  AppFeatureFlags.load().then((_) =>
+    print('[BOOT] FeatureFlags ready: ${bootWatch.elapsedMilliseconds}ms'));
+
+  // Notification init (local notifications plugin + FCM) — fire and forget
+  NotificationService().initialize().then((_) =>
+    print('[BOOT] Notifications ready: ${bootWatch.elapsedMilliseconds}ms'));
+
+  // Teacher list — background, non-blocking
+  _backgroundInit();
 }
 
 /// Tasks that can run in the background after/during boot without blocking runApp
@@ -88,21 +108,42 @@ void _backgroundInit() {
 }
 
 // ── Boots every service that feeds snapshot cards + home screen widgets ───────
+// OPTIMIZED: Fetch user doc ONCE, then share it across all services that need it.
 Future<void> _bootUserServices(User user) async {
   if (kDebugMode) print('[BOOT] Booting services for ${user.uid}');
 
-  // Run everything in parallel — order ydoesn't matter
+  final sw = Stopwatch()..start();
+
+  // Phase 1: Fetch the user document ONCE (this is the single most expensive
+  // operation — gRPC channel establishment on cold start)
+  final userData = await UserDocCache.get();
+  if (kDebugMode) print('[BOOT] UserDoc fetched (${sw.elapsedMilliseconds}ms)');
+
+  // Phase 2: Boot all services in parallel, sharing the cached user doc.
+  // CounselorPersona and ProfilePicture both need unlock flags from the user doc.
+  // DawnUnlock needs the dawn_avatar_unlocked field.
+  // StarredTeacher/Bus need their own sub-collections (separate reads, but small).
+  // LayoutService needs user settings sub-collection.
+  // PomPrefs needs user settings sub-collection.
   await Future.wait([
-    StarredTeacherService.load(),
-    StarredBusService.load(),
-    CalendarService.loadAllEvents(),
-    LayoutService.load(),
-    PomPrefsService.load(),
-    ProfilePictureService.init(),
-    DawnUnlockService.init(),
+    CounselorPersonaService.init(),         // Uses UserDocCache internally
+    ProfilePictureService.init(cachedUserData: userData),
+    DawnUnlockService.init(cachedUserData: userData),
+    StarredTeacherService.load(),           // Small sub-collection read
+    StarredBusService.load(),               // Small sub-collection read
+    LayoutService.load(),                   // Small sub-collection read
+    PomPrefsService.load(),                 // Small sub-collection read
   ]);
 
-  if (kDebugMode) print('[BOOT] All services ready');
+  if (kDebugMode) print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
+
+  // Phase 3: Calendar is the heaviest service — it queries groups, BCA events,
+  // personal events, and sets up Firestore streams. Run it AFTER core services
+  // so the UI can render while it loads. The calendar widget uses ValueNotifiers
+  // and will update reactively.
+  CalendarService.loadAllEvents().then((_) {
+    if (kDebugMode) print('[BOOT] Calendar ready (${sw.elapsedMilliseconds}ms)');
+  });
 }
 
 // ── Tears down everything on logout ──────────────────────────────────────────
@@ -111,6 +152,7 @@ void _teardownUserServices() {
   StarredBusService.reset();
   CalendarService.reset();
   NotificationService().stopListening();
+  UserDocCache.invalidate();
 }
 
 class MyApp extends StatefulWidget {
@@ -123,29 +165,41 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _showLoading = true;
 
+  bool _isFirstAuthEvent = true;
+
   @override
   void initState() {
     super.initState();
+    final initWatch = Stopwatch()..start();
 
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (user != null) {
-        NotificationService().startListening();
-        // Boot all snapshot-card data sources as soon as the user is known
-        _bootUserServices(user);
-      } else {
+    FirebaseAuth.instance.authStateChanges().listen((user) async {
+      print('[MAIN] Auth state change. User: ${user?.uid}, isFirst: $_isFirstAuthEvent');
+
+      if (user == null) {
         _teardownUserServices();
+      } else {
+        // Start notification listeners (fire-and-forget, don't block UI)
+        NotificationService().startListening();
+
+        if (_isFirstAuthEvent) {
+          print('[MAIN] Starting boot for initial user...');
+          await _bootUserServices(user);
+          print('[MAIN] Boot complete: ${initWatch.elapsedMilliseconds}ms');
+        } else {
+          print('[MAIN] Starting boot for newly logged in user...');
+          _bootUserServices(user); // Don't await on subsequent logins
+        }
+      }
+
+      if (_isFirstAuthEvent) {
+        _isFirstAuthEvent = false;
+        print('[MAIN] Setting _showLoading = false (${initWatch.elapsedMilliseconds}ms total)');
+        if (mounted) setState(() => _showLoading = false);
       }
     });
 
-    _setupNotificationTapHandler();
-
-    // Show splash animation for 1.8 seconds so the full tree stagger finishes
-    Future.delayed(const Duration(milliseconds: 1800), () {
-      if (mounted) {
-        setState(() => _showLoading = false);
-      }
-    });
-  }
+  _setupNotificationTapHandler();
+}
 
   void _setupNotificationTapHandler() {
     NotificationService().setNotificationTapCallback(_handleNotificationTap);

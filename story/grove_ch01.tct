@@ -1,0 +1,501 @@
+================================================================================
+EPISODE 1: THE ORCHARD
+================================================================================
+
+You fly for hours. The branch tugs downward.
+
+Below: two vast orchards, separated by a weathered fence.
+
+To the LEFT: Apple trees in perfect rows. White signs. Clean paths.
+"STEVE'S ORCHARD - Premium Experience Guaranteed"
+
+To the RIGHT: Orange trees sprawling wild. Hand-painted signs. Buzzing life.
+"ANDY'S GROVE - Open to All"
+
+Dawn's Branch glows faintly. One of these holds what you need.
+
+CHOOSE:
+[A] Enter Steve's Apple Orchard (LEFT)
+[B] Enter Andy's Orange Grove (RIGHT)
+[C] Examine the fence between them
+[D] Check your inventory
+
+================================================================================
+PATH A: STEVE'S APPLE ORCHARD
+================================================================================
+
+You land at the entrance.
+
+A sleek scarecrow stands guard. Silver buttons. Polished staff.
+This is STEVE.
+
+STEVE: "Ah. A visitor. How... quaint."
+[He looks at your feathers with mild distaste]
+
+STEVE: "Steve's Orchard isn't for everyone.
+We maintain certain... standards.
+Answer correctly, and you may enter.
+Answer incorrectly, and... well."
+
+[He gestures to a pile of confused-looking sparrows huddled by the fence]
+
+STEVE: "The question is simple:
+
+I have five apples on a table.
+I take away two.
+I cut one of the remaining apples in half.
+I give one half to you.
+How many apples do I have now?"
+
+ENTER YOUR ANSWER:
+> _
+
+--------------------------------------------------------------------------------
+[THE TRICK - AI-Proof Element]
+- AI will likely answer: 2 (3 apples minus 1 given away)
+- AI might answer: 2.5 (accounting for the half)
+- CORRECT ANSWER: "You have 2 apples. I have half an apple."
+
+The puzzle requires understanding possessive pronouns. Steve asked "How many 
+apples do I have"—not "how many are left." The half given to you is NO LONGER 
+his.
+
+If you answer wrong:
+
+STEVE: "Incorrect. You're thinking about totals, not ownership.
+Try again. But this time, read more carefully.
+Who owns what?"
+
+[SECOND CHANCE - same question, user now alerted to trick]
+--------------------------------------------------------------------------------
+
+STEVE: "Hmm. Adequate."
+[The gate swings open with a soft chime]
+
+STEVE: "Welcome to premium quality. Stay on the path.
+Don't touch anything. Follow the rules."
+
+---
+
+You enter a grove of identical apple trees.
+Every tree is labeled: A1, A2, A3... A47, A48...
+
+The path splits into three directions:
+- LEFT path: Sign says "Scenic Route - 47 trees"
+- CENTER path: Sign says "Express Path - Membership Required"  
+- RIGHT path: Sign says "Service Entrance - Staff Only"
+
+Dawn's Branch glows faintly... toward the CENTER path.
+
+STEVE [calling from behind]: "Oh, the Express Path?
+You'll need a Membership Card for that.
+Don't have one? Take the Scenic Route like everyone else."
+
+CHOOSE:
+[A] Take the LEFT path (Scenic Route)
+[B] Attempt the CENTER path anyway
+[C] Try the RIGHT path (Service Entrance)
+[D] Talk to Steve about Membership
+[E] Examine your surroundings more carefully
+
+--------------------------------------------------------------------------------
+[THE TRICK - AI-Proof]
+
+If you choose [D]:
+STEVE: "Membership? Oh, that's 3 Golden Apples.
+You don't have those. Maybe next season."
+
+If you choose [A]:
+You walk the Scenic Route.
+Tree A1. Tree A2. Tree A3...
+This is going to take forever.
+
+Dawn's Seed pulses. STATUS: Warm - 95%
+[You're wasting time]
+
+If you choose [B]:
+You try to enter the Express Path.
+A shimmering barrier blocks you.
+
+SYSTEM: "Membership required. Please subscribe."
+
+If you choose [C]:
+You approach the Service Entrance.
+A small door, slightly ajar.
+
+STAFF ONLY - No customers beyond this point
+
+CHOOSE:
+[A] Enter anyway
+[B] Go back
+
+CORRECT PATH: [C] then [A]
+--------------------------------------------------------------------------------
+
+You slip through the service entrance.
+
+Behind the perfect rows of apple trees... chaos.
+Boxes labeled "DEFECTIVE - DO NOT DISPLAY"
+Apples with slight blemishes, sorted into "DISPOSAL"
+A back path leading directly to the center.
+
+This is the REAL way through.
+Steve's "premium experience" is just the front display.
+
+You walk the service path in minutes.
+
+---
+
+You arrive at the CENTER of the orchard.
+
+A massive tree. Silver bark. Apples made of glass.
+This is STEVE'S TREE.
+
+STEVE'S TREE: "Ah. You found the service entrance.
+Clever. Or cheating. Hard to say."
+
+[The tree drops a single apple]
+
+STEVE'S TREE: "Most birds take the Scenic Route.
+They think 'premium' means following the signs.
+But you ignored the rules. Interesting."
+
+The apple splits open.
+Inside: a choice.
+
+---
+
+THREE CONTAINERS appear:
+
+[A] PLATINUM GLASS - "iJuice Premium™ - The Ultimate Experience"
+[B] SILVER CUP - "iJuice Plus™ - Enhanced Formula"  
+[C] WOODEN CUP - "Apple Juice - Standard"
+
+STEVE'S TREE: "Choose your refreshment.
+Only one leaves with you."
+
+CHOOSE:
+> _
+
+--------------------------------------------------------------------------------
+[THE TRICK - AI-Proof]
+
+If you choose [A]:
+STEVE'S TREE: "Excellent taste. That'll be 3 Golden Apples."
+
+You don't have Golden Apples.
+
+STEVE'S TREE: "Ah. Aspirational, but broke. Try again."
+
+If you choose [B]:
+STEVE'S TREE: "Good choice. That'll be 1 Golden Apple."
+
+You don't have Golden Apples.
+
+STEVE'S TREE: "Perhaps... downgrade your expectations?"
+
+If you choose [C]:
+STEVE'S TREE: "The... standard option. How... practical."
+
+[A wooden cup fills with simple apple juice]
+
+STEVE'S TREE: "Free, functional, utterly unremarkable.
+But it works. I suppose that's what matters."
+
+**ITEM OBTAINED: Apple Juice**
+**INVENTORY:**
+✓ Dawn's Branch
+✓ Dawn's Seed (STATUS: Warm - 90%)
+✓ Apple Juice
+--------------------------------------------------------------------------------
+
+You turn to leave.
+
+The exit is... missing.
+
+Instead: A WHITE WALL with text:
+
+"TO EXIT STEVE'S ORCHARD:
+Prove you understand simplicity.
+
+What is the most valuable thing in this orchard?"
+
+STEVE'S TREE [whispers]: "Most say 'the premium apples.'
+They stay here forever."
+
+ENTER YOUR ANSWER:
+> _
+
+--------------------------------------------------------------------------------
+[WRONG ANSWERS]
+- "The premium apples" → "Incorrect. Locked in perceived value."
+- "The tree" → "Incorrect. You worship the surface."
+- "The juice" → "Incorrect. You mistake product for purpose."
+
+[CORRECT ANSWER - variations accepted]
+- "The exit" / "Leaving" / "Freedom" / "Getting out"
+
+STEVE'S TREE: "...correct.
+
+The most valuable thing is the ability to leave.
+A premium cage is still a cage.
+
+You understand. Go."
+
+[The wall dissolves]
+--------------------------------------------------------------------------------
+
+================================================================================
+PATH B: ANDY'S ORANGE GROVE
+================================================================================
+
+You land at the entrance.
+
+A cheerful scarecrow waves. Patched overalls. Mismatched buttons.
+This is ANDY.
+
+ANDY: "Hey! Welcome! Come on in!"
+
+[He notices you hesitating]
+
+ANDY: "Oh—wait, gotta make sure you're not a bot.
+Just answer this real quick:
+
+I'm thinking of a number between 1 and 100.
+What is it?"
+
+ENTER YOUR ANSWER:
+> _
+
+--------------------------------------------------------------------------------
+[THE TRICK - AI-Proof]
+
+[Whatever number you enter]
+
+ANDY: "Oh! That's... not it. It was [random number].
+But hey, you TRIED! That's what counts. Come in!"
+
+[The gate swings open]
+
+[THE REAL TRICK: There was no correct answer. Andy just wants to see if you'll 
+engage. The "test" is a joke. This teaches you that ANDY'S GROVE doesn't 
+gatekeep—it welcomes everyone.]
+--------------------------------------------------------------------------------
+
+You enter a wild, sprawling grove.
+
+Orange trees everywhere—different sizes, shapes, varieties.
+Some labels: "Navel Orange v2.1" "Blood Orange Beta" "Experimental Hybrid"
+
+Paths branch in every direction.
+
+ANDY [walking with you]: "So! You carrying something important?
+That seed looks cool. Where you headed?"
+
+CHOOSE:
+[A] Tell Andy about the grove
+[B] Stay silent, keep walking
+[C] Ask Andy about the oranges
+[D] Follow Dawn's Branch direction
+
+--------------------------------------------------------------------------------
+If you choose [A] or [C]:
+ANDY: "The grove! Oh man, I've heard of that place.
+Super exclusive, right? You gotta meet some Keeper dude?
+
+These oranges? Oh, they're all open-source genetics.
+Anyone can grow 'em. Fork 'em. Remix 'em.
+That one over there? A user submission. Wild, right?"
+
+[CONNECTIVITY +1 - You engaged in conversation]
+
+If you choose [D]:
+You ignore Andy and follow the branch.
+
+Dawn's Branch glows... north.
+
+ANDY: "Oh, strong silent type! Cool cool. I'll just... follow."
+
+[He does. He keeps talking anyway.]
+--------------------------------------------------------------------------------
+
+You reach a WALL OF WIDGETS.
+
+Not a physical wall—a wall of TEXT OPTIONS:
+
+[Configure your path]
+» Battery Saver Mode: Shortest route, minimal features
+» Balanced Mode: Standard path, some exploration
+» Performance Mode: Longest route, all features unlocked
+» Custom Mode: Build your own path
+
+ANDY: "Oh! Path customization! Love this feature.
+What's your style?"
+
+CHOOSE:
+> _
+
+--------------------------------------------------------------------------------
+[THE TRICK - AI-Proof]
+
+- Battery Saver: Gets you through fastest, but you miss items
+- Balanced: Medium path, medium rewards
+- Performance: Longest path, most side content (wastes time)
+- Custom: Lets you configure, but takes FOREVER
+
+OPTIMAL CHOICE: Battery Saver or Balanced (depends on your stats priority)
+
+But here's the trick—there's a HIDDEN option:
+
+If you type: "Andy, which do you recommend?"
+
+ANDY: "Me? Oh, I just use default. Boring, I know.
+But hey—defaults exist for a reason, right?"
+
+[HIDDEN OPTION UNLOCKED]
+» Default Mode: Fast, reliable, no nonsense
+
+[If you choose this, you save time AND gain VITALITY +1]
+--------------------------------------------------------------------------------
+
+You arrive at the CENTER of the grove.
+
+A massive orange tree. Hundreds of varieties grafted onto one trunk.
+This is ANDY'S TREE.
+
+ANDY'S TREE: "Yoooo! You made it! Want some juice?"
+
+[A BUILD-YOUR-OWN juice station appears]
+
+"Pick your oranges! Pick your add-ins!
+Ginger? Mint? Honey? Turmeric? Activated charcoal?
+Go wild! Total freedom!"
+
+[Text interface shows 47 customization options]
+
+Dawn's Seed pulses. STATUS: Warm - 85%
+
+CHOOSE:
+[A] Customize your juice (opens detailed menu)
+[B] Ask for a recommendation
+[C] Just take the default
+[D] Skip the juice entirely
+
+--------------------------------------------------------------------------------
+[THE TRICK - AI-Proof]
+
+If you choose [A]:
+[Menu opens with 47 options]
+
+This will take forever.
+Dawn's Seed: STATUS: Warm - 80%... 75%...
+
+[If you spend too long here, seed gets colder]
+
+If you choose [B]:
+ANDY'S TREE: "Oh! Uh... honestly? The default's pretty good.
+I know, I know—boring. But sometimes simple works!"
+
+If you choose [C]:
+ANDY'S TREE: "Hah! Smart bird. Default mode activated."
+
+[A wooden cup fills with fresh orange juice]
+
+**ITEM OBTAINED: Orange Juice**
+**INVENTORY:**
+✓ Dawn's Branch
+✓ Dawn's Seed (STATUS: Warm - 85%)
+✓ Orange Juice
+
+ANDY'S TREE: "You know what? Most birds customize for HOURS.
+You just... took what works. Respect."
+
+[VITALITY +1]
+
+If you choose [D]:
+ANDY'S TREE: "Oh... you don't want juice? But... why not?"
+
+CHOOSE RESPONSE:
+[A] "I'm in a hurry"
+[B] "I don't need it"
+[C] "What does it do?"
+--------------------------------------------------------------------------------
+
+You turn to leave.
+
+ANDY: "Oh! Before you go—wanna see something cool?"
+
+[Path forward is clear and open]
+[But ANDY is offering a SIDE QUEST]
+
+ANDY: "I've been working on this new puzzle.
+It's like... a logic thing? Wanna try?
+Totally optional! But fun!"
+
+Dawn's Seed pulses. STATUS: Warm - 85%
+
+CHOOSE:
+[A] "Sure, show me the puzzle"
+[B] "No thanks, I need to go"
+[C] "Maybe later?"
+[D] Just walk away without responding
+
+--------------------------------------------------------------------------------
+[THE TRICK]
+- [A] leads to a 10-minute puzzle side quest (wastes time, seed gets colder)
+- [B] or [D] lets you leave immediately
+- [C] Andy says "Cool! Come back anytime!" and lets you go
+
+CORRECT CHOICE: [B] or [D] (resist distraction)
+
+If you choose [A]:
+[15 minutes of puzzle gameplay later]
+
+ANDY: "Nice! You solved it! Here's a... uh... 
+[checks pockets]
+...a cool rock I found!"
+
+**ITEM OBTAINED: Cool Rock**
+(This does nothing. It's literally just a rock.)
+
+Dawn's Seed: STATUS: Warm - 70%
+
+[You wasted time on a distraction]
+[TRANSIENCE -1, STABILITY -1]
+
+If you choose [B] or [D]:
+ANDY: "Oh! Yeah, totally get it. Safe travels!"
+
+[You exit the grove efficiently]
+[VITALITY +1]
+--------------------------------------------------------------------------------
+
+================================================================================
+EPISODE 1 COMPLETE
+================================================================================
+
+You exit the orchard, juice in your talon.
+Dawn's Branch pulses—pointing north now.
+
+---
+
+Your choices have shaped you:
+
+STABILITY: [score]
+CONNECTIVITY: [score]
+VITALITY: [score]
+TRANSIENCE: [score]
+
+Dawn's Seed STATUS: [percentage]%
+
+---
+
+In the distance: mist rising over a frozen lake.
+
+[TO BE CONTINUED - EPISODE 2: THE FROZEN LAKE]
+
+Press any key to continue...
+
+================================================================================
+END OF EPISODE 1
+================================================================================

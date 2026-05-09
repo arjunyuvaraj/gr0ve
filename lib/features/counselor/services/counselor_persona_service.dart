@@ -8,12 +8,14 @@
 // Solution: Add debouncing and retry logic with exponential backoff.
 
 import 'dart:async';
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Added for kIsWeb
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
+import 'dart:io' as io; // Use prefix to avoid conflicts if needed, but we'll guard it
 
 enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite, ash }
 
@@ -193,19 +195,18 @@ class CounselorPersonaService {
   static Future<void> init() async {
     final persona = await load();
     activePersona.value = persona;
-    // Ensure app icon is synced on startup
-    await _syncAppIcon(persona);
+    // Note: We intentionally do NOT sync the app icon on startup.
+    // iOS shows an intrusive "icon changed" alert every time we call
+    // setAlternateIconName, even when the icon hasn't actually changed.
+    // The icon is synced only when the counselor persona is explicitly
+    // changed via setPersona().
   }
 
-  static Future<CounselorPersona> load() async {
+  static Future<CounselorPersona> load({Map<String, dynamic>? cachedUserData}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return CounselorPersona.grover;
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final data = doc.data();
+      final data = cachedUserData ?? await UserDocCache.get();
 
       _abiesUnlocked = (data?[_abiesUnlockedField] as bool?) ?? false;
       _cediteUnlocked = (data?[_cediteUnlockedField] as bool?) ?? false;
@@ -280,8 +281,8 @@ class CounselorPersonaService {
   }
 
   static Future<Map<String, dynamic>> diagnoseIosIconSetup() async {
-    if (!Platform.isIOS) {
-      return {'error': 'Not iOS'};
+    if (kIsWeb || !io.Platform.isIOS) {
+      return {'error': 'Not iOS or Web platform'};
     }
 
     final results = <String, dynamic>{};
@@ -326,7 +327,7 @@ class CounselorPersonaService {
 
   // BETTER FIX: Try changing icon with a much longer delay
   static Future<void> _syncIosIcon(CounselorPersona persona) async {
-    if (!Platform.isIOS) return;
+    if (kIsWeb || !io.Platform.isIOS) return;
 
     try {
       final supported = await FlutterDynamicIconPlus.supportsAlternateIcons;
@@ -381,6 +382,7 @@ class CounselorPersonaService {
   }
 
   static Future<void> _syncAndroidIcon(CounselorPersona persona) async {
+    if (kIsWeb || !io.Platform.isAndroid) return;
     try {
       await _iconChannel.invokeMethod<void>('setIcon', {
         'alias': persona.androidAlias,

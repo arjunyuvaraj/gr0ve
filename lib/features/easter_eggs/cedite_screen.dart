@@ -111,7 +111,7 @@ class _PassphraseScreen extends StatefulWidget {
 
 class _PassphraseScreenState extends State<_PassphraseScreen>
     with TickerProviderStateMixin {
-  static const _correct = 'DECITE';
+  static const _correct = 'DECEIT';
 
   String _entered = '';
   bool _success = false;
@@ -134,19 +134,28 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
     super.initState();
 
     _shakeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 380));
-    _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn));
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _shakeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn));
 
     _entryCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500))..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..forward();
     _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
     _entrySlide = Tween<Offset>(
-        begin: const Offset(0, 0.06), end: Offset.zero).animate(
-        CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut));
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut));
 
     _voiceCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _voiceFade = CurvedAnimation(parent: _voiceCtrl, curve: Curves.easeOut);
 
     Timer(const Duration(milliseconds: 1400), () {
@@ -240,7 +249,9 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                       child: Container(
                         height: 54,
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withOpacity(0.3),
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.3,
+                          ),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Icon(
@@ -264,16 +275,27 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                       decoration: BoxDecoration(
                         color: colors.surfaceContainerHighest.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: colors.outline.withOpacity(0.07)),
+                        border: Border.all(
+                          color: colors.outline.withOpacity(0.07),
+                        ),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         char,
                         style: textTheme.titleMedium?.copyWith(
-                          fontWeight: isHint ? FontWeight.w800 : FontWeight.w600,
-                          color: isHint ? pc.withOpacity(0.7) : colors.onSurface,
+                          fontWeight: isHint
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                          color: isHint
+                              ? pc.withOpacity(0.7)
+                              : colors.onSurface,
                           shadows: isHint
-                              ? [Shadow(color: pc.withOpacity(0.25), blurRadius: 3)]
+                              ? [
+                                  Shadow(
+                                    color: pc.withOpacity(0.25),
+                                    blurRadius: 3,
+                                  ),
+                                ]
                               : null,
                         ),
                       ),
@@ -306,7 +328,8 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height -
+                  minHeight:
+                      MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
                       MediaQuery.of(context).padding.bottom,
                 ),
@@ -321,11 +344,16 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: colors.surfaceContainerHighest.withOpacity(0.5),
+                              color: colors.surfaceContainerHighest.withOpacity(
+                                0.5,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(Icons.arrow_back_ios_new_rounded,
-                                size: 16, color: colors.onSurface.withOpacity(0.5)),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: colors.onSurface.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
@@ -407,8 +435,8 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                                 color: (_success && filled)
                                     ? pc
                                     : filled
-                                        ? pc.withOpacity(0.85)
-                                        : colors.onSurface.withOpacity(0.1),
+                                    ? pc.withOpacity(0.85)
+                                    : colors.onSurface.withOpacity(0.1),
                                 border: Border.all(
                                   color: filled
                                       ? pc.withOpacity(0.5)
@@ -421,7 +449,7 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                                           color: pc.withOpacity(0.4),
                                           blurRadius: 10,
                                           spreadRadius: 1,
-                                        )
+                                        ),
                                       ]
                                     : null,
                               ),
@@ -487,16 +515,28 @@ class _CediteRevealScreenState extends State<CediteRevealScreen>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800))..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..forward();
 
     _iconFade = CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.0, 0.4, curve: Curves.easeOut));
-    _iconScale = Tween<double>(begin: 0.85, end: 1.0).animate(CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic)));
+      parent: _ctrl,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+    );
+    _iconScale = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
+      ),
+    );
     _textFade = CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.3, 0.7, curve: Curves.easeOut));
+      parent: _ctrl,
+      curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
+    );
     _btnFade = CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.65, 1.0, curve: Curves.easeOut));
+      parent: _ctrl,
+      curve: const Interval(0.65, 1.0, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -519,7 +559,8 @@ class _CediteRevealScreenState extends State<CediteRevealScreen>
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height -
+              minHeight:
+                  MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
                   MediaQuery.of(context).padding.bottom,
             ),
@@ -535,11 +576,16 @@ class _CediteRevealScreenState extends State<CediteRevealScreen>
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withOpacity(0.5),
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.5,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 16, color: colors.onSurface.withOpacity(0.5)),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 16,
+                          color: colors.onSurface.withOpacity(0.5),
+                        ),
                       ),
                     ),
                   ),
@@ -581,7 +627,9 @@ class _CediteRevealScreenState extends State<CediteRevealScreen>
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: pc.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
@@ -625,7 +673,8 @@ She will free you with the truth.''',
                         const SizedBox(height: 28),
                         _RevealTrait(
                           label: 'Brutal Honesty.',
-                          sub: 'She does not sugarcoat the facts, she exposes them.',
+                          sub:
+                              'She does not sugarcoat the facts, she exposes them.',
                           pc: pc,
                           colors: colors,
                           textTheme: textTheme,
@@ -658,7 +707,9 @@ She will free you with the truth.''',
                         onPressed: widget.onContinue,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: pc,
-                          foregroundColor: CounselorPersona.cedite.onPrimary(brightness),
+                          foregroundColor: CounselorPersona.cedite.onPrimary(
+                            brightness,
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),

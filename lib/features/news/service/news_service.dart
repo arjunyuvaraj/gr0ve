@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
@@ -150,7 +149,9 @@ class NewsService {
     if (pubDate == null || pubDate.isEmpty) return null;
 
     try {
-      return HttpDate.parse(pubDate);
+      // RFC 1123 (HTTP Date) format: "Mon, 02 Jan 2006 15:04:05 GMT"
+      final format = DateFormat('EEE, dd MMM yyyy HH:mm:ss zzz');
+      return format.parse(pubDate);
     } catch (_) {
       try {
         return DateTime.parse(pubDate);

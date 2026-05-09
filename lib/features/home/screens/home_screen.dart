@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/authentication/screen/bergen_onboarding_screen.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
@@ -68,15 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    await _user!.reload();
+    // Don't block on reload — use cached verification state
     final isEmailVerified = _user!.emailVerified;
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user!.uid)
-          .get();
-      final data = doc.data();
+      // Use cached user doc — already fetched during boot
+      final data = await UserDocCache.get();
       final hasSetup =
           isEmailVerified && data?['grade'] != null && data?['academy'] != null;
       _needsOnboarding = !hasSetup;
