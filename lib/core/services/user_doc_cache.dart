@@ -27,9 +27,11 @@ class UserDocCache {
 
     // Prevent duplicate fetches if called concurrently
     if (_loading && _cachedUid == user.uid) {
-      // Wait for the existing fetch to complete
-      while (_loading) {
+      // Wait for the existing fetch to complete (max 5 seconds)
+      int attempts = 0;
+      while (_loading && attempts < 500) {
         await Future.delayed(const Duration(milliseconds: 10));
+        attempts++;
       }
       return _data;
     }
@@ -41,7 +43,8 @@ class UserDocCache {
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .get();
+          .get()
+          .timeout(const Duration(seconds: 4));
       _data = doc.data();
       if (kDebugMode) {
         print('[UserDocCache] Fetched user doc (${_data?.keys.length ?? 0} fields)');

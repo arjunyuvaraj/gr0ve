@@ -154,8 +154,21 @@ class _NavigationScreenState extends State<NavigationScreen> {
     try {
       // Use cached user doc — already fetched during boot
       final data = await UserDocCache.get();
-      final hasGrade = data?['grade'] != null;
-      final hasAcademy = data?['academy'] != null;
+      
+      // If we couldn't fetch the data (timeout or error), don't force onboarding.
+      // We only want to onboard if we POSITIVELY know the fields are missing.
+      if (data == null) {
+        if (mounted) {
+          setState(() {
+            _needsOnboarding = false;
+            _isCheckingOnboarding = false;
+          });
+        }
+        return;
+      }
+
+      final hasGrade = data['grade'] != null;
+      final hasAcademy = data['academy'] != null;
       final needsSetup = !isEmailVerified || !hasGrade || !hasAcademy;
 
       if (mounted) setState(() {

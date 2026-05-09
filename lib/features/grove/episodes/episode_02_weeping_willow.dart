@@ -268,12 +268,12 @@ List<Scene> buildEpisode02WeepingWillow() {
           kind: MessageKind.narrative,
         ),
         StoryMessage(
-          'Take this Memory Sack. It will hold the pieces of the past so they do not weigh upon your soul.',
+          'Take this Flask of Tears. It will hold the pieces of the past so they do not weigh upon your soul.',
           character: StoryCharacter.salix,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          '[Memory Sack obtained | Items inside lose their crushing emotional weight.]',
+          '[Flask of Tears obtained | Items inside lose their crushing emotional weight.]',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -286,8 +286,8 @@ List<Scene> buildEpisode02WeepingWillow() {
       inputType: InputType.continueOnly,
       nextScene: 'ep2_memory_1',
       onEnter: (state) {
-        if (!state.inventory.contains('Memory Sack')) {
-          state.inventory.add('Memory Sack');
+        if (!state.inventory.contains('Flask of Tears')) {
+          state.inventory.add('Flask of Tears');
         }
       },
     ),
@@ -330,7 +330,7 @@ List<Scene> buildEpisode02WeepingWillow() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'You carefully place the Faint Resin Shard into your Memory Sack. It pulses with a soft, comforting light from within the fabric.',
+          'You carefully place the Faint Resin Shard into your Flask of Tears. It pulses with a soft, comforting light from within.',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -339,9 +339,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       nextScene: 'ep2_memory_2',
       waitDuration: const Duration(minutes: 45),
       onEnter: (state) {
-        if (!state.inventory.contains('Faint Resin Shard')) {
-          state.inventory.add('Faint Resin Shard');
-        }
+        // Shards are held in the bag, not as individual items
       },
     ),
 
@@ -379,7 +377,7 @@ List<Scene> buildEpisode02WeepingWillow() {
         ),
         StoryMessage('Abies ignores him, turning back to a waiting deer.'),
         StoryMessage(
-          'The Etched Bark Strip slides into the Memory Sack. The weight on your mind lifts as the sack absorbs the burden of the memory.',
+          'The Etched Bark Strip slides into the Flask of Tears. The weight on your mind lifts as the flask absorbs the burden of the memory.',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -388,9 +386,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       nextScene: 'ep2_memory_3',
       waitDuration: const Duration(minutes: 60),
       onEnter: (state) {
-        if (!state.inventory.contains('Etched Bark Strip')) {
-          state.inventory.add('Etched Bark Strip');
-        }
+        // Shards are held in the bag
       },
     ),
 
@@ -422,7 +418,7 @@ List<Scene> buildEpisode02WeepingWillow() {
           'The memory in the water begins to fracture. Images repeat and glitch. Abies looks terrified as his own mind begins to splinter under the weight of deep time.',
         ),
         StoryMessage(
-          'The Distorted Memory Fragment flickers as you tuck it into the Memory Sack. The dizziness fades as the sack stabilizes the splintered time.',
+          'The Distorted Memory Fragment flickers as you tuck it into the Flask of Tears. The dizziness fades as the flask stabilizes the splintered time.',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -431,9 +427,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       nextScene: 'ep2_memory_4',
       waitDuration: const Duration(minutes: 90),
       onEnter: (state) {
-        if (!state.inventory.contains('Distorted Memory Fragment')) {
-          state.inventory.add('Distorted Memory Fragment');
-        }
+        // Shards are held in the bag
       },
     ),
 
@@ -467,7 +461,7 @@ List<Scene> buildEpisode02WeepingWillow() {
           'The memory shows Salix, rooted to the shore, helplessly watching his friend drown in time. Salix begins to weep, and as the tears hit the ground, the earth shatters into the chasms you see today.',
         ),
         StoryMessage(
-          'The Crystallized Memory Core settles at the bottom of the Memory Sack. Its immense weight is now manageable, safely contained within Salix\'s gift.',
+          'The Crystallized Memory Core settles at the bottom of the Flask of Tears. Its immense weight is now manageable, safely contained within Salix\'s gift.',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -477,9 +471,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       waitDuration: const Duration(minutes: 120),
       onEnter: (state) {
         state.stability += 2;
-        if (!state.inventory.contains('Crystallized Memory Core')) {
-          state.inventory.add('Crystallized Memory Core');
-        }
+        // Shards are held in the bag
       },
     ),
 
@@ -565,12 +557,12 @@ List<Scene> buildEpisode02WeepingWillow() {
           'Salix\'s branches sweep the ground as you pull the last shard from the water.',
         ),
         StoryMessage(
-          'You have the pieces now. The weight of the memories you just experienced is safely contained within the sack.',
+          'You have the pieces now. The weight of the memories you just experienced is safely contained within the flask.',
           character: StoryCharacter.salix,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'The sack glows with the combined light of the four shards, pulsing with a quiet, stabilized energy.',
+          'The flask glows with the combined light of the four shards, pulsing with a quiet, stabilized energy.',
         ),
       ],
       inputType: InputType.continueOnly,

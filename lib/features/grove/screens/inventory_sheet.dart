@@ -99,13 +99,10 @@ class TInventorySheet extends StatelessWidget {
                     asset = isDark
                         ? 'assets/story/characters/ep0/dawn_dark.png'
                         : 'assets/story/characters/ep0/dawn_light.png';
-                  case 'memory sack':
-                    asset = 'assets/story/inventory/sack_$mode.png';
-                  case 'faint resin shard' ||
-                      'etched bark strip' ||
-                      'distorted memory fragment' ||
-                      'crystallized memory core':
+                  case 'flask of tears':
                     asset = 'assets/story/inventory/flask_of_tears_$mode.png';
+                  case 'warm knapsack':
+                    asset = 'assets/story/inventory/warm_knapsack_$mode.png';
                 }
               }
 

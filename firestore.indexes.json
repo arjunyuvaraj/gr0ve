@@ -125,6 +125,16 @@
                     "order": "DESCENDING"
                 }
             ]
+        },
+        {
+            "collectionGroup": "preferences",
+            "queryScope": "COLLECTION_GROUP",
+            "fields": [
+                {
+                    "fieldPath": "towns",
+                    "arrayConfig": "CONTAINS"
+                }
+            ]
         }
     ]
 }

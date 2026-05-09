@@ -28,6 +28,8 @@ enum StoryCharacter {
   abies,
   cedite,
   ash,
+  london,
+  squashy,
 }
 
 extension StoryCharacterX on StoryCharacter {
@@ -54,6 +56,8 @@ extension StoryCharacterX on StoryCharacter {
         StoryCharacter.abies => 'Abies',
         StoryCharacter.cedite => 'Cedite',
         StoryCharacter.ash => 'Ash',
+        StoryCharacter.london => 'London',
+        StoryCharacter.squashy => 'Squashy',
       };
 
   String avatarAsset(Brightness brightness) {
@@ -83,6 +87,8 @@ extension StoryCharacterX on StoryCharacter {
       StoryCharacter.abies => 'assets/story/characters/abies_$mode.png',
       StoryCharacter.cedite => 'assets/story/characters/cedite_$mode.png',
       StoryCharacter.ash => 'assets/story/characters/ash_$mode.png',
+      StoryCharacter.london => 'assets/story/characters/ep3/london_$mode.png',
+      StoryCharacter.squashy => 'assets/story/characters/ep3/squashy_$mode.png',
       _ => 'assets/story/inventory/branch_$mode.png',
     };
   }
@@ -129,6 +135,12 @@ extension StoryCharacterX on StoryCharacter {
     StoryCharacter.ash => brightness == Brightness.dark
         ? const Color(0xFFE55B5B) // Matches CounselorPersona.primaryDark
         : const Color(0xFFC43D3D), // Matches CounselorPersona.primaryLight
+    StoryCharacter.london => brightness == Brightness.dark
+        ? const Color(0xFF4A7C44)
+        : const Color(0xFF2D5A27),
+    StoryCharacter.squashy => brightness == Brightness.dark
+        ? const Color(0xFFF9A825)
+        : const Color(0xFFF57F17),
     StoryCharacter.thicketSheep => brightness == Brightness.dark
         ? const Color(0xFFA1887F)
         : const Color(0xFF795548),

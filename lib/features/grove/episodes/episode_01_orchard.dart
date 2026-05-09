@@ -102,6 +102,7 @@ List<Scene> buildEpisode01Orchard() {
         ),
         StoryMessage(
           'They\'ve been arguing for days. Bob would have known what to do... but he\'s gone now.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
         ),
       ],
@@ -146,6 +147,7 @@ List<Scene> buildEpisode01Orchard() {
         ),
         StoryMessage(
           'Bob was our leader. The wise one. He always knew which way to fly.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
@@ -170,6 +172,7 @@ List<Scene> buildEpisode01Orchard() {
         ),
         StoryMessage(
           'Don\'t be like Bob. Don\'t get lost in the trees. And don\'t be like us—stuck between choices.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
           isBold: true,
         ),
@@ -216,6 +219,7 @@ List<Scene> buildEpisode01Orchard() {
         ),
         StoryMessage(
           'I found a back way. Service entrance. Newton wasn\'t happy but he couldn\'t stop me. Just... read the signs carefully. Not everything premium is necessary.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
         ),
       ],
@@ -261,6 +265,7 @@ List<Scene> buildEpisode01Orchard() {
         ),
         StoryMessage(
           'I just asked Darwin what he recommended. He said "default." I took default everything. In and out in ten minutes. Sometimes simple is best.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
         ),
       ],
@@ -302,10 +307,12 @@ List<Scene> buildEpisode01Orchard() {
         ),
         StoryMessage(
           'We\'ve been here so long our seeds went cold. Now we\'re just... waiting. For what, I don\'t know.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
           'Don\'t be like us. Choose. Move forward. Even a wrong choice is better than no choice.',
+          character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
           isBold: true,
         ),

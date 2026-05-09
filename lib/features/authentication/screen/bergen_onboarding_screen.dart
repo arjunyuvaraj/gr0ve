@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 
 class BergenOnboardingScreen extends StatefulWidget {
   final VoidCallback onComplete;
@@ -92,16 +94,25 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user!.uid)
-          .update({'grade': selectedGrade, 'academy': selectedAcademy});
+          .update({'grade': selectedGrade, 'academy': selectedAcademy})
+          .timeout(const Duration(seconds: 5));
+
+      // Update local cache so NavigationScreen doesn't re-trigger onboarding
+      UserDocCache.invalidate(); 
+      await UserDocCache.get();
 
       if (mounted) {
         widget.onComplete();
       }
     } catch (e) {
+      String errorMessage = e.toString();
+      if (e is TimeoutException) {
+        errorMessage = "Connection timed out. Please try again or check your internet.";
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(errorMessage),
             behavior: SnackBarBehavior.floating,
           ),
         );

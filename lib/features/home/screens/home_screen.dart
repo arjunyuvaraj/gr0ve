@@ -74,8 +74,16 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       // Use cached user doc — already fetched during boot
       final data = await UserDocCache.get();
+      
+      // If we couldn't fetch the data (timeout or error), don't force onboarding.
+      // We only want to onboard if we POSITIVELY know the fields are missing.
+      if (data == null) {
+        _needsOnboarding = false;
+        return;
+      }
+
       final hasSetup =
-          isEmailVerified && data?['grade'] != null && data?['academy'] != null;
+          isEmailVerified && data['grade'] != null && data['academy'] != null;
       _needsOnboarding = !hasSetup;
     } catch (_) {
       _needsOnboarding = false;

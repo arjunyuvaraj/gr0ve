@@ -42,6 +42,7 @@ import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/services/settings/accessibility_service.dart';
 import 'package:gr0ve/services/settings/theme_color_service.dart';
 import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
+import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
 
 // Global navigator key for handling notification taps
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -52,7 +53,14 @@ void main() async {
   print('[BOOT] WidgetsBinding: ${bootWatch.elapsedMilliseconds}ms');
 
   // Initialize Firebase first as everything depends on it
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 10), onTimeout: () {
+      print('[BOOT] Firebase.init TIMEOUT - proceeding anyway');
+      return Firebase.app();
+    });
+  }
   print('[BOOT] Firebase.init: ${bootWatch.elapsedMilliseconds}ms');
 
   // 1. Critical UI-blocking init — ONLY local/instant services needed for
@@ -126,14 +134,17 @@ Future<void> _bootUserServices(User user) async {
   // LayoutService needs user settings sub-collection.
   // PomPrefs needs user settings sub-collection.
   await Future.wait([
-    CounselorPersonaService.init(),         // Uses UserDocCache internally
+    CounselorPersonaService.init(cachedUserData: userData),
     ProfilePictureService.init(cachedUserData: userData),
     DawnUnlockService.init(cachedUserData: userData),
     StarredTeacherService.load(),           // Small sub-collection read
     StarredBusService.load(),               // Small sub-collection read
     LayoutService.load(),                   // Small sub-collection read
     PomPrefsService.load(),                 // Small sub-collection read
-  ]);
+  ]).timeout(const Duration(seconds: 4), onTimeout: () {
+    print('[BOOT] Service boot TIMEOUT - showing UI anyway');
+    return [];
+  });
 
   if (kDebugMode) print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
 
@@ -173,26 +184,31 @@ class _MyAppState extends State<MyApp> {
     final initWatch = Stopwatch()..start();
 
     FirebaseAuth.instance.authStateChanges().listen((user) async {
-      print('[MAIN] Auth state change. User: ${user?.uid}, isFirst: $_isFirstAuthEvent');
+      final isFirst = _isFirstAuthEvent;
+      if (isFirst) _isFirstAuthEvent = false;
+
+      print('[MAIN] Auth state change. User: ${user?.uid}, isFirst: $isFirst');
 
       if (user == null) {
         _teardownUserServices();
       } else {
-        // Start notification listeners (fire-and-forget, don't block UI)
-        NotificationService().startListening();
-
-        if (_isFirstAuthEvent) {
+        if (isFirst) {
           print('[MAIN] Starting boot for initial user...');
+          // Delay notifications slightly to prioritize core UI boot
+          Future.delayed(const Duration(milliseconds: 500), () {
+            NotificationService().startListening();
+          });
+
           await _bootUserServices(user);
           print('[MAIN] Boot complete: ${initWatch.elapsedMilliseconds}ms');
         } else {
+          NotificationService().startListening();
           print('[MAIN] Starting boot for newly logged in user...');
-          _bootUserServices(user); // Don't await on subsequent logins
+          _bootUserServices(user);
         }
       }
 
-      if (_isFirstAuthEvent) {
-        _isFirstAuthEvent = false;
+      if (isFirst) {
         print('[MAIN] Setting _showLoading = false (${initWatch.elapsedMilliseconds}ms total)');
         if (mounted) setState(() => _showLoading = false);
       }
@@ -294,7 +310,33 @@ class _MyAppState extends State<MyApp> {
                   themeMode: ThemeMode.system,
                   debugShowCheckedModeBanner: false,
                   builder: (context, child) {
-                    return SchoolClosedOverlay(child: child!);
+                    return StreamBuilder<User?>(
+                      stream: FirebaseAuth.instance.authStateChanges(),
+                      builder: (context, snapshot) {
+                        return ValueListenableBuilder<bool>(
+                          valueListenable: AppFeatureFlags.isReady,
+                          builder: (context, isReady, _) {
+                            return ValueListenableBuilder<bool>(
+                              valueListenable: AppFeatureFlags.lockdownMode,
+                              builder: (context, isLocked, _) {
+                                // Don't show anything until we know the status
+                                if (!isReady) return const Scaffold(backgroundColor: Colors.black);
+                                
+                                final user = snapshot.data;
+                                final isBeta = AppFeatureFlags.isBetaTester(user?.email);
+                                
+                                // If locked and user is NOT a beta tester, show maintenance
+                                if (isLocked && !isBeta) {
+                                  return const MaintenanceScreen();
+                                }
+                                
+                                return SchoolClosedOverlay(child: child!);
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
                   },
                   home: _showLoading
                       ? const LogoLoadingScreen()
