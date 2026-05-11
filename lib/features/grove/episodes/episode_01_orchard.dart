@@ -44,14 +44,14 @@ List<Scene> buildEpisode01Orchard() {
           label: 'Enter Newton\'s Apple Orchard',
           nextScene: 'ep1_newton_travel',
           setPath: 'apple',
-          waitDuration: Duration(hours: 5),
+          waitDuration: Duration(hours: 4),
         ),
         const SceneChoice(
           letter: 'B',
           label: 'Enter Darwin\'s Orange Grove',
           nextScene: 'ep1_darwin_travel',
           setPath: 'orange',
-          waitDuration: Duration(hours: 5),
+          waitDuration: Duration(hours: 4),
         ),
         const SceneChoice(
           letter: 'C',
@@ -185,6 +185,19 @@ List<Scene> buildEpisode01Orchard() {
     ),
 
     Scene(
+      id: 'ep1_sparrows_bob_story_notification',
+      lines: const [
+        StoryMessage(
+          '[CONNECTIVITY +1]',
+          kind: MessageKind.system,
+          isBold: true,
+        ),
+      ],
+      inputType: InputType.continueOnly,
+      nextScene: 'ep1_sparrows',
+    ),
+
+    Scene(
       id: 'ep1_sparrows_newton_story',
       lines: const [
         StoryMessage(
@@ -221,6 +234,11 @@ List<Scene> buildEpisode01Orchard() {
           'I found a back way. Service entrance. Newton wasn\'t happy but he couldn\'t stop me. Just... read the signs carefully. Not everything premium is necessary.',
           character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
+        ),
+        StoryMessage(
+          '[CONNECTIVITY +1]',
+          kind: MessageKind.system,
+          isBold: true,
         ),
       ],
       inputType: InputType.continueOnly,
@@ -267,6 +285,11 @@ List<Scene> buildEpisode01Orchard() {
           'I just asked Darwin what he recommended. He said "default." I took default everything. In and out in ten minutes. Sometimes simple is best.',
           character: StoryCharacter.graySparrow,
           kind: MessageKind.dialogue,
+        ),
+        StoryMessage(
+          '[CONNECTIVITY +1]',
+          kind: MessageKind.system,
+          isBold: true,
         ),
       ],
       inputType: InputType.continueOnly,
@@ -1823,19 +1846,19 @@ List<Scene> buildEpisode01Orchard() {
           letter: 'B',
           label: '"No thanks, I need to go"',
           nextScene: 'darwin_exit_efficient',
-          waitDuration: Duration(hours: 36),
+          waitDuration: Duration(hours: 10),
         ),
         SceneChoice(
           letter: 'C',
           label: '"Maybe later?"',
           nextScene: 'darwin_exit_polite',
-          waitDuration: Duration(hours: 36),
+          waitDuration: Duration(hours: 10),
         ),
         SceneChoice(
           letter: 'D',
           label: 'Walk away without responding',
           nextScene: 'darwin_exit_efficient',
-          waitDuration: Duration(hours: 36),
+          waitDuration: Duration(hours: 10),
         ),
       ],
     ),
@@ -1887,7 +1910,7 @@ List<Scene> buildEpisode01Orchard() {
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep1_complete',
-      waitDuration: Duration(hours: 36),
+      waitDuration: Duration(hours: 10),
       onEnter: (state) {
         state.seedWarmth = max(0, state.seedWarmth - 10);
         state.transience += 1;
@@ -1960,6 +1983,8 @@ List<Scene> buildEpisode01Orchard() {
         // Final clamped range check
         state.seedWarmth = state.seedWarmth.clamp(60, 90);
         state.episodeComplete = true; // Mark episode as done
+        state.newtonUnlocked = true;
+        state.darwinUnlocked = true;
       },
     ),
   ];

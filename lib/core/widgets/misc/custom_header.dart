@@ -38,7 +38,7 @@ class CustomHeader extends StatelessWidget {
     if (t.contains("ROWAN")) return "Practical Direction".capitalized;
     if (t.contains("SAKURA")) return "Creative Insight".capitalized;
     if (t.contains("AIBES")) return "I remember".capitalized;
-    return "FOR BCA";
+    return "THE ALL IN ONE BCA APP";
   }
 
   @override

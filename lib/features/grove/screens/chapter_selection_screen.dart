@@ -50,6 +50,10 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     if (mounted) {
       setState(() {
         _gameState = state ?? GroveGameState();
+        // Sync beta status from widget to state
+        if (widget.isBetaTester) {
+          _gameState!.isBetaTester = true;
+        }
         _isLoading = false;
       });
       // Start the staggered lift animation
@@ -149,9 +153,68 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                 _resetProgress();
               },
               child: Text(
-                'Reset',
+                'Reset Everything',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmEpisodeReset(Episode episode) {
+    HapticFeedback.heavyImpact();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final colors = Theme.of(context).colorScheme;
+        return AlertDialog(
+          backgroundColor: colors.surface,
+          title: Text(
+            'Reset ${episode.title}?',
+            style: const TextStyle(
+              fontFamily: 'JetBrains Mono',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'This will roll back your stats, inventory, and choices to the beginning of this episode. All progress in later episodes will also be cleared. Continue?',
+            style: TextStyle(color: colors.onSurface.withOpacity(0.8)),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: colors.onSurface.withOpacity(0.6)),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                setState(() => _isLoading = true);
+                final newState = await GroveProgressService.resetToEpisode(
+                  _gameState!,
+                  episode.number,
+                );
+                if (mounted) {
+                  setState(() {
+                    _gameState = newState;
+                    _isLoading = false;
+                  });
+                }
+              },
+              child: Text(
+                'Reset Episode',
+                style: TextStyle(
+                  color: colors.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -199,6 +262,43 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     TInventorySheet.show(context, _gameState!.inventory);
   }
 
+  Widget _statDesc(String code, String name, String desc, ColorScheme colors) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '$code: ',
+                style: TextStyle(
+                  fontFamily: 'JetBrains Mono',
+                  fontWeight: FontWeight.bold,
+                  color: colors.primary,
+                ),
+              ),
+              Text(
+                name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            desc,
+            style: TextStyle(
+              fontSize: 12,
+              color: colors.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -231,57 +331,35 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
           children: [
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      'THE GR0VE',
-                      style: TextStyle(
-                        fontFamily: 'JetBrains Mono',
-                        fontSize: 48,
-                        fontWeight: FontWeight.w900,
-                        color: colors.onSurface,
-                        letterSpacing: 2.0,
-                        height: 1.0,
+            CustomHeader(
+              title: 'THE GR0VE',
+              action: _gameState?.busyUntil != null &&
+                      _currentTime.millisecondsSinceEpoch <
+                          _gameState!.busyUntil!
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                    ),
-                  ),
-                ),
-                if (_gameState?.busyUntil != null &&
-                    _currentTime.millisecondsSinceEpoch <
-                        _gameState!.busyUntil!) ...[
-                  const SizedBox(width: 12),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1C40F).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFFF1C40F).withOpacity(0.3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1C40F).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFF1C40F).withOpacity(0.3),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'TRAVELING',
-                      style: TextStyle(
-                        fontFamily: 'JetBrains Mono',
-                        fontSize: 8,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFFF1C40F),
-                        letterSpacing: 1.2,
+                      child: const Text(
+                        'TRAVELING',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 8,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFF1C40F),
+                          letterSpacing: 1.2,
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ],
+                    )
+                  : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -333,9 +411,41 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                         color: colors.outline.withOpacity(0.1),
                       ),
                     ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            backgroundColor: colors.surface,
+                            title: const Text(
+                              'Seed Statistics',
+                              style: TextStyle(
+                                fontFamily: 'JetBrains Mono',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _statDesc('STA', 'Stability', 'Resilience against external corruption.', colors),
+                                _statDesc('CON', 'Connectivity', 'Your bond with the root network.', colors),
+                                _statDesc('VIT', 'Vitality', 'Raw life force and growth potential.', colors),
+                                _statDesc('TRA', 'Transience', 'Your ability to adapt and change.', colors),
+                              ],
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                       child: Text(
                         'STA:${_gameState?.stability ?? 0} CON:${_gameState?.connectivity ?? 0} VIT:${_gameState?.vitality ?? 0} TRA:${_gameState?.transience ?? 0}',
                         style: TextStyle(
@@ -999,6 +1109,39 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (isCompleted || inProgress)
+                    InkWell(
+                      onTap: () => _confirmEpisodeReset(episode),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.restart_alt_rounded,
+                              size: 14,
+                              color: accentColor.withOpacity(0.5),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'RESET',
+                              style: TextStyle(
+                                fontFamily: 'JetBrains Mono',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: accentColor.withOpacity(0.5),
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
                   Text(
                     isCompleted ? 'REVIEW' : 'ENTER',
                     style: TextStyle(
@@ -1078,6 +1221,36 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
               _buildSkipButton(3, _gameState!.skips3h, accentColor),
             if ((_gameState?.skips1h ?? 0) > 0)
               _buildSkipButton(1, _gameState!.skips1h, accentColor),
+            if (widget.isBetaTester) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    HapticFeedback.heavyImpact();
+                    setState(() {
+                      _gameState!.busyUntil = DateTime.now().millisecondsSinceEpoch;
+                    });
+                    GroveProgressService.save(_gameState!);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                    side: const BorderSide(color: Colors.redAccent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'BETA: SKIP TRAVEL',
+                    style: TextStyle(
+                      fontFamily: 'JetBrains Mono',
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ],
       ),

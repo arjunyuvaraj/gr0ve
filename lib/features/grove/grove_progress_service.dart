@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gr0ve/features/grove/episodes/episode_registry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 
@@ -22,6 +23,7 @@ class GroveGameState {
   bool episodeComplete;
   bool newtonUnlocked;
   bool darwinUnlocked;
+  bool londonUnlocked;
   int? busyUntil; // epoch milliseconds
   String? pendingScene; // Scene to load once busyUntil expires
   int skips1h; // 1-hour skips
@@ -37,8 +39,9 @@ class GroveGameState {
   bool darwinConversationHad;
   bool darwinDefaultModeUnlocked;
 
-  // History tracking log
   Map<String, List<Map<String, dynamic>>> episodeHistories;
+  Map<String, Map<String, dynamic>> episodeStartStates;
+  bool isBetaTester;
 
   GroveGameState({
     this.currentScene = 'ep0_intro',
@@ -53,6 +56,7 @@ class GroveGameState {
     this.episodeComplete = false,
     this.newtonUnlocked = false,
     this.darwinUnlocked = false,
+    this.londonUnlocked = false,
     this.newtonRiddleAttempts = 0,
     this.newtonRiddleSolved = false,
     this.newtonExitAttempts = 0,
@@ -64,9 +68,12 @@ class GroveGameState {
     this.skips1h = 0,
     this.skips3h = 0,
     this.skips5h = 0,
+    this.isBetaTester = false,
     Map<String, List<Map<String, dynamic>>>? episodeHistories,
-  })  : inventory = inventory ?? [],
-        episodeHistories = episodeHistories ?? {};
+    Map<String, Map<String, dynamic>>? episodeStartStates,
+  }) : inventory = inventory ?? [],
+       episodeHistories = episodeHistories ?? {},
+       episodeStartStates = episodeStartStates ?? {};
 
   Map<String, dynamic> toJson() => {
     'currentScene': currentScene,
@@ -81,6 +88,7 @@ class GroveGameState {
     'episodeComplete': episodeComplete,
     'newtonUnlocked': newtonUnlocked,
     'darwinUnlocked': darwinUnlocked,
+    'londonUnlocked': londonUnlocked,
     'newtonRiddleAttempts': newtonRiddleAttempts,
     'newtonRiddleSolved': newtonRiddleSolved,
     'newtonExitAttempts': newtonExitAttempts,
@@ -92,7 +100,9 @@ class GroveGameState {
     'skips1h': skips1h,
     'skips3h': skips3h,
     'skips5h': skips5h,
+    'isBetaTester': isBetaTester,
     'episodeHistories': episodeHistories,
+    'episodeStartStates': episodeStartStates,
   };
 
   factory GroveGameState.fromJson(Map<String, dynamic> json) {
@@ -109,6 +119,7 @@ class GroveGameState {
       episodeComplete: json['episodeComplete'] as bool? ?? false,
       newtonUnlocked: json['newtonUnlocked'] as bool? ?? false,
       darwinUnlocked: json['darwinUnlocked'] as bool? ?? false,
+      londonUnlocked: json['londonUnlocked'] as bool? ?? false,
       newtonRiddleAttempts: json['newtonRiddleAttempts'] as int? ?? 0,
       newtonRiddleSolved: json['newtonRiddleSolved'] as bool? ?? false,
       newtonExitAttempts: json['newtonExitAttempts'] as int? ?? 0,
@@ -118,18 +129,30 @@ class GroveGameState {
           json['darwinDefaultModeUnlocked'] as bool? ?? false,
       busyUntil: json['busyUntil'] as int?,
       pendingScene: json['pendingScene'] as String?,
-      skips1h: json['skips1h'] as int? ?? (json['skipTokens'] as int? ?? 0), // Migrate old tokens
+      skips1h:
+          json['skips1h'] as int? ??
+          (json['skipTokens'] as int? ?? 0), // Migrate old tokens
       skips3h: json['skips3h'] as int? ?? 0,
       skips5h: json['skips5h'] as int? ?? 0,
+      isBetaTester: json['isBetaTester'] as bool? ?? false,
       episodeHistories: _parseHistories(json['episodeHistories']),
+      episodeStartStates: _parseStartStates(json['episodeStartStates']),
     );
+  }
+
+  static Map<String, Map<String, dynamic>> _parseStartStates(dynamic data) {
+    if (data == null) return {};
+    final map = data as Map<String, dynamic>;
+    return map.map((k, v) => MapEntry(k, Map<String, dynamic>.from(v)));
   }
 
   static Map<String, List<Map<String, dynamic>>> _parseHistories(dynamic data) {
     if (data == null) return {};
     final mapText = data as Map<String, dynamic>;
     return mapText.map((k, v) {
-      final list = (v as List).map((e) => Map<String, dynamic>.from(e)).toList();
+      final list = (v as List)
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
       return MapEntry(k, list);
     });
   }
@@ -147,6 +170,7 @@ class GroveGameState {
     bool? episodeComplete,
     bool? newtonUnlocked,
     bool? darwinUnlocked,
+    bool? londonUnlocked,
     int? newtonRiddleAttempts,
     bool? newtonRiddleSolved,
     int? newtonExitAttempts,
@@ -158,7 +182,9 @@ class GroveGameState {
     int? skips1h,
     int? skips3h,
     int? skips5h,
+    bool? isBetaTester,
     Map<String, List<Map<String, dynamic>>>? episodeHistories,
+    Map<String, Map<String, dynamic>>? episodeStartStates,
   }) {
     return GroveGameState(
       currentScene: currentScene ?? this.currentScene,
@@ -173,11 +199,13 @@ class GroveGameState {
       episodeComplete: episodeComplete ?? this.episodeComplete,
       newtonUnlocked: newtonUnlocked ?? this.newtonUnlocked,
       darwinUnlocked: darwinUnlocked ?? this.darwinUnlocked,
+      londonUnlocked: londonUnlocked ?? this.londonUnlocked,
       newtonRiddleAttempts: newtonRiddleAttempts ?? this.newtonRiddleAttempts,
       newtonRiddleSolved: newtonRiddleSolved ?? this.newtonRiddleSolved,
       newtonExitAttempts: newtonExitAttempts ?? this.newtonExitAttempts,
       newtonExitSolved: newtonExitSolved ?? this.newtonExitSolved,
-      darwinConversationHad: darwinConversationHad ?? this.darwinConversationHad,
+      darwinConversationHad:
+          darwinConversationHad ?? this.darwinConversationHad,
       darwinDefaultModeUnlocked:
           darwinDefaultModeUnlocked ?? this.darwinDefaultModeUnlocked,
       busyUntil: busyUntil ?? this.busyUntil,
@@ -185,7 +213,10 @@ class GroveGameState {
       skips1h: skips1h ?? this.skips1h,
       skips3h: skips3h ?? this.skips3h,
       skips5h: skips5h ?? this.skips5h,
+      isBetaTester: isBetaTester ?? this.isBetaTester,
       episodeHistories: episodeHistories ?? Map.from(this.episodeHistories),
+      episodeStartStates:
+          episodeStartStates ?? Map.from(this.episodeStartStates),
     );
   }
 }
@@ -219,7 +250,12 @@ class GroveProgressService {
         await FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
-            .set({_firestoreField: json}, SetOptions(merge: true));
+            .set({
+          _firestoreField: json,
+          'story_newton_unlocked': state.newtonUnlocked,
+          'story_darwin_unlocked': state.darwinUnlocked,
+          'story_london_unlocked': state.londonUnlocked,
+        }, SetOptions(merge: true));
       } catch (e) {
         debugPrint('[GroveProgress] Firestore save error: $e');
       }
@@ -275,9 +311,59 @@ class GroveProgressService {
               _firestoreField: FieldValue.delete(),
               'story_newton_unlocked': FieldValue.delete(),
               'story_darwin_unlocked': FieldValue.delete(),
+              'story_london_unlocked': FieldValue.delete(),
             });
       } catch (_) {}
     }
+  }
+
+  /// Resets progress to the beginning of a specific episode.
+  static Future<GroveGameState> resetToEpisode(
+    GroveGameState current,
+    int episodeNumber,
+  ) async {
+    final epKey = 'ep$episodeNumber';
+
+    // Find if we have a saved start state for this episode
+    final startStateJson = current.episodeStartStates[epKey];
+    GroveGameState newState;
+
+    if (startStateJson != null) {
+      newState = GroveGameState.fromJson(startStateJson);
+      // Ensure beta status is preserved
+      newState.isBetaTester = current.isBetaTester;
+      // Preserve start states for the future
+      newState.episodeStartStates = Map.from(current.episodeStartStates);
+    } else {
+      // Fallback: Just set the episode and initial scene
+      // This is for existing users who haven't saved start states yet
+      final episode = groveEpisodes.firstWhere(
+        (e) => e.number == episodeNumber,
+      );
+      final scenes = episode.buildScenes();
+      final initialScene = scenes.isNotEmpty
+          ? scenes.first.id
+          : 'ep${episodeNumber}_intro';
+
+      newState = current.copyWith(
+        currentEpisode: episodeNumber,
+        currentScene: initialScene,
+        episodeComplete: false,
+        busyUntil: 0,
+        pendingScene: null,
+      );
+    }
+
+    // Clear histories and start states for this and subsequent episodes
+    for (int i = episodeNumber; i <= 10; i++) {
+      newState.episodeHistories.remove('ep$i');
+      if (i > episodeNumber) {
+        newState.episodeStartStates.remove('ep$i');
+      }
+    }
+
+    await save(newState);
+    return newState;
   }
 
   /// Mark a story profile picture as unlocked in Firestore

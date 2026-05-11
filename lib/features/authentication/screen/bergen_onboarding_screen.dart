@@ -22,6 +22,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
   String? selectedAcademy;
   bool isLoading = false;
   bool isSaving = false;
+  Timer? _verificationTimer;
 
   final grades = ['9', '10', '11', '12'];
   final academies = [
@@ -40,14 +41,34 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
   void initState() {
     super.initState();
     _checkEmailVerification();
+    _startVerificationTimer();
     FirebaseAnalytics.instance.logEvent(name: 'screen_onboarding');
+  }
+
+  void _startVerificationTimer() {
+    _verificationTimer?.cancel();
+    _verificationTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      _checkEmailVerification();
+    });
+  }
+
+  @override
+  void dispose() {
+    _verificationTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkEmailVerification() async {
     await user?.reload();
-    setState(() {
-      isEmailVerified = user?.emailVerified ?? false;
-    });
+    if (mounted) {
+      final verified = user?.emailVerified ?? false;
+      if (verified && !isEmailVerified) {
+        _verificationTimer?.cancel();
+      }
+      setState(() {
+        isEmailVerified = verified;
+      });
+    }
   }
 
   Future<void> _sendVerificationEmail() async {

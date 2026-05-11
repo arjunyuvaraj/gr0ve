@@ -5,9 +5,15 @@ List<Scene> buildEpisode00Dawn() {
     Scene(
       id: 'ep0_intro',
       lines: const [
-        StoryMessage('EPISODE 0: THE DAWN', kind: MessageKind.episodeHeader, isBold: true),
+        StoryMessage(
+          'EPISODE 0: THE DAWN',
+          kind: MessageKind.episodeHeader,
+          isBold: true,
+        ),
         StoryMessage('You wake on a branch of smooth, pale wood.'),
-        StoryMessage('The tree beneath you hums faintly — dying light trapped in bark.'),
+        StoryMessage(
+          'The tree beneath you hums faintly — dying light trapped in bark.',
+        ),
         StoryMessage('This is Dawn. And Dawn is fading.'),
       ],
       inputType: InputType.continueOnly,
@@ -27,7 +33,11 @@ List<Scene> buildEpisode00Dawn() {
           character: StoryCharacter.dawn,
           kind: MessageKind.dialogue,
         ),
-        StoryMessage('A seed appears in your inventory — warm, pulsing with fading light.', kind: MessageKind.system, isItalic: true),
+        StoryMessage(
+          'A seed appears in your inventory — warm, pulsing with fading light.',
+          kind: MessageKind.system,
+          isItalic: true,
+        ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep0_dawn_branch',
@@ -56,8 +66,15 @@ List<Scene> buildEpisode00Dawn() {
           character: StoryCharacter.dawn,
           kind: MessageKind.dialogue,
         ),
-        StoryMessage('Dawn\'s light flickers once — then dims to ash-gray.', isItalic: true),
-        StoryMessage('[Dawn\'s Branch obtained]\n[Dawn\'s Seed obtained  |  STATUS: Warm — 100%]', kind: MessageKind.system, isBold: true),
+        StoryMessage(
+          'Dawn\'s light flickers once — then dims to ash-gray.',
+          isItalic: true,
+        ),
+        StoryMessage(
+          '[Dawn\'s Branch obtained]\n[Dawn\'s Seed obtained  |  STATUS: Warm — 100%]',
+          kind: MessageKind.system,
+          isBold: true,
+        ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep0_player_resolve',
@@ -109,7 +126,9 @@ List<Scene> buildEpisode00Dawn() {
     Scene(
       id: 'ep0_complete',
       lines: const [
-        StoryMessage('With nothing left holding you here, you launch into the air. The journey begins.'),
+        StoryMessage(
+          'With nothing left holding you here, you launch into the air. The journey begins.',
+        ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep0_stats',
@@ -119,7 +138,11 @@ List<Scene> buildEpisode00Dawn() {
       id: 'ep0_stats',
       lines: const [
         StoryMessage('EPISODE COMPLETE', kind: MessageKind.episodeHeader),
-        StoryMessage('To proceed, exit and select Episode 1 from the Chapter Menu.', kind: MessageKind.system, isItalic: true),
+        StoryMessage(
+          'To proceed, exit and select Episode 1 from the Chapter Menu.',
+          kind: MessageKind.system,
+          isItalic: true,
+        ),
       ],
       inputType: InputType.none,
     ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gr0ve/core/theme/persona_theme.dart';
+import 'package:gr0ve/core/widgets/misc/value_listenable_builder_2.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
 import 'package:gr0ve/features/absence/screens/absence_screen.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
@@ -56,10 +57,17 @@ void main() async {
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    ).timeout(const Duration(seconds: 10), onTimeout: () {
-      print('[BOOT] Firebase.init TIMEOUT - proceeding anyway');
-      return Firebase.app();
-    });
+    ).timeout(
+      const Duration(seconds: 3),
+      onTimeout: () {
+        print('[BOOT] Firebase.init TIMEOUT - proceeding anyway');
+        if (Firebase.apps.isNotEmpty) return Firebase.app();
+        throw Exception(
+          'Firebase initialization timed out. This often happens on hot restarts '
+          'with a buggy emulator. Please STOP the app (press "q") and run "flutter run" again.',
+        );
+      },
+    );
   }
   print('[BOOT] Firebase.init: ${bootWatch.elapsedMilliseconds}ms');
 
@@ -68,8 +76,8 @@ void main() async {
   //    NO Firestore calls here — those require a gRPC channel that takes
   //    hundreds of ms to establish on Android cold start.
   await Future.wait([
-    AccessibilityService.init(),   // SharedPreferences only
-    ThemeColorService.init(),       // SharedPreferences only
+    AccessibilityService.init(), // SharedPreferences only
+    ThemeColorService.init(), // SharedPreferences only
   ]);
   print('[BOOT] SharedPrefs init: ${bootWatch.elapsedMilliseconds}ms');
 
@@ -87,14 +95,21 @@ void main() async {
 /// All of these use ValueNotifiers, so the UI updates reactively when ready.
 void _deferredInit(Stopwatch bootWatch) {
   // Load dotenv and feature flags — lightweight, non-blocking
-  dotenv.load(fileName: ".env").then((_) =>
-    print('[BOOT] dotenv ready: ${bootWatch.elapsedMilliseconds}ms'));
-  AppFeatureFlags.load().then((_) =>
-    print('[BOOT] FeatureFlags ready: ${bootWatch.elapsedMilliseconds}ms'));
+  dotenv
+      .load(fileName: ".env")
+      .then(
+        (_) => print('[BOOT] dotenv ready: ${bootWatch.elapsedMilliseconds}ms'),
+      );
+  AppFeatureFlags.load().then(
+    (_) =>
+        print('[BOOT] FeatureFlags ready: ${bootWatch.elapsedMilliseconds}ms'),
+  );
 
   // Notification init (local notifications plugin + FCM) — fire and forget
-  NotificationService().initialize().then((_) =>
-    print('[BOOT] Notifications ready: ${bootWatch.elapsedMilliseconds}ms'));
+  NotificationService().initialize().then(
+    (_) =>
+        print('[BOOT] Notifications ready: ${bootWatch.elapsedMilliseconds}ms'),
+  );
 
   // Teacher list — background, non-blocking
   _backgroundInit();
@@ -137,23 +152,28 @@ Future<void> _bootUserServices(User user) async {
     CounselorPersonaService.init(cachedUserData: userData),
     ProfilePictureService.init(cachedUserData: userData),
     DawnUnlockService.init(cachedUserData: userData),
-    StarredTeacherService.load(),           // Small sub-collection read
-    StarredBusService.load(),               // Small sub-collection read
-    LayoutService.load(),                   // Small sub-collection read
-    PomPrefsService.load(),                 // Small sub-collection read
-  ]).timeout(const Duration(seconds: 4), onTimeout: () {
-    print('[BOOT] Service boot TIMEOUT - showing UI anyway');
-    return [];
-  });
+    StarredTeacherService.load(), // Small sub-collection read
+    StarredBusService.load(), // Small sub-collection read
+    LayoutService.load(), // Small sub-collection read
+    PomPrefsService.load(), // Small sub-collection read
+  ]).timeout(
+    const Duration(seconds: 4),
+    onTimeout: () {
+      print('[BOOT] Service boot TIMEOUT - showing UI anyway');
+      return [];
+    },
+  );
 
-  if (kDebugMode) print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
+  if (kDebugMode)
+    print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
 
   // Phase 3: Calendar is the heaviest service — it queries groups, BCA events,
   // personal events, and sets up Firestore streams. Run it AFTER core services
   // so the UI can render while it loads. The calendar widget uses ValueNotifiers
   // and will update reactively.
   CalendarService.loadAllEvents().then((_) {
-    if (kDebugMode) print('[BOOT] Calendar ready (${sw.elapsedMilliseconds}ms)');
+    if (kDebugMode)
+      print('[BOOT] Calendar ready (${sw.elapsedMilliseconds}ms)');
   });
 }
 
@@ -209,13 +229,15 @@ class _MyAppState extends State<MyApp> {
       }
 
       if (isFirst) {
-        print('[MAIN] Setting _showLoading = false (${initWatch.elapsedMilliseconds}ms total)');
+        print(
+          '[MAIN] Setting _showLoading = false (${initWatch.elapsedMilliseconds}ms total)',
+        );
         if (mounted) setState(() => _showLoading = false);
       }
     });
 
-  _setupNotificationTapHandler();
-}
+    _setupNotificationTapHandler();
+  }
 
   void _setupNotificationTapHandler() {
     NotificationService().setNotificationTapCallback(_handleNotificationTap);
@@ -313,26 +335,27 @@ class _MyAppState extends State<MyApp> {
                     return StreamBuilder<User?>(
                       stream: FirebaseAuth.instance.authStateChanges(),
                       builder: (context, snapshot) {
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: AppFeatureFlags.isReady,
-                          builder: (context, isReady, _) {
-                            return ValueListenableBuilder<bool>(
-                              valueListenable: AppFeatureFlags.lockdownMode,
-                              builder: (context, isLocked, _) {
-                                // Don't show anything until we know the status
-                                if (!isReady) return const Scaffold(backgroundColor: Colors.black);
-                                
-                                final user = snapshot.data;
-                                final isBeta = AppFeatureFlags.isBetaTester(user?.email);
-                                
-                                // If locked and user is NOT a beta tester, show maintenance
-                                if (isLocked && !isBeta) {
-                                  return const MaintenanceScreen();
-                                }
-                                
-                                return SchoolClosedOverlay(child: child!);
-                              },
+                        return ValueListenableBuilder2<bool, bool>(
+                          first: AppFeatureFlags.isReady,
+                          second: AppFeatureFlags.lockdownMode,
+                          builder: (context, isReady, isLocked, _) {
+                            // Don't show anything until we know the status
+                            if (!isReady)
+                              return const Scaffold(
+                                backgroundColor: Colors.black,
+                              );
+
+                            final user = snapshot.data;
+                            final isBeta = AppFeatureFlags.isBetaTester(
+                              user?.email,
                             );
+
+                            // If locked and user is NOT a beta tester, show maintenance
+                            if (isLocked && !isBeta) {
+                              return const MaintenanceScreen();
+                            }
+
+                            return SchoolClosedOverlay(child: child!);
                           },
                         );
                       },

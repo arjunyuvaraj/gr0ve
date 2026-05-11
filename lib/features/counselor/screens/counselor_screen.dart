@@ -10,6 +10,10 @@ import 'package:gr0ve/features/counselor/services/counselor_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/legal/legal.dart';
 import 'package:gr0ve/models/counselor.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:gr0ve/configuration/firebase_options.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/easter_eggs/abies_screen.dart';
@@ -61,42 +65,92 @@ class _CounselorScreenState extends State<CounselorScreen>
   }
 
   Future<void> _initialize() async {
+    // Ensure Firebase is initialized even after a hot reload
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ).timeout(const Duration(seconds: 2));
+    } catch (e) {
+      if (kDebugMode) print('[CounselorScreen] Firebase init error (ignored if already init): $e');
+    }
+    if (!mounted) return;
     setState(() => _isInitializing = true);
 
-    final hasAcceptedTerms = await TermsOfServiceService.hasAcceptedTerms();
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        if (mounted) setState(() => _isInitializing = false);
+        return;
+      }
 
-    if (!hasAcceptedTerms) {
+      // Check ToS first
+      final hasAcceptedTerms = await TermsOfServiceService.hasAcceptedTerms()
+          .timeout(const Duration(seconds: 5), onTimeout: () => true);
+
+      if (!hasAcceptedTerms) {
+        if (mounted) {
+          setState(() {
+            _isInitializing = false;
+            _termsAccepted = false;
+          });
+        }
+        return;
+      }
+
+      if (mounted) setState(() => _termsAccepted = true);
+
+      // Parallel load essential data with fail-safes
+      final results = await Future.wait([
+        CounselorPersonaService.load().timeout(const Duration(seconds: 5)),
+        _loadUserProfile().timeout(const Duration(seconds: 5)),
+      ]).timeout(const Duration(seconds: 8));
+
+      final persona = results[0] as CounselorPersona;
+      final profile = results[1] as UserProfile;
+
+      // History load
+      final history = await ChatHistoryService.load(
+        persona,
+      ).timeout(const Duration(seconds: 5), onTimeout: () => []);
+
+      // Non-blocking background loads
+      KnowledgeBaseService.load();
+      CourseCatalogService.buildPromptString(academy: profile.academy);
+
+      if (mounted) {
+        setState(() {
+          _persona = persona;
+          _profile = profile;
+          _messages = history;
+          _hasStarted = history.isNotEmpty;
+          _isInitializing = false;
+        });
+
+        if (history.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _scrollToBottom(),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('[CounselorScreen] Initialization error: $e');
       if (mounted) {
         setState(() {
           _isInitializing = false;
-          _termsAccepted = false;
+          _hasStarted = false;
+          // Set defaults to avoid null crashes in build
+          _persona = CounselorPersona.grover;
+          _profile = UserProfile.empty;
+          _messages = [];
         });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Connection slow. Some features might be limited."),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
-      return;
-    }
-
-    setState(() => _termsAccepted = true);
-
-    final results = await Future.wait([
-      CounselorPersonaService.load(),
-      _loadUserProfile(),
-    ]);
-    final persona = results[0] as CounselorPersona;
-    final profile = results[1] as UserProfile;
-    final history = await ChatHistoryService.load(persona);
-    KnowledgeBaseService.load();
-    CourseCatalogService.buildPromptString(academy: profile.academy);
-
-    if (!mounted) return;
-    setState(() {
-      _persona = persona;
-      _profile = profile;
-      _messages = history;
-      _hasStarted = history.isNotEmpty;
-      _isInitializing = false;
-    });
-    if (history.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     }
   }
 
@@ -104,17 +158,15 @@ class _CounselorScreenState extends State<CounselorScreen>
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return UserProfile.empty;
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final data = doc.data();
+      // Use cache to avoid redundant gRPC calls and potential hangs
+      final Map<String, dynamic>? data = await UserDocCache.get();
       return UserProfile(
         name: user.displayName ?? '',
         academy: data?['academy'] as String? ?? '',
         grade: data?['grade']?.toString() ?? '',
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[CounselorScreen] Profile load error: $e');
       return UserProfile(name: user.displayName ?? '', academy: '', grade: '');
     }
   }
@@ -200,7 +252,8 @@ class _CounselorScreenState extends State<CounselorScreen>
     final bubbleId = _addStreamingBubble(_persona);
 
     try {
-      if (_persona.isHidden && !CounselorPersonaService.isPersonaUnlocked(_persona)) {
+      if (_persona.isHidden &&
+          !CounselorPersonaService.isPersonaUnlocked(_persona)) {
         await Future.delayed(const Duration(milliseconds: 600));
         final line = _persona.lockedVoiceLine(unlocked: false);
         _appendToken(bubbleId, line);
@@ -426,7 +479,8 @@ class _CounselorScreenState extends State<CounselorScreen>
   // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> _clearHistory() async {
-    if (_isTyping) return; // Guard against clearing while a message is in flight
+    if (_isTyping)
+      return; // Guard against clearing while a message is in flight
 
     setState(() {
       _messages.clear();
@@ -509,11 +563,44 @@ class _CounselorScreenState extends State<CounselorScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                'Please visit your Account page to agree to the Terms of Service before using the counselor.',
+                'Please accept the Terms of Service to use the counselor.',
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
                   color: colors.onSurface.withOpacity(0.7),
                   height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => TermsOfServiceModal(
+                      isBlockingCounselorAccess: true,
+                      onAccepted: () {
+                        if (mounted) _initialize();
+                      },
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  'View Terms of Service',
+                  style: textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -523,26 +610,32 @@ class _CounselorScreenState extends State<CounselorScreen>
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: EmailVerificationGate(
         description:
             "Please verify your email address to talk with the counselor.",
         child: Column(
           children: [
-            TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutCubic,
-              tween: Tween(begin: 0.0, end: 1.0),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: child,
-                  ),
-                );
-              },
-              child: _buildHeader(colors, textTheme, brightness, pc),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              child: MediaQuery.of(context).viewInsets.bottom > 100
+                  ? const SizedBox(width: double.infinity, height: 0)
+                  : TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: _buildHeader(colors, textTheme, brightness, pc),
+                    ),
             ),
             Expanded(
               child: TweenAnimationBuilder<double>(
@@ -564,7 +657,6 @@ class _CounselorScreenState extends State<CounselorScreen>
               ),
             ),
             _buildInputBar(colors, textTheme, pc),
-            SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
           ],
         ),
       ),
@@ -627,9 +719,7 @@ class _CounselorScreenState extends State<CounselorScreen>
           if (_hasStarted)
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: _isTyping 
-                ? null 
-                : () => _confirmClear(colors, textTheme),
+              onTap: _isTyping ? null : () => _confirmClear(colors, textTheme),
               child: Opacity(
                 opacity: _isTyping ? 0.3 : 1.0,
                 child: Container(
@@ -772,88 +862,86 @@ class _CounselorScreenState extends State<CounselorScreen>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: colors.outline.withOpacity(0.1),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: colors.outline.withOpacity(0.1)),
+                  ),
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLines: viewInsets.bottom > 100 ? 3 : 5,
+                    minLines: 1,
+                    style: textTheme.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: 'Ask ${_persona.displayName}...',
+                      hintStyle: textTheme.bodyMedium?.copyWith(
+                        color: colors.onSurface.withOpacity(0.3),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 14,
                       ),
                     ),
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      textCapitalization: TextCapitalization.sentences,
-                      maxLines: 5,
-                      minLines: 1,
-                      style: textTheme.bodyMedium,
-                      decoration: InputDecoration(
-                        hintText: 'Ask ${_persona.displayName}...',
-                        hintStyle: textTheme.bodyMedium?.copyWith(
-                          color: colors.onSurface.withOpacity(0.3),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                      ),
-                      onSubmitted: _isTyping ? null : _send,
-                    ),
+                    onSubmitted: _isTyping ? null : _send,
                   ),
                 ),
-                GestureDetector(
-                  onTap: _openVoiceMode,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 48,
-                    height: 48,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: pc.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: pc.withOpacity(0.3)),
-                    ),
-                    child: Icon(Icons.mic_rounded, color: pc, size: 22),
+              ),
+              GestureDetector(
+                onTap: _openVoiceMode,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 48,
+                  height: 48,
+                  margin: const EdgeInsets.only(left: 8),
+                  decoration: BoxDecoration(
+                    color: pc.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: pc.withOpacity(0.3)),
                   ),
+                  child: Icon(Icons.mic_rounded, color: pc, size: 22),
                 ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: _isTyping ? null : () => _send(_controller.text),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: _isTyping ? pc.withOpacity(0.35) : pc,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: _isTyping
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : HugeIcon(
-                              icon: HugeIcons.strokeRoundedSent,
-                              size: 20,
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _isTyping ? null : () => _send(_controller.text),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _isTyping ? pc.withOpacity(0.35) : pc,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: _isTyping
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
                               color: Colors.white,
                             ),
-                    ),
+                          )
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedSent,
+                            size: 20,
+                            color: Colors.white,
+                          ),
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
-      );
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

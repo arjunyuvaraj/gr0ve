@@ -23,13 +23,13 @@ List<Scene> buildEpisode03TangledForest() {
           'The water, which was clear and reflective at the lake, becomes warmer. The memory images that rippled across Lake Lament\'s surface fade completely. The water is just water again.',
         ),
         StoryMessage(
-          'The Memory Sack against your side responds to the heat. The crushing weight of the shards inside feels... lighter somehow. More bearable.',
+          'The Flask of Tears against your side responds to the heat. The crushing weight of the shards inside feels... lighter somehow. More bearable.',
         ),
         StoryMessage(
-          'Down\'s Seed, which had cooled to a dim flicker at Lake Lament, maintains its weak glow but the light shifts—becoming less blue-tinged, more amber-colored. The rainforest light is affecting it.',
+          'Dawn\'s Seed, which had cooled to a dim flicker at Lake Lament, maintains its weak glow but the light shifts—becoming less blue-tinged, more amber-colored. The rainforest light is affecting it.',
         ),
         StoryMessage(
-          'Down\'s Branch, clutched in your other talon, begins to absorb moisture. The wood feels heavier, but less brittle. It\'s coming alive with humidity.',
+          'Dawn\'s Branch, clutched in your other talon, begins to absorb moisture. The wood feels heavier, but less brittle. It\'s coming alive with humidity.',
         ),
       ],
       inputType: InputType.continueOnly,
@@ -266,7 +266,7 @@ List<Scene> buildEpisode03TangledForest() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'You land fully on the moss. The Memory Sack settles against your side. You feel its warmth intensify slightly—responding to proximity, to being noticed.',
+          'You land fully on the moss. The Flask of Tears settles against your side. You feel its warmth intensify slightly—responding to proximity, to being noticed.',
         ),
       ],
       inputType: InputType.choices,
@@ -496,23 +496,23 @@ List<Scene> buildEpisode03TangledForest() {
       id: 'ep3_branch_examination',
       lines: const [
         StoryMessage(
-          'You hold Down\'s Branch more tightly, but London\'s attention is patient and inevitable.',
+          'You hold Dawn\'s Branch more tightly, but London\'s attention is patient and inevitable.',
         ),
         StoryMessage(
           'Her presence is calm enough that you find yourself lowering the branch slightly, so her leaves can brush it, examine it.',
         ),
         StoryMessage(
-          'Yes. I can read it. This wood was a reaching tree. Look at the growth rings—each one is a season of stretching. Spreading toward light. Stretching toward water.',
+          'Yes. I can read it. This wood was a bridge. A threshold. Look at the growth rings—they alternate with precision. One side light, one side dark. Day and night held in perfect, rhythmic balance.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'At first, they\'re even. Clear progression. But then—do you see?—they become irregular. Tight. Strangled almost.',
+          'But then—do you see?—the rhythm begins to fail. The rings grow thin. Translucent. The wood itself seems to be... fading.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'As if the reaching became desperate. As if this tree\'s attention began to turn inward, away from seasonal work of simple growth, toward something else entirely. Something older than seasons.',
+          'As if the tree it came from was losing its grip on the world. As if it were standing on a line that was being drawn away. A tree that was once a gate, now becoming a ghost.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -520,15 +520,15 @@ List<Scene> buildEpisode03TangledForest() {
           'You look down at the branch. In the rainforest\'s green light, the grain is suddenly VISIBLE. Stark. The story London is reading is written in wood—in the architecture of growth itself.',
         ),
         StoryMessage(
-          'The rings don\'t lie. There is a moment where the tree\'s growth changed from healthy to desperate.',
+          'The rings don\'t lie. There is a moment where the tree\'s growth changed from a steady bridge into something... vanishing.',
         ),
         StoryMessage(
-          'This wood was alive once. Reaching. Growing. But the reaching became something else. Became... hunted. Hunted by the past. By something it couldn\'t stop seeking.',
+          'This wood was a boundary once. A limit. But the boundary began to thin. To blur. I can feel the memory of a great weight in these fibers—the weight of holding two worlds apart, until they finally touched.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'I wonder what happened after. After the reaching grew desperate. After the grain grew tight. Did the tree\'s reaching succeed? Did it find whatever it was seeking? Or did it break?',
+          'I wonder what happened after. After the balance failed. After the gate began to dissolve. Did the tree find a new place to stand? Or did it simply... end?',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -537,25 +537,25 @@ List<Scene> buildEpisode03TangledForest() {
       choices: const [
         SceneChoice(
           letter: 'A',
-          label: '"It froze. In the moment of reaching. That\'s all I know."',
+          label: '"Is it the same as the tree that froze? The one reaching?"',
           nextScene: 'ep3_london_freeze_response',
         ),
         SceneChoice(
           letter: 'B',
           label:
-              '"It reached too far and shattered itself. The memories are inside that sack."',
+              '"It reached too far into the light and vanished. I have the fragments here."',
           nextScene: 'ep3_london_sack_response',
         ),
         SceneChoice(
           letter: 'C',
           label:
-              '"I don\'t know. I was given this branch as part of a mission, not as a story."',
+              '"I was told it was a gate. I didn\'t know wood could become a ghost."',
           nextScene: 'ep3_london_mission_response',
         ),
         SceneChoice(
           letter: 'D',
           label:
-              '"It reached backward instead of forward. That was its mistake."',
+              '"Abies reached backward. Did this tree do the same?"',
           nextScene: 'ep3_london_backward_response',
         ),
       ],
@@ -565,12 +565,12 @@ List<Scene> buildEpisode03TangledForest() {
       id: 'ep3_london_freeze_response',
       lines: const [
         StoryMessage(
-          'Freezing. That\'s a different kind of death. Not an ending, but a stopping. Caught between moments.',
+          'No. Freezing is an ending of a different kind. Abies—the one you speak of—he was caught in a moment of desperate holding. He froze because he refused to let go.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'I shed to avoid that fate. To avoid being caught in any single moment. But the reaching tree—Abies, yes?—he chose the opposite. He tried to hold everything. And in holding, he froze.',
+          'But this branch in your hand? It didn\'t freeze. It thinned. It chose to become nothing rather than be trapped. It didn\'t reach for the past; it reached so far into the future that the present couldn\'t hold it.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -629,12 +629,12 @@ List<Scene> buildEpisode03TangledForest() {
       id: 'ep3_london_backward_response',
       lines: const [
         StoryMessage(
-          'Yes. Backward reaching is the most dangerous kind.',
+          'Abies reached backward, yes. The past was his gravity. But look at these rings again.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'The past is a gravity well. The deeper you reach into it, the harder it becomes to escape. Abies reached so far back that he couldn\'t return.',
+          'Dawn didn\'t reach back. She reached through. She was a threshold that decided to stop being a wall. She didn\'t fail because of a mistake; she succeeded so well that she ceased to be a solid thing.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -682,7 +682,7 @@ List<Scene> buildEpisode03TangledForest() {
           'They are old. They are patient. They have made peace with holding this patch of earth while the rest of the rainforest is constantly becoming, constantly transforming.',
         ),
         StoryMessage(
-          'The Memory Sack, warm against your side, continues to respond to London\'s presence. Its warmth increases. The sack is reacting to being witnessed—to another living thing attending to the memories it holds.',
+          'The Flask of Tears, warm against your side, continues to respond to London\'s presence. Its warmth increases. The sack is reacting to being witnessed—to another living thing attending to the memories it holds.',
         ),
         StoryMessage(
           'How long have you been carrying these things? The seed. The branch. The sack.',
@@ -729,7 +729,7 @@ List<Scene> buildEpisode03TangledForest() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'You think back. Down. The orchard. The moment when you agreed to carry his vision forward.',
+          'You think back. Dawn. The orchard. The moment when you agreed to carry his vision forward.',
         ),
         StoryMessage(
           'It meant purpose, I think. It meant I mattered. That I could do something important.',
@@ -819,7 +819,7 @@ List<Scene> buildEpisode03TangledForest() {
         SceneChoice(
           letter: 'A',
           label:
-              '"I understand that Down had a vision. That his seed carries that vision. That memory can become bearable if you have the right container."',
+              '"I understand that Dawn had a vision. That his seed carries that vision. That memory can become bearable if you have the right container."',
           nextScene: 'ep3_understand_vision',
         ),
         SceneChoice(
@@ -848,7 +848,7 @@ List<Scene> buildEpisode03TangledForest() {
       id: 'ep3_understand_vision',
       lines: const [
         StoryMessage(
-          'Understanding and agreement are not the same. You understand Down\'s vision. But do you agree with it? Do you want what he wanted?',
+          'Understanding and agreement are not the same. You understand Dawn\'s vision. But do you agree with it? Do you want what he wanted?',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -892,7 +892,7 @@ List<Scene> buildEpisode03TangledForest() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'You can understand what the seed needs, what Down wanted, what the gr0ve requires—and still ask yourself what YOU want. That question is allowed. That question is necessary.',
+          'You can understand what the seed needs, what Dawn wanted, what the gr0ve requires—and still ask yourself what YOU want. That question is allowed. That question is necessary.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -1090,7 +1090,7 @@ List<Scene> buildEpisode03TangledForest() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'Of all the things you hold, of all the purposes that have been handed to you—Down\'s mission, Salix\'s knowledge, the seed\'s hunger for ground—what do you actually want?',
+          'Of all the things you hold, of all the purposes that have been handed to you—Dawn\'s mission, Salix\'s knowledge, the seed\'s hunger for ground—what do you actually want?',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -1645,22 +1645,22 @@ List<Scene> buildEpisode03TangledForest() {
           'The process is not violent or desperate. It is methodical. Inevitable. A shedding of what was so that what is can be seen clearly.',
         ),
         StoryMessage(
-          'One more thing. About the reaching in that branch. The desperation that came later, after the early growth was complete.',
+          'One more thing. About the thinning in that branch. The moment when the balance finally broke.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'That reaching came from someone trying to reach backward. Trying to find the moment when things were different. Trying to undo a severance. Trying to recover something lost.',
+          'That thinning is the opposite of the reaching in the ice. Abies tried to hold everything by reaching backward into what was. But the tree of this branch... it tried to hold everything by standing in the middle. By being the bridge between day and night.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'But there is a kind of reaching that goes forward. Not into what was, but into what might be. Not backward into yesterday, but into tomorrow, always aware that today is where you actually live.',
+          'Both are dangerous, little bird. Reaching backward freezes you. But being a bridge for shores that are drawing apart... that can pull you thin until you vanish entirely.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'You might try that kind of reaching. The kind that does not freeze you mid-motion. The kind that lets you land, sometimes, and be still.',
+          'Do not be a bridge for worlds that do not want to be connected. And do not reach for yesterday. Just be here. In the flight. In the now.',
           character: StoryCharacter.london,
           kind: MessageKind.dialogue,
         ),
@@ -2142,7 +2142,7 @@ List<Scene> buildEpisode03TangledForest() {
           'You accept the pouch. It is warm in your talons—almost alive with heat. The sensation is comforting.',
         ),
         StoryMessage(
-          'You carefully place Down\'s Seed into the warming pouch.',
+          'You carefully place Dawn\'s Seed into the warming pouch.',
         ),
         StoryMessage(
           'The moment the seed touches the interior, the glow BRIGHTENS. The amber light becomes vivid, almost red-gold.',
@@ -2152,7 +2152,7 @@ List<Scene> buildEpisode03TangledForest() {
         ),
         StoryMessage('A closed system of care.'),
         StoryMessage(
-          '[Warming Pouch obtained | Contains Down\'s Seed. Creates a cycle of warmth. Seed-light brightens to red-gold.]',
+          '[Warming Pouch obtained | Contains Dawn\'s Seed. Creates a cycle of warmth. Seed-light brightens to red-gold.]',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -2291,7 +2291,7 @@ List<Scene> buildEpisode03TangledForest() {
       id: 'ep3_unnamed_knowledge',
       lines: const [
         StoryMessage(
-          'About the origin of the seed. About Down. About what it truly means to plant something in a broken world.',
+          'About the origin of the seed. About Dawn. About what it truly means to plant something in a broken world.',
           character: StoryCharacter.squashy,
           kind: MessageKind.dialogue,
         ),
@@ -2430,10 +2430,10 @@ List<Scene> buildEpisode03TangledForest() {
           'The vial of rainforest liquid remains in your other talon—still inert, still waiting, still warm with the day\'s heat.',
         ),
         StoryMessage(
-          'Down\'s Branch, heavy with moisture and story, remains held close.',
+          'Dawn\'s Branch, heavy with moisture and story, remains held close.',
         ),
         StoryMessage(
-          'The Memory Sack, warm against your side, pulses gently with the memory shards it carries.',
+          'The Flask of Tears, warm against your side, pulses gently with the memory shards it carries.',
         ),
         StoryMessage(
           'You have been given gifts by the forest, by the shore, by a small snake with bright eyes.',
@@ -2462,17 +2462,35 @@ List<Scene> buildEpisode03TangledForest() {
           kind: MessageKind.episodeHeader,
         ),
         StoryMessage(
-          'Thank you for playing. Episode 4 awaits...',
+          'Before the crossing, a message from the depths drifts into your mind...',
+          kind: MessageKind.narrative,
+          isItalic: true,
+        ),
+        StoryMessage(
+          '0x47 0x52 0x30 0x56 0x45 0x20 0x57 0x41 0x49 0x54 0x53',
           kind: MessageKind.system,
+          isBold: true,
+        ),
+        StoryMessage(
+          '"Only those who have shed the burden of \'Totals\' may pass the Unnamed Gate."',
+          kind: MessageKind.narrative,
+          isItalic: true,
+        ),
+        StoryMessage(
+          'The path forward through the Frozen Crossing awaits...',
+          kind: MessageKind.system,
+          isItalic: true,
         ),
       ],
       inputType: InputType.none,
       onEnter: (state) {
         state.episodeComplete = true;
+        state.londonUnlocked = true;
         state.stability += 1;
         state.connectivity += 1;
+        state.seedWarmth = 15; // Steadily lost warmth throughout the episode
       },
-      waitDuration: const Duration(minutes: 60),
+      waitDuration: const Duration(hours: 5),
     ),
   ];
 }

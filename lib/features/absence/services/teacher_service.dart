@@ -33,7 +33,8 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
     final doc = await FirebaseFirestore.instance
         .collection('public_data')
         .doc('teacher_absences')
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 4));
 
     if (!doc.exists) {
       if (kDebugMode) {
@@ -108,7 +109,7 @@ Stream<Map<String, String>> streamTeacherAbsences() {
   return FirebaseFirestore.instance
       .collection('public_data')
       .doc('teacher_absences')
-      .snapshots()
+      .snapshots(includeMetadataChanges: true)
       .map((doc) {
         if (!doc.exists || doc.data() == null) return <String, String>{};
         final data = doc.data()!;
@@ -140,7 +141,7 @@ Stream<Map<String, Map<String, dynamic>>> streamTeacherList() {
     return Stream.value({});
   }
 
-  return FirebaseFirestore.instance.collection('teachers').snapshots().map((
+  return FirebaseFirestore.instance.collection('teachers').snapshots(includeMetadataChanges: true).map((
     snapshot,
   ) {
     final Map<String, Map<String, dynamic>> result = {};
@@ -161,7 +162,8 @@ Future<List<Map<String, dynamic>>> fetchAllTeachersFromFirebase() async {
   try {
     final snapshot = await FirebaseFirestore.instance
         .collection('teachers')
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 4));
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
@@ -448,7 +450,8 @@ Future<Map<String, Map<String, dynamic>>> fetchTeacherListFromFirebase() async {
   try {
     final snapshot = await FirebaseFirestore.instance
         .collection('teachers')
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 4));
 
     final Map<String, Map<String, dynamic>> result = {};
 

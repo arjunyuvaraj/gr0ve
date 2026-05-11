@@ -76,6 +76,7 @@ flutter:
     - assets/story/characters/ep2/
     - assets/story/characters/ep2/sheep/
     - assets/story/characters/ep2/baby/
+    - assets/story/characters/ep3/
     - assets/story/inventory/
     - shorebird.yaml
     - .env

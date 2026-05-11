@@ -459,9 +459,12 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
 
 class TermsOfServiceService {
   static const String _termsKey = 'accepted_terms_of_service';
+  static bool? _localAcceptedCache;
 
   /// Check if user has accepted the Terms of Service
   static Future<bool> hasAcceptedTerms() async {
+    if (_localAcceptedCache == true) return true;
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
 
@@ -469,15 +472,30 @@ class TermsOfServiceService {
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .get();
-      return doc.data()?[_termsKey] as bool? ?? false;
+          .get()
+          .timeout(const Duration(seconds: 3));
+      final accepted = doc.data()?[_termsKey] as bool? ?? false;
+      if (accepted) _localAcceptedCache = true;
+      return accepted;
     } catch (_) {
-      return false;
+      try {
+        // Fall back to local cache if network times out
+        final cacheDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get(const GetOptions(source: Source.cache));
+        final accepted = cacheDoc.data()?[_termsKey] as bool? ?? false;
+        if (accepted) _localAcceptedCache = true;
+        return accepted;
+      } catch (e) {
+        return false;
+      }
     }
   }
 
   /// Accept and save terms to Firestore
   static Future<void> acceptTerms() async {
+    _localAcceptedCache = true;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -485,11 +503,16 @@ class TermsOfServiceService {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         _termsKey: true,
         'terms_accepted_at': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          debugPrint('[TermsOfService] Network slow, queued write locally.');
+        },
+      );
       debugPrint('[TermsOfService] Terms accepted and saved');
     } catch (e) {
       debugPrint('[TermsOfService] Error saving acceptance: $e');
-      rethrow;
+      // Proceed anyway, the user clicked accept.
     }
   }
 
@@ -502,7 +525,7 @@ class TermsOfServiceService {
     if (hasAccepted) return;
 
     if (context.mounted) {
-      showDialog(
+      await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (_) => TermsOfServiceModal(

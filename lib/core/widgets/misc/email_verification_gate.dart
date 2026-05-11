@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +22,35 @@ class EmailVerificationGate extends StatefulWidget {
 
 class _EmailVerificationGateState extends State<EmailVerificationGate> {
   bool _isRefreshing = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.emailVerified) {
+      _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+        _checkVerificationStatus();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _checkVerificationStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    await user.reload();
+    if (user.emailVerified && mounted) {
+      _timer?.cancel();
+      setState(() {}); // Trigger rebuild to show child
+    }
+  }
 
   Future<void> _sendVerification(User user) async {
     try {

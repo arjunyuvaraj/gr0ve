@@ -190,12 +190,21 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Future<void> _loadFeatureFlags() async {
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('app_config')
-          .doc('feature_flags')
-          .get();
+      DocumentSnapshot<Map<String, dynamic>>? doc;
+      try {
+        doc = await FirebaseFirestore.instance
+            .collection('app_config')
+            .doc('feature_flags')
+            .get()
+            .timeout(const Duration(seconds: 3));
+      } catch (_) {
+        doc = await FirebaseFirestore.instance
+            .collection('app_config')
+            .doc('feature_flags')
+            .get(const GetOptions(source: Source.cache));
+      }
 
-        if (mounted && doc.exists) {
+        if (mounted && doc != null && doc.exists) {
           final data = doc.data();
           final betaTesters = List<String>.from(data?["beta_testers"] ?? []);
           final userEmail = _user?.email ?? "";
@@ -1199,6 +1208,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,

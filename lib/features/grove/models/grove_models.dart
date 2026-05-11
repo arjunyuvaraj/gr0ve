@@ -44,7 +44,7 @@ extension StoryCharacterX on StoryCharacter {
         StoryCharacter.orangeSparrow => 'Orange Sparrow',
         StoryCharacter.wall => 'Wall',
         StoryCharacter.system => 'System',
-        StoryCharacter.player => 'Sparrow',
+        StoryCharacter.player => 'Green Sparrow',
         StoryCharacter.graySparrow => 'Gray Sparrow',
         StoryCharacter.salix => 'Salix',
         StoryCharacter.salixBaby => 'Young Salix',
@@ -111,9 +111,6 @@ extension StoryCharacterX on StoryCharacter {
     StoryCharacter.system => brightness == Brightness.dark
         ? const Color(0xFF7BA3C7)
         : const Color(0xFF3C7AB0),
-    StoryCharacter.cediteBaby => brightness == Brightness.dark
-        ? const Color(0xFF81C784)
-        : const Color(0xFF388E3C),
     StoryCharacter.player => brightness == Brightness.dark
         ? const Color(0xFF5AE6A0)
         : const Color(0xFF1F8A5F),
@@ -130,8 +127,8 @@ extension StoryCharacterX on StoryCharacter {
         : const Color(0xFF00C8FF), // Matches CounselorPersona.primaryLight
     StoryCharacter.cedite ||
     StoryCharacter.cediteBaby => brightness == Brightness.dark
-        ? const Color(0xFFB388EB) // Matches CounselorPersona.primaryDark
-        : const Color(0xFF9F72D8), // Matches CounselorPersona.primaryLight
+        ? const Color(0xFF9B59B6) // Vibrant Purple
+        : const Color(0xFF8E44AD), // Deeper Purple
     StoryCharacter.ash => brightness == Brightness.dark
         ? const Color(0xFFE55B5B) // Matches CounselorPersona.primaryDark
         : const Color(0xFFC43D3D), // Matches CounselorPersona.primaryLight

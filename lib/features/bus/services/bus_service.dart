@@ -47,7 +47,7 @@ Stream<List<BusRoute>> getBusRoutesStream() {
   return FirebaseFirestore.instance
       .collection('public_data')
       .doc('bus_routes')
-      .snapshots()
+      .snapshots(includeMetadataChanges: true)
       .map((snapshot) {
         final List<BusRoute> routes = [];
 

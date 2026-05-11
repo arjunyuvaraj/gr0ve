@@ -22,7 +22,7 @@ class AuthenticationService {
     final userEmail = email ?? user.email ?? '';
     final isBCA = userEmail.isNotEmpty ? _isBCAEmail(userEmail) : false;
     final userDoc = _firestore.collection('users').doc(user.uid);
-    final docSnapshot = await userDoc.get();
+    final docSnapshot = await userDoc.get().timeout(const Duration(seconds: 10));
 
     if (!docSnapshot.exists) {
       await userDoc.set({

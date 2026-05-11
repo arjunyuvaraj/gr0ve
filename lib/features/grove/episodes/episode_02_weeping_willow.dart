@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 
 List<Scene> buildEpisode02WeepingWillow() {
@@ -35,7 +36,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_sheep_encounter_1',
-      waitDuration: const Duration(minutes: 30),
+      waitDuration: const Duration(hours: 3),
     ),
 
     Scene(
@@ -170,12 +171,12 @@ List<Scene> buildEpisode02WeepingWillow() {
       choices: const [
         SceneChoice(
           letter: 'A',
-          label: 'Approach the Willow (Salix)',
+          label: 'Talk to Salix (The Willow)',
           nextScene: 'ep2_salix_first_contact',
         ),
         SceneChoice(
           letter: 'B',
-          label: 'Approach the silhouette in the lake first',
+          label: 'Search for Abies (The silhouette in the lake)',
           nextScene: 'ep2_approach_silhouette',
         ),
       ],
@@ -201,6 +202,32 @@ List<Scene> buildEpisode02WeepingWillow() {
       nextScene: 'ep2_salix_first_contact',
       onEnter: (state) {
         state.transience += 3;
+        state.seedWarmth -= (8 + Random().nextInt(5)); // Heavy penalty for the cold lake
+      },
+    ),
+
+    Scene(
+      id: 'ep2_search_shore_house',
+      lines: const [
+        StoryMessage(
+          'You fly away from the sheep, scanning the misty, broken coastline for anything that looks like a house. A "slithouse," or whatever legend you might have heard.',
+        ),
+        StoryMessage(
+          'The mist is thick. The shoreline is a jagged mess of uprooted trees and crystallized tears. You fly for a long time, but there is no house. There is no one else here.',
+        ),
+        StoryMessage(
+          'The sheep were right. Abies is not here. Whatever you were looking for is further away—on an island of ice you cannot yet see.',
+        ),
+        StoryMessage(
+          'Exhausted from the fruitless search, you circle back toward the massive Willow on the shore. It\'s the only thing that remains certain.',
+        ),
+      ],
+      inputType: InputType.continueOnly,
+      nextScene: 'ep2_salix_first_contact',
+      waitDuration: const Duration(hours: 1),
+      onEnter: (state) {
+        state.transience += 1;
+        state.seedWarmth -= (4 + Random().nextInt(4));
       },
     ),
 
@@ -259,49 +286,63 @@ List<Scene> buildEpisode02WeepingWillow() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'But raw memory is a dangerous thing. It will consume you if you carry it unprotected.',
+          'The water remembers, little bird. It holds the shards of what was. Step into the shallows. Touch the lake. Let it show you four moments. Four pieces of a breaking heart.',
           character: StoryCharacter.salix,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'Salix\'s branches work the water of the lake. A single, new tear drops from his leaves, crystallizing into a beautiful pouch woven from water and light.',
-          kind: MessageKind.narrative,
-        ),
-        StoryMessage(
-          'Take this Flask of Tears. It will hold the pieces of the past so they do not weigh upon your soul.',
-          character: StoryCharacter.salix,
-          kind: MessageKind.dialogue,
-        ),
-        StoryMessage(
-          '[Flask of Tears obtained | Items inside lose their crushing emotional weight.]',
-          kind: MessageKind.system,
-          isBold: true,
-        ),
-        StoryMessage(
-          'Now, step into the shallows. Touch the water. It will show you four moments. Four pieces of a breaking heart.',
+          'But be warned: raw memory is dangerous. It will pull at you. You must pull back.',
           character: StoryCharacter.salix,
           kind: MessageKind.dialogue,
         ),
       ],
       inputType: InputType.continueOnly,
-      nextScene: 'ep2_memory_1',
-      onEnter: (state) {
-        if (!state.inventory.contains('Flask of Tears')) {
-          state.inventory.add('Flask of Tears');
-        }
-      },
+      nextScene: 'ep2_touch_water_intro',
+    ),
+
+    Scene(
+      id: 'ep2_touch_water_intro',
+      lines: const [
+        StoryMessage(
+          'You step toward the edge of the lake. The water is impossibly cold.',
+        ),
+        StoryMessage(
+          'Do you step in?',
+          character: StoryCharacter.player,
+          kind: MessageKind.dialogue,
+        ),
+      ],
+      inputType: InputType.choices,
+      choices: const [
+        SceneChoice(
+          letter: 'A',
+          label: 'Step into the water',
+          nextScene: 'ep2_memory_1',
+        ),
+        SceneChoice(
+          letter: 'B',
+          label: '"Is there another way to learn this?"',
+          nextScene: 'ep2_salix_offer_memories',
+        ),
+      ],
     ),
 
     Scene(
       id: 'ep2_memory_1',
       lines: const [
         StoryMessage(
+          'You step into Lake Lament.',
+        ),
+        StoryMessage(
+          'The shock of cold is immediate. But the cold is not painful—it is clarifying. The water rises to your talons, your wings, your chest. Your breath comes in gasps.',
+        ),
+        StoryMessage(
+          'And then, the visions begin.',
+        ),
+        StoryMessage(
           'MEMORY 1: THE GIFT AWAKENS',
           kind: MessageKind.episodeHeader,
           isBold: true,
-        ),
-        StoryMessage(
-          'You dip your talon into the freezing water. The lake shimmers, and the mist forms a vivid scene from centuries ago.',
         ),
         StoryMessage(
           'A young, vibrant fir tree stands beside a small, lively willow sapling. It is spring.',
@@ -329,18 +370,10 @@ List<Scene> buildEpisode02WeepingWillow() {
           character: StoryCharacter.abiesBaby,
           kind: MessageKind.dialogue,
         ),
-        StoryMessage(
-          'You carefully place the Faint Resin Shard into your Flask of Tears. It pulses with a soft, comforting light from within.',
-          kind: MessageKind.system,
-          isBold: true,
-        ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_memory_2',
-      waitDuration: const Duration(minutes: 45),
-      onEnter: (state) {
-        // Shards are held in the bag, not as individual items
-      },
+      waitDuration: const Duration(hours: 3),
     ),
 
     Scene(
@@ -377,14 +410,14 @@ List<Scene> buildEpisode02WeepingWillow() {
         ),
         StoryMessage('Abies ignores him, turning back to a waiting deer.'),
         StoryMessage(
-          'The Etched Bark Strip slides into the Flask of Tears. The weight on your mind lifts as the flask absorbs the burden of the memory.',
+          'The Etched Bark Strip slides into your talon. The weight on your mind lifts as you secure the burden of the memory.',
           kind: MessageKind.system,
           isBold: true,
         ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_memory_3',
-      waitDuration: const Duration(minutes: 60),
+      waitDuration: const Duration(hours: 3),
       onEnter: (state) {
         // Shards are held in the bag
       },
@@ -418,14 +451,14 @@ List<Scene> buildEpisode02WeepingWillow() {
           'The memory in the water begins to fracture. Images repeat and glitch. Abies looks terrified as his own mind begins to splinter under the weight of deep time.',
         ),
         StoryMessage(
-          'The Distorted Memory Fragment flickers as you tuck it into the Flask of Tears. The dizziness fades as the flask stabilizes the splintered time.',
+          'The Distorted Memory Fragment flickers as you tuck it away. The dizziness fades as you stabilize the splintered time.',
           kind: MessageKind.system,
           isBold: true,
         ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_memory_4',
-      waitDuration: const Duration(minutes: 90),
+      waitDuration: const Duration(hours: 3),
       onEnter: (state) {
         // Shards are held in the bag
       },
@@ -460,18 +493,13 @@ List<Scene> buildEpisode02WeepingWillow() {
         StoryMessage(
           'The memory shows Salix, rooted to the shore, helplessly watching his friend drown in time. Salix begins to weep, and as the tears hit the ground, the earth shatters into the chasms you see today.',
         ),
-        StoryMessage(
-          'The Crystallized Memory Core settles at the bottom of the Flask of Tears. Its immense weight is now manageable, safely contained within Salix\'s gift.',
-          kind: MessageKind.system,
-          isBold: true,
-        ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_post_memory',
-      waitDuration: const Duration(minutes: 120),
+      waitDuration: const Duration(hours: 4),
       onEnter: (state) {
         state.stability += 2;
-        // Shards are held in the bag
+        state.seedWarmth -= (5 + Random().nextInt(5));
       },
     ),
 
@@ -479,27 +507,74 @@ List<Scene> buildEpisode02WeepingWillow() {
       id: 'ep2_post_memory',
       lines: const [
         StoryMessage(
-          'You pull your talon from the water, trembling. You are soaked. Dawn\'s seed is noticeably colder, its light flickering weakly.',
+          'You cannot breathe. The memories are crushing you. Four lifetimes of sorrow, four moments of breaking, all pressing down on your small form.',
         ),
         StoryMessage(
-          'The sheep have gathered silently at the edge of the grass, watching you.',
+          'You thrash backward, gasping, spluttering. Your wings flail helplessly. The weight is too much.',
         ),
         StoryMessage(
-          'He saw it all. The poor bird saw the freezing.',
-          character: StoryCharacter.bluebellSheep,
-          kind: MessageKind.dialogue,
+          'For a terrible moment, you think you will drown in the past.',
         ),
         StoryMessage(
-          'Now you know why we stay in the meadow. The past is a trap.',
-          character: StoryCharacter.woolberrySheep,
-          kind: MessageKind.dialogue,
+          'But then—a branch. Strong and supportive. Salix has reached out. His limb guides you back to the shore, pulling you from the crushing water.',
         ),
-        StoryMessage('Salix\'s branches slowly sweep the ground.'),
         StoryMessage(
-          'I do not expect you to understand fully. Most cannot. But you must carry this truth forward. Knowing everything is not the same as understanding anything.',
+          'You collapse on the grass, trembling, soaked through. Dawn\'s seed pulses weakly against your chest, its light flickering.',
+        ),
+        StoryMessage(
+          'The sheep gather silently, watching.',
+        ),
+      ],
+      inputType: InputType.continueOnly,
+      nextScene: 'ep2_salix_gift_moment',
+      waitDuration: const Duration(hours: 2),
+    ),
+
+    Scene(
+      id: 'ep2_salix_gift_moment',
+      lines: const [
+        StoryMessage(
+          'Salix\'s branches sweep across the water of the lake. A single, luminous tear crystallizes as it falls.',
+        ),
+        StoryMessage(
+          'I did not want you to carry that alone, little bird. Raw memory is a dangerous burden.',
           character: StoryCharacter.salix,
           kind: MessageKind.dialogue,
         ),
+        StoryMessage(
+          'Salix weaves the crystallized tear into a beautiful, delicate pouch of woven water and light. He holds it out toward you.',
+        ),
+        StoryMessage(
+          'This Flask of Tears will hold the weight you just carried. It will keep the shards safe, and keep you whole.',
+          character: StoryCharacter.salix,
+          kind: MessageKind.dialogue,
+        ),
+        StoryMessage(
+          'You carefully place the memory shards into the flask. They vibrate against the glass, then suddenly melt, dissolving into a vibrant blue liquid that glows with a soft, steady light.',
+        ),
+        StoryMessage(
+          '[Flask of Tears obtained]',
+          kind: MessageKind.system,
+          isBold: true,
+        ),
+      ],
+      inputType: InputType.continueOnly,
+      nextScene: 'ep2_salix_thanks_choice',
+      onEnter: (state) {
+        if (!state.inventory.contains('Flask of Tears')) {
+          state.inventory.add('Flask of Tears');
+        }
+        state.stability += 1;
+      },
+    ),
+
+    Scene(
+      id: 'ep2_salix_thanks_choice',
+      lines: const [
+        StoryMessage(
+          'You accept the gift, your hands still shaking.',
+        ),
+        StoryMessage('[STABILITY +1]', kind: MessageKind.system, isBold: true),
       ],
       inputType: InputType.choices,
       choices: const [
@@ -541,7 +616,22 @@ List<Scene> buildEpisode02WeepingWillow() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          'Raw memory cannot be carried safely. It will overwhelm you, pull you under, as the deep past tried to pull Abies. But I will give you something to help.',
+          'Together, they are part of the gr0ve. Part of an old legend. Old magic. Four trees that were never meant to break apart. But Abies reached too far, and the network fractured.',
+          character: StoryCharacter.salix,
+          kind: MessageKind.dialogue,
+        ),
+        StoryMessage(
+          'You speak of them with such certainty. Are they... real? Part of some legend?',
+          character: StoryCharacter.player,
+          kind: MessageKind.dialogue,
+        ),
+        StoryMessage(
+          'They are real, little bird. But do not confuse the layers of time. Abies, Cedite, and Ash... they are the First Trees. They stood before the gr0ve was even a whisper in the wind. They are the foundation.',
+          character: StoryCharacter.salix,
+          kind: MessageKind.dialogue,
+        ),
+        StoryMessage(
+          'Grover, Aspen, Rowan, and Sakura came later. They were the ones who brought the Gifts of Virtue to the network: Stability, Connectivity, Vitality, and Transience. They tend the spaces between, holding the gr0ve together with the virtues you now carry.',
           character: StoryCharacter.salix,
           kind: MessageKind.dialogue,
         ),
@@ -554,16 +644,12 @@ List<Scene> buildEpisode02WeepingWillow() {
       id: 'ep2_salix_gift',
       lines: const [
         StoryMessage(
-          'Salix\'s branches sweep the ground as you pull the last shard from the water.',
-        ),
-        StoryMessage(
-          'You have the pieces now. The weight of the memories you just experienced is safely contained within the flask.',
-          character: StoryCharacter.salix,
-          kind: MessageKind.dialogue,
-        ),
-        StoryMessage(
           'The flask glows with the combined light of the four shards, pulsing with a quiet, stabilized energy.',
         ),
+        StoryMessage('[STABILITY +1]', kind: MessageKind.system, isBold: true),
+        StoryMessage('[CONNECTIVITY +1]', kind: MessageKind.system, isBold: true),
+        StoryMessage('[VITALITY +1]', kind: MessageKind.system, isBold: true),
+        StoryMessage('[TRANSIENCE +1]', kind: MessageKind.system, isBold: true),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_departure',
@@ -572,6 +658,7 @@ List<Scene> buildEpisode02WeepingWillow() {
         state.connectivity += 1;
         state.vitality += 1;
         state.transience += 1;
+        state.seedWarmth -= (2 + Random().nextInt(3));
       },
     ),
 
@@ -606,7 +693,7 @@ List<Scene> buildEpisode02WeepingWillow() {
           nextScene: 'ep2_transition',
         ),
       ],
-      waitDuration: const Duration(minutes: 60),
+      waitDuration: const Duration(hours: 5),
     ),
 
     Scene(
@@ -629,8 +716,9 @@ List<Scene> buildEpisode02WeepingWillow() {
           kind: MessageKind.episodeHeader,
         ),
         StoryMessage(
-          'Thank you for playing the early access of The Gr0ve. Episode 3 is growing...',
+          'The path forward through the Tangled Forest awaits...',
           kind: MessageKind.system,
+          isItalic: true,
         ),
       ],
       inputType: InputType.none,

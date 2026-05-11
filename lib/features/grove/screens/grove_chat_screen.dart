@@ -70,9 +70,13 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     } else if (!pastCompleted) {
       _gameState.currentEpisode = widget.episode.number;
       _gameState.currentScene = startSceneId;
-      _gameState.episodeComplete = false; // Add reset
-      _gameState.episodeHistories[widget.episode.id] =
-          []; // Reset history if starting fresh
+      _gameState.episodeComplete = false;
+      _gameState.episodeHistories[widget.episode.id] = [];
+      // Save snapshot of state at the start of this episode
+      _gameState.episodeStartStates.putIfAbsent(
+        widget.episode.id,
+        () => _gameState.toJson(),
+      );
       GroveProgressService.save(_gameState);
     }
 
@@ -298,6 +302,16 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       } else {
         _gameState.darwinUnlocked = true;
       }
+    } else if (widget.episode.number == 3) {
+      // Episode 3 gives London reward
+      pfpName = 'London';
+      final pfpKey = 'london';
+      final pfpChar = StoryCharacter.london;
+      pfpAsset = pfpChar.avatarAsset(Theme.of(context).brightness);
+
+      await GroveProgressService.unlockProfilePicture(pfpKey);
+      markStoryPfpUnlocked(pfpKey);
+      _gameState.londonUnlocked = true;
     }
 
     if (_gameState.currentEpisode == widget.episode.number) {
@@ -1076,20 +1090,27 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
         position: _slide,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 6),
-          child: switch (msg.kind) {
-            MessageKind.episodeHeader => _episodeHeader(msg),
-            MessageKind.playerChoice => _playerBubble(msg),
-            MessageKind.dialogue => _characterBubble(msg),
-            MessageKind.narrative => _narrativeBubble(msg),
-            MessageKind.system => _systemBubble(msg),
-            MessageKind.divider => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Divider(
-                color: widget.colors.onSurface.withOpacity(0.07),
-                thickness: 1,
+          child: () {
+            // If the character is the player, always use the player bubble style
+            if (msg.character == StoryCharacter.player) {
+              return _playerBubble(msg);
+            }
+
+            return switch (msg.kind) {
+              MessageKind.episodeHeader => _episodeHeader(msg),
+              MessageKind.playerChoice => _playerBubble(msg),
+              MessageKind.dialogue => _characterBubble(msg),
+              MessageKind.narrative => _narrativeBubble(msg),
+              MessageKind.system => _systemBubble(msg),
+              MessageKind.divider => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Divider(
+                  color: widget.colors.onSurface.withOpacity(0.07),
+                  thickness: 1,
+                ),
               ),
-            ),
-          },
+            };
+          }(),
         ),
       ),
     );
@@ -1271,6 +1292,10 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
         ? StoryCharacter.system.accent(widget.brightness)
         : widget.colors.primary;
 
+    // Detect if this is a stat change or inventory update
+    final isStat = msg.text.contains(RegExp(r'STA|CON|VIT|TRA|STABILITY|CONNECTIVITY|VITALITY|TRANSIENCE'));
+    final isInventory = msg.text.contains('[') && msg.text.contains('obtained]');
+
     return Padding(
       padding: const EdgeInsets.only(left: 36, top: 4, bottom: 4),
       child: Container(
@@ -1279,17 +1304,39 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
           color: sysColor.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: sysColor.withOpacity(0.12)),
+          boxShadow: isStat || isInventory ? [
+            BoxShadow(
+              color: sysColor.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
         ),
-        child: Text(
-          msg.text,
-          style: widget.textTheme.bodySmall?.copyWith(
-            fontFamily: 'JetBrains Mono',
-            color: sysColor.withOpacity(0.8),
-            height: 1.55,
-            fontSize: 11,
-            fontStyle: msg.isItalic ? FontStyle.italic : null,
-            fontWeight: msg.isBold ? FontWeight.w600 : null,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isStat) ...[
+              Icon(Icons.auto_graph_rounded, size: 14, color: sysColor.withOpacity(0.7)),
+              const SizedBox(width: 8),
+            ] else if (isInventory) ...[
+              Icon(Icons.backpack_rounded, size: 14, color: sysColor.withOpacity(0.7)),
+              const SizedBox(width: 8),
+            ],
+            Flexible(
+              child: Text(
+                msg.text,
+                style: widget.textTheme.bodySmall?.copyWith(
+                  fontFamily: 'JetBrains Mono',
+                  color: sysColor.withOpacity(0.8),
+                  height: 1.55,
+                  fontSize: 11,
+                  fontStyle: msg.isItalic ? FontStyle.italic : null,
+                  fontWeight: (isStat || isInventory || msg.isBold) ? FontWeight.w800 : FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -29,8 +29,14 @@ class ProfileVariant {
       return 'assets/app_icons/png/dawn_$mode.png';
     }
     // Story reward characters
-    if (key == 'newton' || key == 'darwin') {
-      return 'assets/app_icons/png/${key}_$mode.png';
+    if (key == 'newton' || key == 'darwin' || key == 'london' || key == 'salix') {
+      if (key == 'london') {
+        return 'assets/story/characters/ep3/london_$mode.png';
+      }
+      if (key == 'salix') {
+        return 'assets/story/characters/ep2/salix_$mode.png';
+      }
+      return 'assets/story/characters/ep1/${key}_$mode.png';
     }
     // Use app icons for hidden personas' default PFPs
     if (persona.isHidden && isDefault) {
@@ -77,6 +83,8 @@ const List<ProfileVariant> _allVariants = [
   // Story rewards
   ProfileVariant(key: 'newton', persona: CounselorPersona.grover),
   ProfileVariant(key: 'darwin', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'salix', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'london', persona: CounselorPersona.grover),
 ];
 
 /// All variants the user is currently allowed to see.
@@ -85,7 +93,7 @@ List<ProfileVariant> get availableVariants => _allVariants.where((v) {
     return DawnUnlockService.isUnlocked.value;
   }
   // Story reward gating — check cached unlock status
-  if (v.key == 'newton' || v.key == 'darwin') {
+  if (v.key == 'newton' || v.key == 'darwin' || v.key == 'salix' || v.key == 'london') {
     return _storyUnlocks[v.key] ?? false;
   }
   if (v.persona.isHidden &&
@@ -135,7 +143,7 @@ class ProfilePictureService {
   /// Load story unlock status from cached user doc
   static Future<void> _loadStoryUnlocks({Map<String, dynamic>? cachedUserData}) async {
     final data = cachedUserData ?? await UserDocCache.get();
-    for (final key in ['newton', 'darwin']) {
+    for (final key in ['newton', 'darwin', 'salix', 'london']) {
       final field = 'story_${key}_unlocked';
       _storyUnlocks[key] = (data?[field] as bool?) ?? false;
     }

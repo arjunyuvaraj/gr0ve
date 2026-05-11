@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 
 class QuickLink {
   final String id;
@@ -119,21 +120,26 @@ class LinkService {
     final user = _auth.currentUser;
     if (user == null) return defaultLinks;
 
-    final doc = await _firestore.collection('users').doc(user.uid).get();
+    try {
+      final docData = await UserDocCache.get();
+      final linksData = docData?['links'] ?? docData?['inks'];
 
-    final data = doc.data();
-    final linksData = data?['links'] ?? data?['inks'];
+      if (docData == null || linksData == null) {
+        if (docData != null) {
+          await saveUserLinks(defaultLinks);
+        }
+        return defaultLinks;
+      }
 
-    if (!doc.exists || linksData == null) {
-      await saveUserLinks(defaultLinks);
+      final saved = (linksData as List)
+          .map((l) => QuickLink.fromMap(Map<String, dynamic>.from(l)))
+          .toList();
+
+      return saved;
+    } catch (e) {
+      debugPrint('[LinkService] Error fetching links: $e');
       return defaultLinks;
     }
-
-    final saved = (linksData as List)
-        .map((l) => QuickLink.fromMap(Map<String, dynamic>.from(l)))
-        .toList();
-
-    return saved;
   }
 
   static Future<void> saveUserLinks(List<QuickLink> links) async {

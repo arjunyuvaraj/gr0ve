@@ -21,7 +21,7 @@ class GroupService {
   // METHOD: Helper to sync a single member's data from Firebase Auth
   Future<void> _syncMemberDataFromAuth(String groupId, String userId) async {
     // Get the user's current profile from a users collection or Auth
-    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final userDoc = await _firestore.collection('users').doc(userId).get().timeout(const Duration(seconds: 5));
 
     if (userDoc.exists) {
       final userData = userDoc.data()!;
@@ -46,7 +46,7 @@ class GroupService {
     required String email,
   }) async {
     // Get all groups
-    final groupsSnapshot = await _firestore.collection('groups').get();
+    final groupsSnapshot = await _firestore.collection('groups').get().timeout(const Duration(seconds: 5));
 
     final batch = _firestore.batch();
     int operationCount = 0;
@@ -59,7 +59,7 @@ class GroupService {
           .collection('members')
           .doc(userId);
 
-      final memberDoc = await memberRef.get();
+      final memberDoc = await memberRef.get().timeout(const Duration(seconds: 5));
       if (memberDoc.exists) {
         // Update member info
         batch.update(memberRef, {'displayName': displayName, 'email': email});
@@ -79,7 +79,7 @@ class GroupService {
           .collection('joinRequests')
           .doc(userId);
 
-      final joinRequestDoc = await joinRequestRef.get();
+      final joinRequestDoc = await joinRequestRef.get().timeout(const Duration(seconds: 5));
       if (joinRequestDoc.exists) {
         batch.update(joinRequestRef, {
           'displayName': displayName,
@@ -106,7 +106,8 @@ class GroupService {
     final creationRequestsSnapshot = await _firestore
         .collection('groupCreationRequests')
         .where('requesterId', isEqualTo: userId)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     if (creationRequestsSnapshot.docs.isNotEmpty) {
       final updateBatch = _firestore.batch();
@@ -125,7 +126,7 @@ class GroupService {
     String userId,
     String displayName,
   ) async {
-    final groupsSnapshot = await _firestore.collection('groups').get();
+    final groupsSnapshot = await _firestore.collection('groups').get().timeout(const Duration(seconds: 5));
 
     for (final groupDoc in groupsSnapshot.docs) {
       final announcementsSnapshot = await _firestore
@@ -133,7 +134,8 @@ class GroupService {
           .doc(groupDoc.id)
           .collection('announcements')
           .where('authorId', isEqualTo: userId)
-          .get();
+          .get()
+          .timeout(const Duration(seconds: 5));
 
       if (announcementsSnapshot.docs.isNotEmpty) {
         final batch = _firestore.batch();
@@ -156,7 +158,8 @@ class GroupService {
       final doc = await _firestore
           .collection('platformAdmins')
           .doc(user.uid)
-          .get();
+          .get()
+          .timeout(const Duration(seconds: 5));
       return doc.exists;
     } catch (e) {
       return false;
@@ -173,7 +176,8 @@ class GroupService {
         .collection('groups')
         .where('status', isEqualTo: 'active')
         .where('type', isEqualTo: GroupType.club.toJson())
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     for (final doc in groupsSnapshot.docs) {
       final memberDoc = await _firestore
@@ -181,7 +185,8 @@ class GroupService {
           .doc(doc.id)
           .collection('members')
           .doc(user.uid)
-          .get();
+          .get()
+          .timeout(const Duration(seconds: 5));
 
       if (memberDoc.exists) {
         return Group.fromFirestore(doc);
@@ -213,7 +218,8 @@ class GroupService {
     final request = await _firestore
         .collection('groupCreationRequests')
         .doc(requestId)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     if (!request.exists) throw Exception('Request not found');
 
@@ -282,7 +288,8 @@ class GroupService {
         .collection('groups')
         .doc(groupId)
         .collection('members')
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
     for (var doc in members.docs) {
       batch.delete(doc.reference);
     }
@@ -292,7 +299,8 @@ class GroupService {
         .collection('groups')
         .doc(groupId)
         .collection('joinRequests')
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
     for (var doc in requests.docs) {
       batch.delete(doc.reference);
     }
@@ -302,7 +310,8 @@ class GroupService {
         .collection('groups')
         .doc(groupId)
         .collection('announcements')
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
     for (var doc in announcements.docs) {
       batch.delete(doc.reference);
     }
@@ -336,7 +345,7 @@ class GroupService {
         .collection('members')
         .doc(memberId);
 
-    final memberDoc = await memberRef.get();
+    final memberDoc = await memberRef.get().timeout(const Duration(seconds: 5));
     if (!memberDoc.exists) throw Exception('Member not found');
 
     await memberRef.update({'role': MemberRole.moderator.toJson()});
@@ -362,7 +371,7 @@ class GroupService {
         .collection('members')
         .doc(memberId);
 
-    final memberDoc = await memberRef.get();
+    final memberDoc = await memberRef.get().timeout(const Duration(seconds: 5));
     if (!memberDoc.exists) throw Exception('Member not found');
 
     final roleStr = memberDoc.get('role');
@@ -393,7 +402,7 @@ class GroupService {
         .collection('members')
         .doc(memberId);
 
-    final memberDoc = await memberRef.get();
+    final memberDoc = await memberRef.get().timeout(const Duration(seconds: 5));
     if (!memberDoc.exists) throw Exception('Member not found');
 
     await memberRef.update({'role': MemberRole.admin.toJson()});
@@ -429,7 +438,7 @@ class GroupService {
         .collection('members')
         .doc(memberId);
 
-    final memberDoc = await memberRef.get();
+    final memberDoc = await memberRef.get().timeout(const Duration(seconds: 5));
     if (!memberDoc.exists) throw Exception('Member not found');
 
     final roleStr = memberDoc.get('role');
@@ -462,7 +471,7 @@ class GroupService {
         .collection('members')
         .doc(userId);
 
-    final memberDoc = await memberRef.get();
+    final memberDoc = await memberRef.get().timeout(const Duration(seconds: 5));
     if (!memberDoc.exists) throw Exception('Member not found');
 
     final targetRoleStr = memberDoc.get('role') ?? 'member';
@@ -474,7 +483,7 @@ class GroupService {
         .collection('members')
         .doc(user.uid);
 
-    final requesterDoc = await requesterMemberRef.get();
+    final requesterDoc = await requesterMemberRef.get().timeout(const Duration(seconds: 5));
     final requesterRoleStr = requesterDoc.exists
         ? (requesterDoc.get('role') ?? 'member')
         : 'member';
@@ -573,7 +582,7 @@ class GroupService {
       query = query.where('type', isEqualTo: type.toJson());
     }
 
-    return query.snapshots().map(
+    return query.snapshots(includeMetadataChanges: true).map(
       (snapshot) =>
           snapshot.docs.map((doc) => Group.fromFirestore(doc)).toList(),
     );
@@ -595,6 +604,7 @@ class GroupService {
             .collection('members')
             .doc(user.uid)
             .get()
+            .timeout(const Duration(seconds: 5))
             .then((doc) => doc.exists);
         if (isMember) {
           userGroups.add(group);
@@ -606,7 +616,7 @@ class GroupService {
 
   // METHOD: Get single group by ID
   Future<Group?> getGroup(String groupId) async {
-    final doc = await _firestore.collection('groups').doc(groupId).get();
+    final doc = await _firestore.collection('groups').doc(groupId).get().timeout(const Duration(seconds: 5));
     if (!doc.exists) return null;
     return Group.fromFirestore(doc);
   }
@@ -618,7 +628,8 @@ class GroupService {
         .where('joinCode', isEqualTo: joinCode.toUpperCase())
         .where('status', isEqualTo: 'active')
         .limit(1)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     if (query.docs.isEmpty) return null;
     return Group.fromFirestore(query.docs.first);
@@ -643,7 +654,8 @@ class GroupService {
         .doc(groupId)
         .collection('members')
         .doc(user.uid)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     if (!doc.exists) return false;
 
@@ -662,7 +674,8 @@ class GroupService {
         .doc(groupId)
         .collection('members')
         .doc(user.uid)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     return doc.exists;
   }
@@ -710,7 +723,8 @@ class GroupService {
         .doc(group.id)
         .collection('joinRequests')
         .doc(user.uid)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     if (existingRequest.exists) {
       final request = JoinRequest.fromFirestore(existingRequest);
@@ -764,7 +778,8 @@ class GroupService {
         .doc(groupId)
         .collection('joinRequests')
         .doc(userId)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     if (!requestDoc.exists) throw Exception('Request not found');
 
