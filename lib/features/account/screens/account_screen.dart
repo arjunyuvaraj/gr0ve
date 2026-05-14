@@ -25,6 +25,7 @@ import 'package:gr0ve/features/easter_eggs/cedite_screen.dart';
 import 'package:gr0ve/features/easter_eggs/ash_screen.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/services/settings/accessibility_service.dart';
+import 'package:gr0ve/services/settings/fun_mode_service.dart';
 import 'package:gr0ve/services/settings/theme_color_service.dart';
 import 'package:gr0ve/features/account/screens/credits_screen.dart';
 
@@ -49,6 +50,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CounselorPersona _activePersona = CounselorPersonaService.activePersona.value;
   AppThemeColor _activeAppColor = ThemeColorService.activeColor.value;
+  bool _isFunMode = FunModeService.isFunMode.value;
   int _versionTapCount = 0;
   Offset _jitterOffset = Offset.zero;
   late final Timer? _jitterTimer;
@@ -67,8 +69,17 @@ class _AccountScreenState extends State<AccountScreen> {
     FirebaseAnalytics.instance.logEvent(name: 'screen_account');
     CounselorPersonaService.activePersona.addListener(_onPersonaChanged);
     ThemeColorService.activeColor.addListener(_onAppColorChanged);
+    FunModeService.isFunMode.addListener(_onFunModeChanged);
     _startJitterTimer();
     _loadDevInfo();
+  }
+
+  void _onFunModeChanged() {
+    if (mounted) {
+      setState(() {
+        _isFunMode = FunModeService.isFunMode.value;
+      });
+    }
   }
 
   void _startJitterTimer() {
@@ -94,6 +105,7 @@ class _AccountScreenState extends State<AccountScreen> {
     CounselorPersonaService.activePersona.removeListener(_onPersonaChanged);
     ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     ThemeColorService.activeColor.removeListener(_onAppColorChanged);
+    FunModeService.isFunMode.removeListener(_onFunModeChanged);
     _jitterTimer?.cancel();
     super.dispose();
   }
@@ -988,6 +1000,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return Center(
       child: GestureDetector(
         onTap: () {
+          if (!_isFunMode) return;
           setState(() => _versionTapCount++);
           if (_versionTapCount == 7 && _activePersona == CounselorPersona.ash) {
             _showAshWarning();
@@ -1369,8 +1382,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   borderColor: colors.outline.withAlpha(18),
                   bgColor: colors.surfaceVariant.withAlpha(isDark ? 89 : 115),
                   children: [
-                    _counselorRow(colors, brightness, personaColor, isDark),
-                    _divider(colors),
+                    if (_isFunMode) ...[
+                      _counselorRow(colors, brightness, personaColor, isDark),
+                      _divider(colors),
+                    ],
                     _settingsRow(
                       leadingWidget: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -1542,6 +1557,25 @@ class _AccountScreenState extends State<AccountScreen> {
                                 AccessibilityService.toggleAccessibleColors(
                                   val,
                                 ),
+                            activeColor: colors.primary,
+                          ),
+                        );
+                      },
+                    ),
+                    _divider(colors),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: FunModeService.isFunMode,
+                      builder: (context, funMode, child) {
+                        return _settingsRow(
+                          icon: Icons.celebration_rounded,
+                          iconColor: colors.primary,
+                          label: 'Fun Mode',
+                          value: 'Enable story elements and easter eggs',
+                          onTap: () => FunModeService.toggleFunMode(!funMode),
+                          colors: colors,
+                          trailingWidget: Switch(
+                            value: funMode,
+                            onChanged: (val) => FunModeService.toggleFunMode(val),
                             activeColor: colors.primary,
                           ),
                         );

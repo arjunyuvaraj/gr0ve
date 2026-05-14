@@ -6,35 +6,36 @@ final List<ChangelogVersion> changelogVersions = [
   ChangelogVersion(
     version: '2.2.0',
     tagline: 'The Half Anniversary Update',
-    description: 'Making ',
+    description:
+        'A major milestone update bringing reliable automation, new choices, and deeper mysteries.',
     features: [
       ChangelogFeature(
-        icon: HugeIcons.strokeRoundedSettings01,
-        title: 'Admin Excellence',
+        icon: HugeIcons.strokeRoundedServerStack03,
+        title: 'Meet Junior',
         description:
-            'New ultra-compact, reactive grid system for managing teacher absences with ease.',
+            'Say hello to Junior! Our new automated system tirelessly runs the bus and teacher scripts in the background so you\'re always up to date.',
         color: const Color(0xFF6366F1),
       ),
       ChangelogFeature(
-        icon: HugeIcons.strokeRoundedUserGroup,
-        title: 'Detailed Credits',
+        icon: HugeIcons.strokeRoundedNotification03,
+        title: 'Reliable Notifications',
         description:
-            'A brand new credits page to recognize the icon designers and dedicated testers.',
-        color: const Color(0xFFEC4899),
+            'A completely revamped notification system. Fun, creative, and guaranteed to alert you whenever a bus or teacher status changes.',
+        color: const Color(0xFF10B981),
       ),
       ChangelogFeature(
-        icon: HugeIcons.strokeRoundedLockPassword,
-        title: 'Locked Personas',
+        icon: HugeIcons.strokeRoundedSparkles,
+        title: 'Fun & Serious Modes',
         description:
-            'Hidden counselor personas are now strictly gated for a more rewarding discovery experience. They\'re protected by the Almighty Grove Keeper.',
+            'You\'re in control. Enable Fun Mode in Account Settings to uncover the story and easter eggs, or switch to Serious Mode for a distraction-free experience.',
         color: const Color(0xFFF59E0B),
       ),
       ChangelogFeature(
-        icon: HugeIcons.strokeRoundedDeveloper,
-        title: 'iOS Stability',
+        icon: HugeIcons.strokeRoundedBookOpen01,
+        title: 'The Seed is Planted',
         description:
-            'Crucial under-the-hood fixes to ensure gr0ve remains rock-solid on all Apple devices.',
-        color: const Color(0xFF10B981),
+            'The soil shifts. Roots grow deeper into the dark. What was buried will not stay hidden forever. Are you ready to dig?',
+        color: const Color(0xFFEC4899),
       ),
     ],
   ),

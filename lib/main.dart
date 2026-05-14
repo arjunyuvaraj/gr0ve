@@ -45,6 +45,7 @@ import 'package:gr0ve/services/settings/theme_color_service.dart';
 import 'package:gr0ve/core/services/network_time_service.dart';
 import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
+import 'package:gr0ve/services/settings/fun_mode_service.dart';
 
 // Global navigator key for handling notification taps
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -79,6 +80,7 @@ void main() async {
   await Future.wait([
     AccessibilityService.init(), // SharedPreferences only
     ThemeColorService.init(), // SharedPreferences only
+    FunModeService.init(), // SharedPreferences only
   ]);
   print('[BOOT] SharedPrefs init: ${bootWatch.elapsedMilliseconds}ms');
 

@@ -32,6 +32,7 @@ import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gr0ve/features/navigation/models/nav_config.dart';
 import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
+import 'package:gr0ve/services/settings/fun_mode_service.dart';
 
 // SCREEN: Main navigation hub with role-based access control
 class NavigationScreen extends StatefulWidget {
@@ -68,6 +69,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   bool _enableClubs = false;
   bool _enableCounselor = false;
   bool _isBetaTester = false;
+  bool _isFunMode = false;
 
   // Onboarding state
   bool _isCheckingOnboarding = true;
@@ -89,6 +91,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
     AppFeatureFlags.isBeta.addListener(_onBetaStatusChanged);
     AppFeatureFlags.enableClubs.addListener(_onBetaStatusChanged);
     AppFeatureFlags.enableCounselor.addListener(_onBetaStatusChanged);
+    FunModeService.isFunMode.addListener(_onFunModeChanged);
+    _isFunMode = FunModeService.isFunMode.value;
     _onBetaStatusChanged(); // Sync initial state
     _initAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -102,6 +106,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
         _isBetaTester = AppFeatureFlags.isBeta.value;
         _enableClubs = AppFeatureFlags.enableClubs.value;
         _enableCounselor = AppFeatureFlags.enableCounselor.value;
+        _buildNavigation();
+      });
+    }
+  }
+
+  void _onFunModeChanged() {
+    if (mounted) {
+      setState(() {
+        _isFunMode = FunModeService.isFunMode.value;
         _buildNavigation();
       });
     }
@@ -136,6 +149,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     AppFeatureFlags.isBeta.removeListener(_onBetaStatusChanged);
     AppFeatureFlags.enableClubs.removeListener(_onBetaStatusChanged);
     AppFeatureFlags.enableCounselor.removeListener(_onBetaStatusChanged);
+    FunModeService.isFunMode.removeListener(_onFunModeChanged);
     ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     _unreadCountSubscription?.cancel();
     super.dispose();
@@ -361,13 +375,18 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: 'Changelog',
             screen: const ChangelogScreen(),
           ),
-          NavConfig(
-            id: 'grove',
-            label: 'Gr0ve',
-            iconData: HugeIcons.strokeRoundedPlant02, // or use a tree icon
-            screen: GroveScreen(isBetaTester: _isBetaTester),
-          ),
         ];
+
+        if (_isFunMode) {
+          baseNav.add(
+            NavConfig(
+              id: 'grove',
+              label: 'Gr0ve',
+              iconData: HugeIcons.strokeRoundedPlant02,
+              screen: GroveScreen(isBetaTester: _isBetaTester),
+            ),
+          );
+        }
 
         if (isAdmin) {
           baseNav.addAll([
@@ -401,7 +420,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           );
         }
 
-        if (_enableCounselor) {
+        if (_enableCounselor && _isFunMode) {
           baseNav.add(
             NavConfig(
               id: 'counselor',
