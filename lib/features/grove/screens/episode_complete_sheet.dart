@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
+import 'package:gr0ve/features/grove/widgets/stat_scale_widget.dart';
 
 class EpisodeCompleteSheet extends StatelessWidget {
   final String title;
@@ -169,20 +170,37 @@ class EpisodeCompleteSheet extends StatelessWidget {
                   const SizedBox(height: 32),
                 ],
                 
-                // Stats summary 
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 2.2,
-                  children: [
-                    _statBox('STA', state.stability, colors),
-                    _statBox('CON', state.connectivity, colors),
-                    _statBox('VIT', state.vitality, colors),
-                    _statBox('TRA', state.transience, colors),
-                  ],
+                // Stats summary - Scale Style
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: colors.onSurface.withOpacity(0.02),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: colors.outline.withOpacity(0.05)),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'NARRATIVE ALIGNMENT',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Stats Scales
+                      StatScaleWidget(label: 'STABILITY', value: state.stability, colors: colors),
+                      const SizedBox(height: 16),
+                      StatScaleWidget(label: 'CONNECTIVITY', value: state.connectivity, colors: colors),
+                      const SizedBox(height: 16),
+                      StatScaleWidget(label: 'VITALITY', value: state.vitality, colors: colors),
+                      const SizedBox(height: 16),
+                      StatScaleWidget(label: 'TRANSIENCE', value: state.transience, colors: colors),
+                    ],
+                  ),
                 ),
                 
                 const SizedBox(height: 40),
@@ -221,41 +239,4 @@ class EpisodeCompleteSheet extends StatelessWidget {
     );
   }
 
-  Widget _statBox(String label, int value, ColorScheme colors) {
-    final pc = colors.primary;
-    final isPositive = value > 0;
-    final isNegative = value < 0;
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.outline.withOpacity(0.05)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: colors.onSurface.withOpacity(0.4),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _fmt(value),
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: isPositive ? pc : (isNegative ? Colors.red.shade400 : colors.onSurface),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

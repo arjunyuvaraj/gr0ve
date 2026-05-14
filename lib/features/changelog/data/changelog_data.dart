@@ -4,6 +4,41 @@ import 'changelog_models.dart';
 
 final List<ChangelogVersion> changelogVersions = [
   ChangelogVersion(
+    version: '2.2.0',
+    tagline: 'The Half Anniversary Update',
+    description: 'Making ',
+    features: [
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedSettings01,
+        title: 'Admin Excellence',
+        description:
+            'New ultra-compact, reactive grid system for managing teacher absences with ease.',
+        color: const Color(0xFF6366F1),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedUserGroup,
+        title: 'Detailed Credits',
+        description:
+            'A brand new credits page to recognize the icon designers and dedicated testers.',
+        color: const Color(0xFFEC4899),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedLockPassword,
+        title: 'Locked Personas',
+        description:
+            'Hidden counselor personas are now strictly gated for a more rewarding discovery experience. They\'re protected by the Almighty Grove Keeper.',
+        color: const Color(0xFFF59E0B),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedDeveloper,
+        title: 'iOS Stability',
+        description:
+            'Crucial under-the-hood fixes to ensure gr0ve remains rock-solid on all Apple devices.',
+        color: const Color(0xFF10B981),
+      ),
+    ],
+  ),
+  ChangelogVersion(
     version: '2.1.0',
     tagline: 'Refined controls & recognition.',
     description:

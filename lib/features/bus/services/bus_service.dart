@@ -114,59 +114,56 @@ Future<void> refreshBusRoutesFromSheets() async {
       );
     }
 
-    // Step 2: Parse CSV data
+    // Parse CSV data
     final csvData = const CsvDecoder().convert(response.body);
-
-    if (kDebugMode) {
-      print('📊 Fetched ${csvData.length} rows from sheet');
-    }
 
     final List<BusRoute> routes = [];
 
-    if (kDebugMode) {
-      print('Parsing CSV data:');
-      for (int i = 0; i < csvData.length.clamp(0, 5); i++) {
-        print('  Row $i: ${csvData[i]}');
-      }
-    }
+    // ONLY pull from rows 2-24 (index 1 to 23 inclusive) to match Python script
+    // Python script uses all_values[1:24]
+    final int endRow = csvData.length.clamp(0, 24);
 
-    // Parse each row starting from row 1 (skip header row 0)
-    for (int i = 1; i < csvData.length; i++) {
+    for (int i = 1; i < endRow; i++) {
       final row = csvData[i];
 
       // Skip completely empty rows
       if (row.isEmpty) continue;
 
-      // Skip rows where all cells are empty
-      if (row.every((cell) => cell == null || cell.toString().trim().isEmpty)) {
-        continue;
-      }
-
-      if (kDebugMode) {
-        print('Row $i (${row.length} cells): $row');
-      }
-
       // --- LEFT COLUMNS: A (index 0) = Town, B (index 1) = Code ---
-      final town1 = (row.length > 0) ? row[0].toString().trim() : '';
-      final code1 = (row.length > 1) ? row[1].toString().trim() : '';
-
-      if (town1.isNotEmpty) {
-        final status = code1.isNotEmpty ? 'Arrived' : 'Not here yet';
-        routes.add(BusRoute(town: town1, code: code1.isNotEmpty ? code1 : '?', status: status));
-        if (kDebugMode) {
-          print('  → Added: $town1 ($code1) — $status');
+      if (row.length >= 2) {
+        final town1 = row[0].toString().trim();
+        if (town1.isNotEmpty) {
+          String code1 = row[1].toString().trim();
+          // Skip if marked as 'missing' (case-insensitive) to match Python
+          if (code1.toLowerCase() == 'missing') {
+            code1 = "";
+          }
+          
+          final status = code1.isNotEmpty ? 'Arrived' : 'Not here yet';
+          routes.add(BusRoute(
+            town: town1, 
+            code: code1, 
+            status: status,
+          ));
         }
       }
 
       // --- RIGHT COLUMNS: C (index 2) = Town, D (index 3) = Code ---
-      final town2 = (row.length > 2) ? row[2].toString().trim() : '';
-      final code2 = (row.length > 3) ? row[3].toString().trim() : '';
-
-      if (town2.isNotEmpty) {
-        final status = code2.isNotEmpty ? 'Arrived' : 'Not here yet';
-        routes.add(BusRoute(town: town2, code: code2.isNotEmpty ? code2 : '?', status: status));
-        if (kDebugMode) {
-          print('  → Added: $town2 ($code2) — $status');
+      if (row.length >= 4) {
+        final town2 = row[2].toString().trim();
+        if (town2.isNotEmpty) {
+          String code2 = row[3].toString().trim();
+          // Skip if marked as 'missing' (case-insensitive) to match Python
+          if (code2.toLowerCase() == 'missing') {
+            code2 = "";
+          }
+          
+          final status = code2.isNotEmpty ? 'Arrived' : 'Not here yet';
+          routes.add(BusRoute(
+            town: town2, 
+            code: code2, 
+            status: status,
+          ));
         }
       }
     }
@@ -175,30 +172,23 @@ Future<void> refreshBusRoutesFromSheets() async {
       throw Exception('No valid routes found in Google Sheets');
     }
 
-    if (kDebugMode) {
-      print('✅ Parsed ${routes.length} valid bus routes');
-    }
-
     // Step 3: Update Firestore with new data
-    // Match Python script structure - key by town name, not route_N
+    // Match Python script structure exactly
     final Map<String, dynamic> routesMap = {};
     for (final route in routes) {
-      // Use town as key if available, otherwise use route_N
-      final key = route.town.isNotEmpty
-          ? route.town
-          : 'route_${routes.indexOf(route)}';
-      routesMap[key] = route.toJson();
+      routesMap[route.town] = {
+        'town': route.town,
+        'code': route.code,
+        'status': route.status,
+      };
     }
 
-    // Use 'updated_at' with ISO string
-    // This matches the Python script exactly
     await FirebaseFirestore.instance
         .collection('public_data')
         .doc('bus_routes')
         .set({
           'routes': routesMap,
           'updated_at': DateTime.now().toIso8601String(),
-          'route_count': routes.length,
         });
 
     if (kDebugMode) {

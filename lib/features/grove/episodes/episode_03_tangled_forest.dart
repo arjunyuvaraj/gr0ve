@@ -35,6 +35,9 @@ List<Scene> buildEpisode03TangledForest() {
       inputType: InputType.continueOnly,
       nextScene: 'ep3_stream_split',
       waitDuration: const Duration(minutes: 30),
+      onEnter: (state) {
+        state.seedWarmth -= 5;
+      },
     ),
 
     Scene(
@@ -117,6 +120,7 @@ List<Scene> buildEpisode03TangledForest() {
       waitDuration: const Duration(minutes: 45),
       onEnter: (state) {
         state.vitality -= 1;
+        state.seedWarmth -= 3;
       },
     ),
 
@@ -152,6 +156,7 @@ List<Scene> buildEpisode03TangledForest() {
       waitDuration: const Duration(minutes: 25),
       onEnter: (state) {
         state.stability += 1;
+        state.seedWarmth -= 2;
       },
     ),
 
@@ -270,6 +275,9 @@ List<Scene> buildEpisode03TangledForest() {
         ),
       ],
       inputType: InputType.choices,
+      onEnter: (state) {
+        state.seedWarmth -= 2;
+      },
       choices: const [
         SceneChoice(
           letter: 'A',
@@ -1769,16 +1777,15 @@ List<Scene> buildEpisode03TangledForest() {
         StoryMessage(
           'The trees pull back as if in deference to something larger. The stream widens dramatically, becomes a river, becomes a flood of water flowing toward a clear horizon.',
         ),
-        StoryMessage('Light. OPEN light. Sky. Massive sky.'),
         StoryMessage(
-          'You break through the rainforest\'s edge and see it: the OPEN SHORE. The beach. Water without bounds, without loops, without confusion.',
-        ),
-        StoryMessage(
-          'The air is suddenly clear. The light is suddenly direct. The horizon stretches endlessly.',
+          'You fly deeper into the rainforest, toward a particularly dense patch of greenery where London indicated Squashy might be found.',
         ),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep3_squashy_encounter',
+      onEnter: (state) {
+        state.seedWarmth -= 3;
+      },
     ),
 
     Scene(

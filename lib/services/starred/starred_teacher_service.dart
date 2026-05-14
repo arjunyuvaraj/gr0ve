@@ -26,19 +26,26 @@ class StarredTeacherService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final doc = await _docRef(user.uid).get();
+    try {
+      final doc = await _docRef(user.uid).get().timeout(
+        const Duration(seconds: 5),
+      );
 
-    if (doc.exists) {
-      final data = doc.data();
-      final List<dynamic>? teachers = data?['teachers'];
-      if (teachers != null) {
-        starredTeachers.value = teachers.cast<String>().toSet();
+      if (doc.exists) {
+        final data = doc.data();
+        final List<dynamic>? teachers = data?['teachers'];
+        if (teachers != null) {
+          starredTeachers.value = teachers.cast<String>().toSet();
+        }
+      } else {
+        starredTeachers.value = {};
       }
-    } else {
+      _loaded = true;
+    } catch (e) {
+      print('[StarredTeacher] Error loading preferences: $e');
       starredTeachers.value = {};
+      _loaded = true; // Mark as loaded to satisfy boot sequence
     }
-
-    _loaded = true;
   }
 
   static Future<void> toggleTeacher(String fullName) async {

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_screen.dart';
+import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/grove/grove_screen.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/links/screens/link_screen.dart';
@@ -80,24 +81,37 @@ class _NavigationScreenState extends State<NavigationScreen> {
     super.initState();
     _selectedIndex = widget.initialIndex;
     _user = FirebaseAuth.instance.currentUser;
+    _isBetaTester = AppFeatureFlags.isBeta.value;
     _determineUserRole();
     _setupNotificationHandler();
     _subscribeToUnreadCounts();
     ProfilePictureService.activeVariant.addListener(_onVariantChanged);
-    // Batch all async init into one method to parallelize Firestore reads
+    AppFeatureFlags.isBeta.addListener(_onBetaStatusChanged);
+    AppFeatureFlags.enableClubs.addListener(_onBetaStatusChanged);
+    AppFeatureFlags.enableCounselor.addListener(_onBetaStatusChanged);
+    _onBetaStatusChanged(); // Sync initial state
     _initAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) DawnUnlockService.checkAndUnlock(context);
     });
   }
 
+  void _onBetaStatusChanged() {
+    if (mounted) {
+      setState(() {
+        _isBetaTester = AppFeatureFlags.isBeta.value;
+        _enableClubs = AppFeatureFlags.enableClubs.value;
+        _enableCounselor = AppFeatureFlags.enableCounselor.value;
+        _buildNavigation();
+      });
+    }
+  }
+
   /// Parallelizes all async init work that was previously done sequentially.
   Future<void> _initAll() async {
-    // Run all Firestore reads in parallel
     await Future.wait([
       _checkOnboarding(),
       _checkAdminStatus(),
-      _loadFeatureFlags(),
       _loadNavigationOrder(),
       _loadVersionInfo(),
     ]);
@@ -119,6 +133,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   void dispose() {
+    AppFeatureFlags.isBeta.removeListener(_onBetaStatusChanged);
+    AppFeatureFlags.enableClubs.removeListener(_onBetaStatusChanged);
+    AppFeatureFlags.enableCounselor.removeListener(_onBetaStatusChanged);
     ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     _unreadCountSubscription?.cancel();
     super.dispose();
@@ -130,10 +147,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Future<void> _checkOnboarding() async {
     if (_user == null) {
-      if (mounted) setState(() {
-        _isCheckingOnboarding = false;
-        _needsOnboarding = false;
-      });
+      if (mounted)
+        setState(() {
+          _isCheckingOnboarding = false;
+          _needsOnboarding = false;
+        });
       return;
     }
 
@@ -141,10 +159,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
     final isBergenStudent = email.endsWith('@bergen.org');
 
     if (!isBergenStudent) {
-      if (mounted) setState(() {
-        _isCheckingOnboarding = false;
-        _needsOnboarding = false;
-      });
+      if (mounted)
+        setState(() {
+          _isCheckingOnboarding = false;
+          _needsOnboarding = false;
+        });
       return;
     }
 
@@ -154,7 +173,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     try {
       // Use cached user doc — already fetched during boot
       final data = await UserDocCache.get();
-      
+
       // If we couldn't fetch the data (timeout or error), don't force onboarding.
       // We only want to onboard if we POSITIVELY know the fields are missing.
       if (data == null) {
@@ -171,55 +190,18 @@ class _NavigationScreenState extends State<NavigationScreen> {
       final hasAcademy = data['academy'] != null;
       final needsSetup = !isEmailVerified || !hasGrade || !hasAcademy;
 
-      if (mounted) setState(() {
-        _needsOnboarding = needsSetup;
-        _isCheckingOnboarding = false;
-      });
+      if (mounted)
+        setState(() {
+          _needsOnboarding = needsSetup;
+          _isCheckingOnboarding = false;
+        });
     } catch (e) {
       print('[NAV] Error checking onboarding: $e');
-      if (mounted) setState(() {
-        _needsOnboarding = false;
-        _isCheckingOnboarding = false;
-      });
-    }
-  }
-
-  // ============================================================================
-  // FEATURE FLAGS & REMOTE CONFIG
-  // ============================================================================
-
-  Future<void> _loadFeatureFlags() async {
-    try {
-      DocumentSnapshot<Map<String, dynamic>>? doc;
-      try {
-        doc = await FirebaseFirestore.instance
-            .collection('app_config')
-            .doc('feature_flags')
-            .get()
-            .timeout(const Duration(seconds: 3));
-      } catch (_) {
-        doc = await FirebaseFirestore.instance
-            .collection('app_config')
-            .doc('feature_flags')
-            .get(const GetOptions(source: Source.cache));
-      }
-
-        if (mounted && doc != null && doc.exists) {
-          final data = doc.data();
-          final betaTesters = List<String>.from(data?["beta_testers"] ?? []);
-          final userEmail = _user?.email ?? "";
-          final isBetaTester = betaTesters.contains(userEmail);
-
-          setState(() {
-            _isBetaTester = isBetaTester;
-            _enableClubs = (data?["enable_clubs"] ?? false) || isBetaTester;
-            _enableCounselor =
-                (data?["enable_counselor"] ?? false) || isBetaTester;
-            _buildNavigation();
-          });
-        }
-    } catch (e) {
-      print('[NAV] Error loading feature flags: $e');
+      if (mounted)
+        setState(() {
+          _needsOnboarding = false;
+          _isCheckingOnboarding = false;
+        });
     }
   }
 

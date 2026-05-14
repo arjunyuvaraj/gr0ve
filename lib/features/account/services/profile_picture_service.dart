@@ -38,10 +38,16 @@ class ProfileVariant {
       }
       return 'assets/story/characters/ep1/${key}_$mode.png';
     }
-    // Use app icons for hidden personas' default PFPs
-    if (persona.isHidden && isDefault) {
-      return 'assets/app_icons/png/${persona.name}_$mode.png';
+    // Ash and Cedite only have 'default' which is named ash_light.png etc.
+    if ((persona.name == 'ash' || persona.name == 'cedite') && isDefault) {
+      return 'assets/profile/${persona.name}/${persona.name}_$mode.png';
     }
+    // Academy variants
+    if (key.startsWith('academy_')) {
+      final academy = key.replaceFirst('academy_', '');
+      return 'assets/profile/academy/${academy}_$mode.png';
+    }
+    // Standard counselor variants
     return 'assets/profile/${persona.name}/${persona.name}_${mode}_$key.png';
   }
 
@@ -85,6 +91,14 @@ const List<ProfileVariant> _allVariants = [
   ProfileVariant(key: 'darwin', persona: CounselorPersona.grover),
   ProfileVariant(key: 'salix', persona: CounselorPersona.grover),
   ProfileVariant(key: 'london', persona: CounselorPersona.grover),
+  // Academy variants
+  ProfileVariant(key: 'academy_atcs', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'academy_aedt', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'academy_amst', persona: CounselorPersona.aspen),
+  ProfileVariant(key: 'academy_aast', persona: CounselorPersona.aspen),
+  ProfileVariant(key: 'academy_abf', persona: CounselorPersona.rowan),
+  ProfileVariant(key: 'academy_acaha', persona: CounselorPersona.rowan),
+  ProfileVariant(key: 'academy_avpa', persona: CounselorPersona.sakura),
 ];
 
 /// All variants the user is currently allowed to see.

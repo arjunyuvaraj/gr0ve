@@ -129,6 +129,9 @@ class AppFeatureFlags {
   AppFeatureFlags._();
 
   static final ValueNotifier<bool> lockdownMode = ValueNotifier(false);
+  static final ValueNotifier<bool> isBeta = ValueNotifier(false);
+  static final ValueNotifier<bool> enableClubs = ValueNotifier(false);
+  static final ValueNotifier<bool> enableCounselor = ValueNotifier(false);
   static final ValueNotifier<bool> isReady = ValueNotifier(false);
   static final List<String> _betaTesters = [];
 
@@ -177,11 +180,17 @@ class AppFeatureFlags {
             _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
             
             final currentEmail = FirebaseAuth.instance.currentUser?.email;
-            final isBeta = isBetaTester(currentEmail);
+            final isBetaTesterFlag = isBetaTester(currentEmail);
+            isBeta.value = isBetaTesterFlag;
+            
+            enableClubs.value = (data?['enable_clubs'] ?? false) || isBetaTesterFlag;
+            enableCounselor.value = (data?['enable_counselor'] ?? false) || isBetaTesterFlag;
             
             print('[FLAGS] --- SYSTEM STATUS ---');
             print('[FLAGS] Lockdown Active: ${lockdownMode.value}');
-            print('[FLAGS] User Is Beta: $isBeta');
+            print('[FLAGS] User Is Beta: $isBetaTesterFlag');
+            print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
+            print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
             print('[FLAGS] -----------------------');
             
             onFirstData?.call();

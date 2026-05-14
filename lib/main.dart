@@ -42,6 +42,7 @@ import 'package:gr0ve/features/snapshot/widgets/snapshot_pomodoro_card.dart'
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/services/settings/accessibility_service.dart';
 import 'package:gr0ve/services/settings/theme_color_service.dart';
+import 'package:gr0ve/core/services/network_time_service.dart';
 import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
 
@@ -58,7 +59,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ).timeout(
-      const Duration(seconds: 3),
+      const Duration(seconds: 10),
       onTimeout: () {
         print('[BOOT] Firebase.init TIMEOUT - proceeding anyway');
         if (Firebase.apps.isNotEmpty) return Firebase.app();
@@ -105,10 +106,14 @@ void _deferredInit(Stopwatch bootWatch) {
         print('[BOOT] FeatureFlags ready: ${bootWatch.elapsedMilliseconds}ms'),
   );
 
-  // Notification init (local notifications plugin + FCM) — fire and forget
   NotificationService().initialize().then(
     (_) =>
         print('[BOOT] Notifications ready: ${bootWatch.elapsedMilliseconds}ms'),
+  );
+
+  // Network time sync — prevents local clock manipulation for travel timers
+  NetworkTimeService.sync().then(
+    (_) => print('[BOOT] Time sync ready: ${bootWatch.elapsedMilliseconds}ms'),
   );
 
   // Teacher list — background, non-blocking
@@ -157,7 +162,7 @@ Future<void> _bootUserServices(User user) async {
     LayoutService.load(), // Small sub-collection read
     PomPrefsService.load(), // Small sub-collection read
   ]).timeout(
-    const Duration(seconds: 4),
+    const Duration(seconds: 10),
     onTimeout: () {
       print('[BOOT] Service boot TIMEOUT - showing UI anyway');
       return [];

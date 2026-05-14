@@ -101,8 +101,8 @@ class TInventorySheet extends StatelessWidget {
                         : 'assets/story/characters/ep0/dawn_light.png';
                   case 'flask of tears':
                     asset = 'assets/story/inventory/flask_of_tears_$mode.png';
-                  case 'warm knapsack':
-                    asset = 'assets/story/inventory/warm_knapsack_$mode.png';
+                  case 'warming pouch':
+                    asset = 'assets/story/inventory/warming_pouch_$mode.png';
                 }
               }
 

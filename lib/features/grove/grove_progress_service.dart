@@ -23,6 +23,7 @@ class GroveGameState {
   bool episodeComplete;
   bool newtonUnlocked;
   bool darwinUnlocked;
+  bool salixUnlocked;
   bool londonUnlocked;
   int? busyUntil; // epoch milliseconds
   String? pendingScene; // Scene to load once busyUntil expires
@@ -56,6 +57,7 @@ class GroveGameState {
     this.episodeComplete = false,
     this.newtonUnlocked = false,
     this.darwinUnlocked = false,
+    this.salixUnlocked = false,
     this.londonUnlocked = false,
     this.newtonRiddleAttempts = 0,
     this.newtonRiddleSolved = false,
@@ -75,35 +77,56 @@ class GroveGameState {
        episodeHistories = episodeHistories ?? {},
        episodeStartStates = episodeStartStates ?? {};
 
-  Map<String, dynamic> toJson() => {
-    'currentScene': currentScene,
-    'stability': stability,
-    'connectivity': connectivity,
-    'vitality': vitality,
-    'transience': transience,
-    'seedWarmth': seedWarmth,
-    'inventory': inventory,
-    'chosenPath': chosenPath,
-    'currentEpisode': currentEpisode,
-    'episodeComplete': episodeComplete,
-    'newtonUnlocked': newtonUnlocked,
-    'darwinUnlocked': darwinUnlocked,
-    'londonUnlocked': londonUnlocked,
-    'newtonRiddleAttempts': newtonRiddleAttempts,
-    'newtonRiddleSolved': newtonRiddleSolved,
-    'newtonExitAttempts': newtonExitAttempts,
-    'newtonExitSolved': newtonExitSolved,
-    'darwinConversationHad': darwinConversationHad,
-    'darwinDefaultModeUnlocked': darwinDefaultModeUnlocked,
-    'busyUntil': busyUntil,
-    'pendingScene': pendingScene,
-    'skips1h': skips1h,
-    'skips3h': skips3h,
-    'skips5h': skips5h,
-    'isBetaTester': isBetaTester,
-    'episodeHistories': episodeHistories,
-    'episodeStartStates': episodeStartStates,
-  };
+  void clampStats() {
+    stability = stability.clamp(-5, 5);
+    connectivity = connectivity.clamp(-5, 5);
+    vitality = vitality.clamp(-5, 5);
+    transience = transience.clamp(-5, 5);
+    seedWarmth = seedWarmth.clamp(0, 100);
+  }
+
+  Map<String, dynamic> toJson() {
+    clampStats();
+    return {
+      'currentScene': currentScene,
+      'stability': stability,
+      'connectivity': connectivity,
+      'vitality': vitality,
+      'transience': transience,
+      'seedWarmth': seedWarmth,
+      'inventory': inventory,
+      'chosenPath': chosenPath,
+      'currentEpisode': currentEpisode,
+      'episodeComplete': episodeComplete,
+      'newtonUnlocked': newtonUnlocked,
+      'darwinUnlocked': darwinUnlocked,
+      'salixUnlocked': salixUnlocked,
+      'londonUnlocked': londonUnlocked,
+      'newtonRiddleAttempts': newtonRiddleAttempts,
+      'newtonRiddleSolved': newtonRiddleSolved,
+      'newtonExitAttempts': newtonExitAttempts,
+      'newtonExitSolved': newtonExitSolved,
+      'darwinConversationHad': darwinConversationHad,
+      'darwinDefaultModeUnlocked': darwinDefaultModeUnlocked,
+      'busyUntil': busyUntil,
+      'pendingScene': pendingScene,
+      'skips1h': skips1h,
+      'skips3h': skips3h,
+      'skips5h': skips5h,
+      'isBetaTester': isBetaTester,
+      // To prevent cyclic errors, we don't save histories/startStates inside themselves
+      'episodeHistories': episodeHistories,
+      'episodeStartStates': episodeStartStates,
+    };
+  }
+
+  /// Special toJson for nested storage to prevent recursion cycles
+  Map<String, dynamic> toNestedJson() {
+    final map = toJson();
+    map.remove('episodeHistories');
+    map.remove('episodeStartStates');
+    return map;
+  }
 
   factory GroveGameState.fromJson(Map<String, dynamic> json) {
     return GroveGameState(
@@ -119,6 +142,7 @@ class GroveGameState {
       episodeComplete: json['episodeComplete'] as bool? ?? false,
       newtonUnlocked: json['newtonUnlocked'] as bool? ?? false,
       darwinUnlocked: json['darwinUnlocked'] as bool? ?? false,
+      salixUnlocked: json['salixUnlocked'] as bool? ?? false,
       londonUnlocked: json['londonUnlocked'] as bool? ?? false,
       newtonRiddleAttempts: json['newtonRiddleAttempts'] as int? ?? 0,
       newtonRiddleSolved: json['newtonRiddleSolved'] as bool? ?? false,
@@ -170,6 +194,7 @@ class GroveGameState {
     bool? episodeComplete,
     bool? newtonUnlocked,
     bool? darwinUnlocked,
+    bool? salixUnlocked,
     bool? londonUnlocked,
     int? newtonRiddleAttempts,
     bool? newtonRiddleSolved,
@@ -199,6 +224,7 @@ class GroveGameState {
       episodeComplete: episodeComplete ?? this.episodeComplete,
       newtonUnlocked: newtonUnlocked ?? this.newtonUnlocked,
       darwinUnlocked: darwinUnlocked ?? this.darwinUnlocked,
+      salixUnlocked: salixUnlocked ?? this.salixUnlocked,
       londonUnlocked: londonUnlocked ?? this.londonUnlocked,
       newtonRiddleAttempts: newtonRiddleAttempts ?? this.newtonRiddleAttempts,
       newtonRiddleSolved: newtonRiddleSolved ?? this.newtonRiddleSolved,
@@ -251,11 +277,15 @@ class GroveProgressService {
             .collection(_firestoreCollection)
             .doc(user.uid)
             .set({
-          _firestoreField: json,
-          'story_newton_unlocked': state.newtonUnlocked,
-          'story_darwin_unlocked': state.darwinUnlocked,
-          'story_london_unlocked': state.londonUnlocked,
-        }, SetOptions(merge: true));
+              _firestoreField: json,
+              'story_newton_unlocked': state.newtonUnlocked,
+              'story_darwin_unlocked': state.darwinUnlocked,
+              'story_salix_unlocked': state.salixUnlocked,
+              'story_london_unlocked': state.londonUnlocked,
+            }, SetOptions(merge: true));
+        
+        // IMPORTANT: Invalidate cache so other services see the new data
+        UserDocCache.invalidate();
       } catch (e) {
         debugPrint('[GroveProgress] Firestore save error: $e');
       }
@@ -313,6 +343,9 @@ class GroveProgressService {
               'story_darwin_unlocked': FieldValue.delete(),
               'story_london_unlocked': FieldValue.delete(),
             });
+        
+        // IMPORTANT: Invalidate cache so other services see the new data
+        UserDocCache.invalidate();
       } catch (_) {}
     }
   }
@@ -340,7 +373,7 @@ class GroveProgressService {
       final episode = groveEpisodes.firstWhere(
         (e) => e.number == episodeNumber,
       );
-      final scenes = episode.buildScenes();
+      final scenes = await episode.buildScenes();
       final initialScene = scenes.isNotEmpty
           ? scenes.first.id
           : 'ep${episodeNumber}_intro';

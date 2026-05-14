@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
 
@@ -57,7 +58,7 @@ extension StoryCharacterX on StoryCharacter {
         StoryCharacter.cedite => 'Cedite',
         StoryCharacter.ash => 'Ash',
         StoryCharacter.london => 'London',
-        StoryCharacter.squashy => 'Squashy',
+        StoryCharacter.squashy => 'Squishy',
       };
 
   String avatarAsset(Brightness brightness) {
@@ -235,6 +236,32 @@ class SceneChoice {
     this.setPath,
     this.waitDuration,
   });
+
+  Map<String, dynamic> toJson() => {
+        'label': label,
+        'letter': letter,
+        'nextScene': nextScene,
+        'statEffects': statEffects,
+        'addItems': addItems,
+        'warmthChange': warmthChange,
+        'setPath': setPath,
+        'waitDuration': waitDuration?.inSeconds,
+      };
+
+  factory SceneChoice.fromJson(Map<String, dynamic> json) {
+    return SceneChoice(
+      label: json['label'] as String,
+      letter: json['letter'] as String,
+      nextScene: json['nextScene'] as String,
+      statEffects: Map<String, int>.from(json['statEffects'] ?? {}),
+      addItems: List<String>.from(json['addItems'] ?? []),
+      warmthChange: json['warmthChange'] as int? ?? 0,
+      setPath: json['setPath'] as String?,
+      waitDuration: json['waitDuration'] != null
+          ? Duration(seconds: json['waitDuration'] as int)
+          : null,
+    );
+  }
 }
 
 typedef FreeTextHandler = String? Function(String input, GroveGameState state);
@@ -259,6 +286,35 @@ class Scene {
     this.waitDuration,
     this.onEnter,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'lines': lines.map((l) => l.toJson()).toList(),
+        'inputType': inputType.name,
+        'choices': choices.map((c) => c.toJson()).toList(),
+        'nextScene': nextScene,
+        'waitDuration': waitDuration?.inSeconds,
+      };
+
+  factory Scene.fromJson(Map<String, dynamic> json) {
+    return Scene(
+      id: json['id'] as String,
+      lines: (json['lines'] as List)
+          .map((l) => StoryMessage.fromJson(l as Map<String, dynamic>))
+          .toList(),
+      inputType: InputType.values.firstWhere(
+        (e) => e.name == json['inputType'],
+        orElse: () => InputType.none,
+      ),
+      choices: (json['choices'] as List? ?? [])
+          .map((c) => SceneChoice.fromJson(c as Map<String, dynamic>))
+          .toList(),
+      nextScene: json['nextScene'] as String?,
+      waitDuration: json['waitDuration'] != null
+          ? Duration(seconds: json['waitDuration'] as int)
+          : null,
+    );
+  }
 }
 
 class TravelNarrative {
@@ -289,9 +345,12 @@ class TravelNarrative {
   ];
 
   static String getQuote(String? path, Duration remaining) {
+    // If no path is set (e.g. all episodes complete), pick one randomly for variety
+    final effectivePath = path ?? (DateTime.now().second % 2 == 0 ? 'apple' : 'orange');
+    
     int index = 9 - (remaining.inMinutes / 30).floor().clamp(0, 9);
-    if (path == 'apple') return appleQuotes[index];
-    if (path == 'orange') return orangeQuotes[index];
+    if (effectivePath == 'apple') return appleQuotes[index];
+    if (effectivePath == 'orange') return orangeQuotes[index];
     return "Traveling toward your next destination...";
   }
 }
@@ -305,7 +364,7 @@ class Episode {
   final int number;
   final String title;
   final String description;
-  final List<Scene> Function() buildScenes;
+  final FutureOr<List<Scene>> Function() buildScenes;
   final bool isComingSoon;
 
   const Episode({

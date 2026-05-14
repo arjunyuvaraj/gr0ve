@@ -419,6 +419,9 @@ List<Scene> buildEpisode01Orchard() {
       inputType: InputType.continueOnly,
       nextScene: 'newton_entrance',
       waitDuration: Duration(hours: 5),
+      onEnter: (state) {
+        state.seedWarmth -= 5;
+      },
     ),
 
     Scene(
@@ -440,6 +443,9 @@ List<Scene> buildEpisode01Orchard() {
       inputType: InputType.continueOnly,
       nextScene: 'darwin_entrance',
       waitDuration: Duration(hours: 5),
+      onEnter: (state) {
+        state.seedWarmth -= 5;
+      },
     ),
 
     // ══════════════════════════════════════════════════════════
@@ -1985,6 +1991,14 @@ List<Scene> buildEpisode01Orchard() {
         state.episodeComplete = true; // Mark episode as done
         state.newtonUnlocked = true;
         state.darwinUnlocked = true;
+
+        // Ensure both jars are in inventory as requested
+        if (!state.inventory.contains('Apple Juice')) {
+          state.inventory.add('Apple Juice');
+        }
+        if (!state.inventory.contains('Orange Juice')) {
+          state.inventory.add('Orange Juice');
+        }
       },
     ),
   ];

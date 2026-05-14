@@ -8,7 +8,10 @@ import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 import 'package:gr0ve/features/grove/screens/grove_chat_screen.dart';
+import 'package:gr0ve/core/services/network_time_service.dart';
+import 'package:intl/intl.dart';
 import 'package:gr0ve/features/grove/screens/inventory_sheet.dart';
+import 'package:gr0ve/features/grove/widgets/stat_scale_widget.dart';
 
 class ChapterSelectionScreen extends StatefulWidget {
   final bool isBetaTester;
@@ -23,7 +26,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
   GroveGameState? _gameState;
   bool _isLoading = true;
   Timer? _refreshTimer;
-  DateTime _currentTime = DateTime.now();
+  DateTime _currentTime = NetworkTimeService.now;
   bool _bypassedAnniversary = false;
 
   late AnimationController _animCtrl;
@@ -36,6 +39,18 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       duration: const Duration(milliseconds: 600),
     );
     _loadProgress();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChapterSelectionScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isBetaTester != oldWidget.isBetaTester) {
+      if (_gameState != null) {
+        setState(() {
+          _gameState!.isBetaTester = widget.isBetaTester;
+        });
+      }
+    }
   }
 
   @override
@@ -67,14 +82,19 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     _refreshTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
-          _currentTime = DateTime.now();
+          _currentTime = NetworkTimeService.now;
         });
       }
     });
   }
 
   void _openEpisode(Episode episode, bool isUnlocked) {
-    if (episode.isComingSoon || !isUnlocked) {
+    if (episode.isComingSoon && !widget.isBetaTester) {
+      HapticFeedback.lightImpact();
+      return;
+    }
+
+    if (!isUnlocked && !widget.isBetaTester) {
       HapticFeedback.lightImpact();
       return;
     }
@@ -97,30 +117,38 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
   }
 
   void _resetProgress() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
+    try {
+      // Clear from firestore entirely
+      await GroveProgressService.clear();
 
-    // Clear from firestore entirely
-    await GroveProgressService.clear();
+      // Lock them in runtime UI globally
+      lockStoryPfp('newton');
+      lockStoryPfp('darwin');
+      lockStoryPfp('salix');
+      lockStoryPfp('london');
 
-    // Lock them in runtime UI globally
-    lockStoryPfp('newton');
-    lockStoryPfp('darwin');
+      // If active profile is a story profile that was just locked, reset to default
+      final current = ProfilePictureService.activeVariant.value;
+      if (['newton', 'darwin', 'salix', 'london'].contains(current.key)) {
+        await ProfilePictureService.setVariant(
+          ProfilePictureService.defaultVariant,
+        );
+      }
 
-    // If active profile is a story profile that was just locked, reset to default
-    final current = ProfilePictureService.activeVariant.value;
-    if (current.key == 'newton' || current.key == 'darwin') {
-      await ProfilePictureService.setVariant(
-        ProfilePictureService.defaultVariant,
-      );
-    }
-
-    if (mounted) {
-      setState(() {
-        _gameState = GroveGameState();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _gameState = GroveGameState();
+        });
+      }
+    } catch (e) {
+      debugPrint('[ChapterSelection] Reset error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -200,15 +228,24 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
               onPressed: () async {
                 Navigator.pop(ctx);
                 setState(() => _isLoading = true);
-                final newState = await GroveProgressService.resetToEpisode(
-                  _gameState!,
-                  episode.number,
-                );
-                if (mounted) {
-                  setState(() {
-                    _gameState = newState;
-                    _isLoading = false;
-                  });
+                try {
+                  final newState = await GroveProgressService.resetToEpisode(
+                    _gameState!,
+                    episode.number,
+                  );
+                  if (mounted) {
+                    setState(() {
+                      _gameState = newState;
+                    });
+                  }
+                } catch (e) {
+                  debugPrint('[ChapterSelection] Episode reset error: $e');
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
                 }
               },
               child: Text(
@@ -278,12 +315,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                   color: colors.primary,
                 ),
               ),
-              Text(
-                name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
             ],
           ),
           const SizedBox(height: 2),
@@ -333,7 +365,8 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
           children: [
             CustomHeader(
               title: 'THE GR0VE',
-              action: _gameState?.busyUntil != null &&
+              action:
+                  _gameState?.busyUntil != null &&
                       _currentTime.millisecondsSinceEpoch <
                           _gameState!.busyUntil!
                   ? Container(
@@ -362,48 +395,82 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                   : null,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD4A912).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFD4A912).withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.local_fire_department_rounded,
-                        size: 14,
-                        color: const Color(0xFFD4A912),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${_gameState?.seedWarmth ?? 100}%',
-                        style: const TextStyle(
-                          fontFamily: 'JetBrains Mono',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFD4A912),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              child: Row(
+                children: [
+                  Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 6,
                     ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4A912).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFD4A912).withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.local_fire_department_rounded,
+                          size: 14,
+                          color: Color(0xFFD4A912),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${_gameState?.seedWarmth ?? 100}%',
+                          style: const TextStyle(
+                            fontFamily: 'JetBrains Mono',
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFFD4A912),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Narrative Alignment Button
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        _showStatsDialog(colors);
+                      },
+                      child: Container(
+                        height: 28,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: colors.primary.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'NARRATIVE ALIGNMENT',
+                            style: TextStyle(
+                              fontFamily: 'JetBrains Mono',
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: colors.primary,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 28,
                     decoration: BoxDecoration(
                       color: colors.surfaceContainerHighest.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(12),
@@ -411,106 +478,52 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                         color: colors.outline.withOpacity(0.1),
                       ),
                     ),
-                    child: InkWell(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            backgroundColor: colors.surface,
-                            title: const Text(
-                              'Seed Statistics',
-                              style: TextStyle(
-                                fontFamily: 'JetBrains Mono',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _statDesc('STA', 'Stability', 'Resilience against external corruption.', colors),
-                                _statDesc('CON', 'Connectivity', 'Your bond with the root network.', colors),
-                                _statDesc('VIT', 'Vitality', 'Raw life force and growth potential.', colors),
-                                _statDesc('TRA', 'Transience', 'Your ability to adapt and change.', colors),
-                              ],
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Close'),
-                              ),
-                            ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          constraints: const BoxConstraints(),
+                          icon: Icon(
+                            Icons.backpack_outlined,
+                            size: 16,
+                            color: colors.onSurface.withOpacity(0.6),
                           ),
-                        );
-                      },
-                      child: Text(
-                        'STA:${_gameState?.stability ?? 0} CON:${_gameState?.connectivity ?? 0} VIT:${_gameState?.vitality ?? 0} TRA:${_gameState?.transience ?? 0}',
-                        style: TextStyle(
-                          fontFamily: 'JetBrains Mono',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: colors.onSurface.withOpacity(0.6),
+                          onPressed: _showInventory,
                         ),
-                      ),
+                        Container(
+                          width: 1,
+                          color: colors.outline.withOpacity(0.2),
+                        ),
+                        IconButton(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          constraints: const BoxConstraints(),
+                          icon: Icon(
+                            Icons.info_outline_rounded,
+                            size: 16,
+                            color: colors.onSurface.withOpacity(0.6),
+                          ),
+                          onPressed: _showInfo,
+                        ),
+                        Container(
+                          width: 1,
+                          color: colors.outline.withOpacity(0.2),
+                        ),
+                        IconButton(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          constraints: const BoxConstraints(),
+                          icon: Icon(
+                            Icons.refresh_rounded,
+                            size: 16,
+                            color: colors.onSurface.withOpacity(0.6),
+                          ),
+                          onPressed: _confirmReset,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerHighest.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: colors.outline.withOpacity(0.1)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        constraints: const BoxConstraints(),
-                        icon: Icon(
-                          Icons.backpack_outlined,
-                          size: 16,
-                          color: colors.onSurface.withOpacity(0.6),
-                        ),
-                        onPressed: _showInventory,
-                      ),
-                      Container(
-                        width: 1,
-                        color: colors.outline.withOpacity(0.2),
-                      ),
-                      IconButton(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        constraints: const BoxConstraints(),
-                        icon: Icon(
-                          Icons.info_outline_rounded,
-                          size: 16,
-                          color: colors.onSurface.withOpacity(0.6),
-                        ),
-                        onPressed: _showInfo,
-                      ),
-                      Container(
-                        width: 1,
-                        color: colors.outline.withOpacity(0.2),
-                      ),
-                      IconButton(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        constraints: const BoxConstraints(),
-                        icon: Icon(
-                          Icons.refresh_rounded,
-                          size: 16,
-                          color: colors.onSurface.withOpacity(0.6),
-                        ),
-                        onPressed: _confirmReset,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 32),
 
@@ -644,46 +657,48 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _countdownCell(
-                days.toString().padLeft(2, '0'),
-                'DAYS',
-                pc,
-              ),
+              _countdownCell(days.toString().padLeft(2, '0'), 'DAYS', pc),
               const SizedBox(width: 12),
-              _countdownCell(
-                hours.toString().padLeft(2, '0'),
-                'HRS',
-                pc,
-              ),
+              _countdownCell(hours.toString().padLeft(2, '0'), 'HRS', pc),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _countdownCell(
-                minutes.toString().padLeft(2, '0'),
-                'MIN',
-                pc,
-              ),
+              _countdownCell(minutes.toString().padLeft(2, '0'), 'MIN', pc),
               const SizedBox(width: 12),
-              _countdownCell(
-                seconds.toString().padLeft(2, '0'),
-                'SEC',
-                pc,
-              ),
+              _countdownCell(seconds.toString().padLeft(2, '0'), 'SEC', pc),
             ],
           ),
           if (widget.isBetaTester) ...[
             const SizedBox(height: 16),
-            Text(
-              'Beta: Update not yet live',
-              style: TextStyle(
-                fontFamily: 'JetBrains Mono',
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: pc.withOpacity(0.5),
-                letterSpacing: 0.5,
+            ElevatedButton(
+              onPressed: () {
+                HapticFeedback.heavyImpact();
+                setState(() {
+                  _gameState!.currentEpisode = groveEpisodes.length;
+                  _bypassedAnniversary = true;
+                });
+                GroveProgressService.save(_gameState!);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: pc.withOpacity(0.1),
+                foregroundColor: pc,
+                elevation: 0,
+                side: BorderSide(color: pc.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
+              child: const Text(
+                'BETA: UNLOCK ALL EPISODES',
+                style: TextStyle(
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -692,11 +707,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     );
   }
 
-  Widget _countdownCell(
-    String value,
-    String label,
-    Color accent,
-  ) {
+  Widget _countdownCell(String value, String label, Color accent) {
     return Container(
       width: 72,
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -907,10 +918,13 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                   ),
                   child: const Text(
                     'beta testers, test story',
-                    style: TextStyle(fontFamily: 'JetBrains Mono', fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontFamily: 'JetBrains Mono',
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ]
+              ],
             ],
           ),
         ),
@@ -965,7 +979,8 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     Color pc,
     bool isDark,
   ) {
-    final bool isLocked = !isUnlocked || episode.isComingSoon;
+    final bool isLocked =
+        !isUnlocked || (episode.isComingSoon && !widget.isBetaTester);
 
     Color accentColor;
     if (isCompleted && !isLocked) {
@@ -986,184 +1001,190 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
         ? colors.outline.withOpacity(0.1)
         : accentColor.withOpacity(0.3);
 
-    return GestureDetector(
-      onTap: () => _openEpisode(episode, isUnlocked),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: cardBgColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: cardBorderColor),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return IgnorePointer(
+      ignoring: isLocked,
+      child: GestureDetector(
+        onTap: () => _openEpisode(episode, isUnlocked),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: cardBgColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: cardBorderColor),
+          ),
+          child: Opacity(
+            opacity: isLocked ? 0.4 : 1.0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(isLocked ? 0.2 : 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'EP ${episode.number}',
-                    style: TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: accentColor,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(isLocked ? 0.2 : 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'EP ${episode.number}',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: accentColor,
+                        ),
+                      ),
                     ),
-                  ),
+                    const Spacer(),
+                    if (episode.isComingSoon) ...[
+                      Icon(Icons.lock_rounded, size: 14, color: accentColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        'COMING SOON',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
+                      ),
+                    ] else if (isCompleted) ...[
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 14,
+                        color: accentColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'COMPLETED',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
+                      ),
+                    ] else if (inProgress) ...[
+                      Icon(
+                        Icons.play_circle_filled_rounded,
+                        size: 14,
+                        color: accentColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'IN PROGRESS',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
+                      ),
+                    ] else if (isLocked) ...[
+                      Icon(
+                        Icons.lock_outline_rounded,
+                        size: 14,
+                        color: accentColor,
+                      ),
+                    ],
+                  ],
                 ),
-                const Spacer(),
-                if (episode.isComingSoon) ...[
-                  Icon(Icons.lock_rounded, size: 14, color: accentColor),
-                  const SizedBox(width: 4),
+                const SizedBox(height: 16),
+                if (inProgress &&
+                    _gameState?.busyUntil != null &&
+                    _currentTime.millisecondsSinceEpoch <
+                        _gameState!.busyUntil!) ...[
+                  _buildWaitTimer(accentColor, colors),
+                ] else ...[
                   Text(
-                    'COMING SOON',
+                    episode.title,
                     style: TextStyle(
                       fontFamily: 'JetBrains Mono',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: accentColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: isLocked
+                          ? colors.onSurface.withOpacity(0.4)
+                          : colors.onSurface,
                     ),
                   ),
-                ] else if (isCompleted) ...[
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 14,
-                    color: accentColor,
-                  ),
-                  const SizedBox(width: 4),
+                  const SizedBox(height: 8),
                   Text(
-                    'COMPLETED',
+                    episode.description,
                     style: TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: accentColor,
+                      fontSize: 13,
+                      height: 1.5,
+                      color: isLocked
+                          ? colors.onSurface.withOpacity(0.3)
+                          : colors.onSurface.withOpacity(0.7),
                     ),
                   ),
-                ] else if (inProgress) ...[
-                  Icon(
-                    Icons.play_circle_filled_rounded,
-                    size: 14,
-                    color: accentColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'IN PROGRESS',
-                    style: TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: accentColor,
-                    ),
-                  ),
-                ] else if (isLocked) ...[
-                  Icon(
-                    Icons.lock_outline_rounded,
-                    size: 14,
-                    color: accentColor,
+                ],
+                if (!isLocked) ...[
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (isCompleted || inProgress)
+                        InkWell(
+                          onTap: () => _confirmEpisodeReset(episode),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.restart_alt_rounded,
+                                  size: 14,
+                                  color: accentColor.withOpacity(0.5),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'RESET',
+                                  style: TextStyle(
+                                    fontFamily: 'JetBrains Mono',
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: accentColor.withOpacity(0.5),
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      const Spacer(),
+                      Text(
+                        isCompleted ? 'REVIEW' : 'ENTER',
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: accentColor,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        isCompleted
+                            ? Icons.history_rounded
+                            : Icons.arrow_forward_rounded,
+                        size: 14,
+                        color: accentColor,
+                      ),
+                    ],
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 16),
-            if (inProgress &&
-                _gameState?.busyUntil != null &&
-                _currentTime.millisecondsSinceEpoch <
-                    _gameState!.busyUntil!) ...[
-              _buildWaitTimer(accentColor, colors),
-            ] else ...[
-              Text(
-                episode.title,
-                style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: isLocked
-                      ? colors.onSurface.withOpacity(0.4)
-                      : colors.onSurface,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                episode.description,
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.5,
-                  color: isLocked
-                      ? colors.onSurface.withOpacity(0.3)
-                      : colors.onSurface.withOpacity(0.7),
-                ),
-              ),
-            ],
-            if (!isLocked) ...[
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (isCompleted || inProgress)
-                    InkWell(
-                      onTap: () => _confirmEpisodeReset(episode),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.restart_alt_rounded,
-                              size: 14,
-                              color: accentColor.withOpacity(0.5),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'RESET',
-                              style: TextStyle(
-                                fontFamily: 'JetBrains Mono',
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: accentColor.withOpacity(0.5),
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  const Spacer(),
-                  Text(
-                    isCompleted ? 'REVIEW' : 'ENTER',
-                    style: TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: accentColor,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    isCompleted
-                        ? Icons.history_rounded
-                        : Icons.arrow_forward_rounded,
-                    size: 14,
-                    color: accentColor,
-                  ),
-                ],
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -1190,15 +1211,13 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       ),
       child: Column(
         children: [
-          Text(
-            'TRAVELING...',
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: accentColor.withOpacity(0.6),
-              letterSpacing: 1.2,
-            ),
+          const SizedBox(height: 4),
+          LinearProgressIndicator(
+            value: 1.0 - (remainingMillis / (5 * 3600 * 1000)).clamp(0.0, 1.0),
+            backgroundColor: accentColor.withOpacity(0.1),
+            valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+            minHeight: 2,
+            borderRadius: BorderRadius.circular(1),
           ),
           const SizedBox(height: 2),
           Text(
@@ -1228,10 +1247,17 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                 child: OutlinedButton(
                   onPressed: () {
                     HapticFeedback.heavyImpact();
-                    setState(() {
-                      _gameState!.busyUntil = DateTime.now().millisecondsSinceEpoch;
-                    });
-                    GroveProgressService.save(_gameState!);
+                    final isBusy =
+                        _gameState!.busyUntil != null &&
+                        _gameState!.busyUntil! >
+                            NetworkTimeService.now.millisecondsSinceEpoch;
+                    if (isBusy) {
+                      setState(() {
+                        _gameState!.busyUntil =
+                            NetworkTimeService.now.millisecondsSinceEpoch;
+                      });
+                      GroveProgressService.save(_gameState!);
+                    }
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.redAccent,
@@ -1271,7 +1297,8 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                 _gameState!.skips5h--;
               else if (hours == 3)
                 _gameState!.skips3h--;
-              else if (hours == 1) _gameState!.skips1h--;
+              else if (hours == 1)
+                _gameState!.skips1h--;
 
               final currentBusy = _gameState!.busyUntil ?? 0;
               final skipMs = Duration(hours: hours).inMilliseconds;
@@ -1300,4 +1327,49 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       ),
     );
   }
+
+  void _showStatsDialog(ColorScheme colors) {
+    if (_gameState == null) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.surface,
+        title: const Text(
+          'NARRATIVE STATS',
+          style: TextStyle(
+            fontFamily: 'JetBrains Mono',
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: SizedBox(
+          width: 320,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                StatScaleWidget(label: 'STABILITY', value: _gameState!.stability, colors: colors),
+                const SizedBox(height: 16),
+                StatScaleWidget(label: 'CONNECTIVITY', value: _gameState!.connectivity, colors: colors),
+                const SizedBox(height: 16),
+                StatScaleWidget(label: 'VITALITY', value: _gameState!.vitality, colors: colors),
+                const SizedBox(height: 16),
+                StatScaleWidget(label: 'TRANSIENCE', value: _gameState!.transience, colors: colors),
+              ],
+            ),
+          ),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('DISMISS'),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
