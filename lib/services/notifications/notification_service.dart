@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +12,7 @@ import 'dart:convert';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('[NOTIF] Background message received: ${message.messageId}');
+  if (kDebugMode) print('[NOTIF] Background message received: ${message.messageId}');
 }
 
 class NotificationService {
@@ -66,7 +67,7 @@ class NotificationService {
     void Function(NotificationResponse) callback,
   ) {
     _onNotificationTapCallback = callback;
-    print('[NOTIF] Notification tap callback registered');
+    if (kDebugMode) print('[NOTIF] Notification tap callback registered');
   }
 
   // ---------------------------------------------------------------------------
@@ -74,7 +75,7 @@ class NotificationService {
   // ---------------------------------------------------------------------------
 
   Future<void> initialize() async {
-    print('[NOTIF] Initializing notification service...');
+    if (kDebugMode) print('[NOTIF] Initializing notification service...');
 
     await _loadNotifiedBuses();
     await _loadUnreadCounts();
@@ -99,7 +100,7 @@ class NotificationService {
     await _requestPermissions();
     await _initializeFCM();
 
-    print('[NOTIF] Notification service initialized');
+    if (kDebugMode) print('[NOTIF] Notification service initialized');
   }
 
   // ---------------------------------------------------------------------------
@@ -152,9 +153,9 @@ class NotificationService {
       }
 
       _notifyUnreadCountUpdate();
-      print('[NOTIF] Loaded unread counts: $_unreadCounts');
+      if (kDebugMode) print('[NOTIF] Loaded unread counts: $_unreadCounts');
     } catch (e) {
-      print('[NOTIF] Error loading unread counts: $e');
+      if (kDebugMode) print('[NOTIF] Error loading unread counts: $e');
     }
   }
 
@@ -190,7 +191,7 @@ class NotificationService {
       );
       _notifyUnreadCountUpdate();
     } catch (e) {
-      print('[NOTIF] Error saving unread counts: $e');
+      if (kDebugMode) print('[NOTIF] Error saving unread counts: $e');
     }
   }
 
@@ -305,7 +306,7 @@ class NotificationService {
         });
       }
     } catch (e) {
-      print('[NOTIF] Error loading notified buses: $e');
+      if (kDebugMode) print('[NOTIF] Error loading notified buses: $e');
     }
   }
 
@@ -318,7 +319,7 @@ class NotificationService {
       });
       await prefs.setString(_notifiedBusesKey, json.encode(toStore));
     } catch (e) {
-      print('[NOTIF] Error saving notified buses: $e');
+      if (kDebugMode) print('[NOTIF] Error saving notified buses: $e');
     }
   }
 
@@ -327,21 +328,21 @@ class NotificationService {
   // ---------------------------------------------------------------------------
 
   Future<void> _initializeFCM() async {
-    print('[NOTIF] Initializing FCM...');
+    if (kDebugMode) print('[NOTIF] Initializing FCM...');
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     try {
       final token = await _messaging.getToken();
       if (token != null) {
-        print('[NOTIF] FCM Token: ${token.substring(0, 20)}...');
+        if (kDebugMode) print('[NOTIF] FCM Token: ${token.substring(0, 20)}...');
         await _saveFCMToken(token);
       }
     } catch (e) {
-      print('[NOTIF] Error getting FCM token: $e');
+      if (kDebugMode) print('[NOTIF] Error getting FCM token: $e');
     }
     _messaging.onTokenRefresh.listen(_saveFCMToken);
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
-    print('[NOTIF] FCM initialized');
+    if (kDebugMode) print('[NOTIF] FCM initialized');
   }
 
   Future<void> _saveFCMToken(String token) async {
@@ -355,7 +356,7 @@ class NotificationService {
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
-      print('[NOTIF] Error saving FCM token: $e');
+      if (kDebugMode) print('[NOTIF] Error saving FCM token: $e');
     }
   }
 
@@ -371,7 +372,7 @@ class NotificationService {
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {
-    print('[NOTIF] App opened from notification: ${message.data}');
+    if (kDebugMode) print('[NOTIF] App opened from notification: ${message.data}');
   }
 
   Future<void> _requestPermissions() async {
@@ -394,7 +395,7 @@ class NotificationService {
   }
 
   void _onNotificationTapped(NotificationResponse response) {
-    print('[NOTIF] Notification tapped: ${response.payload}');
+    if (kDebugMode) print('[NOTIF] Notification tapped: ${response.payload}');
     _onNotificationTapCallback?.call(response);
   }
 
@@ -405,8 +406,7 @@ class NotificationService {
   Future<void> startListening() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
-    print('[NOTIF] Starting listeners for user: ${user.uid}');
+    if (kDebugMode) print('[NOTIF] Starting listeners for user: ${user.uid}');
 
     await stopListening();
     _processedIds.clear();
@@ -447,18 +447,22 @@ class NotificationService {
           }
         } catch (e) {
           // Individual group membership check failed, skip this group
-          print(
-            '[NOTIF] Error checking membership for group ${groupDoc.id}: $e',
-          );
+          if (kDebugMode) {
+            print(
+              '[NOTIF] Error checking membership for group ${groupDoc.id}: $e',
+            );
+          }
         }
       });
       await Future.wait(membershipFutures);
 
-      print(
-        '[NOTIF] Resolved membership: ${memberGroups.length} groups, ${staffGroups.length} staff',
-      );
+      if (kDebugMode) {
+        print(
+          '[NOTIF] Resolved membership: ${memberGroups.length} groups, ${staffGroups.length} staff',
+        );
+      }
     } catch (e) {
-      print('[NOTIF] Critical error fetching groups collection: $e');
+      if (kDebugMode) print('[NOTIF] Critical error fetching groups collection: $e');
       // If we can't read the groups collection, we can't set up group-specific listeners.
       // We log and return, allowing the app to keep running without these notifications.
       return;
@@ -476,7 +480,7 @@ class NotificationService {
     );
     _listenForNewQuestionsResolved(user.uid, staffGroups);
 
-    print('[NOTIF] All listeners started');
+    if (kDebugMode) print('[NOTIF] All listeners started');
   }
 
   Future<void> stopListening() async {
@@ -536,7 +540,7 @@ class NotificationService {
         }
       }
     } catch (e) {
-      print('[NOTIF] Error checking starred bus arrivals: $e');
+      if (kDebugMode) print('[NOTIF] Error checking starred bus arrivals: $e');
     }
   }
 
@@ -587,7 +591,7 @@ class NotificationService {
         _subscriptions.add(sub);
       }
     } catch (e) {
-      print('[NOTIF] Error setting up announcement listeners: $e');
+      if (kDebugMode) print('[NOTIF] Error setting up announcement listeners: $e');
     }
   }
 
@@ -729,7 +733,7 @@ class NotificationService {
         _subscriptions.add(announcementSub);
       }
     } catch (e) {
-      print('[NOTIF] Error setting up Q&A reply listeners: $e');
+      if (kDebugMode) print('[NOTIF] Error setting up Q&A reply listeners: $e');
     }
   }
 
@@ -784,7 +788,7 @@ class NotificationService {
         _subscriptions.add(sub);
       }
     } catch (e) {
-      print('[NOTIF] Error setting up join request listeners: $e');
+      if (kDebugMode) print('[NOTIF] Error setting up join request listeners: $e');
     }
   }
 
@@ -829,7 +833,7 @@ class NotificationService {
           });
       _subscriptions.add(sub);
     } catch (e) {
-      print('[NOTIF] Error setting up club creation listener: $e');
+      if (kDebugMode) print('[NOTIF] Error setting up club creation listener: $e');
     }
   }
 
@@ -846,9 +850,8 @@ class NotificationService {
     // Deduplicate by payload within a short window (5 seconds)
     if (payload != null) {
       final now = DateTime.now();
-      final lastShown = _lastShownPayloads[payload];
-      if (lastShown != null && now.difference(lastShown).inSeconds < 5) {
-        print('[NOTIF] Skipping duplicate notification for payload: $payload');
+      if (_lastShownPayloads.containsKey(payload)) {
+        if (kDebugMode) print('[NOTIF] Skipping duplicate notification for payload: $payload');
         return;
       }
       _lastShownPayloads[payload] = now;
@@ -877,7 +880,7 @@ class NotificationService {
         payload: payload,
       );
     } catch (e) {
-      print('[NOTIF] Error showing notification: $e');
+      if (kDebugMode) print('[NOTIF] Error showing notification: $e');
     }
   }
 
@@ -971,7 +974,7 @@ class NotificationService {
         _subscriptions.add(announcementSub);
       }
     } catch (e) {
-      print('[NOTIF] Error setting up new question listeners: $e');
+      if (kDebugMode) print('[NOTIF] Error setting up new question listeners: $e');
     }
   }
 }

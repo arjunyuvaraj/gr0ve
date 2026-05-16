@@ -44,6 +44,7 @@ dependencies:
   googleapis: ^16.0.0
   googleapis_auth: ^1.6.0
   flutter_dynamic_icon_plus: ^1.4.0
+  confetti: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +63,7 @@ flutter:
   assets:
     - assets/credentials/gsheets.json
     - assets/credentials/service_account.json
-    - assets/
+    - assets/profile/academy/
     - assets/app_icons/png/
     - assets/profile/grover/
     - assets/profile/aspen/

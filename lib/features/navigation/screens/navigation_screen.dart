@@ -33,6 +33,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gr0ve/features/navigation/models/nav_config.dart';
 import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
 import 'package:gr0ve/services/settings/fun_mode_service.dart';
+import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
 
 // SCREEN: Main navigation hub with role-based access control
 class NavigationScreen extends StatefulWidget {
@@ -70,6 +71,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   bool _enableCounselor = false;
   bool _isBetaTester = false;
   bool _isFunMode = false;
+  bool _isGroveUnlocked = false;
 
   // Onboarding state
   bool _isCheckingOnboarding = true;
@@ -93,6 +95,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
     AppFeatureFlags.enableCounselor.addListener(_onBetaStatusChanged);
     FunModeService.isFunMode.addListener(_onFunModeChanged);
     _isFunMode = FunModeService.isFunMode.value;
+    GroveUnlockService.isUnlocked.addListener(_onGroveUnlockChanged);
+    _isGroveUnlocked = GroveUnlockService.isUnlocked.value;
     _onBetaStatusChanged(); // Sync initial state
     _initAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -115,6 +119,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
     if (mounted) {
       setState(() {
         _isFunMode = FunModeService.isFunMode.value;
+        _buildNavigation();
+      });
+    }
+  }
+
+  void _onGroveUnlockChanged() {
+    if (mounted) {
+      setState(() {
+        _isGroveUnlocked = GroveUnlockService.isUnlocked.value;
         _buildNavigation();
       });
     }
@@ -150,6 +163,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     AppFeatureFlags.enableClubs.removeListener(_onBetaStatusChanged);
     AppFeatureFlags.enableCounselor.removeListener(_onBetaStatusChanged);
     FunModeService.isFunMode.removeListener(_onFunModeChanged);
+    GroveUnlockService.isUnlocked.removeListener(_onGroveUnlockChanged);
     ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     _unreadCountSubscription?.cancel();
     super.dispose();
@@ -377,7 +391,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
         ];
 
-        if (_isFunMode) {
+        if (_isFunMode && _isGroveUnlocked) {
           baseNav.add(
             NavConfig(
               id: 'grove',
@@ -420,7 +434,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           );
         }
 
-        if (_enableCounselor && _isFunMode) {
+        if (_enableCounselor) {
           baseNav.add(
             NavConfig(
               id: 'counselor',

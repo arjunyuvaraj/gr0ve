@@ -618,7 +618,7 @@ class _AccountScreenState extends State<AccountScreen> {
       'ACAHA',
       'AEDT',
       'AMST',
-      'AVPA-A',
+      'AVPA-V',
       'AVPA-M',
       'AVPA-T',
     ];
@@ -1382,10 +1382,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   borderColor: colors.outline.withAlpha(18),
                   bgColor: colors.surfaceVariant.withAlpha(isDark ? 89 : 115),
                   children: [
-                    if (_isFunMode) ...[
-                      _counselorRow(colors, brightness, personaColor, isDark),
-                      _divider(colors),
-                    ],
+                    _counselorRow(colors, brightness, personaColor, isDark),
+                    _divider(colors),
                     _settingsRow(
                       leadingWidget: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -1575,7 +1573,8 @@ class _AccountScreenState extends State<AccountScreen> {
                           colors: colors,
                           trailingWidget: Switch(
                             value: funMode,
-                            onChanged: (val) => FunModeService.toggleFunMode(val),
+                            onChanged: (val) =>
+                                FunModeService.toggleFunMode(val),
                             activeColor: colors.primary,
                           ),
                         );
@@ -1998,11 +1997,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 color: colors.primary.withAlpha(31),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                Icons.code_rounded,
-                size: 17,
-                color: colors.primary,
-              ),
+              child: Icon(Icons.code_rounded, size: 17, color: colors.primary),
             ),
             const SizedBox(width: 12),
             Expanded(

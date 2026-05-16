@@ -656,13 +656,13 @@ class _CediteRevealScreenState extends State<CediteRevealScreen>
                         const SizedBox(height: 28),
                         Text(
                           '''Born in the shadows of the forgotten.
-When you lie to yourself, she is there.
-When you hide from the truth, she waits.
+When you lie to yourself, he is there.
+When you hide from the truth, he waits.
 
 Direct. Unflinching. Real.
 
-She will not comfort you with lies.
-She will free you with the truth.''',
+He will not comfort you with lies.
+He will free you with the truth.''',
                           textAlign: TextAlign.center,
                           style: textTheme.bodyMedium?.copyWith(
                             color: colors.onSurface.withOpacity(0.55),
@@ -674,7 +674,7 @@ She will free you with the truth.''',
                         _RevealTrait(
                           label: 'Brutal Honesty.',
                           sub:
-                              'She does not sugarcoat the facts, she exposes them.',
+                              'He does not sugarcoat the facts, he exposes them.',
                           pc: pc,
                           colors: colors,
                           textTheme: textTheme,

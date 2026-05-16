@@ -19,6 +19,7 @@ import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart
 import 'package:gr0ve/features/easter_eggs/abies_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:gr0ve/core/widgets/misc/email_verification_gate.dart';
+import 'package:gr0ve/services/settings/fun_mode_service.dart';
 
 class CounselorScreen extends StatefulWidget {
   const CounselorScreen({super.key});
@@ -343,6 +344,8 @@ class _CounselorScreenState extends State<CounselorScreen>
   void _onBubbleDoubleTap() => _openFrozenLake();
 
   void _openFrozenLake() {
+    if (!FunModeService.isFunMode.value) return;
+
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (ctx, animation, _) => FrozenLakeScreen(

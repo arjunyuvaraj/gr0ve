@@ -34,7 +34,7 @@ final List<ChangelogVersion> changelogVersions = [
         icon: HugeIcons.strokeRoundedBookOpen01,
         title: 'The Seed is Planted',
         description:
-            'The soil shifts. Roots grow deeper into the dark. What was buried will not stay hidden forever. Are you ready to dig?',
+            'The soil shifts. Roots grow deeper into the dark. What was buried will not stay hidden forever. Are you ready to fly?',
         color: const Color(0xFFEC4899),
       ),
     ],
@@ -190,7 +190,7 @@ final List<ChangelogVersion> changelogVersions = [
   ),
   ChangelogVersion(
     version: '1.0.0',
-    tagline: 'The Beginning',
+    tagline: 'The Dawn',
     description:
         'Gr0ve\'s first public release! Track live bus parking locations, view teacher absences, and access essential school resources.',
     features: [],

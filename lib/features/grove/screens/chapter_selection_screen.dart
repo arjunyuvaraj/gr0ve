@@ -361,39 +361,9 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
           children: [
-            CustomHeader(
-              title: 'THE GR0VE',
-              action:
-                  _gameState?.busyUntil != null &&
-                      _currentTime.millisecondsSinceEpoch <
-                          _gameState!.busyUntil!
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1C40F).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFFF1C40F).withOpacity(0.3),
-                        ),
-                      ),
-                      child: const Text(
-                        'TRAVELING',
-                        style: TextStyle(
-                          fontFamily: 'JetBrains Mono',
-                          fontSize: 8,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFF1C40F),
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
+            CustomHeader(title: 'THE GR0VE', action: null),
             const SizedBox(height: 16),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -455,7 +425,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                         ),
                         child: Center(
                           child: Text(
-                            'NARRATIVE ALIGNMENT',
+                            'STATS',
                             style: TextStyle(
                               fontFamily: 'JetBrains Mono',
                               fontSize: 9,
@@ -468,7 +438,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 20),
                   Container(
                     height: 28,
                     decoration: BoxDecoration(
@@ -1350,13 +1320,29 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                StatScaleWidget(label: 'STABILITY', value: _gameState!.stability, colors: colors),
+                StatScaleWidget(
+                  label: 'STABILITY',
+                  value: _gameState!.stability,
+                  colors: colors,
+                ),
                 const SizedBox(height: 16),
-                StatScaleWidget(label: 'CONNECTIVITY', value: _gameState!.connectivity, colors: colors),
+                StatScaleWidget(
+                  label: 'CONNECTIVITY',
+                  value: _gameState!.connectivity,
+                  colors: colors,
+                ),
                 const SizedBox(height: 16),
-                StatScaleWidget(label: 'VITALITY', value: _gameState!.vitality, colors: colors),
+                StatScaleWidget(
+                  label: 'VITALITY',
+                  value: _gameState!.vitality,
+                  colors: colors,
+                ),
                 const SizedBox(height: 16),
-                StatScaleWidget(label: 'TRANSIENCE', value: _gameState!.transience, colors: colors),
+                StatScaleWidget(
+                  label: 'TRANSIENCE',
+                  value: _gameState!.transience,
+                  colors: colors,
+                ),
               ],
             ),
           ),
@@ -1371,5 +1357,4 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       ),
     );
   }
-
 }

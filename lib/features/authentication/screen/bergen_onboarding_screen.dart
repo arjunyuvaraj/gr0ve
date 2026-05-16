@@ -32,7 +32,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
     'ACAHA',
     'AEDT',
     'AMST',
-    'AVPA-A',
+    'AVPA-V',
     'AVPA-M',
     'AVPA-T',
   ];
@@ -119,7 +119,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
           .timeout(const Duration(seconds: 5));
 
       // Update local cache so NavigationScreen doesn't re-trigger onboarding
-      UserDocCache.invalidate(); 
+      UserDocCache.invalidate();
       await UserDocCache.get();
 
       if (mounted) {
@@ -128,7 +128,8 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
     } catch (e) {
       String errorMessage = e.toString();
       if (e is TimeoutException) {
-        errorMessage = "Connection timed out. Please try again or check your internet.";
+        errorMessage =
+            "Connection timed out. Please try again or check your internet.";
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

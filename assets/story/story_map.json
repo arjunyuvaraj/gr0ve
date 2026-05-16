@@ -1,0 +1,185 @@
+{
+  "version": "1.0",
+  "description": "GR0VE: The Seed Carrier's Journey - Story Structure",
+  "episodes": {
+    "ep0": {
+      "id": "ep0",
+      "number": 0,
+      "title": "The Dawn",
+      "description": "You wake on a branch and meet Dawn, who gives you a seed and a branch to guide your journey.",
+      "scenes": [
+        "ep0_intro",
+        "ep0_dawn_speaks",
+        "ep0_dawn_branch",
+        "ep0_player_resolve",
+        "ep0_complete",
+        "ep0_stats"
+      ]
+    }
+  },
+  "scenes": {
+    "ep0_intro": {
+      "id": "ep0_intro",
+      "type": "narrative",
+      "lines": [
+        {
+          "text": "EPISODE 0: THE DAWN",
+          "character": "narrator",
+          "kind": "episodeHeader",
+          "isBold": true
+        },
+        {
+          "text": "You wake on a branch of smooth, pale wood.",
+          "character": "narrator",
+          "kind": "narrative"
+        },
+        {
+          "text": "The tree beneath you hums faintly — dying light trapped in bark.",
+          "character": "narrator",
+          "kind": "narrative"
+        },
+        {
+          "text": "This is Dawn. And Dawn is fading.",
+          "character": "narrator",
+          "kind": "narrative"
+        }
+      ],
+      "inputType": "continueOnly",
+      "nextScene": "ep0_dawn_speaks"
+    },
+    "ep0_dawn_speaks": {
+      "id": "ep0_dawn_speaks",
+      "type": "dialogue",
+      "lines": [
+        {
+          "text": "Little bird. You feel it, don't you? The thinning air. This realm — my realm — exists between day and night. But the balance breaks. I cannot hold both anymore.",
+          "character": "dawn",
+          "kind": "dialogue"
+        },
+        {
+          "text": "I have one seed left. One chance. The gr0ve still stands, far from here. If you can reach it... if you can plant this seed... something of the threshold survives.",
+          "character": "dawn",
+          "kind": "dialogue"
+        },
+        {
+          "text": "A seed appears in your inventory — warm, pulsing with fading light.",
+          "character": "system",
+          "kind": "system",
+          "isItalic": true
+        }
+      ],
+      "inputType": "continueOnly",
+      "nextScene": "ep0_dawn_branch",
+      "stateEffects": {
+        "inventory_add": ["Dawn's Seed"]
+      }
+    },
+    "ep0_dawn_branch": {
+      "id": "ep0_dawn_branch",
+      "type": "dialogue",
+      "lines": [
+        {
+          "text": "And this — take my branch. It remembers the way. When you're lost, it will pull toward where you need to be.",
+          "character": "dawn",
+          "kind": "dialogue"
+        },
+        {
+          "text": "But listen carefully: The path is not straight. You will face orchards, lakes, canyons, clearings. Each will test you. Each will offer aid — or distraction.",
+          "character": "dawn",
+          "kind": "dialogue"
+        },
+        {
+          "text": "Trust the branch. Trust yourself. And whatever you do... reach the grove before this seed goes cold.",
+          "character": "dawn",
+          "kind": "dialogue"
+        },
+        {
+          "text": "Dawn's light flickers once — then dims to ash-gray.",
+          "character": "narrator",
+          "kind": "narrative",
+          "isItalic": true
+        },
+        {
+          "text": "[Dawn's Branch obtained]\n[Dawn's Seed obtained  |  STATUS: Warm — 100%]",
+          "character": "system",
+          "kind": "system",
+          "isBold": true
+        }
+      ],
+      "inputType": "continueOnly",
+      "nextScene": "ep0_player_resolve",
+      "stateEffects": {
+        "inventory_add": ["Dawn's Branch"]
+      }
+    },
+    "ep0_player_resolve": {
+      "id": "ep0_player_resolve",
+      "type": "choice",
+      "lines": [
+        {
+          "text": "Before I fade, little bird... tell me. When you look at the horizon, what do you see?",
+          "character": "dawn",
+          "kind": "dialogue"
+        }
+      ],
+      "inputType": "choices",
+      "choices": [
+        {
+          "letter": "A",
+          "label": "I see a puzzle to be solved",
+          "nextScene": "ep0_complete",
+          "statEffects": {"stability": 1}
+        },
+        {
+          "letter": "B",
+          "label": "I see others waiting for help",
+          "nextScene": "ep0_complete",
+          "statEffects": {"connectivity": 1}
+        },
+        {
+          "letter": "C",
+          "label": "I see a distance to be crossed",
+          "nextScene": "ep0_complete",
+          "statEffects": {"vitality": 1}
+        },
+        {
+          "letter": "D",
+          "label": "I see the beauty in the fading",
+          "nextScene": "ep0_complete",
+          "statEffects": {"transience": 1}
+        }
+      ]
+    },
+    "ep0_complete": {
+      "id": "ep0_complete",
+      "type": "narrative",
+      "lines": [
+        {
+          "text": "With nothing left holding you here, you launch into the air. The journey begins.",
+          "character": "narrator",
+          "kind": "narrative"
+        }
+      ],
+      "inputType": "continueOnly",
+      "nextScene": "ep0_stats"
+    },
+    "ep0_stats": {
+      "id": "ep0_stats",
+      "type": "system",
+      "lines": [
+        {
+          "text": "EPISODE COMPLETE",
+          "character": "system",
+          "kind": "episodeHeader"
+        },
+        {
+          "text": "To proceed, exit and select Episode 1 from the Chapter Menu.",
+          "character": "system",
+          "kind": "system",
+          "isItalic": true
+        }
+      ],
+      "inputType": "none"
+    }
+  }
+}

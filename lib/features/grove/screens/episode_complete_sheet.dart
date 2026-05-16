@@ -65,7 +65,7 @@ class EpisodeCompleteSheet extends StatelessWidget {
               blurRadius: 30,
               spreadRadius: 5,
               offset: const Offset(0, -10),
-            )
+            ),
           ],
         ),
         child: SafeArea(
@@ -76,7 +76,10 @@ class EpisodeCompleteSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: pc.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -163,13 +166,13 @@ class EpisodeCompleteSheet extends StatelessWidget {
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
                 ],
-                
+
                 // Stats summary - Scale Style
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -181,7 +184,7 @@ class EpisodeCompleteSheet extends StatelessWidget {
                   child: Column(
                     children: [
                       const Text(
-                        'NARRATIVE ALIGNMENT',
+                        'STATS',
                         style: TextStyle(
                           fontFamily: 'JetBrains Mono',
                           fontSize: 10,
@@ -192,19 +195,35 @@ class EpisodeCompleteSheet extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // Stats Scales
-                      StatScaleWidget(label: 'STABILITY', value: state.stability, colors: colors),
+                      StatScaleWidget(
+                        label: 'STABILITY',
+                        value: state.stability,
+                        colors: colors,
+                      ),
                       const SizedBox(height: 16),
-                      StatScaleWidget(label: 'CONNECTIVITY', value: state.connectivity, colors: colors),
+                      StatScaleWidget(
+                        label: 'CONNECTIVITY',
+                        value: state.connectivity,
+                        colors: colors,
+                      ),
                       const SizedBox(height: 16),
-                      StatScaleWidget(label: 'VITALITY', value: state.vitality, colors: colors),
+                      StatScaleWidget(
+                        label: 'VITALITY',
+                        value: state.vitality,
+                        colors: colors,
+                      ),
                       const SizedBox(height: 16),
-                      StatScaleWidget(label: 'TRANSIENCE', value: state.transience, colors: colors),
+                      StatScaleWidget(
+                        label: 'TRANSIENCE',
+                        value: state.transience,
+                        colors: colors,
+                      ),
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
@@ -238,5 +257,4 @@ class EpisodeCompleteSheet extends StatelessWidget {
       ),
     );
   }
-
 }

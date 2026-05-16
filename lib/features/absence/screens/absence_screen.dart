@@ -706,7 +706,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                   ),
                 ],
               ),
-              // const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Expanded(
                 child: isLoading
                     ? const PremiumLoadingIndicator()

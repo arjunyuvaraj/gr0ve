@@ -15,6 +15,7 @@ class CustomHeader extends StatelessWidget {
   String _getSarcasticSubtitle(String title) {
     final t = title.toUpperCase();
     final user = FirebaseAuth.instance.currentUser?.displayName ?? "";
+    if (t.contains('THE GR0VE')) return "WELCOME TO";
     if (t.contains('GR0VE')) return "LET'S TAKE A LOOK";
     if (t.contains('BUSES')) return "FINALLY LEAVING";
     if (t.contains('TEACHERS')) return "HOPE YOU HAVE A FREE!";
@@ -66,11 +67,7 @@ class CustomHeader extends StatelessWidget {
                 const SizedBox(height: 8),
               ],
             ),
-            if (action != null)
-              Positioned(
-                right: 0,
-                child: action!,
-              ),
+            if (action != null) Positioned(right: 0, child: action!),
           ],
         ),
         Text(

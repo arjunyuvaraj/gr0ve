@@ -5,6 +5,9 @@ import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/changelog/data/changelog_models.dart';
 import 'package:gr0ve/features/changelog/data/changelog_data.dart';
+import 'package:gr0ve/features/changelog/screens/original_seed_screen.dart';
+import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
+import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 
 class ChangelogScreen extends StatefulWidget {
   const ChangelogScreen({super.key});
@@ -146,41 +149,49 @@ class _VersionPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 16),
                   // Overlapping Avatars
-                  SizedBox(
-                    height: 36,
-                    width: 36.0 + (3 * 24.0),
-                    child: Stack(
-                      children: List.generate(basePersonas.length, (index) {
-                        return Positioned(
-                          right: index * 24.0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colors.surface,
-                                width: 2,
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: version.version == '1.0.0'
+                          ? const _Version100EasterEgg()
+                          : SizedBox(
+                              height: 36,
+                              width: 36.0 + (3 * 24.0),
+                              child: Stack(
+                                children: List.generate(basePersonas.length, (index) {
+                                  return Positioned(
+                                    right: index * 24.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: colors.surface,
+                                          width: 2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipOval(
+                                        child: Image.asset(
+                                          basePersonas[basePersonas.length - 1 - index]
+                                              .avatarAsset(Theme.of(context).brightness),
+                                          width: 32,
+                                          height: 32,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                basePersonas[basePersonas.length - 1 - index]
-                                    .avatarAsset(Theme.of(context).brightness),
-                                width: 32,
-                                height: 32,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
                     ),
                   ),
                 ],
@@ -278,6 +289,161 @@ class _ChangelogFeatureCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _Version100EasterEgg extends StatefulWidget {
+  const _Version100EasterEgg();
+
+  @override
+  State<_Version100EasterEgg> createState() => _Version100EasterEggState();
+}
+
+class _Version100EasterEggState extends State<_Version100EasterEgg> {
+  int _tapCount = 0;
+  bool _isExpanded = false;
+
+  final List<CounselorPersona> _currentOrder = [
+    CounselorPersona.abies,
+    CounselorPersona.ash,
+    CounselorPersona.aspen,
+    CounselorPersona.cedite,
+    CounselorPersona.grover,
+    CounselorPersona.rowan,
+    CounselorPersona.sakura,
+  ];
+
+  final List<CounselorPersona> _correctOrder = [
+    CounselorPersona.abies,
+    CounselorPersona.cedite,
+    CounselorPersona.ash,
+    CounselorPersona.grover,
+    CounselorPersona.aspen,
+    CounselorPersona.rowan,
+    CounselorPersona.sakura,
+  ];
+
+  void _handleTap() {
+    if (_isExpanded) return;
+
+    // Only allow expansion if Abies, Ash, Cedite, and Dawn are unlocked
+    final isEligible = CounselorPersonaService.abiesUnlocked &&
+        CounselorPersonaService.cediteUnlocked &&
+        CounselorPersonaService.ashUnlocked &&
+        DawnUnlockService.isUnlocked.value;
+
+    if (!isEligible) return;
+
+    setState(() {
+      _tapCount++;
+      if (_tapCount >= 7) {
+        _isExpanded = true;
+      }
+    });
+  }
+
+  void _checkOrder() {
+    bool isCorrect = true;
+    for (int i = 0; i < _correctOrder.length; i++) {
+      if (_currentOrder[i] != _correctOrder[i]) {
+        isCorrect = false;
+        break;
+      }
+    }
+
+    if (isCorrect) {
+      _showPoemDialog();
+    }
+  }
+
+  void _showPoemDialog() {
+    GroveUnlockService.unlock();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const OriginalSeedScreen(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isExpanded) {
+      return GestureDetector(
+        onTap: _handleTap,
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: context.colors.surface, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              CounselorPersona.grover.avatarAsset(Theme.of(context).brightness),
+              width: 32,
+              height: 32,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 36,
+      child: ReorderableListView(
+        scrollDirection: Axis.horizontal,
+        buildDefaultDragHandles: false,
+        shrinkWrap: true,
+        onReorder: (oldIndex, newIndex) {
+          setState(() {
+            if (oldIndex < newIndex) {
+              newIndex -= 1;
+            }
+            final item = _currentOrder.removeAt(oldIndex);
+            _currentOrder.insert(newIndex, item);
+          });
+          _checkOrder();
+        },
+        children: List.generate(_currentOrder.length, (index) {
+          final persona = _currentOrder[index];
+          return ReorderableDragStartListener(
+            key: ValueKey(persona.name),
+            index: index,
+            child: Align(
+              widthFactor: 0.75,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.colors.surface, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    persona.avatarAsset(Theme.of(context).brightness),
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

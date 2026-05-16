@@ -74,8 +74,18 @@ class SnapshotAbsenceCard extends StatelessWidget {
                   );
                 }
 
+                final sortedStarred = starred.toList()..sort((a, b) {
+                  final statusA = resolveTeacherStatus(teacherName: a, absenceMap: absences);
+                  final statusB = resolveTeacherStatus(teacherName: b, absenceMap: absences);
+                  if (statusA != statusB) {
+                    if (statusA != 'Present') return -1;
+                    if (statusB != 'Present') return 1;
+                  }
+                  return a.compareTo(b);
+                });
+
                 return Column(
-                  children: starred.map((name) {
+                  children: sortedStarred.map((name) {
                     teachers.values.firstWhere(
                       (t) => (t['name'] as String?) == name,
                       orElse: () => {'name': name, 'department': ''},

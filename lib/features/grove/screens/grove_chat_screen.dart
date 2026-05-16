@@ -424,25 +424,7 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
     _showInput = false;
 
-    // 1. Universal impact for EVERY choice (Personality Assessment logic)
-    // This ensures every decision shapes the player's character (virtue).
-    final traitIndex = (choice.label.length + choice.letter.codeUnitAt(0)) % 4;
-    final impact = (choice.letter == 'A' || choice.letter == 'C') ? 1 : -1;
-    
-    switch (traitIndex) {
-      case 0: 
-        _gameState.stability += impact;
-        _addStatBubble('STABILITY', impact);
-      case 1: 
-        _gameState.connectivity += impact;
-        _addStatBubble('CONNECTIVITY', impact);
-      case 2: 
-        _gameState.vitality += impact;
-        _addStatBubble('VITALITY', impact);
-      case 3: 
-        _gameState.transience += impact;
-        _addStatBubble('TRANSIENCE', impact);
-    }
+    // Removed the Universal Personality Assessment logic since it causes double-application of stats.
 
     // 2. Specific effects (Narrative-driven impacts)
     if (choice.statEffects.isNotEmpty) {

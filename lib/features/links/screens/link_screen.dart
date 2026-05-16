@@ -271,12 +271,8 @@ class _LinksScreenState extends State<LinksScreen> {
                   ),
                 ),
                 if (links.length == maxLinks) ...[
-                  const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
                       color: colors.errorContainer,
                       borderRadius: BorderRadius.circular(4),
@@ -296,9 +292,6 @@ class _LinksScreenState extends State<LinksScreen> {
             ),
           ),
         ],
-
-        const SizedBox(height: 16),
-
         // Links List
         if (links.isEmpty)
           _buildEmptyState(colors, theme)
@@ -306,7 +299,6 @@ class _LinksScreenState extends State<LinksScreen> {
           _buildReorderableList()
         else
           _buildLinksList(),
-        const SizedBox(height: 16),
       ],
     );
   }

@@ -22,7 +22,9 @@ class AuthenticationService {
     final userEmail = email ?? user.email ?? '';
     final isBCA = userEmail.isNotEmpty ? _isBCAEmail(userEmail) : false;
     final userDoc = _firestore.collection('users').doc(user.uid);
-    final docSnapshot = await userDoc.get().timeout(const Duration(seconds: 10));
+    final docSnapshot = await userDoc.get().timeout(
+      const Duration(seconds: 10),
+    );
 
     if (!docSnapshot.exists) {
       await userDoc.set({
@@ -197,12 +199,30 @@ class AuthenticationService {
     try {
       final uid = currentUser!.uid;
       final email = currentUser!.email!;
-      signOut();
-      signInWithEmail(email, password);
-      await currentUser!.delete();
+
+      // Re-authenticate to get fresh credentials for account deletion
+      try {
+        final credential = EmailAuthProvider.credential(
+          email: email,
+          password: password,
+        );
+        await currentUser!.reauthenticateWithCredential(credential);
+      } catch (e) {
+        throw Exception('Failed to verify password: ${e.toString()}');
+      }
+
+      // Delete from Firestore first to ensure no ghost logins
       await _firestore.collection('users').doc(uid).delete();
+
+      // Then delete the Firebase Auth user
+      await currentUser!.delete();
+
+      // Finally, ensure we're signed out
+      signOut();
     } catch (e) {
-      throw Exception('Failed to delete account. Please try again.');
+      throw Exception(
+        'Failed to delete account. Please try again.' + e.toString(),
+      );
     }
   }
 
