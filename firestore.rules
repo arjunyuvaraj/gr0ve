@@ -65,9 +65,9 @@ service cloud.firestore {
       
       allow delete: if isPlatformAdmin();
       
-      // Members subcollection
+      // Members subcollection - any authenticated user can check if they're a member
       match /members/{userId} {
-        allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+        allow read: if isAuthenticated();
         
         allow create: if false; // Created via approval process only
         
@@ -103,6 +103,14 @@ service cloud.firestore {
         
         allow update, delete: if isGroupAdmin(groupId) && isActiveGroup(groupId);
       }
+    }
+    
+    // ============================================================================
+    // USERS COLLECTION - Users can read their own doc + shared public data
+    // ============================================================================
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if false; // Managed server-side only (via Cloud Functions)
     }
     
     // ============================================================================
