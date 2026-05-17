@@ -1902,7 +1902,7 @@ List<Scene> buildEpisode01Orchard() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          '[Cool Rock obtained]\n(This does nothing. It\'s literally just a rock.)',
+          '[Cool Rock obtained... momentarily]\n(This does nothing. It\'s literally just a rock.)',
           kind: MessageKind.system,
         ),
         StoryMessage(
@@ -1911,7 +1911,7 @@ List<Scene> buildEpisode01Orchard() {
           isBold: true,
         ),
         StoryMessage(
-          'You spent time on a distraction. The rock is nice though.',
+          'You spent time on a distraction. You throw the rock into the distance for fun. It skips twice before vanishing.',
         ),
       ],
       inputType: InputType.continueOnly,
@@ -1920,8 +1920,7 @@ List<Scene> buildEpisode01Orchard() {
       onEnter: (state) {
         state.seedWarmth = max(0, state.seedWarmth - 10);
         state.transience += 1;
-        if (!state.inventory.contains('Cool Rock'))
-          state.inventory.add('Cool Rock');
+        // Don't add to inventory
       },
     ),
 
@@ -1991,14 +1990,6 @@ List<Scene> buildEpisode01Orchard() {
         state.episodeComplete = true; // Mark episode as done
         state.newtonUnlocked = true;
         state.darwinUnlocked = true;
-
-        // Ensure both jars are in inventory as requested
-        if (!state.inventory.contains('Apple Juice')) {
-          state.inventory.add('Apple Juice');
-        }
-        if (!state.inventory.contains('Orange Juice')) {
-          state.inventory.add('Orange Juice');
-        }
       },
     ),
   ];

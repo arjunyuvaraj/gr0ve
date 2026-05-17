@@ -562,8 +562,7 @@ List<Scene> buildEpisode03TangledForest() {
         ),
         SceneChoice(
           letter: 'D',
-          label:
-              '"Abies reached backward. Did this tree do the same?"',
+          label: '"Abies reached backward. Did this tree do the same?"',
           nextScene: 'ep3_london_backward_response',
         ),
       ],
@@ -1627,7 +1626,7 @@ List<Scene> buildEpisode03TangledForest() {
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
-          '[Circular Vial obtained | Contains luminous rainforest liquid. Warm. Alive. Waiting.]',
+          '[Mossy Residue obtained | Contains luminous rainforest liquid. Warm. Alive. Waiting.]',
           kind: MessageKind.system,
           isBold: true,
         ),
@@ -1635,8 +1634,8 @@ List<Scene> buildEpisode03TangledForest() {
       inputType: InputType.continueOnly,
       nextScene: 'ep3_final_wisdom',
       onEnter: (state) {
-        if (!state.inventory.contains('Circular Vial')) {
-          state.inventory.add('Circular Vial');
+        if (!state.inventory.contains('Mossy Residue')) {
+          state.inventory.add('Mossy Residue');
         }
         state.vitality += 2;
       },

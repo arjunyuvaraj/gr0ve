@@ -23,7 +23,7 @@ class _OriginalSeedScreenState extends State<OriginalSeedScreen>
     "Through orchards dense with heavy bloom,\nPast weeping willows drowned in gloom,\nThrough tangled rainforests that consume,\nAnd pulled the carrier onward still.",
     "At open shores with breaking skies,\nThe unnamed waters surged and cried,\nA frigid landfall stretched out wide,\nAnd pulled the carrier onward still.",
     "Through frozen lakes of forgotten past,\nPast warped canyons where shadows clashed,\nAcross arid deserts where nothing lasts,\nAnd pulled the carrier onward still.",
-    "Beyond the Thunderveil’s hidden cove,\nPast Verdant Garden’s sacred home,\nThere, plant the seed, no more alone,\nWithin the holy, living Gr0ve."
+    "Beyond the high falls hidden cove,\nPast Verdant Garden\'s sacred home,\nThere, plant the seed, no more alone,\nWithin the holy, living Gr0ve.",
   ];
 
   @override
@@ -86,7 +86,8 @@ class _OriginalSeedScreenState extends State<OriginalSeedScreen>
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height -
+              minHeight:
+                  MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
                   MediaQuery.of(context).padding.bottom,
             ),
@@ -102,7 +103,9 @@ class _OriginalSeedScreenState extends State<OriginalSeedScreen>
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withOpacity(0.5),
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.5,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -189,8 +192,9 @@ class _OriginalSeedScreenState extends State<OriginalSeedScreen>
                           _stanzas[index],
                           style: text.bodyMedium?.copyWith(
                             color: colors.onSurface.withOpacity(0.8),
-                            height: 1.6,
-                            fontStyle: FontStyle.italic,
+                            height: 1.8,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
                           ),
                           textAlign: TextAlign.center,
                         ),

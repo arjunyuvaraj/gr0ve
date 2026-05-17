@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -62,7 +64,9 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                     padding: const EdgeInsets.only(bottom: 24),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(changelogVersions.length, (index) {
+                      children: List.generate(changelogVersions.length, (
+                        index,
+                      ) {
                         final isSelected = _currentPage == index;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -160,7 +164,9 @@ class _VersionPage extends StatelessWidget {
                               height: 36,
                               width: 36.0 + (3 * 24.0),
                               child: Stack(
-                                children: List.generate(basePersonas.length, (index) {
+                                children: List.generate(basePersonas.length, (
+                                  index,
+                                ) {
                                   return Positioned(
                                     right: index * 24.0,
                                     child: Container(
@@ -172,7 +178,9 @@ class _VersionPage extends StatelessWidget {
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
+                                            color: Colors.black.withOpacity(
+                                              0.1,
+                                            ),
                                             blurRadius: 4,
                                             offset: const Offset(0, 2),
                                           ),
@@ -180,8 +188,12 @@ class _VersionPage extends StatelessWidget {
                                       ),
                                       child: ClipOval(
                                         child: Image.asset(
-                                          basePersonas[basePersonas.length - 1 - index]
-                                              .avatarAsset(Theme.of(context).brightness),
+                                          basePersonas[basePersonas.length -
+                                                  1 -
+                                                  index]
+                                              .avatarAsset(
+                                                Theme.of(context).brightness,
+                                              ),
                                           width: 32,
                                           height: 32,
                                           fit: BoxFit.cover,
@@ -305,15 +317,17 @@ class _Version100EasterEggState extends State<_Version100EasterEgg> {
   int _tapCount = 0;
   bool _isExpanded = false;
 
-  final List<CounselorPersona> _currentOrder = [
+  final List<CounselorPersona> _visibleTrees = [CounselorPersona.grover];
+  final List<CounselorPersona> _pool = [
     CounselorPersona.abies,
     CounselorPersona.ash,
     CounselorPersona.aspen,
     CounselorPersona.cedite,
-    CounselorPersona.grover,
     CounselorPersona.rowan,
     CounselorPersona.sakura,
   ];
+
+  late List<CounselorPersona> _currentOrder;
 
   final List<CounselorPersona> _correctOrder = [
     CounselorPersona.abies,
@@ -325,20 +339,41 @@ class _Version100EasterEggState extends State<_Version100EasterEgg> {
     CounselorPersona.sakura,
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _pool.shuffle();
+    _currentOrder = [];
+  }
+
   void _handleTap() {
     if (_isExpanded) return;
 
-    // Only allow expansion if Abies, Ash, Cedite, and Dawn are unlocked
-    final isEligible = CounselorPersonaService.abiesUnlocked &&
-        CounselorPersonaService.cediteUnlocked &&
-        CounselorPersonaService.ashUnlocked &&
-        DawnUnlockService.isUnlocked.value;
+    final data = UserDocCache.getCached();
+    final isEligible =
+        (data?['abies_unlocked'] == true) &&
+        (data?['cedite_unlocked'] == true) &&
+        (data?['ash_unlocked'] == true) &&
+        (data?['dawn_avatar_unlocked'] == true);
 
-    if (!isEligible) return;
+    debugPrint('[EASTER EGG] Tap count: $_tapCount, Eligible: $isEligible');
+
+    if (!isEligible) {
+      HapticFeedback.vibrate();
+      return;
+    }
 
     setState(() {
       _tapCount++;
+      HapticFeedback.lightImpact();
+
+      if (_tapCount < 7 && _pool.isNotEmpty) {
+        _visibleTrees.add(_pool.removeAt(0));
+      }
+
       if (_tapCount >= 7) {
+        HapticFeedback.mediumImpact();
+        _currentOrder = List.from(_visibleTrees);
         _isExpanded = true;
       }
     });
@@ -360,11 +395,9 @@ class _Version100EasterEggState extends State<_Version100EasterEgg> {
 
   void _showPoemDialog() {
     GroveUnlockService.unlock();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const OriginalSeedScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const OriginalSeedScreen()));
   }
 
   @override
@@ -372,25 +405,38 @@ class _Version100EasterEggState extends State<_Version100EasterEgg> {
     if (!_isExpanded) {
       return GestureDetector(
         onTap: _handleTap,
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: context.colors.surface, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              CounselorPersona.grover.avatarAsset(Theme.of(context).brightness),
-              width: 32,
-              height: 32,
-              fit: BoxFit.cover,
-            ),
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          height: 36,
+          width: 36.0 + (_visibleTrees.length - 1) * 20.0,
+          child: Stack(
+            children: List.generate(_visibleTrees.length, (index) {
+              final persona = _visibleTrees[_visibleTrees.length - 1 - index];
+              return Positioned(
+                right: index * 20.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.colors.surface, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      persona.avatarAsset(Theme.of(context).brightness),
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            }),
           ),
         ),
       );

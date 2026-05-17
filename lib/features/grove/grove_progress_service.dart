@@ -269,21 +269,52 @@ class GroveProgressService {
       debugPrint('[GroveProgress] Local save error: $e');
     }
 
-    // Save to Firestore
+    // Save to Firestore - Optimized targeted update
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
+        final epKey = 'ep${state.currentEpisode}';
+        final updates = {
+          '$_firestoreField.currentScene': state.currentScene,
+          '$_firestoreField.stability': state.stability,
+          '$_firestoreField.connectivity': state.connectivity,
+          '$_firestoreField.vitality': state.vitality,
+          '$_firestoreField.transience': state.transience,
+          '$_firestoreField.seedWarmth': state.seedWarmth,
+          '$_firestoreField.inventory': state.inventory,
+          '$_firestoreField.chosenPath': state.chosenPath,
+          '$_firestoreField.currentEpisode': state.currentEpisode,
+          '$_firestoreField.episodeComplete': state.episodeComplete,
+          '$_firestoreField.newtonUnlocked': state.newtonUnlocked,
+          '$_firestoreField.darwinUnlocked': state.darwinUnlocked,
+          '$_firestoreField.salixUnlocked': state.salixUnlocked,
+          '$_firestoreField.londonUnlocked': state.londonUnlocked,
+          '$_firestoreField.busyUntil': state.busyUntil,
+          '$_firestoreField.pendingScene': state.pendingScene,
+          '$_firestoreField.skips1h': state.skips1h,
+          '$_firestoreField.skips3h': state.skips3h,
+          '$_firestoreField.skips5h': state.skips5h,
+          '$_firestoreField.isBetaTester': state.isBetaTester,
+
+          // Sync top-level unlock flags for other services
+          'story_newton_unlocked': state.newtonUnlocked,
+          'story_darwin_unlocked': state.darwinUnlocked,
+          'story_salix_unlocked': state.salixUnlocked,
+          'story_london_unlocked': state.londonUnlocked,
+        };
+
         await FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
-            .set({
-              _firestoreField: json,
-              'story_newton_unlocked': state.newtonUnlocked,
-              'story_darwin_unlocked': state.darwinUnlocked,
-              'story_salix_unlocked': state.salixUnlocked,
-              'story_london_unlocked': state.londonUnlocked,
-            }, SetOptions(merge: true));
-        
+            .update(updates)
+            .catchError((_) {
+              // If update fails (doc doesn't exist), use set with merge
+              final map = state.toNestedJson(); // Use nested to omit histories
+              return FirebaseFirestore.instance
+                  .collection(_firestoreCollection)
+                  .doc(user.uid)
+                  .set({_firestoreField: map}, SetOptions(merge: true));
+            });
         // IMPORTANT: Invalidate cache so other services see the new data
         UserDocCache.invalidate();
       } catch (e) {
@@ -295,33 +326,44 @@ class GroveProgressService {
   /// Load game state — tries Firestore first, falls back to local
   static Future<GroveGameState?> load() async {
     final user = FirebaseAuth.instance.currentUser;
+    GroveGameState? state;
 
-    // Try Firestore first via cache to prevent redundant network calls
-    if (user != null) {
-      try {
-        final data = await UserDocCache.get();
-        if (data != null && data[_firestoreField] != null) {
-          final progress = data[_firestoreField] as Map<String, dynamic>;
-          return GroveGameState.fromJson(progress);
-        }
-      } catch (e) {
-        debugPrint('[GroveProgress] Firestore cache load error: $e');
-      }
-    }
-
-    // Fall back to local
+    // 1. Always load local state first (this contains the bulky histories)
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString(_prefsKey);
       if (jsonString != null) {
         final json = jsonDecode(jsonString) as Map<String, dynamic>;
-        return GroveGameState.fromJson(json);
+        state = GroveGameState.fromJson(json);
       }
     } catch (e) {
       debugPrint('[GroveProgress] Local load error: $e');
     }
 
-    return null;
+    // 2. Fetch the cloud 'Core State' and merge it over the local state
+    if (user != null) {
+      try {
+        final data = await UserDocCache.get();
+        if (data != null && data[_firestoreField] != null) {
+          final cloudProgress = data[_firestoreField] as Map<String, dynamic>;
+          final cloudState = GroveGameState.fromJson(cloudProgress);
+
+          // If we have a local state, preserve its history but use cloud's core progression
+          if (state != null) {
+            state = cloudState.copyWith(
+              episodeHistories: state.episodeHistories,
+              episodeStartStates: state.episodeStartStates,
+            );
+          } else {
+            state = cloudState;
+          }
+        }
+      } catch (e) {
+        debugPrint('[GroveProgress] Firestore load error: $e');
+      }
+    }
+
+    return state;
   }
 
   /// Clear saved progress (for reset/debug)
@@ -343,7 +385,17 @@ class GroveProgressService {
               'story_darwin_unlocked': FieldValue.delete(),
               'story_london_unlocked': FieldValue.delete(),
             });
-        
+
+        // Delete history subcollection docs
+        final historyDocs = await FirebaseFirestore.instance
+            .collection(_firestoreCollection)
+            .doc(user.uid)
+            .collection('grove_history')
+            .get();
+        for (final doc in historyDocs.docs) {
+          await doc.reference.delete();
+        }
+
         // IMPORTANT: Invalidate cache so other services see the new data
         UserDocCache.invalidate();
       } catch (_) {}
@@ -385,6 +437,28 @@ class GroveProgressService {
         busyUntil: 0,
         pendingScene: null,
       );
+    }
+
+    // Manually prune inventory and unlock flags for this and subsequent episodes
+    if (episodeNumber <= 3) {
+      newState.londonUnlocked = false;
+      newState.inventory.remove('Mossy Residue');
+      newState.inventory.remove('Warming Pouch');
+    }
+    if (episodeNumber <= 2) {
+      newState.salixUnlocked = false;
+      newState.inventory.remove('Flask of Tears');
+    }
+    if (episodeNumber <= 1) {
+      newState.newtonUnlocked = false;
+      newState.darwinUnlocked = false;
+      newState.chosenPath = null;
+      newState.inventory.remove('iJuice Premium™');
+      newState.inventory.remove('iJuice Plus™');
+      newState.inventory.remove('Apple Juice');
+      newState.inventory.remove('Custom Orange Juice');
+      newState.inventory.remove('Orange Juice');
+      newState.inventory.remove('Cool Rock');
     }
 
     // Clear histories and start states for this and subsequent episodes

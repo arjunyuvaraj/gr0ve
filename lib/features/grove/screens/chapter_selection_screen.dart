@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -233,6 +234,26 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                     _gameState!,
                     episode.number,
                   );
+
+                  // Lock story profile pictures based on the reset episode
+                  if (episode.number <= 3) lockStoryPfp('london');
+                  if (episode.number <= 2) lockStoryPfp('salix');
+                  if (episode.number <= 1) {
+                    lockStoryPfp('newton');
+                    lockStoryPfp('darwin');
+                  }
+
+                  // Reset active profile if it was locked
+                  final currentPfp = ProfilePictureService.activeVariant.value;
+                  if ((episode.number <= 1 &&
+                          ['newton', 'darwin'].contains(currentPfp.key)) ||
+                      (episode.number <= 2 && currentPfp.key == 'salix') ||
+                      (episode.number <= 3 && currentPfp.key == 'london')) {
+                    await ProfilePictureService.setVariant(
+                      ProfilePictureService.defaultVariant,
+                    );
+                  }
+
                   if (mounted) {
                     setState(() {
                       _gameState = newState;
@@ -359,143 +380,152 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-          children: [
-            CustomHeader(title: 'THE GR0VE', action: null),
-            const SizedBox(height: 16),
-            SingleChildScrollView(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+        children: [
+          CustomHeader(title: 'THE GR0VE', action: null),
+          const SizedBox(height: 16),
+          Center(
+            child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               clipBehavior: Clip.none,
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: Container(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4A912).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFFD4A912).withOpacity(0.3),
-                      ),
+                      color: isDark
+                          ? colors.surfaceContainerHighest.withOpacity(0.3)
+                          : colors.surfaceContainerHighest.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: colors.outline.withOpacity(0.15)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.local_fire_department_rounded,
-                          size: 14,
-                          color: Color(0xFFD4A912),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${_gameState?.seedWarmth ?? 100}%',
-                          style: const TextStyle(
-                            fontFamily: 'JetBrains Mono',
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFFD4A912),
+                        // SEED WARMTH
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD4A912).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFFD4A912).withOpacity(0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.local_fire_department_rounded,
+                                size: 14,
+                                color: Color(0xFFD4A912),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${_gameState?.seedWarmth ?? 100}%',
+                                style: const TextStyle(
+                                  fontFamily: 'JetBrains Mono',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFFD4A912),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Narrative Alignment Button
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        _showStatsDialog(colors);
-                      },
-                      child: Container(
-                        height: 28,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: colors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: colors.primary.withOpacity(0.2),
-                          ),
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 1,
+                          height: 16,
+                          color: colors.outline.withOpacity(0.2),
                         ),
-                        child: Center(
-                          child: Text(
-                            'STATS',
-                            style: TextStyle(
-                              fontFamily: 'JetBrains Mono',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: colors.primary,
-                              letterSpacing: 1.0,
+                        const SizedBox(width: 8),
+                        // STATS
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              _showStatsDialog(colors);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: colors.primary.withOpacity(0.2),
+                                ),
+                              ),
+                              child: Text(
+                                'STATS',
+                                style: TextStyle(
+                                  fontFamily: 'JetBrains Mono',
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: colors.primary,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  Container(
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colors.outline.withOpacity(0.1),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 1,
+                          height: 16,
+                          color: colors.outline.withOpacity(0.2),
+                        ),
+                        // ACTIONS
                         IconButton(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           constraints: const BoxConstraints(),
                           icon: Icon(
                             Icons.backpack_outlined,
-                            size: 16,
-                            color: colors.onSurface.withOpacity(0.6),
+                            size: 18,
+                            color: colors.onSurface.withOpacity(0.7),
                           ),
                           onPressed: _showInventory,
-                        ),
-                        Container(
-                          width: 1,
-                          color: colors.outline.withOpacity(0.2),
                         ),
                         IconButton(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           constraints: const BoxConstraints(),
                           icon: Icon(
                             Icons.info_outline_rounded,
-                            size: 16,
-                            color: colors.onSurface.withOpacity(0.6),
+                            size: 18,
+                            color: colors.onSurface.withOpacity(0.7),
                           ),
                           onPressed: _showInfo,
-                        ),
-                        Container(
-                          width: 1,
-                          color: colors.outline.withOpacity(0.2),
                         ),
                         IconButton(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           constraints: const BoxConstraints(),
                           icon: Icon(
                             Icons.refresh_rounded,
-                            size: 16,
-                            color: colors.onSurface.withOpacity(0.6),
+                            size: 18,
+                            color: colors.onSurface.withOpacity(0.7),
                           ),
                           onPressed: _confirmReset,
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: 32),
+          ),
+          const SizedBox(height: 32),
 
             // ── Anniversary Countdown Banner ─────────────────────
             if (_currentTime.isBefore(DateTime(2026, 5, 20, 8, 0, 0))) ...[
@@ -571,7 +601,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
             }),
           ],
         ),
-      ),
     );
   }
 

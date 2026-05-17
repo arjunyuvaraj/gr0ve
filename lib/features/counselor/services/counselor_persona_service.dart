@@ -243,12 +243,19 @@ class CounselorPersonaService {
   static CounselorPersona _fromString(String? s) => CounselorPersona.values
       .firstWhere((p) => p.id == s, orElse: () => CounselorPersona.grover);
 
-  static bool _isUnlocked(CounselorPersona p) => switch (p) {
-    CounselorPersona.abies => _abiesUnlocked,
-    CounselorPersona.cedite => _cediteUnlocked,
-    CounselorPersona.ash => _ashUnlocked,
-    _ => true,
-  };
+  static bool _isUnlocked(CounselorPersona p) {
+    final data = UserDocCache.getCached();
+    final bool abies = (data?[_abiesUnlockedField] == true) || _abiesUnlocked;
+    final bool cedite = (data?[_cediteUnlockedField] == true) || _cediteUnlocked;
+    final bool ash = (data?[_ashUnlockedField] == true) || _ashUnlocked;
+
+    return switch (p) {
+      CounselorPersona.abies => abies,
+      CounselorPersona.cedite => cedite,
+      CounselorPersona.ash => ash,
+      _ => true,
+    };
+  }
 
   static bool isPersonaUnlocked(CounselorPersona p) => _isUnlocked(p);
 

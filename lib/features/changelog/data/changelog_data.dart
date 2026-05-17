@@ -27,7 +27,7 @@ final List<ChangelogVersion> changelogVersions = [
         icon: HugeIcons.strokeRoundedSparkles,
         title: 'Fun & Serious Modes',
         description:
-            'You\'re in control. Enable Fun Mode in Account Settings to uncover the story and easter eggs, or switch to Serious Mode for a distraction-free experience.',
+            'Keep Fun Mode off by default for a clean experience. The Gr0ve story unlocks only after completing the changelog Easter egg, then the hidden narrative becomes available.',
         color: const Color(0xFFF59E0B),
       ),
       ChangelogFeature(

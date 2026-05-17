@@ -92,7 +92,6 @@ void main() async {
     AccessibilityService.init(), // SharedPreferences only
     ThemeColorService.init(), // SharedPreferences only
     FunModeService.init(), // SharedPreferences only
-    GroveUnlockService.init(), // SharedPreferences only
   ]);
   if (kDebugMode)
     print('[BOOT] SharedPrefs init: ${bootWatch.elapsedMilliseconds}ms');
@@ -181,6 +180,7 @@ Future<void> _bootUserServices(User user) async {
     CounselorPersonaService.init(cachedUserData: userData),
     ProfilePictureService.init(cachedUserData: userData),
     DawnUnlockService.init(cachedUserData: userData),
+    GroveUnlockService.init(cachedUserData: userData),
     StarredTeacherService.load(), // Small sub-collection read
     StarredBusService.load(), // Small sub-collection read
     LayoutService.load(), // Small sub-collection read

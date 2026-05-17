@@ -59,15 +59,33 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
   }
 
   Future<void> _checkEmailVerification() async {
-    await user?.reload();
-    if (mounted) {
-      final verified = user?.emailVerified ?? false;
+    try {
+      // Force refresh the current user's auth state from Firebase
+      await FirebaseAuth.instance.currentUser?.reload();
+      
+      if (!mounted) return;
+      
+      // Get the latest user instance after reload
+      final currentUser = FirebaseAuth.instance.currentUser;
+      final verified = currentUser?.emailVerified ?? false;
+      
       if (verified && !isEmailVerified) {
+        // Email just got verified - cancel the polling timer
         _verificationTimer?.cancel();
       }
+      
       setState(() {
         isEmailVerified = verified;
       });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error checking email: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

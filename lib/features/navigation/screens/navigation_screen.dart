@@ -32,7 +32,6 @@ import 'package:gr0ve/services/notifications/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gr0ve/features/navigation/models/nav_config.dart';
 import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
-import 'package:gr0ve/services/settings/fun_mode_service.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
 
 // SCREEN: Main navigation hub with role-based access control
@@ -70,8 +69,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
   bool _enableClubs = false;
   bool _enableCounselor = false;
   bool _isBetaTester = false;
-  bool _isFunMode = false;
   bool _isGroveUnlocked = false;
+  bool _isDawnUnlocked = false;
 
   // Onboarding state
   bool _isCheckingOnboarding = true;
@@ -93,10 +92,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
     AppFeatureFlags.isBeta.addListener(_onBetaStatusChanged);
     AppFeatureFlags.enableClubs.addListener(_onBetaStatusChanged);
     AppFeatureFlags.enableCounselor.addListener(_onBetaStatusChanged);
-    FunModeService.isFunMode.addListener(_onFunModeChanged);
-    _isFunMode = FunModeService.isFunMode.value;
     GroveUnlockService.isUnlocked.addListener(_onGroveUnlockChanged);
     _isGroveUnlocked = GroveUnlockService.isUnlocked.value;
+    DawnUnlockService.isUnlocked.addListener(_onDawnUnlockChanged);
+    _isDawnUnlocked = DawnUnlockService.isUnlocked.value;
     _onBetaStatusChanged(); // Sync initial state
     _initAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -115,19 +114,19 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  void _onFunModeChanged() {
+  void _onGroveUnlockChanged() {
     if (mounted) {
       setState(() {
-        _isFunMode = FunModeService.isFunMode.value;
+        _isGroveUnlocked = GroveUnlockService.isUnlocked.value;
         _buildNavigation();
       });
     }
   }
 
-  void _onGroveUnlockChanged() {
+  void _onDawnUnlockChanged() {
     if (mounted) {
       setState(() {
-        _isGroveUnlocked = GroveUnlockService.isUnlocked.value;
+        _isDawnUnlocked = DawnUnlockService.isUnlocked.value;
         _buildNavigation();
       });
     }
@@ -162,8 +161,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
     AppFeatureFlags.isBeta.removeListener(_onBetaStatusChanged);
     AppFeatureFlags.enableClubs.removeListener(_onBetaStatusChanged);
     AppFeatureFlags.enableCounselor.removeListener(_onBetaStatusChanged);
-    FunModeService.isFunMode.removeListener(_onFunModeChanged);
     GroveUnlockService.isUnlocked.removeListener(_onGroveUnlockChanged);
+    DawnUnlockService.isUnlocked.removeListener(_onDawnUnlockChanged);
     ProfilePictureService.activeVariant.removeListener(_onVariantChanged);
     _unreadCountSubscription?.cancel();
     super.dispose();
@@ -391,7 +390,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
         ];
 
-        if (_isFunMode && _isGroveUnlocked) {
+        // Gr0ve becomes available only after the changelog Easter egg unlocks it.
+        if (_isGroveUnlocked) {
           baseNav.add(
             NavConfig(
               id: 'grove',

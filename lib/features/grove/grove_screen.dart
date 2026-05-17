@@ -69,11 +69,167 @@ class _GroveScreenState extends State<GroveScreen>
 
     // If it's before the anniversary, or Dawn is unlocked, show the chapter screen
     // (The ChapterSelectionScreen handles the actual full-screen countdown overlay)
+    // If Dawn is not unlocked, show the requirement dialog and a locked placeholder
     if (!_dawnUnlocked && !isBeforeAnniversary) {
+      // Trigger dialog after first build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showDawnRequirementDialog(context);
+      });
       return _buildLockedScreen(colors, isDark);
     }
 
     return ChapterSelectionScreen(isBetaTester: widget.isBetaTester);
+  }
+
+  void _showDawnRequirementDialog(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dawnColor = const Color(0xFFF1C40F);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: colors.outline.withOpacity(0.1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with Dawn Image
+              Container(
+                height: 180,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: dawnColor.withOpacity(0.05),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(32),
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Decorative circles
+                    ...List.generate(3, (i) => Container(
+                      width: 100.0 + (i * 40.0),
+                      height: 100.0 + (i * 40.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: dawnColor.withOpacity(0.1 - (i * 0.03)),
+                        ),
+                      ),
+                    )),
+                    // Dawn Image
+                    Image.asset(
+                      isDark
+                          ? 'assets/story/characters/ep0/dawn_dark.png'
+                          : 'assets/story/characters/ep0/dawn_light.png',
+                      width: 110,
+                      height: 110,
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
+                child: Column(
+                  children: [
+                    Text(
+                      'DAWN REQUIRED',
+                      style: TextStyle(
+                        fontFamily: 'JetBrains Mono',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: colors.onSurface,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'The Gr0ve is a path forged in silence and rest. To begin this journey, you must first find the one who carries the light.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colors.onSurface.withOpacity(0.6),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colors.outline.withOpacity(0.05),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline_rounded,
+                            color: dawnColor,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Hint: Check in when the world rests (weekends or holidays).',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: colors.onSurface.withOpacity(0.5),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'UNDERSTOOD',
+                          style: TextStyle(
+                            fontFamily: 'JetBrains Mono',
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildLockedScreen(ColorScheme colors, bool isDark) {
@@ -137,6 +293,14 @@ class _GroveScreenState extends State<GroveScreen>
                       fontSize: 11,
                       color: colors.onSurface.withOpacity(0.2),
                       letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  IconButton(
+                    onPressed: () => _showDawnRequirementDialog(context),
+                    icon: Icon(
+                      Icons.info_outline_rounded,
+                      color: colors.onSurface.withOpacity(0.1),
                     ),
                   ),
                 ],
