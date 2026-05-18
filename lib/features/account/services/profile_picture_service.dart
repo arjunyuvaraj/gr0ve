@@ -17,10 +17,15 @@ class ProfileVariant {
   const ProfileVariant({required this.key, required this.persona});
 
   /// Display name shown in the picker — capitalizes each word
-  String get displayName => key
-      .split('_')
-      .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
-      .join(' ');
+  String get displayName {
+    if (persona.isHidden && isDefault) {
+      return '${persona.name[0].toUpperCase()}${persona.name.substring(1)}';
+    }
+    return key
+        .split('_')
+        .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+        .join(' ');
+  }
 
   /// Brightness-aware asset path.
   String assetPath(Brightness brightness) {

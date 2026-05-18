@@ -383,6 +383,7 @@ class GroveProgressService {
               _firestoreField: FieldValue.delete(),
               'story_newton_unlocked': FieldValue.delete(),
               'story_darwin_unlocked': FieldValue.delete(),
+              'story_salix_unlocked': FieldValue.delete(),
               'story_london_unlocked': FieldValue.delete(),
             });
 
@@ -485,6 +486,21 @@ class GroveProgressService {
           .set({field: true}, SetOptions(merge: true));
     } catch (e) {
       debugPrint('[GroveProgress] Unlock PFP error: $e');
+    }
+  }
+
+  /// Mark a story profile picture as locked in Firestore
+  static Future<void> lockProfilePicture(String key) async {
+    final field = 'story_${key}_unlocked';
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection(_firestoreCollection)
+          .doc(user.uid)
+          .set({field: false}, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('[GroveProgress] Lock PFP error: $e');
     }
   }
 

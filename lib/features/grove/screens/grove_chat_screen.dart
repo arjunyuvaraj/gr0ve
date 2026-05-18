@@ -352,16 +352,22 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     if (_gameState.currentEpisode == 1) {
       if (_gameState.chosenPath == 'apple') {
         _gameState.newtonUnlocked = true;
+        _gameState.darwinUnlocked = false;
         pfpAsset = 'assets/story/characters/ep1/newton_$mode.png';
         pfpName = 'Newton';
         await GroveProgressService.unlockProfilePicture('newton');
+        await GroveProgressService.lockProfilePicture('darwin');
         markStoryPfpUnlocked('newton');
+        lockStoryPfp('darwin');
       } else {
         _gameState.darwinUnlocked = true;
+        _gameState.newtonUnlocked = false;
         pfpAsset = 'assets/story/characters/ep1/darwin_$mode.png';
         pfpName = 'Darwin';
         await GroveProgressService.unlockProfilePicture('darwin');
+        await GroveProgressService.lockProfilePicture('newton');
         markStoryPfpUnlocked('darwin');
+        lockStoryPfp('newton');
       }
     } else if (_gameState.currentEpisode == 2) {
       _gameState.salixUnlocked = true;

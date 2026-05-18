@@ -1988,8 +1988,13 @@ List<Scene> buildEpisode01Orchard() {
         // Final clamped range check
         state.seedWarmth = state.seedWarmth.clamp(60, 90);
         state.episodeComplete = true; // Mark episode as done
-        state.newtonUnlocked = true;
-        state.darwinUnlocked = true;
+        if (state.chosenPath == 'apple') {
+          state.newtonUnlocked = true;
+          state.darwinUnlocked = false;
+        } else {
+          state.darwinUnlocked = true;
+          state.newtonUnlocked = false;
+        }
       },
     ),
   ];

@@ -2,7 +2,7 @@ name: gr0ve
 description: "For BCA"
 publish_to: "none"
 
-version: 2.2.0+37
+version: 2.2.1+38
 
 environment:
   sdk: ^3.9.2
@@ -71,6 +71,7 @@ flutter:
     - assets/profile/sakura/
     - assets/profile/abies/
     - assets/profile/cedite/
+    - assets/profile/ash/
     - assets/story/characters/
     - assets/story/characters/ep0/
     - assets/story/characters/ep1/
