@@ -129,8 +129,9 @@ class _JoinCodeDialogState extends State<JoinCodeDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed:
-                      _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   child: Text(
                     'Cancel',
                     style: TextStyle(

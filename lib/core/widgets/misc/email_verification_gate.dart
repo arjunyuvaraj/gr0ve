@@ -11,7 +11,8 @@ class EmailVerificationGate extends StatefulWidget {
   const EmailVerificationGate({
     super.key,
     this.title = "Verify Your Email",
-    this.description = "Please verify your email address to access this feature.",
+    this.description =
+        "Please verify your email address to access this feature.",
     required this.child,
     this.padding = const EdgeInsets.all(32),
   });
@@ -48,7 +49,7 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
     await user.reload();
     if (user.emailVerified && mounted) {
       _timer?.cancel();
-      setState(() {}); // Trigger rebuild to show child
+      setState(() {});
     }
   }
 
@@ -160,10 +161,9 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
             ),
             const SizedBox(height: 32),
             InkWell(
-              onTap:
-                  user != null && !_isRefreshing
-                      ? () => _sendVerification(user)
-                      : null,
+              onTap: user != null && !_isRefreshing
+                  ? () => _sendVerification(user)
+                  : null,
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -194,7 +194,9 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
             ),
             const SizedBox(height: 16),
             InkWell(
-              onTap: user != null && !_isRefreshing ? () => _refreshStatus(user) : null,
+              onTap: user != null && !_isRefreshing
+                  ? () => _refreshStatus(user)
+                  : null,
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -214,18 +216,18 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
                   children: [
                     _isRefreshing
                         ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colors.primary,
+                            ),
+                          )
+                        : Icon(
+                            Icons.refresh_rounded,
+                            size: 20,
                             color: colors.primary,
                           ),
-                        )
-                        : Icon(
-                          Icons.refresh_rounded,
-                          size: 20,
-                          color: colors.primary,
-                        ),
                     const SizedBox(width: 10),
                     Text(
                       "I've Verified My Email",

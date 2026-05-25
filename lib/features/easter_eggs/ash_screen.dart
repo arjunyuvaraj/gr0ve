@@ -7,10 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 
-// ─────────────────────────────────────────────────────────────
-// ASH UNLOCK SERVICE
-// ─────────────────────────────────────────────────────────────
-
 class AshUnlockService {
   static const _field = 'ash_unlocked';
 
@@ -42,10 +38,6 @@ class AshUnlockService {
 String ashVoiceLine({required bool unlocked}) {
   return CounselorPersona.ash.lockedVoiceLine(unlocked: unlocked);
 }
-
-// ─────────────────────────────────────────────────────────────
-// THE BURNING GROVE SCREEN — entry point
-// ─────────────────────────────────────────────────────────────
 
 class AshRuinScreen extends StatefulWidget {
   final VoidCallback? onUnlocked;
@@ -118,10 +110,6 @@ class _AshRuinScreenState extends State<AshRuinScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// PASSPHRASE SCREEN
-// ─────────────────────────────────────────────────────────────
-
 class _PassphraseScreen extends StatefulWidget {
   final VoidCallback onUnlocked;
   const _PassphraseScreen({required this.onUnlocked});
@@ -157,19 +145,28 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
     super.initState();
 
     _shakeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 380));
-    _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn));
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _shakeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn));
 
     _entryCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500))..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..forward();
     _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
     _entrySlide = Tween<Offset>(
-        begin: const Offset(0, 0.06), end: Offset.zero).animate(
-        CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut));
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut));
 
     _voiceCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _voiceFade = CurvedAnimation(parent: _voiceCtrl, curve: Curves.easeOut);
 
     _ashLine = ashVoiceLine(unlocked: false);
@@ -189,7 +186,8 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
   }
 
   void _press(String char) {
-    if (_guesses.length >= _maxGuesses || _success || _failedPermanently) return;
+    if (_guesses.length >= _maxGuesses || _success || _failedPermanently)
+      return;
     if (_currentEntry.length < 5) {
       setState(() {
         _currentEntry += char.toUpperCase();
@@ -198,14 +196,16 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
       HapticFeedback.selectionClick();
     }
     if (_currentEntry.length == 5) {
-      // Auto-submit or wait for enter? User didn't specify. I'll auto-submit.
       _submit();
     }
   }
 
   void _delete() {
     if (_currentEntry.isEmpty || _success || _failedPermanently) return;
-    setState(() => _currentEntry = _currentEntry.substring(0, _currentEntry.length - 1));
+    setState(
+      () =>
+          _currentEntry = _currentEntry.substring(0, _currentEntry.length - 1),
+    );
     HapticFeedback.lightImpact();
   }
 
@@ -249,7 +249,13 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
     return 'The fire has already died.';
   }
 
-  Color _dotColor(String letter, int index, String correct, ColorScheme colors, Color pc) {
+  Color _dotColor(
+    String letter,
+    int index,
+    String correct,
+    ColorScheme colors,
+    Color pc,
+  ) {
     if (correct[index] == letter) return Colors.green;
     if (correct.contains(letter)) return Colors.orangeAccent;
     return colors.onSurface.withOpacity(0.15);
@@ -260,7 +266,9 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
       children: List.generate(_maxGuesses, (rowIdx) {
         final hasGuess = rowIdx < _guesses.length;
         final isCurrent = rowIdx == _guesses.length;
-        final guessText = hasGuess ? _guesses[rowIdx] : (isCurrent ? _currentEntry : '');
+        final guessText = hasGuess
+            ? _guesses[rowIdx]
+            : (isCurrent ? _currentEntry : '');
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
@@ -272,7 +280,13 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
               double blur = 0;
 
               if (hasGuess) {
-                color = _dotColor(guessText[colIdx], colIdx, _correct, colors, pc);
+                color = _dotColor(
+                  guessText[colIdx],
+                  colIdx,
+                  _correct,
+                  colors,
+                  pc,
+                );
                 if (color != colors.onSurface.withOpacity(0.15)) blur = 4;
               } else if (isCurrent && hasLetter) {
                 color = pc.withOpacity(0.4);
@@ -287,7 +301,12 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                   shape: BoxShape.circle,
                   color: color,
                   boxShadow: blur > 0
-                      ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: blur)]
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.4),
+                            blurRadius: blur,
+                          ),
+                        ]
                       : null,
                   border: Border.all(
                     color: isCurrent && colIdx == guessText.length
@@ -334,7 +353,9 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                       child: Container(
                         height: 54,
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withOpacity(0.3),
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.3,
+                          ),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Icon(
@@ -358,7 +379,9 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                       decoration: BoxDecoration(
                         color: colors.surfaceContainerHighest.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: colors.outline.withOpacity(0.07)),
+                        border: Border.all(
+                          color: colors.outline.withOpacity(0.07),
+                        ),
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -406,7 +429,8 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height -
+                      minHeight:
+                          MediaQuery.of(context).size.height -
                           MediaQuery.of(context).padding.top -
                           MediaQuery.of(context).padding.bottom,
                     ),
@@ -421,11 +445,15 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: colors.surfaceContainerHighest.withOpacity(0.5),
+                                  color: colors.surfaceContainerHighest
+                                      .withOpacity(0.5),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Icon(Icons.arrow_back_ios_new_rounded,
-                                    size: 16, color: colors.onSurface.withOpacity(0.5)),
+                                child: Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 16,
+                                  color: colors.onSurface.withOpacity(0.5),
+                                ),
                               ),
                             ),
                           ),
@@ -532,11 +560,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
   }
 }
 
-
-// ─────────────────────────────────────────────────────────────
-// ASH REVEAL SCREEN
-// ─────────────────────────────────────────────────────────────
-
 class AshRevealScreen extends StatefulWidget {
   final VoidCallback? onContinue;
   const AshRevealScreen({super.key, this.onContinue});
@@ -557,16 +580,28 @@ class _AshRevealScreenState extends State<AshRevealScreen>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800))..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..forward();
 
     _iconFade = CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.0, 0.4, curve: Curves.easeOut));
-    _iconScale = Tween<double>(begin: 0.85, end: 1.0).animate(CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic)));
+      parent: _ctrl,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+    );
+    _iconScale = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
+      ),
+    );
     _textFade = CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.3, 0.7, curve: Curves.easeOut));
+      parent: _ctrl,
+      curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
+    );
     _btnFade = CurvedAnimation(
-        parent: _ctrl, curve: const Interval(0.65, 1.0, curve: Curves.easeOut));
+      parent: _ctrl,
+      curve: const Interval(0.65, 1.0, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -598,7 +633,8 @@ class _AshRevealScreenState extends State<AshRevealScreen>
               padding: const EdgeInsets.symmetric(horizontal: 28),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height -
+                  minHeight:
+                      MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
                       MediaQuery.of(context).padding.bottom,
                 ),
@@ -614,11 +650,16 @@ class _AshRevealScreenState extends State<AshRevealScreen>
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: colors.surfaceContainerHighest.withOpacity(0.5),
+                              color: colors.surfaceContainerHighest.withOpacity(
+                                0.5,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(Icons.arrow_back_ios_new_rounded,
-                                size: 16, color: colors.onSurface.withOpacity(0.5)),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: colors.onSurface.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
@@ -661,7 +702,9 @@ class _AshRevealScreenState extends State<AshRevealScreen>
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: pc.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(20),
@@ -705,7 +748,8 @@ She prepares you for the inevitable.''',
                             const SizedBox(height: 28),
                             _RevealTrait(
                               label: 'Visionary.',
-                              sub: 'She anticipates consequences before they unfold.',
+                              sub:
+                                  'She anticipates consequences before they unfold.',
                               pc: pc,
                               colors: colors,
                               textTheme: textTheme,
@@ -721,7 +765,8 @@ She prepares you for the inevitable.''',
                             const SizedBox(height: 10),
                             _RevealTrait(
                               label: 'Strategy & preparation.',
-                              sub: 'College planning. Long-term goals. Forecasting.',
+                              sub:
+                                  'College planning. Long-term goals. Forecasting.',
                               pc: pc,
                               colors: colors,
                               textTheme: textTheme,
@@ -738,7 +783,9 @@ She prepares you for the inevitable.''',
                             onPressed: widget.onContinue,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: pc,
-                              foregroundColor: CounselorPersona.ash.onPrimary(brightness),
+                              foregroundColor: CounselorPersona.ash.onPrimary(
+                                brightness,
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -756,7 +803,7 @@ She prepares you for the inevitable.''',
                         ),
                       ),
                       const Spacer(flex: 2),
-                      const SizedBox(height: 60), // Room for ash mounds
+                      const SizedBox(height: 60),
                     ],
                   ),
                 ),
@@ -834,7 +881,6 @@ class _RevealTrait extends StatelessWidget {
   }
 }
 
-
 class _FullScreenEmbers extends StatefulWidget {
   final Color color;
   const _FullScreenEmbers({required this.color});
@@ -842,28 +888,36 @@ class _FullScreenEmbers extends StatefulWidget {
   State<_FullScreenEmbers> createState() => _FullScreenEmbersState();
 }
 
-class _FullScreenEmbersState extends State<_FullScreenEmbers> with SingleTickerProviderStateMixin {
+class _FullScreenEmbersState extends State<_FullScreenEmbers>
+    with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late List<_Spark> _sparks;
-  
+
   @override
   void initState() {
     super.initState();
     _sparks = List.generate(40, (_) => _Spark());
-    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 10))
-      ..addListener(() => setState(() {}))
-      ..repeat();
+    _ctrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 10))
+          ..addListener(() => setState(() {}))
+          ..repeat();
   }
-  
+
   @override
   void dispose() {
     _ctrl.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _EmberPainter(sparks: _sparks, elapsed: _ctrl.value * 10, color: widget.color));
+    return CustomPaint(
+      painter: _EmberPainter(
+        sparks: _sparks,
+        elapsed: _ctrl.value * 10,
+        color: widget.color,
+      ),
+    );
   }
 }
 
@@ -880,15 +934,21 @@ class _EmberPainter extends CustomPainter {
   final List<_Spark> sparks;
   final double elapsed;
   final Color color;
-  
-  _EmberPainter({required this.sparks, required this.elapsed, required this.color});
-  
+
+  _EmberPainter({
+    required this.sparks,
+    required this.elapsed,
+    required this.color,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
     for (final s in sparks) {
       final progress = ((elapsed / s.period) + s.phase) % 1.0;
       final y = (1.0 - progress) * size.height;
-      final x = (s.x + s.drift * progress) * size.width + sin(elapsed * 2 + s.phase * 10) * 10;
+      final x =
+          (s.x + s.drift * progress) * size.width +
+          sin(elapsed * 2 + s.phase * 10) * 10;
       canvas.drawCircle(
         Offset(x, y),
         s.radius,
@@ -898,7 +958,7 @@ class _EmberPainter extends CustomPainter {
       );
     }
   }
-  
+
   @override
   bool shouldRepaint(_EmberPainter old) => true;
 }
@@ -906,31 +966,39 @@ class _EmberPainter extends CustomPainter {
 class _AshMounds extends StatelessWidget {
   final Color color;
   const _AshMounds({required this.color});
-  
+
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(double.infinity, 120), painter: _AshMoundPainter(color: color));
+    return CustomPaint(
+      size: const Size(double.infinity, 120),
+      painter: _AshMoundPainter(color: color),
+    );
   }
 }
 
 class _AshMoundPainter extends CustomPainter {
   final Color color;
   _AshMoundPainter({required this.color});
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final r = Random(456);
-    final paint = Paint()..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25);
+    final paint = Paint()
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25);
     for (int i = 0; i < 8; i++) {
       final x = (i / 7) * size.width;
       final h = 30 + r.nextDouble() * 40;
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(x, size.height), width: size.width * 0.35, height: h * 2),
+        Rect.fromCenter(
+          center: Offset(x, size.height),
+          width: size.width * 0.35,
+          height: h * 2,
+        ),
         paint..color = color.withOpacity(0.06),
       );
     }
   }
-  
+
   @override
   bool shouldRepaint(_AshMoundPainter old) => false;
 }

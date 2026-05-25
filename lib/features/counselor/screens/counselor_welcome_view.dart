@@ -1,11 +1,3 @@
-// counselor_welcome_view.dart
-//
-// REFACTOR NOTES:
-// - The "other counselors" avatar row has been removed from the welcome screen.
-//   Switching counselors is now a hidden action (long-press on header chip).
-// - The `others` and `onSwitchPersona` props have been dropped.
-// - Everything else (greeting, subtitle, academy chip, random button) is unchanged.
-
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/counselor/services/counselor_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
@@ -25,7 +17,6 @@ class WelcomeView extends StatefulWidget {
     required this.randomBtnScale,
     required this.onSendRandom,
     required this.onOpenVoiceMode,
-    // REMOVED: others, onSwitchPersona
   });
 
   final CounselorPersona persona;
@@ -86,7 +77,6 @@ class _WelcomeViewState extends State<WelcomeView>
             children: [
               const SizedBox(height: 20),
 
-              // Avatar
               SizedBox(
                 width: 96,
                 height: 96,
@@ -108,7 +98,6 @@ class _WelcomeViewState extends State<WelcomeView>
               ),
               const SizedBox(height: 16),
 
-              // Greeting
               Text(
                 widget.greeting,
                 textAlign: TextAlign.center,
@@ -127,7 +116,6 @@ class _WelcomeViewState extends State<WelcomeView>
                 ),
               ),
 
-              // Academy chip
               if (widget.profile.academy.isNotEmpty ||
                   widget.profile.grade.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -157,7 +145,6 @@ class _WelcomeViewState extends State<WelcomeView>
 
               const SizedBox(height: 40),
 
-              // Random question button
               ScaleTransition(
                 scale: widget.randomBtnScale,
                 child: GestureDetector(

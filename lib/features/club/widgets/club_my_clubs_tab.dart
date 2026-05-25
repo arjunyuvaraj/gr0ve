@@ -77,7 +77,7 @@ class _ClubMyClubsTabState extends State<ClubMyClubsTab> {
         }
 
         return ListView.builder(
-        padding: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
           itemCount: clubs.length,
           itemBuilder: (context, index) {
             final club = clubs[index];
@@ -85,7 +85,6 @@ class _ClubMyClubsTabState extends State<ClubMyClubsTab> {
               club: club,
               groupService: _groupService,
               onTap: () {
-                // Clear this specific club's announcement count when tapped
                 NotificationService().clearClubAnnouncementCount(club.id);
 
                 Navigator.push(

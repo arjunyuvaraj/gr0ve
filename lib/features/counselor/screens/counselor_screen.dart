@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_chat_view.dart';
@@ -46,10 +45,6 @@ class _CounselorScreenState extends State<CounselorScreen>
   late AnimationController _randomBtnCtrl;
   late Animation<double> _randomBtnScale;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ══════════════════════════════════════════════════════════════════════════
-
   @override
   void initState() {
     super.initState();
@@ -66,13 +61,15 @@ class _CounselorScreenState extends State<CounselorScreen>
   }
 
   Future<void> _initialize() async {
-    // Ensure Firebase is initialized even after a hot reload
     try {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       ).timeout(const Duration(seconds: 2));
     } catch (e) {
-      if (kDebugMode) print('[CounselorScreen] Firebase init error (ignored if already init): $e');
+      if (kDebugMode)
+        print(
+          '[CounselorScreen] Firebase init error (ignored if already init): $e',
+        );
     }
     if (!mounted) return;
     setState(() => _isInitializing = true);
@@ -84,7 +81,6 @@ class _CounselorScreenState extends State<CounselorScreen>
         return;
       }
 
-      // Check ToS first
       final hasAcceptedTerms = await TermsOfServiceService.hasAcceptedTerms()
           .timeout(const Duration(seconds: 5), onTimeout: () => true);
 
@@ -100,7 +96,6 @@ class _CounselorScreenState extends State<CounselorScreen>
 
       if (mounted) setState(() => _termsAccepted = true);
 
-      // Parallel load essential data with fail-safes
       final results = await Future.wait([
         CounselorPersonaService.load().timeout(const Duration(seconds: 5)),
         _loadUserProfile().timeout(const Duration(seconds: 5)),
@@ -109,12 +104,10 @@ class _CounselorScreenState extends State<CounselorScreen>
       final persona = results[0] as CounselorPersona;
       final profile = results[1] as UserProfile;
 
-      // History load
       final history = await ChatHistoryService.load(
         persona,
       ).timeout(const Duration(seconds: 5), onTimeout: () => []);
 
-      // Non-blocking background loads
       KnowledgeBaseService.load();
       CourseCatalogService.buildPromptString(academy: profile.academy);
 
@@ -139,7 +132,7 @@ class _CounselorScreenState extends State<CounselorScreen>
         setState(() {
           _isInitializing = false;
           _hasStarted = false;
-          // Set defaults to avoid null crashes in build
+
           _persona = CounselorPersona.grover;
           _profile = UserProfile.empty;
           _messages = [];
@@ -159,7 +152,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return UserProfile.empty;
     try {
-      // Use cache to avoid redundant gRPC calls and potential hangs
       final Map<String, dynamic>? data = await UserDocCache.get();
       return UserProfile(
         name: user.displayName ?? '',
@@ -181,10 +173,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     super.dispose();
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // SCROLL
-  // ══════════════════════════════════════════════════════════════════════════
-
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -196,10 +184,6 @@ class _CounselorScreenState extends State<CounselorScreen>
       }
     });
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // MESSAGE HELPERS
-  // ══════════════════════════════════════════════════════════════════════════
 
   String _addStreamingBubble(CounselorPersona speaker) {
     final msg = ChatMessage(
@@ -230,10 +214,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     });
     _scrollToBottom();
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // SEND MESSAGE
-  // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> _send(String text) async {
     final trimmed = text.trim();
@@ -267,7 +247,6 @@ class _CounselorScreenState extends State<CounselorScreen>
           onToken: (token) => _appendToken(bubbleId, token),
         );
 
-        // Strip [[CLOSE]] marker from the displayed message
         if (closureState.shouldCloseScreen && mounted) {
           final idx = _messages.indexWhere((m) => m.id == bubbleId);
           if (idx >= 0) {
@@ -307,10 +286,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     _send(randomQuestion(_persona));
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // PERSONA SWITCHING
-  // ══════════════════════════════════════════════════════════════════════════
-
   Future<void> _switchToPersona(CounselorPersona persona) async {
     await CounselorPersonaService.setPersona(persona);
     final history = await ChatHistoryService.load(persona);
@@ -336,10 +311,6 @@ class _CounselorScreenState extends State<CounselorScreen>
       ),
     );
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // EASTER EGGS
-  // ══════════════════════════════════════════════════════════════════════════
 
   void _onBubbleDoubleTap() => _openFrozenLake();
 
@@ -477,13 +448,8 @@ class _CounselorScreenState extends State<CounselorScreen>
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CLEAR HISTORY
-  // ══════════════════════════════════════════════════════════════════════════
-
   Future<void> _clearHistory() async {
-    if (_isTyping)
-      return; // Guard against clearing while a message is in flight
+    if (_isTyping) return;
 
     setState(() {
       _messages.clear();
@@ -521,10 +487,6 @@ class _CounselorScreenState extends State<CounselorScreen>
       ),
     );
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // BUILD
-  // ══════════════════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
@@ -666,10 +628,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // HEADER
-  // ──────────────────────────────────────────────────────────────────────────
-
   Widget _buildHeader(
     ColorScheme colors,
     TextTheme textTheme,
@@ -744,10 +702,6 @@ class _CounselorScreenState extends State<CounselorScreen>
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // WELCOME VIEW
-  // ──────────────────────────────────────────────────────────────────────────
-
   Widget _buildWelcomeView(
     ColorScheme colors,
     TextTheme textTheme,
@@ -766,10 +720,6 @@ class _CounselorScreenState extends State<CounselorScreen>
       onOpenVoiceMode: _openVoiceMode,
     );
   }
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // CHAT VIEW
-  // ──────────────────────────────────────────────────────────────────────────
 
   Widget _buildChatView(
     ColorScheme colors,
@@ -819,10 +769,6 @@ class _CounselorScreenState extends State<CounselorScreen>
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // VOICE MODE
-  // ──────────────────────────────────────────────────────────────────────────
-
   void _openVoiceMode() {
     Navigator.of(context).push(
       CounselorVoiceRoute(
@@ -842,10 +788,6 @@ class _CounselorScreenState extends State<CounselorScreen>
       ),
     );
   }
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // INPUT BAR
-  // ──────────────────────────────────────────────────────────────────────────
 
   Widget _buildInputBar(ColorScheme colors, TextTheme textTheme, Color pc) {
     final isWide = MediaQuery.of(context).size.width > 900;

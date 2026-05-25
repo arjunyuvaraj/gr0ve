@@ -42,8 +42,6 @@ class _LandingDeciderState extends State<LandingDecider> {
       return;
     }
 
-    // For authenticated users, check landing_seen flag.
-    // SharedPreferences is already initialized from main(), so this is fast.
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool('landing_seen') ?? false;
 
@@ -63,9 +61,7 @@ class _LandingDeciderState extends State<LandingDecider> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        body: PremiumLoadingIndicator(),
-      );
+      return const Scaffold(body: PremiumLoadingIndicator());
     }
 
     return widget.landingPage;

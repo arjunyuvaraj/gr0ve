@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:gr0ve/features/grove/services/story_encryption_service.dart';
 
-/// Run this script from the project root to encrypt a story JSON file.
-/// Usage: dart lib/features/grove/episodes/tools/encrypt_tool.dart <input_json> <output_file>
 void main(List<String> args) {
   if (args.length < 2) {
     print(

@@ -4,10 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 
-// ═════════════════════════════════════════════════════════════
-// PERSONA PICKER SCREEN  —  full-screen cinematic experience
-// ═════════════════════════════════════════════════════════════
-
 class PersonaPickerRoute<T> extends PageRouteBuilder<T> {
   PersonaPickerRoute({
     required CounselorPersona currentPersona,
@@ -36,10 +32,6 @@ class PersonaPickerRoute<T> extends PageRouteBuilder<T> {
          reverseTransitionDuration: const Duration(milliseconds: 260),
        );
 }
-
-// ─────────────────────────────────────────────────────────────
-// PERSONA PICKER SCREEN
-// ─────────────────────────────────────────────────────────────
 
 class PersonaPickerScreen extends StatefulWidget {
   const PersonaPickerScreen({
@@ -175,7 +167,6 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
         },
         child: Stack(
           children: [
-            // ── Particle world — fills entire screen, receives swipes ──
             PageView.builder(
               controller: _pageCtrl,
               itemCount: _personas.length,
@@ -201,11 +192,9 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
               },
             ),
 
-            // ── Vignettes — pointer-transparent so swipe still works ──
             IgnorePointer(
               child: Column(
                 children: [
-                  // Top vignette
                   SizedBox(
                     height: 180,
                     child: DecoratedBox(
@@ -227,7 +216,7 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
                     ),
                   ),
                   const Spacer(),
-                  // Bottom vignette — slightly shorter to give content more room
+
                   SizedBox(
                     height: 420,
                     child: DecoratedBox(
@@ -255,39 +244,37 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
               ),
             ),
 
-            // ── Foreground UI — only the actual UI elements block touch ──
             SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top bar — blocks touch only over itself
                   _TopBar(
                     personas: _personas,
                     currentPage: _currentPage,
                     accentColor: pc,
                     isDark: isDark,
                   ),
-                  // Middle gap — pointer transparent so swipes work freely
+
                   const Expanded(child: SizedBox.expand()),
-                  // Bottom content — blocks touch over itself, now scrollable
+
                   Flexible(
                     child: FadeTransition(
                       opacity: _revealFade,
-                    child: SlideTransition(
-                      position: _revealSlide,
-                      child: _BottomContent(
-                        persona: _selected,
-                        isCurrent: _selected == widget.currentPersona,
-                        isChange: widget.isChange,
-                        onConfirm: _confirm,
-                        isDark: isDark,
-                        animation: _revealCtrl,
-                        onOpenFrozenLake: () {
-                          Navigator.pop(context);
-                          widget.onOpenFrozenLake?.call();
-                        },
+                      child: SlideTransition(
+                        position: _revealSlide,
+                        child: _BottomContent(
+                          persona: _selected,
+                          isCurrent: _selected == widget.currentPersona,
+                          isChange: widget.isChange,
+                          onConfirm: _confirm,
+                          isDark: isDark,
+                          animation: _revealCtrl,
+                          onOpenFrozenLake: () {
+                            Navigator.pop(context);
+                            widget.onOpenFrozenLake?.call();
+                          },
+                        ),
                       ),
-                    ),
                     ),
                   ),
                 ],
@@ -299,10 +286,6 @@ class _PersonaPickerScreenState extends State<PersonaPickerScreen>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// TOP BAR
-// ─────────────────────────────────────────────────────────────
 
 class _TopBar extends StatelessWidget {
   const _TopBar({
@@ -370,10 +353,6 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// BOTTOM CONTENT
-// ─────────────────────────────────────────────────────────────
-
 class _BottomContent extends StatelessWidget {
   const _BottomContent({
     required this.persona,
@@ -409,7 +388,6 @@ class _BottomContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Avatar + name header ──────────────────────────────
             FadeTransition(
               opacity: CurvedAnimation(
                 parent: animation,
@@ -424,8 +402,10 @@ class _BottomContent extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       color: pc.withOpacity(0.12),
-                      border:
-                          Border.all(color: pc.withOpacity(0.40), width: 1.2),
+                      border: Border.all(
+                        color: pc.withOpacity(0.40),
+                        width: 1.2,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: pc.withOpacity(isDark ? 0.25 : 0.15),
@@ -600,7 +580,6 @@ class _BottomContent extends StatelessWidget {
 
             const SizedBox(height: 18),
 
-            // ── Actions ──────────────────────────────────────────
             Row(
               children: [
                 Expanded(
@@ -628,8 +607,8 @@ class _BottomContent extends StatelessWidget {
                           isCurrent
                               ? 'STAY WITH ${persona.displayName.toUpperCase()}'
                               : (isChange
-                                  ? 'SWITCH TO ${persona.displayName.toUpperCase()}'
-                                  : 'START WITH ${persona.displayName.toUpperCase()}'),
+                                    ? 'SWITCH TO ${persona.displayName.toUpperCase()}'
+                                    : 'START WITH ${persona.displayName.toUpperCase()}'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -685,10 +664,6 @@ class _BottomContent extends StatelessWidget {
           'to survive the seasons ahead.',
   };
 }
-
-// ─────────────────────────────────────────────────────────────
-// PARTICLE WORLD
-// ─────────────────────────────────────────────────────────────
 
 class _ParticleWorld extends StatefulWidget {
   const _ParticleWorld({
@@ -791,15 +766,15 @@ class _WorldPainter extends CustomPainter {
     required this.embers,
   });
 
-  // In light mode particles need to be more visible (darker against light bg)
-  Color get _c => isDark ? color : color.withOpacity((color.opacity * 1.4).clamp(0.0, 1.0));
+  Color get _c =>
+      isDark ? color : color.withOpacity((color.opacity * 1.4).clamp(0.0, 1.0));
 
   @override
   void paint(Canvas canvas, Size size) {
     final shift = pageOffset * size.width * 0.35;
     canvas.save();
     canvas.translate(-shift, 0);
- 
+
     switch (persona) {
       case CounselorPersona.grover:
         _paintGrover(canvas, size);
@@ -1198,7 +1173,7 @@ class _WorldPainter extends CustomPainter {
 
   void _paintCedite(Canvas canvas, Size size) {
     final boost = isDark ? 1.0 : 2.5;
-    // Base low-frequency fog
+
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
       Paint()
@@ -1217,9 +1192,13 @@ class _WorldPainter extends CustomPainter {
     for (final w in wisps) {
       final progress = ((t * w.speed + w.phase) % 1.0);
       final y = progress * (size.height + 200) - 100;
-      final x = w.laneX * size.width + sin(t * w.swaySpeed + w.phase * 5) * (size.width * w.swayAmp);
+      final x =
+          w.laneX * size.width +
+          sin(t * w.swaySpeed + w.phase * 5) * (size.width * w.swayAmp);
       final radius = size.width * w.radiusFrac;
-      final fade = progress < 0.15 ? progress / 0.15 : (progress > 0.85 ? (1 - progress) / 0.15 : 1.0);
+      final fade = progress < 0.15
+          ? progress / 0.15
+          : (progress > 0.85 ? (1 - progress) / 0.15 : 1.0);
 
       canvas.drawCircle(
         Offset(x, y),
@@ -1230,7 +1209,6 @@ class _WorldPainter extends CustomPainter {
       );
     }
 
-    // Distant distortion lines
     final rng = Random(101);
     for (int i = 0; i < 8; i++) {
       final y = rng.nextDouble() * size.height;
@@ -1247,7 +1225,7 @@ class _WorldPainter extends CustomPainter {
 
   void _paintAsh(Canvas canvas, Size size) {
     final boost = isDark ? 1.4 : 2.8;
-    // Darkening base
+
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
       Paint()
@@ -1265,8 +1243,11 @@ class _WorldPainter extends CustomPainter {
     for (final e in embers) {
       final progress = ((t * e.speed + e.phase) % 1.0);
       final y = (1.0 - progress) * (size.height + 100) - 50;
-      final x = e.x * size.width + sin(t * e.wobbleSpeed + e.phase * 3) * e.sway;
-      final fade = progress < 0.1 ? progress / 0.1 : (progress > 0.8 ? (1 - progress) / 0.2 : 1.0);
+      final x =
+          e.x * size.width + sin(t * e.wobbleSpeed + e.phase * 3) * e.sway;
+      final fade = progress < 0.1
+          ? progress / 0.1
+          : (progress > 0.8 ? (1 - progress) / 0.2 : 1.0);
       final flicker = 0.7 + 0.3 * sin(t * e.flickerSpeed + e.phase * 10);
 
       final p = Paint()
@@ -1274,27 +1255,23 @@ class _WorldPainter extends CustomPainter {
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 0.6);
 
       canvas.drawCircle(Offset(x, y), e.radius, p);
-      
+
       if (e.radius > 2.0 && flicker > 0.85) {
         canvas.drawCircle(
-          Offset(x, y), 
-          e.radius * 2.2, 
+          Offset(x, y),
+          e.radius * 2.2,
           Paint()
             ..color = _c.withOpacity(e.opacity * fade * 0.12 * boost)
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 1.5)
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, e.radius * 1.5),
         );
       }
     }
   }
 
-
   @override
-  bool shouldRepaint(_WorldPainter old) => old.t != t || old.isDark != isDark || old.pageOffset != pageOffset;
+  bool shouldRepaint(_WorldPainter old) =>
+      old.t != t || old.isDark != isDark || old.pageOffset != pageOffset;
 }
-
-// ─────────────────────────────────────────────────────────────
-// PARTICLE DATA MODELS  (unchanged)
-// ─────────────────────────────────────────────────────────────
 
 class _GridNode {
   final double lane = Random().nextDouble();
@@ -1364,10 +1341,6 @@ class _Ember {
   final double wobbleSpeed = 0.4 + Random().nextDouble() * 0.8;
   final double flickerSpeed = 2.5 + Random().nextDouble() * 4.5;
 }
-
-// ─────────────────────────────────────────────────────────────
-// BACKWARD-COMPATIBLE SHIM
-// ─────────────────────────────────────────────────────────────
 
 class PersonaPickerSheet extends StatelessWidget {
   const PersonaPickerSheet({

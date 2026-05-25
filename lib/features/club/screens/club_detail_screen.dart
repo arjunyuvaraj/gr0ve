@@ -125,9 +125,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         _userProfileCache[userId] = profile;
         return profile;
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
     return {'displayName': 'Unknown', 'email': ''};
   }
 
@@ -143,9 +141,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             .collection('members')
             .doc(member.userId)
             .update({'displayName': latestName, 'email': latestEmail});
-      } catch (e) {
-        // Silently fail
-      }
+      } catch (e) {}
     }
   }
 
@@ -658,7 +654,11 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               color: colors.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.campaign_rounded, color: colors.primary, size: 20),
+            child: Icon(
+              Icons.campaign_rounded,
+              color: colors.primary,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1067,10 +1067,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 }
 
-// ---------------------------------------------------------------------------
-// AnnouncementCard  –  now renders Markdown content
-// ---------------------------------------------------------------------------
-
 class AnnouncementCard extends StatefulWidget {
   final Announcement announcement;
   final String authorName;
@@ -1100,7 +1096,6 @@ class AnnouncementCard extends StatefulWidget {
 class _AnnouncementCardState extends State<AnnouncementCard> {
   bool _isExpanded = false;
 
-  // Truncate long announcements and let users expand.
   static const int _collapseThreshold = 300;
 
   bool get _isLong => widget.announcement.content.length > _collapseThreshold;
@@ -1116,7 +1111,6 @@ class _AnnouncementCardState extends State<AnnouncementCard> {
     final theme = Theme.of(context);
     final groupService = GroupService();
 
-    // Build a MarkdownStyleSheet that inherits the app's theme
     final mdStyle = MarkdownStyleSheet(
       p: theme.textTheme.bodyMedium?.copyWith(
         color: colors.onSurface.withOpacity(0.8),
@@ -1184,7 +1178,6 @@ class _AnnouncementCardState extends State<AnnouncementCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Title row ────────────────────────────────────
           Row(
             children: [
               if (widget.announcement.isPinned)
@@ -1252,7 +1245,6 @@ class _AnnouncementCardState extends State<AnnouncementCard> {
           ),
           const SizedBox(height: 10),
 
-          // ── Markdown content ─────────────────────────────
           MarkdownBody(
             data: _displayContent,
             styleSheet: mdStyle,
@@ -1267,7 +1259,6 @@ class _AnnouncementCardState extends State<AnnouncementCard> {
             },
           ),
 
-          // ── Expand / collapse ────────────────────────────
           if (_isLong) ...[
             const SizedBox(height: 6),
             GestureDetector(
@@ -1284,7 +1275,6 @@ class _AnnouncementCardState extends State<AnnouncementCard> {
 
           const SizedBox(height: 16),
 
-          // ── Footer: author · time · Q&A button ───────────
           Row(
             children: [
               Icon(

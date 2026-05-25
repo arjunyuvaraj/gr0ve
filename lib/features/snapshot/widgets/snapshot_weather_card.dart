@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 
-// ════════════════════════════════════════════════════════════════
-// WEATHER STATE & DATA
-// ════════════════════════════════════════════════════════════════
-
 sealed class WX {}
 
 class WXLoading extends WX {}
@@ -50,10 +46,6 @@ Future<void> fetchWeather() async {
     wxNotifier.value = WXError();
   }
 }
-
-// ════════════════════════════════════════════════════════════════
-// WEATHER CARD
-// ════════════════════════════════════════════════════════════════
 
 String _wLabel(int c) {
   if (c == 0) return 'Clear';

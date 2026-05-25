@@ -1,31 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// ENUM: Defines the type of group (Club or Academy)
 enum GroupType {
   club,
   academy;
 
   String toJson() => name;
-  
+
   static GroupType fromJson(String json) {
     return GroupType.values.firstWhere((e) => e.name == json);
   }
 }
 
-// ENUM: Defines the current status of the group
 enum GroupStatus {
   pending,
   active,
   archived;
 
   String toJson() => name;
-  
+
   static GroupStatus fromJson(String json) {
     return GroupStatus.values.firstWhere((e) => e.name == json);
   }
 }
 
-// MODEL: Represents a user group with metadata and status
 class Group {
   final String id;
   final String name;

@@ -7,10 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 
-// ─────────────────────────────────────────────────────────────
-// ABIES UNLOCK SERVICE
-// ─────────────────────────────────────────────────────────────
-
 class AbiesUnlockService {
   static const _field = 'abies_unlocked';
   static const String passphrase = 'the last tree remembers';
@@ -54,22 +50,9 @@ class AbiesUnlockService {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// ABIES VOICE LINES
-// Pre-unlock: amnesiac, confused, fragmented
-// Post-unlock: bitter, dry, precise
-// ─────────────────────────────────────────────────────────────
-
-// Centralized in persona_voice.dart
-
 String abiesVoiceLine({required bool unlocked}) {
   return CounselorPersona.abies.lockedVoiceLine(unlocked: unlocked);
 }
-
-// ─────────────────────────────────────────────────────────────
-// BUBBLE PASSCODE DIALOG
-// Returns true if the correct code was entered
-// ─────────────────────────────────────────────────────────────
 
 Future<bool?> showBubblePasscodeDialog(BuildContext context) {
   return showModalBottomSheet<bool>(
@@ -310,10 +293,6 @@ class _BubblePasscodeSheetState extends State<_BubblePasscodeSheet>
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// FROZEN LAKE SCREEN — entry point
-// ─────────────────────────────────────────────────────────────
-
 class FrozenLakeScreen extends StatefulWidget {
   final VoidCallback? onUnlocked;
   const FrozenLakeScreen({super.key, this.onUnlocked});
@@ -366,13 +345,6 @@ class _FrozenLakeScreenState extends State<FrozenLakeScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// PASSPHRASE SCREEN  — numpad only, no text field
-// Letters that spell ABIES on a phone keypad glow faintly:
-//   A,B → key 2 | E → key 3 | I → key 4 | S → key 7
-// ─────────────────────────────────────────────────────────────
-
-// Map of digit → which of its letters are part of the hint
 const _abiesHintLetters = {
   '2': {'A', 'B'},
   '3': {'E'},
@@ -500,8 +472,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
     return 'Stop guessing.';
   }
 
-  /// Numpad as plain Rows — avoids the nested-viewport crash
-  /// that GridView causes inside SingleChildScrollView.
   Widget _buildNumpad(
     BuildContext context,
     List<List<String>> keys,
@@ -657,7 +627,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Back button
                       Align(
                         alignment: Alignment.centerLeft,
                         child: GestureDetector(
@@ -681,7 +650,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
 
                       const SizedBox(height: 40),
 
-                      // Avatar
                       Container(
                         width: 80,
                         height: 80,
@@ -701,7 +669,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                       ),
                       const SizedBox(height: 14),
 
-                      // Abies voice line — amnesiac
                       SizedBox(
                         height: 20,
                         child: _voiceVisible
@@ -743,7 +710,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
 
                       const SizedBox(height: 32),
 
-                      // ── Dot indicators with glow when filled ──
                       AnimatedBuilder(
                         animation: _shakeAnim,
                         builder: (context, child) {
@@ -794,7 +760,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
 
                       const SizedBox(height: 8),
 
-                      // Error / fail message
                       AnimatedSize(
                         duration: const Duration(milliseconds: 200),
                         child: _errorMsg != null
@@ -815,7 +780,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
 
                       const SizedBox(height: 14),
 
-                      // ── Numpad (Table instead of GridView to avoid nested viewport) ──
                       _buildNumpad(context, keys, colors, textTheme, pc),
 
                       const SizedBox(height: 48),
@@ -839,10 +803,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// ABIES REVEAL SCREEN
-// ─────────────────────────────────────────────────────────────
 
 class AbiesRevealScreen extends StatefulWidget {
   final VoidCallback? onContinue;
@@ -1091,7 +1051,7 @@ class AbiesRevealScreenState extends State<AbiesRevealScreen>
                       ),
 
                       const Spacer(flex: 2),
-                      const SizedBox(height: 100), // room for snow clumps
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -1103,10 +1063,6 @@ class AbiesRevealScreenState extends State<AbiesRevealScreen>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// REVEAL TRAIT CARD
-// ─────────────────────────────────────────────────────────────
 
 class _RevealTrait extends StatelessWidget {
   const _RevealTrait({
@@ -1172,11 +1128,6 @@ class _RevealTrait extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// FULL-SCREEN SNOW
-// Covers the entire screen with drifting flakes
-// ─────────────────────────────────────────────────────────────
 
 class _FullScreenSnow extends StatefulWidget {
   const _FullScreenSnow();
@@ -1270,10 +1221,6 @@ class _FullScreenSnowPainter extends CustomPainter {
   bool shouldRepaint(_FullScreenSnowPainter old) => old.elapsed != elapsed;
 }
 
-// ─────────────────────────────────────────────────────────────
-// SNOW CLUMPS — bottom of screen accumulation
-// ─────────────────────────────────────────────────────────────
-
 class _SnowClumps extends StatelessWidget {
   final Color color;
   const _SnowClumps({required this.color});
@@ -1296,7 +1243,6 @@ class _SnowClumpPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Back layer — subtle, large mounds
     _drawMoundLayer(
       canvas,
       size,
@@ -1310,7 +1256,6 @@ class _SnowClumpPainter extends CustomPainter {
       opacity: 0.06,
     );
 
-    // Mid layer
     _drawMoundLayer(
       canvas,
       size,
@@ -1325,7 +1270,6 @@ class _SnowClumpPainter extends CustomPainter {
       opacity: 0.09,
     );
 
-    // Front layer — brightest, smallest mounds
     _drawMoundLayer(
       canvas,
       size,
@@ -1340,8 +1284,7 @@ class _SnowClumpPainter extends CustomPainter {
       opacity: 0.13,
     );
 
-    // Tiny sparkle dots scattered across the clumps
-    final r = Random(42); // fixed seed = consistent sparkles
+    final r = Random(42);
     final sparklePaint = Paint()
       ..color = color.withOpacity(0.22)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.4);
@@ -1362,7 +1305,7 @@ class _SnowClumpPainter extends CustomPainter {
     for (final m in mounds) {
       final path = Path();
       final rx = m.width / 2;
-      // Elliptical bump sitting on the baseline
+
       path.addOval(
         Rect.fromCenter(
           center: Offset(m.cx, m.baseY - m.height * 0.45),

@@ -106,7 +106,6 @@ class _MyClubCardState extends State<MyClubCard> {
               borderRadius: BorderRadius.circular(24),
               child: Row(
                 children: [
-                  // Club icon with notification dot
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -123,7 +122,7 @@ class _MyClubCardState extends State<MyClubCard> {
                           size: 28,
                         ),
                       ),
-                      // Red notification breadcrumb
+
                       if (unreadCount > 0)
                         Positioned(
                           right: -4,
@@ -146,7 +145,6 @@ class _MyClubCardState extends State<MyClubCard> {
 
                   const SizedBox(width: 16),
 
-                  // Club info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,7 +231,6 @@ class _MyClubCardState extends State<MyClubCard> {
 
                   const SizedBox(width: 8),
 
-                  // Arrow
                   Icon(
                     Icons.chevron_right_rounded,
                     size: 20,

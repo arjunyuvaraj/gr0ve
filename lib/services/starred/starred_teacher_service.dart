@@ -27,9 +27,9 @@ class StarredTeacherService {
     if (user == null) return;
 
     try {
-      final doc = await _docRef(user.uid).get().timeout(
-        const Duration(seconds: 5),
-      );
+      final doc = await _docRef(
+        user.uid,
+      ).get().timeout(const Duration(seconds: 5));
 
       if (doc.exists) {
         final data = doc.data();
@@ -44,7 +44,7 @@ class StarredTeacherService {
     } catch (e) {
       print('[StarredTeacher] Error loading preferences: $e');
       starredTeachers.value = {};
-      _loaded = true; // Mark as loaded to satisfy boot sequence
+      _loaded = true;
     }
   }
 

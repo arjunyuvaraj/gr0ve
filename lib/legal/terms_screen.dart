@@ -37,7 +37,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
       _scrollProgress = maxScroll > 0
           ? (currentScroll / maxScroll).clamp(0, 1)
           : 1;
-      // Mark as read when user scrolls most of the way
+
       if (_scrollProgress > 0.85) {
         _hasRead = true;
       }
@@ -54,13 +54,13 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
       Navigator.pop(context);
       return;
     }
-    // Show confirmation before signing out
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Decline Terms?'),
         content: const Text(
-          'Declining the Terms of Service means you cannot use Gr0ve. You will be signed out.'
+          'Declining the Terms of Service means you cannot use Gr0ve. You will be signed out.',
         ),
         actions: [
           TextButton(
@@ -107,7 +107,6 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
       ),
       body: Column(
         children: [
-          // Scroll progress indicator
           Container(
             height: 2,
             color: colors.outline.withOpacity(0.1),
@@ -117,7 +116,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
               child: Container(color: colors.primary),
             ),
           ),
-          // Content
+
           Expanded(
             child: CustomScrollView(
               controller: _scrollController,
@@ -187,7 +186,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
               ],
             ),
           ),
-          // Bottom action buttons
+
           Container(
             decoration: BoxDecoration(
               border: Border(
@@ -200,7 +199,6 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Checkbox for acceptance
                   GestureDetector(
                     onTap: () => setState(() => _hasRead = !_hasRead),
                     child: Container(
@@ -249,10 +247,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Action buttons
+
                   Row(
                     children: [
-                      // Decline button
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => _declineTerms(),
@@ -275,7 +272,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Accept button
+
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _hasRead ? _acceptTerms : null,

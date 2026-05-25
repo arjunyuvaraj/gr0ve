@@ -42,8 +42,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
     super.dispose();
   }
 
-  // ─── formatting helpers ──────────────────────────────────
-
   void _wrapSelection(String open, String close) {
     final ctrl = _contentController;
     final sel = ctrl.selection;
@@ -251,8 +249,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
     );
   }
 
-  // ─── submit ──────────────────────────────────────────────
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
@@ -284,8 +280,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
     }
   }
 
-  // ─── build ───────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -315,7 +309,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Header ──────────────────────────────────
                 Text(
                   'Post Announcement',
                   style: tt.headlineSmall?.copyWith(
@@ -332,7 +325,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
                 ),
                 const SizedBox(height: 24),
 
-                // ── Title ───────────────────────────────────
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
@@ -353,7 +345,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
                 ),
                 const SizedBox(height: 16),
 
-                // ── Write / Preview tabs ─────────────────────
                 Container(
                   decoration: BoxDecoration(
                     color: cs.onSurface.withOpacity(0.03),
@@ -363,7 +354,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Tab bar (Write | Preview)
                       _WritePreviewTabBar(controller: _tabController, cs: cs),
 
                       Divider(
@@ -377,7 +367,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
                         child: TabBarView(
                           controller: _tabController,
                           children: [
-                            // ── Write tab ───────────────────
                             Column(
                               children: [
                                 _FormattingToolbar(
@@ -436,7 +425,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
                               ],
                             ),
 
-                            // ── Preview tab ──────────────────
                             _MarkdownPreview(
                               content: _contentController.text,
                               cs: cs,
@@ -451,7 +439,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
 
                 const SizedBox(height: 16),
 
-                // ── Pin toggle ───────────────────────────────
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -488,7 +475,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
 
                 const SizedBox(height: 32),
 
-                // ── Actions ──────────────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -544,10 +530,6 @@ class _PostAnnouncementDialogState extends State<PostAnnouncementDialog>
   }
 }
 
-// ============================================================
-//  Write / Preview tab bar
-// ============================================================
-
 class _WritePreviewTabBar extends StatelessWidget {
   final TabController controller;
   final ColorScheme cs;
@@ -591,10 +573,6 @@ class _WritePreviewTabBar extends StatelessWidget {
     );
   }
 }
-
-// ============================================================
-//  Live Markdown preview panel
-// ============================================================
 
 class _MarkdownPreview extends StatelessWidget {
   final String content;
@@ -699,10 +677,6 @@ class _MarkdownPreview extends StatelessWidget {
     );
   }
 }
-
-// ============================================================
-//  Formatting Toolbar
-// ============================================================
 
 class _FormattingToolbar extends StatelessWidget {
   final VoidCallback onBold;

@@ -32,13 +32,10 @@ class NewsArticle {
 class NewsService {
   static const baseUrl = 'https://academychronicle.org/feed/';
 
-  /// Fetch only the first page of articles by default. 
-  /// Use [fetchPage] for specific pages.
   Future<List<NewsArticle>> fetchArticles() async {
     return fetchPage(1);
   }
 
-  /// Fetch a single page of articles with all metadata
   Future<List<NewsArticle>> fetchPage(int page) async {
     final url = page == 1 ? baseUrl : '$baseUrl?paged=$page';
 
@@ -54,7 +51,8 @@ class NewsService {
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) {
-        if (kDebugMode) print('Failed to fetch page $page: ${response.statusCode}');
+        if (kDebugMode)
+          print('Failed to fetch page $page: ${response.statusCode}');
         return [];
       }
 
@@ -64,26 +62,23 @@ class NewsService {
       List<NewsArticle> articles = [];
 
       for (var item in items) {
-        // Basic fields
         final title = item.getElement('title')?.innerText ?? 'No title';
         final link = item.getElement('link')?.innerText ?? '';
         final author =
             item.getElement('dc:creator')?.innerText ?? 'Academy Chronicle';
 
-        // Parse publication date
         final pubDate = item.getElement('pubDate')?.innerText;
         DateTime? published = _parseDate(pubDate);
 
-        // Content
         final description = item.getElement('description')?.innerText ?? '';
         final contentEncoded =
             item.getElement('content:encoded')?.innerText ?? '';
-        final content = contentEncoded.isNotEmpty ? contentEncoded : description;
+        final content = contentEncoded.isNotEmpty
+            ? contentEncoded
+            : description;
 
-        // Excerpt (description is typically the excerpt)
         final excerpt = description;
 
-        // Categories and Tags
         final List<String> categories = [];
         final List<String> tags = [];
 
@@ -103,10 +98,8 @@ class NewsService {
           }
         }
 
-        // Featured Image
         String? featuredImage = _extractFeaturedImage(item, content);
 
-        // Comment count
         int? commentCount;
         final commentRssElement = item.getElement('slash:comments');
         if (commentRssElement != null) {
@@ -129,7 +122,6 @@ class NewsService {
         );
       }
 
-      // Sort newest first within the page
       articles.sort((a, b) {
         if (a.published == null && b.published == null) return 0;
         if (a.published == null) return 1;
@@ -144,12 +136,10 @@ class NewsService {
     }
   }
 
-  /// Parse date from various formats
   DateTime? _parseDate(String? pubDate) {
     if (pubDate == null || pubDate.isEmpty) return null;
 
     try {
-      // RFC 1123 (HTTP Date) format: "Mon, 02 Jan 2006 15:04:05 GMT"
       final format = DateFormat('EEE, dd MMM yyyy HH:mm:ss zzz');
       return format.parse(pubDate);
     } catch (_) {
@@ -166,9 +156,7 @@ class NewsService {
     }
   }
 
-  /// Extract featured image from various sources
   String? _extractFeaturedImage(xml.XmlElement item, String content) {
-    // Try media:content tag (most reliable for WordPress)
     final mediaContent = item.getElement('media:content');
     if (mediaContent != null) {
       final url = mediaContent.getAttribute('url');
@@ -177,7 +165,6 @@ class NewsService {
       }
     }
 
-    // Try media:thumbnail tag
     final mediaThumbnail = item.getElement('media:thumbnail');
     if (mediaThumbnail != null) {
       final url = mediaThumbnail.getAttribute('url');
@@ -186,7 +173,6 @@ class NewsService {
       }
     }
 
-    // Try enclosure tag
     final enclosure = item.getElement('enclosure');
     if (enclosure != null) {
       final type = enclosure.getAttribute('type');
@@ -198,7 +184,6 @@ class NewsService {
       }
     }
 
-    // Try to extract first image from content
     final imgRegex = RegExp(r'<img[^>]+src="([^">]+)"', caseSensitive: false);
     final match = imgRegex.firstMatch(content);
     if (match != null && match.groupCount >= 1) {
@@ -208,7 +193,6 @@ class NewsService {
     return null;
   }
 
-  /// Fetch specific number of recent articles
   Future<List<NewsArticle>> fetchRecentArticles({int count = 50}) async {
     final pagesNeeded = (count / 10).ceil();
 
@@ -229,7 +213,6 @@ class NewsService {
       }
     }
 
-    // Remove duplicates
     final uniqueArticles = <String, NewsArticle>{};
     for (var article in allArticles) {
       if (!uniqueArticles.containsKey(article.link)) {
@@ -239,7 +222,6 @@ class NewsService {
 
     final articles = uniqueArticles.values.toList();
 
-    // Sort newest first
     articles.sort((a, b) {
       if (a.published == null && b.published == null) return 0;
       if (a.published == null) return 1;
@@ -250,7 +232,6 @@ class NewsService {
     return articles.take(count).toList();
   }
 
-  /// Get all unique categories from articles
   Future<List<String>> getCategories() async {
     final articles = await fetchArticles();
     final categories = <String>{};
@@ -262,7 +243,6 @@ class NewsService {
     return categories.toList()..sort();
   }
 
-  /// Get all unique tags from articles
   Future<List<String>> getTags() async {
     final articles = await fetchArticles();
     final tags = <String>{};
@@ -274,7 +254,6 @@ class NewsService {
     return tags.toList()..sort();
   }
 
-  /// Filter articles by category
   Future<List<NewsArticle>> getArticlesByCategory(String category) async {
     final articles = await fetchArticles();
     return articles.where((article) {
@@ -284,7 +263,6 @@ class NewsService {
     }).toList();
   }
 
-  /// Filter articles by tag
   Future<List<NewsArticle>> getArticlesByTag(String tag) async {
     final articles = await fetchArticles();
     return articles.where((article) {

@@ -2,17 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// SECURITY FIX: No more Google Sheets or external APIs
-// All data is now stored and read directly from Firestore
-// Absences are uploaded by admins using the Python upload script
-
 Future<Map<String, String>> fetchGoogleSheetAbsences({
   required String spreadsheetId,
   required String worksheetTitle,
 }) async {
   final Map<String, String> absenceMap = {};
 
-  // SECURITY: Verify user is authenticated and has verified bergen.org email
   final user = FirebaseAuth.instance.currentUser;
   if (user == null || !user.emailVerified) {
     if (kDebugMode) {
@@ -29,7 +24,6 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
   }
 
   try {
-    // Read from Firestore instead of Google Sheets
     final doc = await FirebaseFirestore.instance
         .collection('public_data')
         .doc('teacher_absences')
@@ -56,7 +50,6 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       print('Full data: $data');
     }
 
-    // FIXED: Python writes 'date' (lowercase), so read 'date' (lowercase)
     if (data.containsKey('date')) {
       absenceMap['date'] = data['date'].toString();
       if (kDebugMode) {
@@ -68,7 +61,6 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       }
     }
 
-    // FIXED: Python writes 'teachers' (lowercase), containing a map of teacher -> status
     if (data.containsKey('teachers')) {
       final teachers = data['teachers'] as Map<String, dynamic>;
       if (kDebugMode) {
@@ -109,18 +101,16 @@ Stream<Map<String, String>> streamTeacherAbsences() {
   return FirebaseFirestore.instance
       .collection('public_data')
       .doc('teacher_absences')
-      .snapshots(includeMetadataChanges: true)
+      .snapshots()
       .map((doc) {
         if (!doc.exists || doc.data() == null) return <String, String>{};
         final data = doc.data()!;
         final Map<String, String> result = {};
 
-        // FIXED: Match Python script - lowercase 'date'
         if (data.containsKey('date')) {
           result['date'] = data['date'].toString();
         }
 
-        // FIXED: Match Python script - lowercase 'teachers'
         if (data.containsKey('teachers')) {
           final teachers = data['teachers'] as Map<String, dynamic>;
           teachers.forEach((key, value) {
@@ -131,8 +121,6 @@ Stream<Map<String, String>> streamTeacherAbsences() {
       });
 }
 
-// ── NEW: Live stream of the teachers collection ───────────────────────────────
-// Used by SnapshotAbsenceCard so it doesn't need a one-time fetch + setState.
 Stream<Map<String, Map<String, dynamic>>> streamTeacherList() {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null ||
@@ -141,7 +129,7 @@ Stream<Map<String, Map<String, dynamic>>> streamTeacherList() {
     return Stream.value({});
   }
 
-  return FirebaseFirestore.instance.collection('teachers').snapshots(includeMetadataChanges: true).map((
+  return FirebaseFirestore.instance.collection('teachers').snapshots().map((
     snapshot,
   ) {
     final Map<String, Map<String, dynamic>> result = {};
@@ -223,7 +211,6 @@ String? handleEdgeCases(String name) {
     'mrcrane': 'crane, todd',
     'mr.crane': 'crane, todd',
 
-    // Map common misspelling (without 'y') to correct spelling (with 'y')
     'drapcznski': 'drapczynski, anna',
     'msdrapcznski': 'drapczynski, anna',
     'ms.drapcznski': 'drapczynski, anna',
@@ -263,7 +250,6 @@ String normalizeTeacherName(String raw) {
   raw = raw.trim();
   raw = raw.replaceAll(RegExp(r'\(.*?\)'), '');
 
-  // Remove titles only if followed by space or period (to avoid matching "Drapczynski")
   final titles = ['Dr.', 'Mr.', 'Ms.', 'Mrs.'];
   for (var t in titles) {
     if (raw.startsWith(t + ' ') || raw == t) {
@@ -378,7 +364,6 @@ String formatStatusString(String status) {
     if (part.toUpperCase() == "IGS") {
       items.add("IGS");
     } else if (part.contains('-')) {
-      // Handle range parts like "2-9"
       final rangeParts = part.split('-').map((e) => e.trim()).toList();
       if (rangeParts.length == 2) {
         final start = int.tryParse(rangeParts[0]);

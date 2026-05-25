@@ -1,14 +1,6 @@
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 
-// ─────────────────────────────────────────────────────────────
-// DOMAIN
-// ─────────────────────────────────────────────────────────────
-
 enum CounselorDomain { general, college, research, ib, art, policy }
-
-// ─────────────────────────────────────────────────────────────
-// CHAT MESSAGE
-// ─────────────────────────────────────────────────────────────
 
 class ChatMessage {
   final String id;
@@ -67,10 +59,6 @@ class ChatMessage {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// EXTENSIONS
-// ─────────────────────────────────────────────────────────────
 
 extension ChatMessageX on ChatMessage {
   bool get isChimePrompt => !isUser && text.startsWith('__chime__:');

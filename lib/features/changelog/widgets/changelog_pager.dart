@@ -17,7 +17,6 @@ class ChangelogPagerState extends State<ChangelogPager> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    // Get the latest version (first entry)
     final latestVersion = widget.changelogEntries.keys.first;
     final latestEntry = widget.changelogEntries[latestVersion]!;
 
@@ -33,7 +32,6 @@ class ChangelogPagerState extends State<ChangelogPager> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 Container(
@@ -97,7 +95,6 @@ class ChangelogPagerState extends State<ChangelogPager> {
               ],
             ),
 
-            // Expandable content
             AnimatedSize(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
@@ -107,7 +104,6 @@ class ChangelogPagerState extends State<ChangelogPager> {
                       children: [
                         const SizedBox(height: 16),
 
-                        // Divider
                         Container(
                           height: 1,
                           decoration: BoxDecoration(
@@ -123,7 +119,6 @@ class ChangelogPagerState extends State<ChangelogPager> {
 
                         const SizedBox(height: 16),
 
-                        // Changelog content
                         Text(
                           latestEntry,
                           style: TextStyle(

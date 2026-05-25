@@ -12,10 +12,6 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/docs/v1.dart' as docs;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURATION & CONSTANTS
-// ═══════════════════════════════════════════════════════════════════════════
-
 class _ApiConfig {
   static const baseUrl = 'https://api.groq.com/openai/v1';
   static const model = 'llama-3.1-8b-instant';
@@ -40,15 +36,9 @@ class _StorageConfig {
   static const maxKnowledgeBaseChars = 8000;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// GOOGLE DOCS CLIENT
-// ═══════════════════════════════════════════════════════════════════════════
-
 class GoogleDocsClient {
   static auth.AutoRefreshingAuthClient? _authClient;
   static docs.DocsApi? _docsApi;
-  // ignore: unused_field
-  static drive.DriveApi? _driveApi;
 
   static Future<void> initialize() async {
     if (_authClient != null) return;
@@ -69,7 +59,6 @@ class GoogleDocsClient {
       );
 
       _docsApi = docs.DocsApi(_authClient!);
-      _driveApi = drive.DriveApi(_authClient!);
 
       print('[GoogleDocs] Successfully initialized Google APIs');
     } catch (e) {
@@ -164,14 +153,9 @@ class GoogleDocsClient {
     _authClient?.close();
     _authClient = null;
     _docsApi = null;
-    _driveApi = null;
     print('[GoogleDocs] Client disposed');
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DOMAIN MODELS
-// ═══════════════════════════════════════════════════════════════════════════
 
 enum CounselorDomain { college, research, ib, art, policy, general }
 
@@ -233,10 +217,6 @@ class KnowledgeBaseSection {
     required this.keywords,
   });
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DOMAIN DETECTION
-// ═══════════════════════════════════════════════════════════════════════════
 
 class DomainDetector {
   static final _patterns = {
@@ -445,10 +425,6 @@ class ConversationClosureHelper {
     return ConversationClosureState.closeScreen(cleanedResponse);
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// KNOWLEDGE BASE SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
 
 class KnowledgeBaseService {
   static String? _cachedLocal;
@@ -668,10 +644,6 @@ class KnowledgeBaseService {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// COURSE CATALOG SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
-
 class CourseCatalogService {
   static List<Map<String, dynamic>>? _courses;
   static final _alwaysIncludeAcademies = {
@@ -730,10 +702,6 @@ class CourseCatalogService {
     return sb.isEmpty ? '[Course catalog unavailable]' : sb.toString();
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// FIREBASE SERVICES
-// ═══════════════════════════════════════════════════════════════════════════
 
 class ChatHistoryService {
   static DocumentReference _getDoc(String uid, CounselorPersona persona) =>
@@ -817,26 +785,22 @@ class ChatHistoryService {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PROMPT BUILDING
-// ═══════════════════════════════════════════════════════════════════════════
-
 class PromptBuilder {
   static String buildSharedRules(String catalog, String kb) =>
       '''
-You are a counselor at Bergen County Academies (BCA) for the gr0ve app. 
+You are a counselor at Bergen County Academies (BCA) for the gr0ve app.
 Your scope is ALL things BCA—clubs, research, academics, stress, scheduling, and student life.
 
 CRITICAL — CONVERSATION STYLE:
 After answering the user's question, you MUST suggest what they might want to know next.
-Use phrasing like: "What else would you like to know?", "Anything else I can help with?", 
+Use phrasing like: "What else would you like to know?", "Anything else I can help with?",
 "Would you like to know more about X?" or similar natural follow-ups.
 This keeps the conversation flowing naturally. Never ask more than one question at a time.
 
 CRITICAL — CONVERSATION CLOSING:
 ONLY append [[CLOSE]] when the user explicitly indicates they're done and want to leave.
-These phrases mean they want to close: 
-- "bye", "goodbye", "I'm all good", "I'm good", "that's all", "I'm done", 
+These phrases mean they want to close:
+- "bye", "goodbye", "I'm all good", "I'm good", "that's all", "I'm done",
 - "gotta go", "talk later", "thanks I'm all set", "all good thanks", "that's it"
 
 These phrases do NOT mean close (they want to continue):
@@ -894,10 +858,6 @@ You are speaking via Text-to-Speech. To sound more human:
     return sb.toString();
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// LLM STREAMING SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
 
 class LLMStreamingService {
   static Future<String> stream({
@@ -969,10 +929,6 @@ class LLMStreamingService {
     return buffer.toString().trim();
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COUNSELOR SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
 
 class OllamaCounselorService {
   static Future<ConversationClosureState> sendMessage({

@@ -306,9 +306,6 @@ class _AnnouncementQASheetState extends State<AnnouncementQASheet>
   }
 }
 
-// =============================================================================
-// _BottomInputBar — always mounted, switches between compose/reply
-// =============================================================================
 class _BottomInputBar extends StatelessWidget {
   final bool inThread;
   final TextEditingController composeController;
@@ -468,9 +465,6 @@ class _InputRow extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// _QuestionCard
-// =============================================================================
 class _QuestionCard extends StatelessWidget {
   final AnnouncementQuestion question;
   final String? currentUserId;
@@ -586,7 +580,7 @@ class _QuestionCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Trailing actions column (Unread dot, Menu, Chevron)
+
                   const SizedBox(width: 8),
                   Column(
                     children: [
@@ -601,7 +595,7 @@ class _QuestionCard extends StatelessWidget {
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: Colors.blue, // Blue for unread replies
+                              color: Colors.blue,
                               shape: BoxShape.circle,
                             ),
                           );
@@ -663,9 +657,6 @@ class _QuestionCard extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// _ReplyBubble
-// =============================================================================
 class _ReplyBubble extends StatelessWidget {
   final QuestionReply reply;
   final String? currentUserId;
@@ -772,10 +763,6 @@ class _ReplyBubble extends StatelessWidget {
     );
   }
 }
-
-// =============================================================================
-// Small widgets
-// =============================================================================
 
 class _Handle extends StatelessWidget {
   final ColorScheme colors;
@@ -970,11 +957,7 @@ class _StatusIcon extends StatelessWidget {
           color: Colors.green.withOpacity(0.15),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.check_rounded, // Simple check
-          size: 14,
-          color: Colors.green[700],
-        ),
+        child: Icon(Icons.check_rounded, size: 14, color: Colors.green[700]),
       );
     } else {
       return Padding(

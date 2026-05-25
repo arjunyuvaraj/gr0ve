@@ -10,10 +10,6 @@ import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/models/counselor.dart';
 import 'package:gr0ve/services/settings/accessibility_service.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ROUTE
-// ═══════════════════════════════════════════════════════════════════════════
-
 class CounselorVoiceRoute<T> extends PageRouteBuilder<T> {
   CounselorVoiceRoute({
     required CounselorPersona persona,
@@ -53,10 +49,6 @@ class _VoiceScreenTransition extends StatelessWidget {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// VOICE THEME MANAGER
-// ═══════════════════════════════════════════════════════════════════════════
 
 class _VoiceThemeManager {
   static _VoiceTheme forPersona(CounselorPersona persona, bool isLight) {
@@ -101,10 +93,6 @@ class _VoiceTheme {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// VOICE PHASE ENUM
-// ═══════════════════════════════════════════════════════════════════════════
-
 enum _VoicePhase { greeting, idle, listening, thinking, speaking }
 
 extension _VoicePhaseExt on _VoicePhase {
@@ -113,10 +101,6 @@ extension _VoicePhaseExt on _VoicePhase {
 
   bool get isAnimated => isActive || this == _VoicePhase.thinking;
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN VOICE SCREEN
-// ═══════════════════════════════════════════════════════════════════════════
 
 class CounselorVoiceScreen extends StatefulWidget {
   const CounselorVoiceScreen({
@@ -161,7 +145,6 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
   String _accumulatedTranscript = '';
   DateTime? _lastSpeechDetected;
 
-  // Scroll controller to auto-scroll when content grows
   final ScrollController _scrollCtrl = ScrollController();
 
   @override
@@ -579,7 +562,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
             child: Column(
               children: [
                 _buildTopBar(theme, pc),
-                // Expanded + SingleChildScrollView prevents all overflow
+
                 Expanded(
                   child: SingleChildScrollView(
                     controller: _scrollCtrl,
@@ -659,7 +642,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
                             letterSpacing: 0.2,
                           ),
                         ),
-                        // Transcript — shown while user speaks, hidden after
+
                         if (_transcript.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           Padding(
@@ -667,7 +650,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
                             child: _buildTranscriptBox(theme),
                           ),
                         ],
-                        // Response — shown after counselor speaks
+
                         if (_lastResponse.isNotEmpty &&
                             _phase != _VoicePhase.listening) ...[
                           const SizedBox(height: 16),
@@ -766,7 +749,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.cardBorder),
       ),
-      // No truncation — let the text wrap naturally
+
       child: Text(
         '"$_transcript"',
         textAlign: TextAlign.center,

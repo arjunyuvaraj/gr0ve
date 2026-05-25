@@ -2,10 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
 
-// ─────────────────────────────────────────────────────────────
-// STORY CHARACTERS
-// ─────────────────────────────────────────────────────────────
-
 enum StoryCharacter {
   narrator,
   dawn,
@@ -35,31 +31,31 @@ enum StoryCharacter {
 
 extension StoryCharacterX on StoryCharacter {
   String get displayName => switch (this) {
-        StoryCharacter.narrator => 'Narrator',
-        StoryCharacter.dawn => 'Dawn',
-        StoryCharacter.newton => 'Newton',
-        StoryCharacter.darwin => 'Darwin',
-        StoryCharacter.newtonsTree => 'Newton',
-        StoryCharacter.darwinsTree => 'Darwin',
-        StoryCharacter.redSparrow => 'Red Sparrow',
-        StoryCharacter.orangeSparrow => 'Orange Sparrow',
-        StoryCharacter.wall => 'Wall',
-        StoryCharacter.system => 'System',
-        StoryCharacter.player => 'Green Sparrow',
-        StoryCharacter.graySparrow => 'Gray Sparrow',
-        StoryCharacter.salix => 'Salix',
-        StoryCharacter.salixBaby => 'Young Salix',
-        StoryCharacter.abiesBaby => 'Young Abies',
-        StoryCharacter.thicketSheep => 'Thicket Sheep',
-        StoryCharacter.woolberrySheep => 'Woolberry Sheep',
-        StoryCharacter.bluebellSheep => 'Bluebell Sheep',
-        StoryCharacter.cediteBaby => 'Young Cedite',
-        StoryCharacter.abies => 'Abies',
-        StoryCharacter.cedite => 'Cedite',
-        StoryCharacter.ash => 'Ash',
-        StoryCharacter.london => 'London',
-        StoryCharacter.squashy => 'Squishy',
-      };
+    StoryCharacter.narrator => 'Narrator',
+    StoryCharacter.dawn => 'Dawn',
+    StoryCharacter.newton => 'Newton',
+    StoryCharacter.darwin => 'Darwin',
+    StoryCharacter.newtonsTree => 'Newton',
+    StoryCharacter.darwinsTree => 'Darwin',
+    StoryCharacter.redSparrow => 'Red Sparrow',
+    StoryCharacter.orangeSparrow => 'Orange Sparrow',
+    StoryCharacter.wall => 'Wall',
+    StoryCharacter.system => 'System',
+    StoryCharacter.player => 'Green Sparrow',
+    StoryCharacter.graySparrow => 'Gray Sparrow',
+    StoryCharacter.salix => 'Salix',
+    StoryCharacter.salixBaby => 'Young Salix',
+    StoryCharacter.abiesBaby => 'Young Abies',
+    StoryCharacter.thicketSheep => 'Thicket Sheep',
+    StoryCharacter.woolberrySheep => 'Woolberry Sheep',
+    StoryCharacter.bluebellSheep => 'Bluebell Sheep',
+    StoryCharacter.cediteBaby => 'Young Cedite',
+    StoryCharacter.abies => 'Abies',
+    StoryCharacter.cedite => 'Cedite',
+    StoryCharacter.ash => 'Ash',
+    StoryCharacter.london => 'London',
+    StoryCharacter.squashy => 'Squashy',
+  };
 
   String avatarAsset(Brightness brightness) {
     final mode = brightness == Brightness.dark ? 'dark' : 'light';
@@ -67,24 +63,29 @@ extension StoryCharacterX on StoryCharacter {
       StoryCharacter.dawn => 'assets/story/characters/ep0/dawn_$mode.png',
       StoryCharacter.newton ||
       StoryCharacter.newtonsTree ||
-      StoryCharacter.wall =>
-        'assets/story/characters/ep1/newton_$mode.png',
-      StoryCharacter.darwin ||
-      StoryCharacter.darwinsTree =>
+      StoryCharacter.wall => 'assets/story/characters/ep1/newton_$mode.png',
+      StoryCharacter.darwin || StoryCharacter.darwinsTree =>
         'assets/story/characters/ep1/darwin_$mode.png',
       StoryCharacter.redSparrow =>
         'assets/story/characters/ep1/red_sparrow_$mode.png',
       StoryCharacter.orangeSparrow =>
         'assets/story/characters/ep1/orange_sparrow_$mode.png',
       StoryCharacter.player => 'assets/story/characters/sparrow_$mode.png',
-      StoryCharacter.graySparrow => 'assets/story/characters/ep1/gray_sparrow_$mode.png',
+      StoryCharacter.graySparrow =>
+        'assets/story/characters/ep1/gray_sparrow_$mode.png',
       StoryCharacter.salix => 'assets/story/characters/ep2/salix_$mode.png',
-      StoryCharacter.salixBaby => 'assets/story/characters/ep2/baby/salix_baby_$mode.png',
-      StoryCharacter.abiesBaby => 'assets/story/characters/ep2/baby/abies_baby_$mode.png',
-      StoryCharacter.thicketSheep => 'assets/story/characters/ep2/sheep/thicket_sheep_$mode.png',
-      StoryCharacter.woolberrySheep => 'assets/story/characters/ep2/sheep/woolberry_sheep_$mode.png',
-      StoryCharacter.bluebellSheep => 'assets/story/characters/ep2/sheep/bluebell_sheep_$mode.png',
-      StoryCharacter.cediteBaby => 'assets/story/characters/ep2/baby/cedite_baby_$mode.png',
+      StoryCharacter.salixBaby =>
+        'assets/story/characters/ep2/baby/salix_baby_$mode.png',
+      StoryCharacter.abiesBaby =>
+        'assets/story/characters/ep2/baby/abies_baby_$mode.png',
+      StoryCharacter.thicketSheep =>
+        'assets/story/characters/ep2/sheep/thicket_sheep_$mode.png',
+      StoryCharacter.woolberrySheep =>
+        'assets/story/characters/ep2/sheep/woolberry_sheep_$mode.png',
+      StoryCharacter.bluebellSheep =>
+        'assets/story/characters/ep2/sheep/bluebell_sheep_$mode.png',
+      StoryCharacter.cediteBaby =>
+        'assets/story/characters/ep2/baby/cedite_baby_$mode.png',
       StoryCharacter.abies => 'assets/story/characters/abies_$mode.png',
       StoryCharacter.cedite => 'assets/story/characters/cedite_$mode.png',
       StoryCharacter.ash => 'assets/story/characters/ash_$mode.png',
@@ -95,71 +96,77 @@ extension StoryCharacterX on StoryCharacter {
   }
 
   Color accent(Brightness brightness) => switch (this) {
-    StoryCharacter.dawn => brightness == Brightness.dark
-        ? const Color(0xFFF1C40F)
-        : const Color(0xFFD4A912),
+    StoryCharacter.dawn =>
+      brightness == Brightness.dark
+          ? const Color(0xFFF1C40F)
+          : const Color(0xFFD4A912),
     StoryCharacter.newton ||
     StoryCharacter.newtonsTree ||
     StoryCharacter.wall =>
       brightness == Brightness.dark
           ? const Color(0xFFE55B5B)
           : const Color(0xFFC43D3D),
-    StoryCharacter.darwin ||
-    StoryCharacter.darwinsTree =>
+    StoryCharacter.darwin || StoryCharacter.darwinsTree =>
       brightness == Brightness.dark
           ? const Color(0xFFFF9F43)
           : const Color(0xFFD47A1A),
-    StoryCharacter.system => brightness == Brightness.dark
-        ? const Color(0xFF7BA3C7)
-        : const Color(0xFF3C7AB0),
-    StoryCharacter.player => brightness == Brightness.dark
-        ? const Color(0xFF5AE6A0)
-        : const Color(0xFF1F8A5F),
-    StoryCharacter.graySparrow => brightness == Brightness.dark
-        ? const Color(0xFFB0B0B0)
-        : const Color(0xFF808080),
-    StoryCharacter.salix ||
-    StoryCharacter.salixBaby => brightness == Brightness.dark
-        ? const Color(0xFF0D47A1) // Darker blue for dark mode
-        : const Color(0xFF002171), // Even darker for light mode
-    StoryCharacter.abies ||
-    StoryCharacter.abiesBaby => brightness == Brightness.dark
-        ? const Color(0xFF00C8FF) // Matches CounselorPersona.primaryDark
-        : const Color(0xFF00C8FF), // Matches CounselorPersona.primaryLight
-    StoryCharacter.cedite ||
-    StoryCharacter.cediteBaby => brightness == Brightness.dark
-        ? const Color(0xFF9B59B6) // Vibrant Purple
-        : const Color(0xFF8E44AD), // Deeper Purple
-    StoryCharacter.ash => brightness == Brightness.dark
-        ? const Color(0xFFE55B5B) // Matches CounselorPersona.primaryDark
-        : const Color(0xFFC43D3D), // Matches CounselorPersona.primaryLight
-    StoryCharacter.london => brightness == Brightness.dark
-        ? const Color(0xFF4A7C44)
-        : const Color(0xFF2D5A27),
-    StoryCharacter.squashy => brightness == Brightness.dark
-        ? const Color(0xFFF9A825)
-        : const Color(0xFFF57F17),
-    StoryCharacter.thicketSheep => brightness == Brightness.dark
-        ? const Color(0xFFA1887F)
-        : const Color(0xFF795548),
-    StoryCharacter.woolberrySheep => brightness == Brightness.dark
-        ? const Color(0xFFBA68C8)
-        : const Color(0xFF8E24AA),
-    StoryCharacter.bluebellSheep => brightness == Brightness.dark
-        ? const Color(0xFF7986CB)
-        : const Color(0xFF3949AB),
-    _ => brightness == Brightness.dark
-        ? const Color(0xFFD0D4D8)
-        : const Color(0xFF4A5568),
+    StoryCharacter.system =>
+      brightness == Brightness.dark
+          ? const Color(0xFF7BA3C7)
+          : const Color(0xFF3C7AB0),
+    StoryCharacter.player =>
+      brightness == Brightness.dark
+          ? const Color(0xFF5AE6A0)
+          : const Color(0xFF1F8A5F),
+    StoryCharacter.graySparrow =>
+      brightness == Brightness.dark
+          ? const Color(0xFFB0B0B0)
+          : const Color(0xFF808080),
+    StoryCharacter.salix || StoryCharacter.salixBaby =>
+      brightness == Brightness.dark
+          ? const Color(0xFF0D47A1)
+          : const Color(0xFF002171),
+    StoryCharacter.abies || StoryCharacter.abiesBaby =>
+      brightness == Brightness.dark
+          ? const Color(0xFF00C8FF)
+          : const Color(0xFF00C8FF),
+    StoryCharacter.cedite || StoryCharacter.cediteBaby =>
+      brightness == Brightness.dark
+          ? const Color(0xFF9B59B6)
+          : const Color(0xFF8E44AD),
+    StoryCharacter.ash =>
+      brightness == Brightness.dark
+          ? const Color(0xFFE55B5B)
+          : const Color(0xFFC43D3D),
+    StoryCharacter.london =>
+      brightness == Brightness.dark
+          ? const Color(0xFF4A7C44)
+          : const Color(0xFF2D5A27),
+    StoryCharacter.squashy =>
+      brightness == Brightness.dark
+          ? const Color(0xFFF9A825)
+          : const Color(0xFFF57F17),
+    StoryCharacter.thicketSheep =>
+      brightness == Brightness.dark
+          ? const Color(0xFFA1887F)
+          : const Color(0xFF795548),
+    StoryCharacter.woolberrySheep =>
+      brightness == Brightness.dark
+          ? const Color(0xFFBA68C8)
+          : const Color(0xFF8E24AA),
+    StoryCharacter.bluebellSheep =>
+      brightness == Brightness.dark
+          ? const Color(0xFF7986CB)
+          : const Color(0xFF3949AB),
+    _ =>
+      brightness == Brightness.dark
+          ? const Color(0xFFD0D4D8)
+          : const Color(0xFF4A5568),
   };
 
-  bool get hasAvatar => this != StoryCharacter.narrator &&
-      this != StoryCharacter.system;
+  bool get hasAvatar =>
+      this != StoryCharacter.narrator && this != StoryCharacter.system;
 }
-
-// ─────────────────────────────────────────────────────────────
-// MESSAGES & CONTEXT
-// ─────────────────────────────────────────────────────────────
 
 enum MessageKind {
   dialogue,
@@ -186,12 +193,12 @@ class StoryMessage {
   });
 
   Map<String, dynamic> toJson() => {
-        'text': text,
-        'character': character.name,
-        'kind': kind.name,
-        'isItalic': isItalic,
-        'isBold': isBold,
-      };
+    'text': text,
+    'character': character.name,
+    'kind': kind.name,
+    'isItalic': isItalic,
+    'isBold': isBold,
+  };
 
   factory StoryMessage.fromJson(Map<String, dynamic> json) {
     return StoryMessage(
@@ -209,10 +216,6 @@ class StoryMessage {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// INTERACTIVITY
-// ─────────────────────────────────────────────────────────────
 
 enum InputType { choices, freeText, number, continueOnly, none }
 
@@ -238,15 +241,15 @@ class SceneChoice {
   });
 
   Map<String, dynamic> toJson() => {
-        'label': label,
-        'letter': letter,
-        'nextScene': nextScene,
-        'statEffects': statEffects,
-        'addItems': addItems,
-        'warmthChange': warmthChange,
-        'setPath': setPath,
-        'waitDuration': waitDuration?.inSeconds,
-      };
+    'label': label,
+    'letter': letter,
+    'nextScene': nextScene,
+    'statEffects': statEffects,
+    'addItems': addItems,
+    'warmthChange': warmthChange,
+    'setPath': setPath,
+    'waitDuration': waitDuration?.inSeconds,
+  };
 
   factory SceneChoice.fromJson(Map<String, dynamic> json) {
     return SceneChoice(
@@ -288,13 +291,13 @@ class Scene {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'lines': lines.map((l) => l.toJson()).toList(),
-        'inputType': inputType.name,
-        'choices': choices.map((c) => c.toJson()).toList(),
-        'nextScene': nextScene,
-        'waitDuration': waitDuration?.inSeconds,
-      };
+    'id': id,
+    'lines': lines.map((l) => l.toJson()).toList(),
+    'inputType': inputType.name,
+    'choices': choices.map((c) => c.toJson()).toList(),
+    'nextScene': nextScene,
+    'waitDuration': waitDuration?.inSeconds,
+  };
 
   factory Scene.fromJson(Map<String, dynamic> json) {
     return Scene(
@@ -345,19 +348,15 @@ class TravelNarrative {
   ];
 
   static String getQuote(String? path, Duration remaining) {
-    // If no path is set (e.g. all episodes complete), pick one randomly for variety
-    final effectivePath = path ?? (DateTime.now().second % 2 == 0 ? 'apple' : 'orange');
-    
+    final effectivePath =
+        path ?? (DateTime.now().second % 2 == 0 ? 'apple' : 'orange');
+
     int index = 9 - (remaining.inMinutes / 30).floor().clamp(0, 9);
     if (effectivePath == 'apple') return appleQuotes[index];
     if (effectivePath == 'orange') return orangeQuotes[index];
     return "Traveling toward your next destination...";
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// EPISODE STRUCTURE
-// ─────────────────────────────────────────────────────────────
 
 class Episode {
   final String id;

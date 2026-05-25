@@ -42,9 +42,9 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
       _descriptionController.clear();
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Group submitted for review')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Group submitted for review')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -68,7 +68,6 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Header
           Text(
             'Request New Group',
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -85,7 +84,6 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
 
           const SizedBox(height: 24),
 
-          /// Form
           CreateClubForm(
             formKey: _formKey,
             nameController: _nameController,
@@ -96,7 +94,6 @@ class _ClubCreateTabState extends State<ClubCreateTab> {
 
           const SizedBox(height: 40),
 
-          /// Requests
           Text(
             'Your Requests',
             style: theme.textTheme.titleLarge?.copyWith(

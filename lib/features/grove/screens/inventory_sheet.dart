@@ -55,7 +55,6 @@ class _TInventorySheetState extends State<TInventorySheet> {
     final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // The bird swallowed the seed, so we don't display it in the pouch
     final displayItems = widget.items.where((i) {
       final lower = i.toLowerCase();
       return lower != 'seed' && lower != "dawn's seed";
@@ -71,7 +70,7 @@ class _TInventorySheetState extends State<TInventorySheet> {
             color: Colors.black.withOpacity(0.2),
             blurRadius: 40,
             offset: const Offset(0, -10),
-          )
+          ),
         ],
       ),
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
@@ -121,7 +120,10 @@ class _TInventorySheetState extends State<TInventorySheet> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -139,7 +141,7 @@ class _TInventorySheetState extends State<TInventorySheet> {
               ],
             ),
             const SizedBox(height: 32),
-            // 4x4 Grid
+
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -189,47 +191,51 @@ class _TInventorySheetState extends State<TInventorySheet> {
                   onTap: hasItem
                       ? () {
                           setState(() {
-                            _selectedItemName =
-                                isSelected ? null : itemName;
+                            _selectedItemName = isSelected ? null : itemName;
                           });
                         }
                       : null,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     decoration: BoxDecoration(
-                      // Use transparent for items so the image background blends with the sheet
                       color: hasItem
-                          ? (isSelected ? colors.primary.withOpacity(0.03) : Colors.transparent)
+                          ? (isSelected
+                                ? colors.primary.withOpacity(0.03)
+                                : Colors.transparent)
                           : colors.surfaceContainerHighest.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: hasItem
                             ? (isSelected
-                                ? colors.primary
-                                : colors.outline.withOpacity(0.1))
+                                  ? colors.primary
+                                  : colors.outline.withOpacity(0.1))
                             : colors.outline.withOpacity(0.04),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
                     alignment: Alignment.center,
-                    // Clip the corners in case the white image background overflows
+
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(14),
                       child: Padding(
-                        padding: EdgeInsets.all(hasItem && asset != null ? 2 : 4),
+                        padding: EdgeInsets.all(
+                          hasItem && asset != null ? 2 : 4,
+                        ),
                         child: hasItem
                             ? (asset != null
-                                ? Image.asset(asset, fit: BoxFit.contain)
-                                : Text(
-                                    itemName.toUpperCase(),
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.jetBrainsMono(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.w800,
-                                      color: colors.onSurface.withOpacity(0.9),
-                                      height: 1.1,
-                                    ),
-                                  ))
+                                  ? Image.asset(asset, fit: BoxFit.contain)
+                                  : Text(
+                                      itemName.toUpperCase(),
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.jetBrainsMono(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w800,
+                                        color: colors.onSurface.withOpacity(
+                                          0.9,
+                                        ),
+                                        height: 1.1,
+                                      ),
+                                    ))
                             : Center(
                                 child: Container(
                                   width: 6,
@@ -247,7 +253,7 @@ class _TInventorySheetState extends State<TInventorySheet> {
               },
             ),
             const SizedBox(height: 32),
-            // Details Panel (Fixed height to prevent layout jumps)
+
             SizedBox(
               height: 112,
               child: AnimatedSwitcher(
@@ -259,7 +265,9 @@ class _TInventorySheetState extends State<TInventorySheet> {
                         height: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withOpacity(0.3),
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.3,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: colors.outline.withOpacity(0.1),
@@ -298,7 +306,10 @@ class _TInventorySheetState extends State<TInventorySheet> {
                         key: const ValueKey('empty'),
                         width: double.infinity,
                         height: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                          horizontal: 24,
+                        ),
                         alignment: Alignment.center,
                         child: Text(
                           'Dawn\'s light guides your path.\nThese artifacts follow you through the threshold.',

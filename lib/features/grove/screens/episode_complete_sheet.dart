@@ -44,8 +44,6 @@ class EpisodeCompleteSheet extends StatelessWidget {
     );
   }
 
-  String _fmt(int v) => v > 0 ? '+$v' : '$v';
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -173,7 +171,6 @@ class EpisodeCompleteSheet extends StatelessWidget {
                   const SizedBox(height: 32),
                 ],
 
-                // Stats summary - Scale Style
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -194,7 +191,6 @@ class EpisodeCompleteSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Stats Scales
                       StatScaleWidget(
                         label: 'STABILITY',
                         value: state.stability,

@@ -29,7 +29,6 @@ class PersonaTheme {
   }) {
     final isDark = brightness == Brightness.dark;
 
-    // Primary color: counselorSync uses the active persona's colour, otherwise use themeColor
     final primary = isAccessible
         ? const Color(0xFF0072B2)
         : (themeColor == AppThemeColor.counselorSync
@@ -38,7 +37,6 @@ class PersonaTheme {
 
     final onPrimary = themeColor.onColor(brightness);
 
-    // ── Scaffold / surface colours (unchanged from your originals) ──
     final scaffoldBg = isDark
         ? const Color(0xFF111111)
         : const Color(0xFFF8F9F9);
@@ -57,10 +55,8 @@ class PersonaTheme {
         ? const Color(0xFFFF8A8A)
         : const Color(0xFFC62828);
 
-    // Input fill uses surface in dark, tertiary in light
     final inputFill = isDark ? surface : tertiary;
 
-    // ── Label colour: use persona primary (slightly muted in dark) ──
     final labelColor = isDark ? primary : primary;
 
     return ThemeData(
@@ -84,7 +80,7 @@ class PersonaTheme {
         onSurfaceVariant: onSurfaceVariant,
         errorContainer: errorContainer,
         onErrorContainer: onErrorContainer,
-        // Keep outline subtle regardless of persona
+
         outline: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
         surfaceContainerHighest: isDark
             ? const Color(0xFF262626)
@@ -256,7 +252,6 @@ class PersonaTheme {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),
 
-      // Switches, checkboxes, radio buttons — all follow persona primary
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected) ? primary : null,
@@ -290,13 +285,8 @@ class PersonaTheme {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// AppColorScheme EXTENSION (kept for backward compatibility)
-// Any code using context.colorScheme.success still works.
-// ─────────────────────────────────────────────────────────────
-
 extension AppColorScheme on ColorScheme {
   Color get success => brightness == Brightness.dark
-      ? const Color(0xFF35B595) // Grover Green
+      ? const Color(0xFF35B595)
       : const Color(0xFF1F6F5B);
 }

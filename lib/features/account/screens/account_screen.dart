@@ -55,7 +55,6 @@ class _AccountScreenState extends State<AccountScreen> {
   Offset _jitterOffset = Offset.zero;
   late final Timer? _jitterTimer;
 
-  // Dev info
   String _appVersion = '';
   String _buildNumber = '';
   String _fcmToken = '';
@@ -282,7 +281,6 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                   const SizedBox(height: 28),
 
-                  // Sync Tile
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: GestureDetector(
@@ -426,7 +424,6 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Horizontal Color List
                   SizedBox(
                     height: 110,
                     child: ListView.separated(
@@ -924,10 +921,6 @@ class _AccountScreenState extends State<AccountScreen> {
     if (mounted) Navigator.pushReplacementNamed(context, '/login');
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // BUILD
-  // ─────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1088,10 +1081,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // HERO
-  // ─────────────────────────────────────────────────────────────
-
   Widget _buildHero(
     ColorScheme colors,
     Brightness brightness,
@@ -1114,7 +1103,6 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // ── Banner ──
           Container(
             width: double.infinity,
             height: bannerHeight,
@@ -1130,7 +1118,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
 
-          // ── Avatar ─────────────────────────────────────────────
           Positioned(
             top: bannerHeight - overhang,
             left: isWide ? 32 : 16,
@@ -1176,7 +1163,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ),
                   ),
-                  // Camera badge
+
                   Positioned(
                     right: 0,
                     bottom: 2,
@@ -1200,8 +1187,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
 
-          // ── Name + email — right of avatar, constrained so it
-          //    never overflows the available row width ──────────
           Positioned(
             top: bannerHeight + 8,
             left: avatarSize + (isWide ? 48 : 28),
@@ -1236,10 +1221,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // BODY
-  // ─────────────────────────────────────────────────────────────
-
   Widget _buildBody(
     ColorScheme colors,
     Brightness brightness,
@@ -1251,7 +1232,6 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Email verification banner ──────────────────────────
           if (!isEmailVerified && !user!.isAnonymous) ...[
             TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 600),
@@ -1310,7 +1290,6 @@ class _AccountScreenState extends State<AccountScreen> {
             const SizedBox(height: 20),
           ],
 
-          // ── Student info chips ─────────────────────────────────
           if (isBergenStudent) ...[
             TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 600),
@@ -1359,7 +1338,6 @@ class _AccountScreenState extends State<AccountScreen> {
             const SizedBox(height: 20),
           ],
 
-          // ── Chatbot & appearance group ─────────────────────────
           TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 600),
             curve: Curves.easeOutCubic,
@@ -1586,7 +1564,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
 
-          // ── Danger group ───────────────────────────────────────
           const SizedBox(height: 20),
           TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 600),
@@ -1635,7 +1612,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
 
-          // ── Dev Information section ───────────────────────────
           const SizedBox(height: 20),
           TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 600),
@@ -1700,10 +1676,6 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
   }
-
-  // ─────────────────────────────────────────────────────────────
-  // COUNSELOR ROW
-  // ─────────────────────────────────────────────────────────────
 
   Widget _counselorRow(
     ColorScheme colors,
@@ -1792,10 +1764,6 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
   }
-
-  // ─────────────────────────────────────────────────────────────
-  // SHARED COMPONENTS
-  // ─────────────────────────────────────────────────────────────
 
   void _showCediteUnlockPuzzle() {
     Navigator.push(

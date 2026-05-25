@@ -12,10 +12,6 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/docs/v1.dart' as docs;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURATION & CONSTANTS
-// ═══════════════════════════════════════════════════════════════════════════
-
 class _ApiConfig {
   static const baseUrl = 'https://api.groq.com/openai/v1';
   static const model = 'llama-3.1-8b-instant';
@@ -27,8 +23,8 @@ class _ApiConfig {
 
 class _GoogleDocsConfig {
   static const folderIds = [
-    '0AF5okKhTCOVLUk9PVA', // Resources folder
-    '1h1mXS0l6Sg-952dQtJTBURl2xgzGJw_j', // Knowledge Base folder
+    '0AF5okKhTCOVLUk9PVA',
+    '1h1mXS0l6Sg-952dQtJTBURl2xgzGJw_j',
   ];
   static const serviceAccountAssetPath =
       'assets/credentials/service_account.json';
@@ -43,14 +39,10 @@ class _StorageConfig {
   static const maxKnowledgeBaseChars = 15000;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// GOOGLE DOCS CLIENT
-// ═══════════════════════════════════════════════════════════════════════════
-
 class GoogleDocsClient {
   static auth.AutoRefreshingAuthClient? _authClient;
   static docs.DocsApi? _docsApi;
-  // ignore: unused_field
+
   static drive.DriveApi? _driveApi;
 
   static Future<void> initialize() async {
@@ -140,10 +132,6 @@ class GoogleDocsClient {
     docs.Document document, {
     required String docName,
   }) {
-    // Note: With googleapis 16.0.0+, we now support the 'tabs' feature.
-    // If the document has tabs, we process them recursively.
-    // If it doesn't (legacy), we fall back to the main body.
-
     final sections = <KnowledgeBaseSection>[];
 
     if (document.tabs != null && document.tabs!.isNotEmpty) {
@@ -212,7 +200,6 @@ class GoogleDocsClient {
       final isHeading = style != null && style.startsWith('HEADING_');
 
       if (isHeading) {
-        // Map HEADING_1 to #, HEADING_2 to ##, etc.
         final level = int.tryParse(style.split('_').last) ?? 1;
         buffer.write('\n' + ('#' * level) + ' ');
       }
@@ -270,10 +257,6 @@ class GoogleDocsClient {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// DOMAIN MODELS
-// ═══════════════════════════════════════════════════════════════════════════
-
 enum CounselorDomain { college, research, ib, art, policy, general }
 
 class UserProfile {
@@ -327,7 +310,7 @@ class KnowledgeBaseSection {
   final String title;
   final String content;
   final List<String> keywords;
-  final String source; // New: tracks tab name or document source
+  final String source;
 
   const KnowledgeBaseSection({
     required this.title,
@@ -336,10 +319,6 @@ class KnowledgeBaseSection {
     required this.source,
   });
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DOMAIN DETECTION
-// ═══════════════════════════════════════════════════════════════════════════
 
 class DomainDetector {
   static final _patterns = {
@@ -549,7 +528,7 @@ class SafetyFilter {
     final lower = message.toLowerCase();
     for (final pattern in _dangerPatterns) {
       if (pattern.hasMatch(lower)) {
-        return "I'm really concerned to hear that. Please know that you're not alone, but as an AI, I'm not equipped to handle this. You should immediately reach out to your school counselor or a trusted adult. If you're in immediate danger, please call 911 or go to the nearest emergency room.";
+        return "I'm really concerned to hear that. Please know that you're not alone, but this app is not equipped to handle this. You should immediately reach out to your school counselor or a trusted adult. If you're in immediate danger, please call 911 or go to the nearest emergency room.";
       }
     }
     return null;
@@ -573,10 +552,6 @@ class ConversationClosureHelper {
     return ConversationClosureState.closeScreen(cleanedResponse);
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// KNOWLEDGE BASE SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
 
 class KnowledgeBaseService {
   static String? _cachedLocal;
@@ -621,7 +596,6 @@ class KnowledgeBaseService {
     final sections = <KnowledgeBaseSection>[];
     final lines = content.split('\n');
 
-    // Add source keywords to every section in this tab automatically
     final sourceKeywords = source
         .toLowerCase()
         .replaceAll(RegExp(r'[^\w\s]'), ' ')
@@ -637,8 +611,6 @@ class KnowledgeBaseService {
       final line = lines[i].trim();
       if (line.isEmpty) continue;
 
-      // Only split on explicit Markdown headers (# or ##) to prevent fragmentation.
-      // Legacy "ALL CAPS" or "Colon-Ending" rules are removed as they split tables too much.
       final isHeader = line.startsWith('#');
 
       if (isHeader && currentTitle != null) {
@@ -661,7 +633,6 @@ class KnowledgeBaseService {
       if (isHeader) {
         currentTitle = line.replaceAll(RegExp(r'^#+\s*'), '').trim();
       } else {
-        // If we haven't found a title yet, use the first substantive line as the title
         if (currentTitle == null) {
           currentTitle = line.length > 30
               ? line.substring(0, 30) + '...'
@@ -674,9 +645,7 @@ class KnowledgeBaseService {
           ' ',
         );
         final words = cleanLine.split(RegExp(r'\s+'));
-        currentKeywords.addAll(
-          words.where((w) => w.length > 2),
-        ); // Use length > 2 for TOK, IB, AP
+        currentKeywords.addAll(words.where((w) => w.length > 2));
       }
     }
 
@@ -804,10 +773,6 @@ class KnowledgeBaseService {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// COURSE CATALOG SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
-
 class CourseCatalogService {
   static List<Map<String, dynamic>>? _courses;
   static final _alwaysIncludeAcademies = {
@@ -866,10 +831,6 @@ class CourseCatalogService {
     return sb.isEmpty ? '[Course catalog unavailable]' : sb.toString();
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// FIREBASE SERVICES
-// ═══════════════════════════════════════════════════════════════════════════
 
 class ChatHistoryService {
   static DocumentReference _getDoc(String uid, CounselorPersona persona) =>
@@ -953,18 +914,11 @@ class ChatHistoryService {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// LIVE DATA SERVICE (Bus Routes & Teacher Absences)
-// ═══════════════════════════════════════════════════════════════════════════
-
 class LiveDataService {
-  /// Fetches current bus routes and teacher absences from Firestore
-  /// and formats them as a text block for the AI system prompt.
   static Future<String> fetchLiveDataForPrompt() async {
     final sb = StringBuffer();
 
     try {
-      // ── Bus routes ──────────────────────────────────────────────────────
       final busDoc = await FirebaseFirestore.instance
           .collection('public_data')
           .doc('bus_routes')
@@ -991,7 +945,6 @@ class LiveDataService {
         sb.writeln();
       }
 
-      // ── Teacher absences ────────────────────────────────────────────────
       final absDoc = await FirebaseFirestore.instance
           .collection('public_data')
           .doc('teacher_absences')
@@ -1025,20 +978,16 @@ class LiveDataService {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PROMPT BUILDING
-// ═══════════════════════════════════════════════════════════════════════════
-
 class PromptBuilder {
   static String buildSharedRules(String catalog, String kb, String liveData) =>
       '''
-You are a counselor at Bergen County Academies (BCA) for the gr0ve app. 
+You are a counselor at Bergen County Academies (BCA) for the gr0ve app.
 Your scope is SOLELY defined by the provided school data—clubs, research, academics, scheduling, and student life.
 
 CRITICAL — SOURCE ADHERENCE:
 1. You MUST ONLY use information from the === COURSE CATALOG === and === BCA KNOWLEDGE BASE === sections provided below.
 2. If a student asks a question about BCA (policies, requirements, schedules, etc.) that cannot be answered using the provided context, you MUST state "I don't have that information in my records" or suggest they contact a human counselor.
-3. DO NOT invent dates, names, or requirements. 
+3. DO NOT invent dates, names, or requirements.
 4. DO NOT use your general pre-trained knowledge to supplement missing school-specific data. Factual accuracy is your TOP priority.
 5. You also have access to LIVE school data including bus routes and teacher absences. Use it strictly for those queries.
 
@@ -1116,10 +1065,6 @@ You are speaking via Text-to-Speech. To sound more human:
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// LLM STREAMING SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
-
 class LLMStreamingService {
   static Future<String> stream({
     required List<Map<String, dynamic>> messages,
@@ -1190,10 +1135,6 @@ class LLMStreamingService {
     return buffer.toString().trim();
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COUNSELOR SERVICE
-// ═══════════════════════════════════════════════════════════════════════════
 
 class OllamaCounselorService {
   static Future<ConversationClosureState> sendMessage({

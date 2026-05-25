@@ -24,11 +24,13 @@ class GroveUnlockService {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({_field: true}, SetOptions(merge: true));
-        UserDocCache.invalidate();
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          _field: true,
+        }, SetOptions(merge: true));
+        final cached = UserDocCache.getCached();
+        if (cached != null) {
+          UserDocCache.update({...cached, _field: true});
+        }
       } catch (_) {}
     }
   }

@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 
-// SERVICE: Handles Firebase Authentication and user profile management
 class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -11,13 +10,10 @@ class AuthenticationService {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // METHOD: specific validation for BCA emails
   bool _isBCAEmail(String email) {
     return email.toLowerCase().endsWith('@bergen.org');
   }
 
-  // METHOD: Creates or updates user document in Firestore on login
-  // LOGIC: Updates lastLoginAt if document exists, otherwise creates new user profile
   Future<void> _createUserDocument(User user, {String? email}) async {
     final userEmail = email ?? user.email ?? '';
     final isBCA = userEmail.isNotEmpty ? _isBCAEmail(userEmail) : false;
@@ -40,7 +36,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Signs up a new user with email and password
   Future<User?> signUpWithEmail(
     String email,
     String password,
@@ -69,7 +64,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Signs in existing user
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       final trimmedEmail = email.trim();
@@ -92,7 +86,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Signs in anonymously
   Future<User?> signInAnonymously() async {
     try {
       final UserCredential userCredential = await _auth.signInAnonymously();
@@ -109,11 +102,8 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Signs out user and resets app state
-  // LOGIC: Explicitly resets StarredTeacherService to prevent state leakage
   Future<void> signOut() async {
     try {
-      // Reset services BEFORE signing out
       StarredTeacherService.reset();
 
       await _auth.signOut();
@@ -122,7 +112,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Sends password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
@@ -133,7 +122,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Fetches user data from Firestore
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
@@ -143,7 +131,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Checks if current user is from BCA domain
   Future<bool> isCurrentUserBCA() async {
     if (currentUser == null) return false;
 
@@ -155,7 +142,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Upgrades anonymous account to permanent account
   Future<User?> linkAnonymousToEmailPassword(
     String email,
     String password,
@@ -192,7 +178,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Deletes user account and profile
   Future<void> deleteAccount(String password) async {
     if (currentUser == null) return;
 
@@ -200,7 +185,6 @@ class AuthenticationService {
       final uid = currentUser!.uid;
       final email = currentUser!.email!;
 
-      // Re-authenticate to get fresh credentials for account deletion
       try {
         final credential = EmailAuthProvider.credential(
           email: email,
@@ -211,13 +195,10 @@ class AuthenticationService {
         throw Exception('Failed to verify password: ${e.toString()}');
       }
 
-      // Delete from Firestore first to ensure no ghost logins
       await _firestore.collection('users').doc(uid).delete();
 
-      // Then delete the Firebase Auth user
       await currentUser!.delete();
 
-      // Finally, ensure we're signed out
       signOut();
     } catch (e) {
       throw Exception(
@@ -226,7 +207,6 @@ class AuthenticationService {
     }
   }
 
-  // METHOD: Maps Firebase exceptions to user-friendly messages
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'weak-password':

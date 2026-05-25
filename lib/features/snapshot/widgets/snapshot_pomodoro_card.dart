@@ -6,10 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 
-// ════════════════════════════════════════════════════════════════
-// POMODORO PREFS  (unchanged logic)
-// ════════════════════════════════════════════════════════════════
-
 class PomPrefs {
   final int focus, shortB, longB;
   const PomPrefs({this.focus = 25, this.shortB = 5, this.longB = 15});
@@ -60,10 +56,6 @@ class PomPrefsService {
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-// INTERNAL ENUMS
-// ════════════════════════════════════════════════════════════════
-
 enum _PM {
   focus,
   shortB,
@@ -73,20 +65,15 @@ enum _PM {
   String get shortLabel => const ['Focus', 'Short', 'Long'][index];
   int secs(PomPrefs p) => [p.focus * 60, p.shortB * 60, p.longB * 60][index];
 
-  // Gold accent for focus, muted tones for breaks — consistent with gr0ve theme
   Color activeColor(BuildContext context) {
     final c = Theme.of(context).colorScheme;
     return switch (this) {
-      _PM.focus => c.primary, // app gold
-      _PM.shortB => const Color(0xFF7CB9A8), // muted sage
-      _PM.longB => const Color(0xFF8B9DC3), // muted slate-blue
+      _PM.focus => c.primary,
+      _PM.shortB => const Color(0xFF7CB9A8),
+      _PM.longB => const Color(0xFF8B9DC3),
     };
   }
 }
-
-// ════════════════════════════════════════════════════════════════
-// CARD: POMODORO  (redesigned)
-// ════════════════════════════════════════════════════════════════
 
 class SnapshotPomodoroCard extends StatefulWidget {
   final bool compact;
@@ -106,7 +93,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
   Timer? _t;
   late PomPrefs _draft;
 
-  // Subtle breathing glow when timer is running
   late final AnimationController _glowAc = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1800),
@@ -116,7 +102,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
     curve: Curves.easeInOut,
   );
 
-  // Slide-in for settings panel
   late final AnimationController _settingsAc = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 280),
@@ -126,7 +111,7 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
   void initState() {
     super.initState();
     _draft = PomPrefsService.prefs.value;
-    // ── FIX: read from prefs correctly on first load ──
+
     _left = _mode.secs(PomPrefsService.prefs.value);
     PomPrefsService.prefs.addListener(_onPref);
   }
@@ -220,7 +205,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
       valueListenable: PomPrefsService.prefs,
       builder: (_, __, ___) => Column(
         children: [
-          // ── Mode selector ─────────────────────────────────────
           _ModeSelector(
             current: _mode,
             onSelect: _setMode,
@@ -230,16 +214,13 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
 
           const SizedBox(height: 10),
 
-          // ── Main card ─────────────────────────────────────────
           SnapshotTile(
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // Top row: ring + side controls
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // ── Progress rounded-rect ──────────────────
                     AnimatedBuilder(
                       animation: _glowAnim,
                       builder: (_, child) {
@@ -297,12 +278,10 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
 
                     const SizedBox(width: 18),
 
-                    // ── Right side ─────────────────────────────
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Play/pause button — full width, prominent
                           _PlayButton(
                             running: _run,
                             done: _left == 0,
@@ -312,7 +291,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
 
                           const SizedBox(height: 10),
 
-                          // Reset + settings row
                           Row(
                             children: [
                               _SmallButton(
@@ -340,7 +318,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
                   ],
                 ),
 
-                // ── Session dots ───────────────────────────────
                 if (_sessions > 0 || true) ...[
                   const SizedBox(height: 16),
                   _SessionDots(sessions: _sessions, color: mColor, cs: cs),
@@ -349,7 +326,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
             ),
           ),
 
-          // ── Settings panel ─────────────────────────────────────
           AnimatedSize(
             duration: const Duration(milliseconds: 260),
             curve: Curves.easeInOut,
@@ -375,11 +351,6 @@ class _SnapshotPomodoroCardState extends State<SnapshotPomodoroCard>
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-// SUB-WIDGETS
-// ════════════════════════════════════════════════════════════════
-
-/// Three-tab mode selector with animated indicator
 class _ModeSelector extends StatelessWidget {
   final _PM current;
   final ValueChanged<_PM> onSelect;
@@ -440,7 +411,6 @@ class _ModeSelector extends StatelessWidget {
   }
 }
 
-/// Pill label inside the ring
 class _ModePill extends StatelessWidget {
   final String label;
   final Color color;
@@ -467,7 +437,6 @@ class _ModePill extends StatelessWidget {
   );
 }
 
-/// Big start/pause button
 class _PlayButton extends StatelessWidget {
   final bool running, done;
   final Color color;
@@ -542,7 +511,6 @@ class _PlayButton extends StatelessWidget {
   }
 }
 
-/// Icon-only or icon+label small button
 class _SmallButton extends StatelessWidget {
   final IconData icon;
   final String? label;
@@ -611,7 +579,6 @@ class _SmallButton extends StatelessWidget {
   }
 }
 
-/// Four session dots with animated fill
 class _SessionDots extends StatelessWidget {
   final int sessions;
   final Color color;
@@ -667,7 +634,6 @@ class _SessionDots extends StatelessWidget {
   }
 }
 
-/// Settings panel (duration editor)
 class _SettingsPanel extends StatelessWidget {
   final PomPrefs draft;
   final ColorScheme cs;
@@ -694,7 +660,6 @@ class _SettingsPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
@@ -708,14 +673,12 @@ class _SettingsPanel extends StatelessWidget {
             ),
           ),
 
-          // Duration rows
           ...rows.map((r) {
             final mColor = r.$1.activeColor(ctx);
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  // Color dot
                   Container(
                     width: 6,
                     height: 6,
@@ -757,7 +720,6 @@ class _SettingsPanel extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Action buttons
           Row(
             children: [
               Expanded(
@@ -785,7 +747,6 @@ class _SettingsPanel extends StatelessWidget {
   }
 }
 
-/// +/− stepper control with colored value
 class _StepControl extends StatelessWidget {
   final int value;
   final Color color;
@@ -877,10 +838,6 @@ class _ActionButton extends StatelessWidget {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
-// RRECT PROGRESS PAINTER — rounded rectangle border as progress track
-// ════════════════════════════════════════════════════════════════
-
 class _RRectPainter extends CustomPainter {
   final double progress;
   final Color color, track;
@@ -907,7 +864,6 @@ class _RRectPainter extends CustomPainter {
       Radius.circular(radius - inset),
     );
 
-    // Track (full border, dimmed)
     canvas.drawRRect(
       rrect,
       Paint()
@@ -919,15 +875,12 @@ class _RRectPainter extends CustomPainter {
 
     if (progress <= 0) return;
 
-    // Build the perimeter path starting from top-center, going clockwise
     final path = _buildRRectPath(size);
 
-    // Measure total perimeter length
     final metrics = path.computeMetrics().toList();
     final totalLength = metrics.fold(0.0, (sum, m) => sum + m.length);
     final drawn = totalLength * progress.clamp(0.0, 1.0);
 
-    // Draw only the progress portion
     final progressPath = Path();
     double remaining = drawn;
     for (final metric in metrics) {
@@ -948,7 +901,6 @@ class _RRectPainter extends CustomPainter {
     );
   }
 
-  /// Builds a clockwise path around the rounded rect starting from the top-center.
   Path _buildRRectPath(Size size) {
     final inset = strokeWidth / 2;
     final r = radius - inset;
@@ -958,21 +910,21 @@ class _RRectPainter extends CustomPainter {
     final h = size.height - strokeWidth;
 
     final path = Path();
-    // Start at top-center
+
     path.moveTo(l + w / 2, t);
-    // Top-right corner
+
     path.lineTo(l + w - r, t);
     path.arcToPoint(Offset(l + w, t + r), radius: Radius.circular(r));
-    // Right side down
+
     path.lineTo(l + w, t + h - r);
     path.arcToPoint(Offset(l + w - r, t + h), radius: Radius.circular(r));
-    // Bottom left
+
     path.lineTo(l + r, t + h);
     path.arcToPoint(Offset(l, t + h - r), radius: Radius.circular(r));
-    // Left side up
+
     path.lineTo(l, t + r);
     path.arcToPoint(Offset(l + r, t), radius: Radius.circular(r));
-    // Back to top-center
+
     path.lineTo(l + w / 2, t);
 
     return path;

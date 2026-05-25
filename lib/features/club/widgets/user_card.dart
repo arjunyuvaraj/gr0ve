@@ -66,9 +66,7 @@ class UserCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  user.displayName ??
-                      user.email ??
-                      'Anonymous', // Show display name if available
+                  user.displayName ?? user.email ?? 'Anonymous',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -117,7 +115,6 @@ class UserCard extends StatelessWidget {
                   } else if (value == 'delete') {
                     onDeleteAccount();
                   } else if (value == 'nickname') {
-                    // Add this
                     onUpdateNickname();
                   }
                 },
@@ -126,7 +123,6 @@ class UserCard extends StatelessWidget {
                 ),
                 itemBuilder: (context) => [
                   PopupMenuItem(
-                    // Add this menu item
                     value: 'nickname',
                     child: Row(
                       children: [

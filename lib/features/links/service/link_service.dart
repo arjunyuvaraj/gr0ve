@@ -38,7 +38,6 @@ class QuickLink {
     );
   }
 
-  // Icon mapping - all const IconData references
   static const Map<String, IconData> _iconMap = {
     'school': Icons.school,
     'book': Icons.book,
@@ -60,7 +59,6 @@ class QuickLink {
     'video': Icons.video_library,
     'games': Icons.games,
     'work': Icons.work,
-    // Add more icons as needed
   };
 }
 

@@ -8,13 +8,10 @@ class NavigationPersistenceService {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
-  // METHOD: Load the saved order of navigation item IDs
   Future<List<String>?> getSavedOrder() async {
-    // 1. Check SharedPreferences first for quick access
     final prefs = await SharedPreferences.getInstance();
     final localOrder = prefs.getStringList(_storageKey);
 
-    // 2. If user is logged in, try cached user doc data
     final user = _auth.currentUser;
     if (user != null && !user.isAnonymous) {
       try {
@@ -23,7 +20,6 @@ class NavigationPersistenceService {
           final remoteOrder = (data['navigation_order'] as List?)
               ?.cast<String>();
           if (remoteOrder != null) {
-            // Sync local if different (basic sync)
             if (localOrder == null ||
                 _listEquals(localOrder, remoteOrder) == false) {
               await prefs.setStringList(_storageKey, remoteOrder);
@@ -39,13 +35,10 @@ class NavigationPersistenceService {
     return localOrder;
   }
 
-  // METHOD: Save the order of navigation item IDs
   Future<void> saveOrder(List<String> order) async {
-    // 1. Save to SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_storageKey, order);
 
-    // 2. If user is logged in, save to Firestore
     final user = _auth.currentUser;
     if (user != null && !user.isAnonymous) {
       try {

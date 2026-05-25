@@ -2494,7 +2494,7 @@ List<Scene> buildEpisode03TangledForest() {
         state.londonUnlocked = true;
         state.stability += 1;
         state.connectivity += 1;
-        state.seedWarmth = 15; // Steadily lost warmth throughout the episode
+        state.seedWarmth = 15;
       },
       waitDuration: const Duration(hours: 5),
     ),

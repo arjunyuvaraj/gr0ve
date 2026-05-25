@@ -1,22 +1,12 @@
-// counselor_persona_service_FIXED.dart
-//
-// FIXED VERSION - Handles iOS icon change rate limiting
-//
-// The key issue: iOS restricts how frequently you can change app icons.
-// Error: "Resource temporarily unavailable" means we're hitting that limit.
-//
-// Solution: Add debouncing and retry logic with exponential backoff.
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Added for kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
-import 'dart:io'
-    as io; // Use prefix to avoid conflicts if needed, but we'll guard it
+import 'dart:io' as io;
 
 enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite, ash }
 
@@ -143,17 +133,17 @@ class AppFeatureFlags {
   static bool get ashUnlocked => false;
 
   static Future<void> load() async {
-    // Listen to Auth changes to retry flag loading when a user logs in
     FirebaseAuth.instance.authStateChanges().listen((user) {
       _startListener();
     });
-    
-    final completer = Completer<void>();
-    _startListener(onFirstData: () {
-      if (!completer.isCompleted) completer.complete();
-    });
 
-    // Wait max 2 seconds for the flag, otherwise proceed (fail-safe)
+    final completer = Completer<void>();
+    _startListener(
+      onFirstData: () {
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+
     await completer.future.timeout(
       const Duration(seconds: 2),
       onTimeout: () => print('[FLAGS] Sync timed out, proceeding...'),
@@ -170,38 +160,40 @@ class AppFeatureFlags {
           .doc('feature_flags')
           .snapshots()
           .listen(
-        (doc) {
-          if (doc.exists) {
-            final data = doc.data();
-            lockdownMode.value = data?['lockdown_mode'] ?? false;
-            
-            final testers = List<String>.from(data?['beta_testers'] ?? []);
-            _betaTesters.clear();
-            _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
-            
-            final currentEmail = FirebaseAuth.instance.currentUser?.email;
-            final isBetaTesterFlag = isBetaTester(currentEmail);
-            isBeta.value = isBetaTesterFlag;
-            
-            enableClubs.value = (data?['enable_clubs'] ?? false) || isBetaTesterFlag;
-            enableCounselor.value = (data?['enable_counselor'] ?? false) || isBetaTesterFlag;
-            
-            print('[FLAGS] --- SYSTEM STATUS ---');
-            print('[FLAGS] Lockdown Active: ${lockdownMode.value}');
-            print('[FLAGS] User Is Beta: $isBetaTesterFlag');
-            print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
-            print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
-            print('[FLAGS] -----------------------');
-            
-            onFirstData?.call();
-          }
-        },
-        onError: (e) {
-          print('[FLAGS] Firestore restricted access: $e');
-          // If we can't read it, we proceed but log it
-          onFirstData?.call();
-        },
-      );
+            (doc) {
+              if (doc.exists) {
+                final data = doc.data();
+                lockdownMode.value = data?['lockdown_mode'] ?? false;
+
+                final testers = List<String>.from(data?['beta_testers'] ?? []);
+                _betaTesters.clear();
+                _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
+
+                final currentEmail = FirebaseAuth.instance.currentUser?.email;
+                final isBetaTesterFlag = isBetaTester(currentEmail);
+                isBeta.value = isBetaTesterFlag;
+
+                enableClubs.value =
+                    (data?['enable_clubs'] ?? false) || isBetaTesterFlag;
+                enableCounselor.value =
+                    (data?['enable_counselor'] ?? false) || isBetaTesterFlag;
+
+                print('[FLAGS] --- SYSTEM STATUS ---');
+                print('[FLAGS] Lockdown Active: ${lockdownMode.value}');
+                print('[FLAGS] User Is Beta: $isBetaTesterFlag');
+                print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
+                print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
+                print('[FLAGS] -----------------------');
+
+                onFirstData?.call();
+              }
+            },
+            onError: (e) {
+              print('[FLAGS] Firestore restricted access: $e');
+
+              onFirstData?.call();
+            },
+          );
     } catch (e) {
       print('[FLAGS] Fatal listener error: $e');
       onFirstData?.call();
@@ -235,10 +227,7 @@ class CounselorPersonaService {
   static bool get ashUnlocked => _ashUnlocked;
   static bool get ashLockedForever => _ashLockedForever;
 
-  // ── iOS Icon Change Rate Limiting ─────────────────────────────────────────
   static DateTime? _lastIconChangeAttempt;
-  // ignore: unused_field
-  static const _minIconChangeInterval = Duration(seconds: 2);
 
   static CounselorPersona _fromString(String? s) => CounselorPersona.values
       .firstWhere((p) => p.id == s, orElse: () => CounselorPersona.grover);
@@ -246,7 +235,8 @@ class CounselorPersonaService {
   static bool _isUnlocked(CounselorPersona p) {
     final data = UserDocCache.getCached();
     final bool abies = (data?[_abiesUnlockedField] == true) || _abiesUnlocked;
-    final bool cedite = (data?[_cediteUnlockedField] == true) || _cediteUnlocked;
+    final bool cedite =
+        (data?[_cediteUnlockedField] == true) || _cediteUnlocked;
     final bool ash = (data?[_ashUnlockedField] == true) || _ashUnlocked;
 
     return switch (p) {
@@ -279,11 +269,6 @@ class CounselorPersonaService {
   static Future<void> init({Map<String, dynamic>? cachedUserData}) async {
     final persona = await load(cachedUserData: cachedUserData);
     activePersona.value = persona;
-    // Note: We intentionally do NOT sync the app icon on startup.
-    // iOS shows an intrusive "icon changed" alert every time we call
-    // setAlternateIconName, even when the icon hasn't actually changed.
-    // The icon is synced only when the counselor persona is explicitly
-    // changed via setPersona().
   }
 
   static Future<CounselorPersona> load({
@@ -374,7 +359,6 @@ class CounselorPersonaService {
     final results = <String, dynamic>{};
 
     try {
-      // Check if dynamic icons are supported
       final supported = await FlutterDynamicIconPlus.supportsAlternateIcons;
       results['supported'] = supported;
 
@@ -382,18 +366,14 @@ class CounselorPersonaService {
         return results;
       }
 
-      // Get current icon
       final current = await FlutterDynamicIconPlus.alternateIconName;
       results['current_icon'] = current ?? 'default';
 
-      // Try to get the list of available icons
-      // Note: There's no API to list them, but we can try each one
       final testIcons = ['grover', 'aspen', 'rowan', 'sakura', 'abies'];
       final availableIcons = <String>[];
 
       for (final iconName in testIcons) {
         try {
-          // This will fail fast if the icon doesn't exist in Info.plist
           await FlutterDynamicIconPlus.supportsAlternateIcons;
           availableIcons.add(iconName);
         } catch (e) {
@@ -411,7 +391,6 @@ class CounselorPersonaService {
     return results;
   }
 
-  // BETTER FIX: Try changing icon with a much longer delay
   static Future<void> _syncIosIcon(CounselorPersona persona) async {
     if (kIsWeb || !io.Platform.isIOS) return;
 
@@ -430,7 +409,6 @@ class CounselorPersonaService {
         return;
       }
 
-      // ── MINIMAL COOLDOWN ────────────────────────────────────────────────
       final now = DateTime.now();
       if (_lastIconChangeAttempt != null) {
         final timeSinceLastChange = now.difference(_lastIconChangeAttempt!);
@@ -445,12 +423,9 @@ class CounselorPersonaService {
         }
       }
 
-      // ── CHANGE ATTEMPT ──────────────────────────────────────────────────
       try {
         debugPrint('[ICON] Changing iOS icon to: ${persona.iosIconName}');
 
-        // 'grover' is our default icon in Info.plist (AppIcon) or the primary one.
-        // On iOS, setting it to null reverts to CFBundlePrimaryIcon.
         await FlutterDynamicIconPlus.setAlternateIconName(
           iconName: persona.iosIconName == 'grover'
               ? null
@@ -476,9 +451,6 @@ class CounselorPersonaService {
         'alias': persona.androidAlias,
       });
     } on PlatformException {
-      /* ignore */
-    } on MissingPluginException {
-      /* ignore */
-    }
+    } on MissingPluginException {}
   }
 }

@@ -86,7 +86,6 @@ class NewsDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Academy Chronicle badge
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -120,7 +119,6 @@ class NewsDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Title
                 Text(
                   article.title,
                   style: TextStyle(
@@ -133,7 +131,6 @@ class NewsDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Meta information
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -142,7 +139,6 @@ class NewsDetailScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      // Author
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +166,6 @@ class NewsDetailScreen extends StatelessWidget {
                         ),
                       ),
 
-                      // Divider
                       Container(
                         height: 50,
                         width: 1,
@@ -178,7 +173,6 @@ class NewsDetailScreen extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 16),
                       ),
 
-                      // Date
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -208,7 +202,6 @@ class NewsDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                // Article content
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Html(
@@ -386,7 +379,6 @@ class NewsDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // Bottom action card
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(

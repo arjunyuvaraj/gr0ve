@@ -6,10 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 
-// ─────────────────────────────────────────────────────────────
-// CEDITE UNLOCK SERVICE
-// ─────────────────────────────────────────────────────────────
-
 class CediteUnlockService {
   static const _field = 'cedite_unlocked';
 
@@ -37,10 +33,6 @@ class CediteUnlockService {
     } catch (_) {}
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// CEDITE SHADOW SCREEN — entry point
-// ─────────────────────────────────────────────────────────────
 
 class CediteShadowScreen extends StatefulWidget {
   final VoidCallback? onUnlocked;
@@ -94,10 +86,6 @@ class _CediteShadowScreenState extends State<CediteShadowScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// PASSPHRASE SCREEN
-// ─────────────────────────────────────────────────────────────
 
 const _cediteHintLetters = {'D', 'E', 'C', 'I', 'T'};
 
@@ -491,10 +479,6 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// CEDITE REVEAL SCREEN
-// ─────────────────────────────────────────────────────────────
-
 class CediteRevealScreen extends StatefulWidget {
   final VoidCallback? onContinue;
   const CediteRevealScreen({super.key, this.onContinue});
@@ -727,7 +711,7 @@ He will free you with the truth.''',
                     ),
                   ),
                   const Spacer(flex: 2),
-                  const SizedBox(height: 48), // Padding
+                  const SizedBox(height: 48),
                 ],
               ),
             ),

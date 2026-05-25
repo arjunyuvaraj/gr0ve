@@ -2,7 +2,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gr0ve/features/navigation/screens/navigation_screen.dart';
 import 'package:flutter/material.dart';
 
-/// Handles notification taps and navigates to the appropriate screen.
 class NotificationHandler {
   static final NotificationHandler _instance = NotificationHandler._internal();
   factory NotificationHandler() => _instance;
@@ -31,9 +30,6 @@ class NotificationHandler {
     } else if (payload.startsWith('club_request:')) {
       _navigateToAdminPanel();
     } else if (payload.startsWith('qa_reply:')) {
-      // Format: qa_reply:<groupId>:<announcementId>:<questionId>
-      // We navigate to the group detail screen — the user can open the Q&A
-      // sheet from there. Passing the full deep-link data for future use.
       final parts = payload.substring('qa_reply:'.length).split(':');
       if (parts.isNotEmpty) {
         _navigateToGroup(parts[0]);

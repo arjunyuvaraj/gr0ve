@@ -182,7 +182,6 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row
             Row(
               children: [
                 Expanded(
@@ -253,7 +252,6 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
               ),
             ],
 
-            // Delete button
             if (_isLoading)
               Padding(
                 padding: const EdgeInsets.only(top: 24),
@@ -275,7 +273,10 @@ class _EventDetailsDialogState extends State<EventDetailsDialog> {
                 children: [
                   TextButton.icon(
                     onPressed: _deleteEvent,
-                    icon: Icon(Icons.delete_outline_rounded, color: colors.error),
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: colors.error,
+                    ),
                     label: Text(
                       'Delete Event',
                       style: TextStyle(

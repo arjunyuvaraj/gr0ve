@@ -114,7 +114,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Logo/Title Section
                       Text(
                         "GR0VE",
                         style: text.displayMedium?.copyWith(
@@ -136,7 +135,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 64),
 
-                      // Nickname Field
                       TextFormField(
                         controller: _nicknameController,
                         keyboardType: TextInputType.name,
@@ -179,7 +177,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Email Field
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -225,7 +222,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Password Field
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
@@ -284,7 +280,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Confirm Password Field
                       TextFormField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
@@ -343,7 +338,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                       ),
 
-                      // Error Message
                       if (_errorMessage != null) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -378,7 +372,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Sign Up Button
                       CustomPrimaryButton(
                         label: _isLoading ? "CREATING ACCOUNT..." : "SIGN UP",
                         onTap: _isLoading ? () {} : _handleRegister,
@@ -386,7 +379,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Divider
                       Row(
                         children: [
                           Expanded(
@@ -414,7 +406,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Guest Button
                       InkWell(
                         onTap: _isLoading ? null : _handleAnonymousAuth,
                         borderRadius: BorderRadius.circular(12),
@@ -448,7 +439,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Sign In Link
                       TextButton(
                         onPressed: _isLoading
                             ? null
@@ -468,7 +458,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Footer Text
                       Text(
                         "Register with a @bergen.org email to access more",
                         style: text.bodySmall?.copyWith(

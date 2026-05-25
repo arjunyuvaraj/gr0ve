@@ -202,7 +202,9 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
                               String? lastStation;
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: filteredItems.asMap().entries.map((itemEntry) {
+                                children: filteredItems.asMap().entries.map((
+                                  itemEntry,
+                                ) {
                                   final index = itemEntry.key;
                                   final entry = itemEntry.value;
                                   final widgets = <Widget>[];
@@ -220,8 +222,10 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
                                           return Opacity(
                                             opacity: value,
                                             child: Transform.translate(
-                                              offset:
-                                                  Offset(0, 15 * (1 - value)),
+                                              offset: Offset(
+                                                0,
+                                                15 * (1 - value),
+                                              ),
                                               child: child,
                                             ),
                                           );
@@ -233,8 +237,8 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
                                           ),
                                           child: Text(
                                             entry.station,
-                                            style:
-                                                textSize.titleMedium?.copyWith(
+                                            style: textSize.titleMedium
+                                                ?.copyWith(
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                           ),
@@ -537,10 +541,7 @@ class _MenuItemCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surface.withOpacity(0.4),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: colors.outline.withOpacity(0.08),
-            width: 1,
-          ),
+          border: Border.all(color: colors.outline.withOpacity(0.08), width: 1),
           boxShadow: [
             BoxShadow(
               color: colors.shadow.withOpacity(0.03),

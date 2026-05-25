@@ -92,7 +92,6 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
                       padding: const EdgeInsets.fromLTRB(0, 16, 0, 110),
                       itemCount: clubs.isEmpty ? 4 : clubs.length + 2,
                       itemBuilder: (context, index) {
-                        // Index 0: Join Code Card
                         if (index == 0) {
                           return JoinWithCodeCard(
                             controller: _joinCodeController,
@@ -100,12 +99,10 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
                           );
                         }
 
-                        // Index 1: Spacing
                         if (index == 1) {
                           return const SizedBox(height: 20);
                         }
 
-                        // Empty state handling
                         if (clubs.isEmpty) {
                           if (index == 2) {
                             return Column(
@@ -140,7 +137,6 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
                           return const SizedBox.shrink();
                         }
 
-                        // Header for available groups
                         if (index == 2) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
@@ -153,7 +149,6 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
                           );
                         }
 
-                        // Actual club cards
                         final clubIndex = index - 3;
                         if (clubIndex < 0 || clubIndex >= clubs.length) {
                           return const SizedBox.shrink();
@@ -239,7 +234,7 @@ class _ClubBrowseTabState extends State<ClubBrowseTab> {
               maxCrossAxisExtent: 450,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              mainAxisExtent: 140, // Height of CustomGroupCard
+              mainAxisExtent: 140,
             ),
             delegate: SliverChildBuilderDelegate((context, index) {
               final club = clubs[index];

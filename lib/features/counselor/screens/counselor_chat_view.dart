@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Added for kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/models/counselor.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
-import 'dart:io' as io; // Guarded usage
-
-// ─────────────────────────────────────────────────────────────
-// MESSAGE BUBBLE
-// ─────────────────────────────────────────────────────────────
+import 'dart:io' as io;
 
 class MessageBubble extends StatefulWidget {
   const MessageBubble({
@@ -19,7 +15,7 @@ class MessageBubble extends StatefulWidget {
     required this.textTheme,
     required this.fallbackPersona,
     required this.brightness,
-    this.onDoubleTap, // ← lifted up to CounselorScreen
+    this.onDoubleTap,
   });
 
   final ChatMessage message;
@@ -71,7 +67,7 @@ class _MessageBubbleState extends State<MessageBubble>
       child: SlideTransition(
         position: _slide,
         child: GestureDetector(
-          onDoubleTap: widget.onDoubleTap, // ← just fires the callback
+          onDoubleTap: widget.onDoubleTap,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: msg.isUser
@@ -145,10 +141,7 @@ class _MessageBubbleState extends State<MessageBubble>
                   color: Colors.white,
                 ),
               )
-            : Image.file(
-                io.File(path),
-                fit: BoxFit.cover,
-              ),
+            : Image.file(io.File(path), fit: BoxFit.cover),
       ),
     );
   }
@@ -226,7 +219,9 @@ class _MessageBubbleState extends State<MessageBubble>
                             data: msg.text,
                             styleSheet: MarkdownStyleSheet(
                               p: widget.textTheme.bodySmall?.copyWith(
-                                color: widget.colors.onSurface.withOpacity(0.88),
+                                color: widget.colors.onSurface.withOpacity(
+                                  0.88,
+                                ),
                                 height: 1.5,
                                 fontSize: 13,
                               ),
@@ -252,10 +247,6 @@ class _MessageBubbleState extends State<MessageBubble>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// CHIME PROMPT BUBBLE
-// ─────────────────────────────────────────────────────────────
 
 class ChimePromptBubble extends StatefulWidget {
   const ChimePromptBubble({
@@ -448,10 +439,6 @@ class _ChimeBtn extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// MINI TYPING INDICATOR
-// ─────────────────────────────────────────────────────────────
-
 class MiniTypingIndicator extends StatefulWidget {
   const MiniTypingIndicator({super.key, required this.color});
   final Color color;
@@ -504,10 +491,6 @@ class _MiniTypingIndicatorState extends State<MiniTypingIndicator>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// DATE SEPARATOR
-// ─────────────────────────────────────────────────────────────
 
 class DateSeparator extends StatelessWidget {
   const DateSeparator({

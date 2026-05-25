@@ -18,7 +18,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
   void initState() {
     super.initState();
     _selected = ProfilePictureService.activeVariant.value;
-    // Listen for changes from other sources
+
     ProfilePictureService.activeVariant.addListener(_onVariantChanged);
   }
 
@@ -44,7 +44,6 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
     final persona = CounselorPersonaService.activePersona.value;
     final pc = persona.primary(brightness);
 
-    // Grouping logic
     final grover = variants
         .where(
           (v) =>

@@ -29,7 +29,6 @@ class HelpScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Announcement card
                   Container(
                     margin: const EdgeInsets.only(bottom: 20),
                     padding: const EdgeInsets.all(18),
@@ -82,7 +81,6 @@ class HelpScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Contact options
                   Text(
                     "GET IN TOUCH",
                     style: TextStyle(
@@ -94,7 +92,6 @@ class HelpScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Feedback card
                   _buildActionCard(
                     context,
                     icon: Icons.feedback_rounded,
@@ -107,7 +104,6 @@ class HelpScreen extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  // Email card
                   _buildActionCard(
                     context,
                     icon: Icons.email_rounded,
@@ -119,7 +115,6 @@ class HelpScreen extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  // Security card
                   _buildActionCard(
                     context,
                     icon: Icons.shield_rounded,

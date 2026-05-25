@@ -222,7 +222,6 @@ class _LinksScreenState extends State<LinksScreen> {
         const CustomHeader(title: "LINKS"),
         const SizedBox(height: 32),
 
-        // Action Buttons
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -292,7 +291,7 @@ class _LinksScreenState extends State<LinksScreen> {
             ),
           ),
         ],
-        // Links List
+
         if (links.isEmpty)
           _buildEmptyState(colors, theme)
         else if (isReordering)
@@ -454,7 +453,6 @@ class _LinksScreenState extends State<LinksScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Centered Icon
               Container(
                 width: 44,
                 height: 44,
@@ -467,7 +465,7 @@ class _LinksScreenState extends State<LinksScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              // Centered Title
+
               Text(
                 link.title,
                 textAlign: TextAlign.center,
@@ -481,7 +479,7 @@ class _LinksScreenState extends State<LinksScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               const Spacer(),
-              // Bottom Action Buttons
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -525,7 +523,6 @@ class _LinksScreenState extends State<LinksScreen> {
             ),
             child: Row(
               children: [
-                // Icon Container
                 Container(
                   width: 48,
                   height: 48,
@@ -539,7 +536,6 @@ class _LinksScreenState extends State<LinksScreen> {
                 ),
                 const SizedBox(width: 14),
 
-                // Title (with ellipsis truncation)
                 Expanded(
                   child: Text(
                     link.title,
@@ -555,7 +551,6 @@ class _LinksScreenState extends State<LinksScreen> {
                 ),
                 const SizedBox(width: 12),
 
-                // Action buttons
                 if (isReordering)
                   HugeIcon(
                     icon: HugeIcons.strokeRoundedMenu11,

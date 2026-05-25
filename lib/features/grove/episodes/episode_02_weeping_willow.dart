@@ -202,7 +202,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       nextScene: 'ep2_salix_first_contact',
       onEnter: (state) {
         state.transience += 3;
-        state.seedWarmth -= (8 + Random().nextInt(5)); // Heavy penalty for the cold lake
+        state.seedWarmth -= (8 + Random().nextInt(5));
       },
     ),
 
@@ -330,15 +330,11 @@ List<Scene> buildEpisode02WeepingWillow() {
     Scene(
       id: 'ep2_memory_1',
       lines: const [
-        StoryMessage(
-          'You step into Lake Lament.',
-        ),
+        StoryMessage('You step into Lake Lament.'),
         StoryMessage(
           'The shock of cold is immediate. But the cold is not painful—it is clarifying. The water rises to your talons, your wings, your chest. Your breath comes in gasps.',
         ),
-        StoryMessage(
-          'And then, the visions begin.',
-        ),
+        StoryMessage('And then, the visions begin.'),
         StoryMessage(
           'MEMORY 1: THE GIFT AWAKENS',
           kind: MessageKind.episodeHeader,
@@ -400,7 +396,7 @@ List<Scene> buildEpisode02WeepingWillow() {
         ),
         StoryMessage(
           'But Cedite, they need me! I am necessary. If I stop, the truth is lost. I\'ll rest when everyone is at peace.',
-          character: StoryCharacter.abiesBaby, // still youngish Abies
+          character: StoryCharacter.abiesBaby,
           kind: MessageKind.dialogue,
         ),
         StoryMessage(
@@ -418,9 +414,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       inputType: InputType.continueOnly,
       nextScene: 'ep2_memory_3',
       waitDuration: const Duration(hours: 3),
-      onEnter: (state) {
-        // Shards are held in the bag
-      },
+      onEnter: (state) {},
     ),
 
     Scene(
@@ -459,9 +453,7 @@ List<Scene> buildEpisode02WeepingWillow() {
       inputType: InputType.continueOnly,
       nextScene: 'ep2_memory_4',
       waitDuration: const Duration(hours: 3),
-      onEnter: (state) {
-        // Shards are held in the bag
-      },
+      onEnter: (state) {},
     ),
 
     Scene(
@@ -521,9 +513,7 @@ List<Scene> buildEpisode02WeepingWillow() {
         StoryMessage(
           'You collapse on the grass, trembling, soaked through. Dawn\'s seed pulses weakly against your chest, its light flickering.',
         ),
-        StoryMessage(
-          'The sheep gather silently, watching.',
-        ),
+        StoryMessage('The sheep gather silently, watching.'),
       ],
       inputType: InputType.continueOnly,
       nextScene: 'ep2_salix_gift_moment',
@@ -571,9 +561,7 @@ List<Scene> buildEpisode02WeepingWillow() {
     Scene(
       id: 'ep2_salix_thanks_choice',
       lines: const [
-        StoryMessage(
-          'You accept the gift, your hands still shaking.',
-        ),
+        StoryMessage('You accept the gift, your hands still shaking.'),
         StoryMessage('[STABILITY +1]', kind: MessageKind.system, isBold: true),
       ],
       inputType: InputType.choices,
@@ -647,7 +635,11 @@ List<Scene> buildEpisode02WeepingWillow() {
           'The flask glows with the combined light of the four shards, pulsing with a quiet, stabilized energy.',
         ),
         StoryMessage('[STABILITY +1]', kind: MessageKind.system, isBold: true),
-        StoryMessage('[CONNECTIVITY +1]', kind: MessageKind.system, isBold: true),
+        StoryMessage(
+          '[CONNECTIVITY +1]',
+          kind: MessageKind.system,
+          isBold: true,
+        ),
         StoryMessage('[VITALITY +1]', kind: MessageKind.system, isBold: true),
         StoryMessage('[TRANSIENCE +1]', kind: MessageKind.system, isBold: true),
       ],

@@ -60,20 +60,17 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
 
   Future<void> _checkEmailVerification() async {
     try {
-      // Force refresh the current user's auth state from Firebase
       await FirebaseAuth.instance.currentUser?.reload();
-      
+
       if (!mounted) return;
-      
-      // Get the latest user instance after reload
+
       final currentUser = FirebaseAuth.instance.currentUser;
       final verified = currentUser?.emailVerified ?? false;
-      
+
       if (verified && !isEmailVerified) {
-        // Email just got verified - cancel the polling timer
         _verificationTimer?.cancel();
       }
-      
+
       setState(() {
         isEmailVerified = verified;
       });
@@ -136,7 +133,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
           .update({'grade': selectedGrade, 'academy': selectedAcademy})
           .timeout(const Duration(seconds: 5));
 
-      // Update local cache so NavigationScreen doesn't re-trigger onboarding
       UserDocCache.invalidate();
       await UserDocCache.get();
 
@@ -176,7 +172,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -191,7 +186,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // Title
                 Text(
                   'Complete Your Profile',
                   style: textTheme.headlineMedium?.copyWith(
@@ -202,7 +196,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Subtitle
                 Text(
                   'As a Bergen student, please verify your email and set your grade and academy',
                   style: textTheme.bodyMedium?.copyWith(
@@ -212,7 +205,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // Step 1: Email Verification
                 _buildStepCard(
                   colors,
                   textTheme,
@@ -339,7 +331,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
 
                 const SizedBox(height: 20),
 
-                // Step 2: Grade Selection
                 _buildStepCard(
                   colors,
                   textTheme,
@@ -399,7 +390,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
 
                 const SizedBox(height: 20),
 
-                // Step 3: Academy Selection
                 _buildStepCard(
                   colors,
                   textTheme,
@@ -474,7 +464,6 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
 
                 const SizedBox(height: 32),
 
-                // Complete Button
                 InkWell(
                   onTap:
                       (isEmailVerified &&

@@ -24,7 +24,6 @@ enum AppThemeColor {
     AppThemeColor.counselorSync => 'Sync',
   };
 
-  /// Returns the icon to display in the picker for this color.
   IconData? get pickerIcon => switch (this) {
     AppThemeColor.counselorSync => Icons.sync_rounded,
     _ => null,
@@ -48,7 +47,7 @@ enum AppThemeColor {
         isDark ? const Color(0xFFE55B5B) : const Color(0xFFC43D3D),
       AppThemeColor.monochrome =>
         isDark ? const Color(0xFFFFFFFF) : const Color(0xFF111111),
-      // counselorSync resolves dynamically — callers should use ThemeColorService.resolvedColor
+
       AppThemeColor.counselorSync =>
         isDark ? const Color(0xFF35B595) : const Color(0xFF1F6F5B),
     };
@@ -58,11 +57,11 @@ enum AppThemeColor {
     if (this == AppThemeColor.monochrome) {
       return brightness == Brightness.dark ? Colors.black : Colors.white;
     }
-    // High contrast for light colors in dark mode
+
     if (brightness == Brightness.dark) {
-       if (this == AppThemeColor.aspen || this == AppThemeColor.sakura) {
-         return Colors.black;
-       }
+      if (this == AppThemeColor.aspen || this == AppThemeColor.sakura) {
+        return Colors.black;
+      }
     }
     return Colors.white;
   }
@@ -81,7 +80,6 @@ class ThemeColorService {
     final prefs = await SharedPreferences.getInstance();
     final index = prefs.getInt(_key) ?? AppThemeColor.grover.index;
 
-    // Guard against stale index pointing to removed `custom` slot
     if (index < AppThemeColor.values.length) {
       activeColor.value = AppThemeColor.values[index];
     }

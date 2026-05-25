@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// ---------------------- MEMBER ROLES ----------------------
 enum MemberRole {
   admin,
   moderator,
   member;
 
-  /// Convert to Firestore string
   String toJson() => name;
 
-  /// Convert from Firestore string
   static MemberRole fromJson(String json) {
     return MemberRole.values.firstWhere(
       (e) => e.name == json,
@@ -18,7 +15,6 @@ enum MemberRole {
   }
 }
 
-/// ---------------------- GROUP MEMBER ----------------------
 class GroupMember {
   final String userId;
   final String displayName;
@@ -36,7 +32,6 @@ class GroupMember {
     required this.addedBy,
   });
 
-  /// Create a GroupMember from Firestore document
   factory GroupMember.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return GroupMember(
@@ -49,7 +44,6 @@ class GroupMember {
     );
   }
 
-  /// Convert GroupMember to Firestore map
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
@@ -62,11 +56,8 @@ class GroupMember {
   }
 }
 
-/// ---------------------- EXTENSIONS ----------------------
 extension GroupMemberExtensions on GroupMember {
-  /// True if member is admin
   bool get isAdmin => role == MemberRole.admin;
 
-  /// True if member is moderator
   bool get isMod => role == MemberRole.moderator;
 }

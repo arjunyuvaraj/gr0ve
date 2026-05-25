@@ -38,10 +38,8 @@ class _BusScreenState extends State<BusScreen> {
     setState(() => isRefreshing = true);
 
     try {
-      // Trigger refresh from Google Sheets
       await refreshBusRoutesFromSheets();
 
-      // Wait a moment for Firestore to update
       await Future.delayed(const Duration(milliseconds: 1500));
 
       if (mounted) {
@@ -115,23 +113,38 @@ class _BusScreenState extends State<BusScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: colors.error, size: 48),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: colors.error,
+                    size: 48,
+                  ),
                   const SizedBox(height: 16),
-                  const Text('Delete Bus?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Delete Bus?',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
-                  Text('Are you sure you want to remove the bus for $town?', textAlign: TextAlign.center),
+                  Text(
+                    'Are you sure you want to remove the bus for $town?',
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel'),
+                      ),
                       const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(ctx, true),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.error,
                           foregroundColor: colors.onError,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: const Text('Delete'),
                       ),
@@ -146,9 +159,10 @@ class _BusScreenState extends State<BusScreen> {
     );
 
     if (confirmed == true) {
-      await FirebaseFirestore.instance.collection('public_data').doc('bus_routes').update({
-        'routes.$town': FieldValue.delete(),
-      });
+      await FirebaseFirestore.instance
+          .collection('public_data')
+          .doc('bus_routes')
+          .update({'routes.$town': FieldValue.delete()});
     }
   }
 
@@ -170,14 +184,21 @@ class _BusScreenState extends State<BusScreen> {
             child: Material(
               color: Colors.transparent,
               child: Container(
-                width: 320, // Compact width
-                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                width: 320,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 40,
+                ),
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 40, offset: const Offset(0, 20)),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 40,
+                      offset: const Offset(0, 20),
+                    ),
                   ],
                 ),
                 child: Column(
@@ -186,11 +207,19 @@ class _BusScreenState extends State<BusScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.directions_bus_rounded, size: 20, color: colors.primary),
+                        Icon(
+                          Icons.directions_bus_rounded,
+                          size: 20,
+                          color: colors.primary,
+                        ),
                         const SizedBox(width: 10),
                         Text(
                           isNew ? 'New Route' : 'Update Route',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
                         ),
                       ],
                     ),
@@ -200,10 +229,19 @@ class _BusScreenState extends State<BusScreen> {
                       style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         labelText: 'Town Name',
-                        prefixIcon: Icon(Icons.location_on_outlined, size: 18, color: colors.onSurface.withOpacity(0.5)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        prefixIcon: Icon(
+                          Icons.location_on_outlined,
+                          size: 18,
+                          color: colors.onSurface.withOpacity(0.5),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
                         isDense: true,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       readOnly: !isNew,
                     ),
@@ -213,10 +251,19 @@ class _BusScreenState extends State<BusScreen> {
                       style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         labelText: 'Bus Code',
-                        prefixIcon: Icon(Icons.pin_outlined, size: 18, color: colors.onSurface.withOpacity(0.5)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        prefixIcon: Icon(
+                          Icons.pin_outlined,
+                          size: 18,
+                          color: colors.onSurface.withOpacity(0.5),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
                         isDense: true,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -228,7 +275,11 @@ class _BusScreenState extends State<BusScreen> {
                               Navigator.pop(ctx);
                               _deleteBus(route.town);
                             },
-                            icon: Icon(Icons.delete_outline_rounded, size: 22, color: colors.error.withOpacity(0.7)),
+                            icon: Icon(
+                              Icons.delete_outline_rounded,
+                              size: 22,
+                              color: colors.error.withOpacity(0.7),
+                            ),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                             visualDensity: VisualDensity.compact,
@@ -236,7 +287,12 @@ class _BusScreenState extends State<BusScreen> {
                         const Spacer(),
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
-                          child: Text('Discard', style: TextStyle(color: colors.onSurface.withOpacity(0.6))),
+                          child: Text(
+                            'Discard',
+                            style: TextStyle(
+                              color: colors.onSurface.withOpacity(0.6),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
@@ -245,26 +301,39 @@ class _BusScreenState extends State<BusScreen> {
                             if (town.isEmpty) return;
 
                             final code = codeCtrl.text.trim();
-                            final status = code.isNotEmpty ? 'Arrived' : 'Not here yet';
+                            final status = code.isNotEmpty
+                                ? 'Arrived'
+                                : 'Not here yet';
 
-                            await FirebaseFirestore.instance.collection('public_data').doc('bus_routes').update({
-                              'routes.$town': {
-                                'town': town,
-                                'code': code.isEmpty ? '?' : code,
-                                'status': status,
-                              },
-                            });
+                            await FirebaseFirestore.instance
+                                .collection('public_data')
+                                .doc('bus_routes')
+                                .update({
+                                  'routes.$town': {
+                                    'town': town,
+                                    'code': code.isEmpty ? '?' : code,
+                                    'status': status,
+                                  },
+                                });
 
                             if (mounted) Navigator.pop(ctx);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primary,
                             foregroundColor: colors.onPrimary,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 0,
                           ),
-                          child: const Text('Confirm', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            'Confirm',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ],
                     ),
@@ -278,7 +347,10 @@ class _BusScreenState extends State<BusScreen> {
       transitionBuilder: (ctx, anim1, anim2, child) => FadeTransition(
         opacity: anim1,
         child: ScaleTransition(
-          scale: Tween<double>(begin: 0.95, end: 1.0).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
+          scale: Tween<double>(
+            begin: 0.95,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
           child: child,
         ),
       ),
@@ -304,11 +376,18 @@ class _BusScreenState extends State<BusScreen> {
                     onTap: () => _showBusDialog(),
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add, size: 18, color: Theme.of(context).colorScheme.primary),
+                          Icon(
+                            Icons.add,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Add Route',
@@ -387,7 +466,8 @@ class _BusScreenState extends State<BusScreen> {
                               const SizedBox(height: 16),
                               Text(
                                 'No buses found',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurface.withOpacity(0.4),
@@ -407,7 +487,9 @@ class _BusScreenState extends State<BusScreen> {
                             columns = 2;
                           }
 
-                          final cardWidth = (constraints.maxWidth - (16 * (columns - 1))) / columns;
+                          final cardWidth =
+                              (constraints.maxWidth - (16 * (columns - 1))) /
+                              columns;
 
                           return RefreshIndicator(
                             onRefresh: _refreshBusData,
@@ -416,7 +498,9 @@ class _BusScreenState extends State<BusScreen> {
                               child: Wrap(
                                 spacing: 16,
                                 runSpacing: 16,
-                                children: List.generate(orderedRoutes.length, (index) {
+                                children: List.generate(orderedRoutes.length, (
+                                  index,
+                                ) {
                                   final route = orderedRoutes[index];
                                   final isStarred = starredTowns.contains(
                                     route.town,
@@ -435,16 +519,22 @@ class _BusScreenState extends State<BusScreen> {
                                         ),
                                       );
                                     },
-                                    key: ValueKey('${route.town}_${route.code}_bus_anim'),
+                                    key: ValueKey(
+                                      '${route.town}_${route.code}_bus_anim',
+                                    ),
                                     child: SizedBox(
                                       width: cardWidth,
                                       child: CustomBusCard(
                                         route: route,
                                         starred: isStarred,
-                                        onStarTap: () => StarredBusService.toggleTown(route.town),
+                                        onStarTap: () =>
+                                            StarredBusService.toggleTown(
+                                              route.town,
+                                            ),
                                         isLoggedIn: isLoggedIn,
                                         isAdmin: isAdmin,
-                                        onEditTap: () => _showBusDialog(route: route),
+                                        onEditTap: () =>
+                                            _showBusDialog(route: route),
                                       ),
                                     ),
                                   );

@@ -33,7 +33,6 @@ class _NewsScreenState extends State<NewsScreen> {
   bool isLoadingMore = false;
   bool hasMore = true;
 
-  // Pagination
   int currentPage = 1;
 
   final ScrollController _scrollController = ScrollController();
@@ -97,7 +96,6 @@ class _NewsScreenState extends State<NewsScreen> {
     try {
       final articles = await NewsService().fetchPage(1);
 
-      // Extract unique categories and tags
       final categories = <String>{};
       final tags = <String>{};
 
@@ -121,7 +119,6 @@ class _NewsScreenState extends State<NewsScreen> {
   void _applyFilters({bool resetPagination = true}) {
     setState(() {
       _filteredArticles = _allArticles.where((article) {
-        // Search filter
         if (searchQuery.isNotEmpty) {
           final query = searchQuery.toLowerCase();
           final matchesSearch =
@@ -131,7 +128,6 @@ class _NewsScreenState extends State<NewsScreen> {
           if (!matchesSearch) return false;
         }
 
-        // Category filter
         if (selectedCategories.isNotEmpty) {
           final hasCategory = article.categories.any(
             (cat) => selectedCategories.contains(cat),
@@ -139,7 +135,6 @@ class _NewsScreenState extends State<NewsScreen> {
           if (!hasCategory) return false;
         }
 
-        // Tag filter
         if (selectedTags.isNotEmpty) {
           final hasTag = article.tags.any((tag) => selectedTags.contains(tag));
           if (!hasTag) return false;
@@ -148,7 +143,6 @@ class _NewsScreenState extends State<NewsScreen> {
         return true;
       }).toList();
 
-      // Apply sorting
       _applySorting();
     });
   }
@@ -206,7 +200,6 @@ class _NewsScreenState extends State<NewsScreen> {
       padding: const EdgeInsets.only(top: 24),
       child: Column(
         children: [
-          // Custom Header
           CustomHeader(title: 'NEWS'),
           Text(
             'All articles are provided by Academy chronicle'.capitalized,
@@ -216,12 +209,11 @@ class _NewsScreenState extends State<NewsScreen> {
               fontSize: 10,
             ),
           ),
-          // Search and controls bar
+
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Row(
               children: [
-                // Search bar
                 Expanded(
                   child: Container(
                     height: 48,
@@ -302,7 +294,6 @@ class _NewsScreenState extends State<NewsScreen> {
 
                 const SizedBox(width: 8),
 
-                // Filter button
                 _ActionButton(
                   icon: Icons.tune_rounded,
                   isActive: showFilters,
@@ -314,7 +305,6 @@ class _NewsScreenState extends State<NewsScreen> {
 
                 const SizedBox(width: 8),
 
-                // Sort button
                 _ActionButton(
                   icon: Icons.sort_rounded,
                   onTap: () => _showSortMenu(context),
@@ -323,7 +313,6 @@ class _NewsScreenState extends State<NewsScreen> {
             ),
           ),
 
-          // Filter chips (compact view when filters active)
           if (!showFilters && activeFiltersCount > 0)
             Container(
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -331,7 +320,6 @@ class _NewsScreenState extends State<NewsScreen> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    // Selected categories
                     ...selectedCategories.map(
                       (cat) => _ActiveFilterChip(
                         label: cat,
@@ -343,7 +331,7 @@ class _NewsScreenState extends State<NewsScreen> {
                         },
                       ),
                     ),
-                    // Selected tags
+
                     ...selectedTags.map(
                       (tag) => _ActiveFilterChip(
                         label: tag,
@@ -355,7 +343,7 @@ class _NewsScreenState extends State<NewsScreen> {
                         },
                       ),
                     ),
-                    // Clear all button
+
                     TextButton.icon(
                       onPressed: _clearAllFilters,
                       icon: const Icon(Icons.clear_all_rounded, size: 16),
@@ -373,7 +361,6 @@ class _NewsScreenState extends State<NewsScreen> {
               ),
             ),
 
-          // Filter panel (expandable)
           if (showFilters)
             Container(
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -398,7 +385,6 @@ class _NewsScreenState extends State<NewsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Filter header
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -458,14 +444,12 @@ class _NewsScreenState extends State<NewsScreen> {
 
                   Divider(height: 1, color: Colors.grey.shade200),
 
-                  // Filter content - scrollable
                   Flexible(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Categories
                           if (availableCategories.isNotEmpty) ...[
                             _FilterSection(
                               title: 'Categories',
@@ -493,7 +477,6 @@ class _NewsScreenState extends State<NewsScreen> {
                             const SizedBox(height: 20),
                           ],
 
-                          // Tags
                           if (availableTags.isNotEmpty) ...[
                             _FilterSection(
                               title: 'Tags',
@@ -531,102 +514,99 @@ class _NewsScreenState extends State<NewsScreen> {
             child: isLoading
                 ? const PremiumLoadingIndicator()
                 : _filteredArticles.isEmpty
-                    ? _buildEmptyState(activeFiltersCount > 0)
-                    : RefreshIndicator(
-                        onRefresh: _loadArticles,
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final isWide = constraints.maxWidth > 800;
+                ? _buildEmptyState(activeFiltersCount > 0)
+                : RefreshIndicator(
+                    onRefresh: _loadArticles,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isWide = constraints.maxWidth > 800;
 
-                            if (isWide) {
-                              return GridView.builder(
-                                controller: _scrollController,
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                                gridDelegate:
-                                    const SliverGridDelegateWithMaxCrossAxisExtent(
+                        if (isWide) {
+                          return GridView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: 500,
                                   mainAxisSpacing: 12,
                                   crossAxisSpacing: 12,
                                   mainAxisExtent: 90,
                                 ),
-                                itemCount:
-                                    _filteredArticles.length +
-                                    (isLoadingMore ? 1 : 0),
-                                itemBuilder: (context, index) {
-                                  if (index >= _filteredArticles.length) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
+                            itemCount:
+                                _filteredArticles.length +
+                                (isLoadingMore ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index >= _filteredArticles.length) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
 
-                                  final article = _filteredArticles[index];
-                                  return TweenAnimationBuilder<double>(
-                                    key: ValueKey('grid-article-${article.link}'),
-                                    duration: Duration(
-                                      milliseconds: 500 + (index * 50),
+                              final article = _filteredArticles[index];
+                              return TweenAnimationBuilder<double>(
+                                key: ValueKey('grid-article-${article.link}'),
+                                duration: Duration(
+                                  milliseconds: 500 + (index * 50),
+                                ),
+                                curve: Curves.easeOutQuart,
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                builder: (context, value, child) {
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(0, 20 * (1 - value)),
+                                      child: child,
                                     ),
-                                    curve: Curves.easeOutQuart,
-                                    tween: Tween(begin: 0.0, end: 1.0),
-                                    builder: (context, value, child) {
-                                      return Opacity(
-                                        opacity: value,
-                                        child: Transform.translate(
-                                          offset: Offset(0, 20 * (1 - value)),
-                                          child: child,
-                                        ),
-                                      );
-                                    },
-                                    child: _NewsCard(article: article),
                                   );
                                 },
+                                child: _NewsCard(article: article),
+                              );
+                            },
+                          );
+                        }
+
+                        return ListView.separated(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                          itemCount:
+                              _filteredArticles.length +
+                              (isLoadingMore ? 1 : 0),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            if (index >= _filteredArticles.length) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 24),
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
                             }
 
-                            return ListView.separated(
-                              controller: _scrollController,
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                              itemCount:
-                                  _filteredArticles.length +
-                                  (isLoadingMore ? 1 : 0),
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                if (index >= _filteredArticles.length) {
-                                  return const Center(
-                                    child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 24),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
-
-                                final article = _filteredArticles[index];
-                                return TweenAnimationBuilder<double>(
-                                  key: ValueKey('list-article-${article.link}'),
-                                  duration: Duration(
-                                    milliseconds: 500 + (index * 50),
+                            final article = _filteredArticles[index];
+                            return TweenAnimationBuilder<double>(
+                              key: ValueKey('list-article-${article.link}'),
+                              duration: Duration(
+                                milliseconds: 500 + (index * 50),
+                              ),
+                              curve: Curves.easeOutQuart,
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 20 * (1 - value)),
+                                    child: child,
                                   ),
-                                  curve: Curves.easeOutQuart,
-                                  tween: Tween(begin: 0.0, end: 1.0),
-                                  builder: (context, value, child) {
-                                    return Opacity(
-                                      opacity: value,
-                                      child: Transform.translate(
-                                        offset: Offset(0, 20 * (1 - value)),
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: _NewsCard(article: article),
                                 );
                               },
+                              child: _NewsCard(article: article),
                             );
                           },
-                        ),
-                      ),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -643,7 +623,6 @@ class _NewsScreenState extends State<NewsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
@@ -761,7 +740,6 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 }
 
-// Action button widget
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final bool isActive;
@@ -829,7 +807,6 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-// Active filter chip
 class _ActiveFilterChip extends StatelessWidget {
   final String label;
   final VoidCallback onRemove;
@@ -874,7 +851,6 @@ class _ActiveFilterChip extends StatelessWidget {
   }
 }
 
-// Filter section
 class _FilterSection extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -912,7 +888,6 @@ class _FilterSection extends StatelessWidget {
   }
 }
 
-// Filter chip item
 class _FilterChipItem extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -967,7 +942,6 @@ class _FilterChipItem extends StatelessWidget {
   }
 }
 
-// Sort option
 class _SortOption extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -1003,7 +977,6 @@ class _SortOption extends StatelessWidget {
   }
 }
 
-// News card
 class _NewsCard extends StatelessWidget {
   final NewsArticle article;
 
@@ -1064,7 +1037,6 @@ class _NewsCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Featured Image
               if (article.featuredImage != null)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -1115,15 +1087,12 @@ class _NewsCard extends StatelessWidget {
                   ),
                 ),
 
-              // Content
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Top section
-                      // Title
                       Text(
                         article.title,
                         style: const TextStyle(
@@ -1137,7 +1106,6 @@ class _NewsCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
 
-                      // Bottom section
                       if (article.excerpt != null &&
                           article.excerpt!.isNotEmpty)
                         Padding(
@@ -1154,7 +1122,6 @@ class _NewsCard extends StatelessWidget {
                           ),
                         ),
 
-                      // Author and Date
                       Row(
                         children: [
                           Icon(

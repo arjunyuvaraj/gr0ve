@@ -4,7 +4,7 @@ import 'package:gr0ve/core/helper/helper_functions.dart';
 
 extension AppColorScheme on ColorScheme {
   Color get success => brightness == Brightness.dark
-      ? const Color(0xFF35B595) // Grover Green
+      ? const Color(0xFF35B595)
       : const Color(0xFF1F6F5B);
 }
 
@@ -17,7 +17,7 @@ final ThemeData darkTheme = ThemeData(
     secondary: Color(0xFFEEC3F5),
     surface: Color(0xFF1A1A1A),
     tertiary: Color(0xFF262626),
-    error: Color(0xFFFB7185), // Soft neon rose
+    error: Color(0xFFFB7185),
     onError: Color(0xFFFFFFFF),
     errorContainer: Color(0xFF2D1A1A),
     onErrorContainer: Color(0xFFFF8A8A),

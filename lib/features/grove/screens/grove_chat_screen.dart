@@ -7,7 +7,6 @@ import 'package:gr0ve/features/grove/grove_progress_service.dart';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 import 'package:gr0ve/features/grove/screens/episode_complete_sheet.dart';
 import 'package:gr0ve/core/services/network_time_service.dart';
-import 'package:intl/intl.dart';
 
 class GroveChatScreen extends StatefulWidget {
   final Episode episode;
@@ -55,27 +54,24 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-    
+
     _initEpisode();
   }
 
   Future<void> _initEpisode() async {
     final scenes = await widget.episode.buildScenes();
     if (!mounted) return;
-    
+
     setState(() {
       _scenes = scenes;
     });
 
-    // If starting a new episode, default to the first scene of that episode.
-    // If resuming the current episode, find the saved scene.
     String startSceneId = _scenes!.first.id;
 
     final pastCompleted = _gameState.currentEpisode > widget.episode.number;
 
     if (_gameState.currentEpisode == widget.episode.number &&
         _gameState.currentScene.isNotEmpty) {
-      // Check if we have the saved scene in this episode
       if (_scenes!.any((s) => s.id == _gameState.currentScene)) {
         startSceneId = _gameState.currentScene;
       }
@@ -84,7 +80,7 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       _gameState.currentScene = startSceneId;
       _gameState.episodeComplete = false;
       _gameState.episodeHistories[widget.episode.id] = [];
-      // Save snapshot of state at the start of this episode
+
       _gameState.episodeStartStates.putIfAbsent(
         widget.episode.id,
         () => _gameState.toNestedJson(),
@@ -92,7 +88,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       GroveProgressService.save(_gameState);
     }
 
-    // Restore history
     final epKey = widget.episode.id;
 
     if (_gameState.episodeHistories[epKey]?.isNotEmpty ?? false) {
@@ -112,31 +107,25 @@ class _GroveChatScreenState extends State<GroveChatScreen>
             _isTyping = false;
           });
         });
-        return; // Halt logic, let them view history
+        return;
       }
     } else if (pastCompleted) {
-      // If completed but no history found, just show generic complete
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showEpisodeComplete();
       });
       return;
     }
 
-    // Delay slight bit before loading so UI can build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _pulseCtrl.repeat(reverse: true);
 
-      // Initial timer check
       if (_gameState.busyUntil != null) {
         _startWaitTimer();
       }
 
-      // ONLY load the scene if we don't have bubbles in history for this episode yet,
-      // OR if we are just starting fresh. This prevents duplicating messages on app resume.
       if (_bubbles.isEmpty && !pastCompleted) {
         _loadScene(startSceneId);
       } else {
-        // If we have history, we just need to set the current scene so input knows what to show
         setState(() {
           _currentScene = _scenes!
               .where((s) => s.id == startSceneId)
@@ -203,7 +192,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       return;
     }
 
-    // Capture state before onEnter
     final oldStats = {
       'STABILITY': _gameState.stability,
       'CONNECTIVITY': _gameState.connectivity,
@@ -215,41 +203,52 @@ class _GroveChatScreenState extends State<GroveChatScreen>
 
     scene.onEnter?.call(_gameState);
 
-    // Check for changes and notify
     if (oldStats['STABILITY'] != _gameState.stability) {
-      _addStatBubble('STABILITY', _gameState.stability - oldStats['STABILITY']!);
+      _addStatBubble(
+        'STABILITY',
+        _gameState.stability - oldStats['STABILITY']!,
+      );
     }
     if (oldStats['CONNECTIVITY'] != _gameState.connectivity) {
-      _addStatBubble('CONNECTIVITY', _gameState.connectivity - oldStats['CONNECTIVITY']!);
+      _addStatBubble(
+        'CONNECTIVITY',
+        _gameState.connectivity - oldStats['CONNECTIVITY']!,
+      );
     }
     if (oldStats['VITALITY'] != _gameState.vitality) {
       _addStatBubble('VITALITY', _gameState.vitality - oldStats['VITALITY']!);
     }
     if (oldStats['TRANSIENCE'] != _gameState.transience) {
-      _addStatBubble('TRANSIENCE', _gameState.transience - oldStats['TRANSIENCE']!);
+      _addStatBubble(
+        'TRANSIENCE',
+        _gameState.transience - oldStats['TRANSIENCE']!,
+      );
     }
     if (oldStats['WARMTH'] != _gameState.seedWarmth) {
       final delta = _gameState.seedWarmth - oldStats['WARMTH']!;
-      _addBubble(StoryMessage(
-        'Seed Warmth: ${delta > 0 ? '+' : ''}$delta%',
-        character: StoryCharacter.system,
-        kind: MessageKind.system,
-      ));
+      _addBubble(
+        StoryMessage(
+          'Seed Warmth: ${delta > 0 ? '+' : ''}$delta%',
+          character: StoryCharacter.system,
+          kind: MessageKind.system,
+        ),
+      );
     }
     for (final item in _gameState.inventory) {
       if (!oldInventory.contains(item)) {
-        _addBubble(StoryMessage(
-          'Inventory: [$item obtained]',
-          character: StoryCharacter.system,
-          kind: MessageKind.system,
-        ));
+        _addBubble(
+          StoryMessage(
+            'Inventory: [$item obtained]',
+            character: StoryCharacter.system,
+            kind: MessageKind.system,
+          ),
+        );
       }
     }
 
-    // SAVE PROGRESS: Only if we are playing the LATEST episode
     if (_gameState.currentEpisode == widget.episode.number) {
       _gameState.currentScene = sceneId;
-       GroveProgressService.save(_gameState);
+      GroveProgressService.save(_gameState);
       widget.onProgressUpdated(_gameState);
     }
 
@@ -287,7 +286,7 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         ? 600
         : msg.kind == MessageKind.divider
         ? 200
-        : 600 + (msg.text.length * 5); // Simulated read time
+        : 600 + (msg.text.length * 5);
 
     _typeTimer?.cancel();
     _typeTimer = Timer(Duration(milliseconds: delay), () {
@@ -313,7 +312,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
   void _handleEndOfScene() {
     final scene = _currentScene!;
     if (scene.inputType == InputType.none) {
-      // It's the end of the episode or a terminal state
       _showEpisodeComplete();
     } else {
       setState(() {
@@ -332,15 +330,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         );
       }
     });
-  }
-
-  bool _isEpisodeTerminal() {
-    if (_scenes == null || _currentMsgIdx < 0) return false;
-    // We check the LAST scene in the episode's build list
-    // If the current scene matches the last ID and has InputType.none, it's terminal
-    final scene = _currentScene;
-    if (scene == null) return false;
-    return scene.inputType == InputType.none;
   }
 
   Future<void> _showEpisodeComplete() async {
@@ -385,16 +374,13 @@ class _GroveChatScreenState extends State<GroveChatScreen>
 
     if (_gameState.currentEpisode == widget.episode.number) {
       _gameState.currentEpisode = widget.episode.number + 1;
-      _gameState.currentScene =
-          ''; // Wipe scene progression tracking for the next run
+      _gameState.currentScene = '';
 
-      // Mandatory 5-hour travel wait between episodes
       _gameState.busyUntil = DateTime.now()
           .add(const Duration(hours: 5))
           .millisecondsSinceEpoch;
       _gameState.episodeComplete = true;
 
-      // Seed warmth is sensitive to travel
       _gameState.seedWarmth = (_gameState.seedWarmth - 10).clamp(0, 100);
 
       await GroveProgressService.save(_gameState);
@@ -409,14 +395,12 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         unlockedPfpAsset: pfpAsset,
         unlockedPfpName: pfpName,
         onReturnToChapters: () {
-          Navigator.of(context).pop(); // pop modal
-          Navigator.of(context).pop(); // pop chat screen
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
         },
       );
     }
   }
-
-  // ── INPUT HANDLING ─────────────────────────────────────────────
 
   void _handleChoice(SceneChoice choice) {
     HapticFeedback.mediumImpact();
@@ -430,9 +414,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
     _showInput = false;
 
-    // Removed the Universal Personality Assessment logic since it causes double-application of stats.
-
-    // 2. Specific effects (Narrative-driven impacts)
     if (choice.statEffects.isNotEmpty) {
       choice.statEffects.forEach((stat, value) {
         if (value == 0) return;
@@ -455,34 +436,37 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     for (final item in choice.addItems) {
       if (!_gameState.inventory.contains(item)) {
         _gameState.inventory.add(item);
-        _addBubble(StoryMessage(
-          'Inventory: [$item obtained]',
-          character: StoryCharacter.system,
-          kind: MessageKind.system,
-        ));
+        _addBubble(
+          StoryMessage(
+            'Inventory: [$item obtained]',
+            character: StoryCharacter.system,
+            kind: MessageKind.system,
+          ),
+        );
       }
     }
     if (choice.warmthChange != 0) {
-      _gameState.seedWarmth = (_gameState.seedWarmth + choice.warmthChange).clamp(0, 100);
-      _addBubble(StoryMessage(
-        'Seed Warmth: ${choice.warmthChange > 0 ? '+' : ''}${choice.warmthChange}%',
-        character: StoryCharacter.system,
-        kind: MessageKind.system,
-      ));
+      _gameState.seedWarmth = (_gameState.seedWarmth + choice.warmthChange)
+          .clamp(0, 100);
+      _addBubble(
+        StoryMessage(
+          'Seed Warmth: ${choice.warmthChange > 0 ? '+' : ''}${choice.warmthChange}%',
+          character: StoryCharacter.system,
+          kind: MessageKind.system,
+        ),
+      );
     }
     if (choice.setPath != null) _gameState.chosenPath = choice.setPath;
 
-    // ALWAYS save progress after a choice to capture stats and seed warmth
     GroveProgressService.save(_gameState);
 
-    // Handle wait duration
     if (choice.waitDuration != null) {
       _gameState.busyUntil = DateTime.now()
           .add(choice.waitDuration!)
           .millisecondsSinceEpoch;
       _gameState.pendingScene = choice.nextScene;
-      GroveProgressService.save(_gameState); // SAVE IMMEDIATELY
-      widget.onProgressUpdated(_gameState); // NOTIFY PARENT
+      GroveProgressService.save(_gameState);
+      widget.onProgressUpdated(_gameState);
       _startWaitTimer();
     }
 
@@ -670,8 +654,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
   }
 
-  // ── INTERNAL HELPERS ─────────────────────────────────────────
-
   void _addBubble(StoryMessage msg) {
     _bubbles.add(_ChatBubbleData(message: msg));
     final epKey = widget.episode.id;
@@ -691,8 +673,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
   }
 
-  // ── BUILD ──────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -702,9 +682,7 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     if (_scenes == null) {
       return Scaffold(
         backgroundColor: colors.surface,
-        body: Center(
-          child: CircularProgressIndicator(color: pc),
-        ),
+        body: Center(child: CircularProgressIndicator(color: pc)),
       );
     }
 
@@ -808,7 +786,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
   Widget _buildInputArea(ColorScheme colors, Color pc) {
     final scene = _currentScene;
 
-    // Check if we are currently "busy" (timer active)
     final isBusy =
         _gameState.busyUntil != null &&
         _currentTime.millisecondsSinceEpoch < _gameState.busyUntil!;
@@ -904,7 +881,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
                         _currentTime = DateTime.now();
                       });
 
-                      // Immediately check if we finished the wait
                       if (_gameState.busyUntil != null &&
                           _currentTime.millisecondsSinceEpoch >=
                               _gameState.busyUntil!) {
@@ -979,7 +955,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
   }
 
-  // Updated Continue Button Style
   Widget _buildContinueBtn(Color pc, ColorScheme colors) {
     return SizedBox(
       width: double.infinity,
@@ -1019,7 +994,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
   }
 
-  // Polished Choice List Style
   Widget _buildChoiceList(Scene scene, Color pc, ColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1082,7 +1056,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
   }
 
-  // Refined Text Input Style
   Widget _buildTextInput(Color pc, ColorScheme colors) {
     return Container(
       decoration: BoxDecoration(
@@ -1136,10 +1109,6 @@ class _GroveChatScreenState extends State<GroveChatScreen>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// CHAT BUBBLE WIDGET
-// ─────────────────────────────────────────────────────────────
 
 class _ChatBubbleData {
   final StoryMessage message;
@@ -1202,7 +1171,6 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
         child: Padding(
           padding: const EdgeInsets.only(bottom: 6),
           child: () {
-            // If the character is the player, always use the player bubble style
             if (msg.character == StoryCharacter.player) {
               return _playerBubble(msg);
             }
@@ -1403,10 +1371,12 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
         ? StoryCharacter.system.accent(widget.brightness)
         : widget.colors.primary;
 
-    // Detect if this is a stat change or inventory update
-    final isStat = msg.text.contains(RegExp(r'STA|CON|VIT|TRA|STABILITY|CONNECTIVITY|VITALITY|TRANSIENCE'));
+    final isStat = msg.text.contains(
+      RegExp(r'STA|CON|VIT|TRA|STABILITY|CONNECTIVITY|VITALITY|TRANSIENCE'),
+    );
     final isWarmth = msg.text.contains('Warmth');
-    final isInventory = msg.text.contains('[') && msg.text.contains('obtained]');
+    final isInventory =
+        msg.text.contains('[') && msg.text.contains('obtained]');
 
     Color displayColor = sysColor;
     IconData icon = Icons.info_outline_rounded;
@@ -1437,7 +1407,7 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
               color: displayColor.withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Row(

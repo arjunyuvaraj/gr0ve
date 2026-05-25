@@ -9,7 +9,6 @@ import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
 import 'package:confetti/confetti.dart';
 import 'package:gr0ve/main.dart' show debugNow;
 
-// Snapshot Widgets
 import 'package:gr0ve/features/snapshot/widgets/snapshot_countdown_card.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_absence_card.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_bus_card.dart';
@@ -19,10 +18,6 @@ import 'package:gr0ve/features/snapshot/widgets/snapshot_upcoming_card.dart';
 import 'package:gr0ve/features/home/services/layout_service.dart';
 
 import 'package:hugeicons/hugeicons.dart';
-
-// ════════════════════════════════════════════════════════════════
-// HOME SCREEN
-// ════════════════════════════════════════════════════════════════
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,7 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _user = FirebaseAuth.instance.currentUser;
     FirebaseAnalytics.instance.logEvent(name: 'screen_home');
     LayoutService.initializeTimeChecker();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 5));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 5),
+    );
     _initData();
   }
 
@@ -55,12 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initData() async {
-    // Services (starred teachers, buses, calendar, layout) are already booted
-    // by _bootUserServices() in main.dart. We only need to check onboarding.
     await _checkOnboarding();
     if (mounted) {
       setState(() => _isLoading = false);
-      // Only celebrate on Wednesday (the half-year anniversary day)
+
       if (debugNow.weekday == DateTime.wednesday) {
         _confettiController.play();
       }
@@ -79,15 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // Don't block on reload — use cached verification state
     final isEmailVerified = _user!.emailVerified;
 
     try {
-      // Use cached user doc — already fetched during boot
       final data = await UserDocCache.get();
-      
-      // If we couldn't fetch the data (timeout or error), don't force onboarding.
-      // We only want to onboard if we POSITIVELY know the fields are missing.
+
       if (data == null) {
         _needsOnboarding = false;
         return;
@@ -121,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Stack(
         children: [
-          // Full-page confetti — fires from top-center, covers entire screen
           Align(
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
@@ -134,19 +124,18 @@ class _HomeScreenState extends State<HomeScreen> {
               minBlastForce: 10,
               gravity: 0.05,
               colors: const [
-                Color(0xFF1F6F5B), // Grover green
-                Color(0xFFFFC200), // Aspen gold
-                Color(0xFFAD3800), // Rowan orange
-                Color(0xFFDC8FE8), // Sakura pink
-                Color(0xFF00C8FF), // Abies cyan
-                Color(0xFF9F72D8), // Cedite purple
-                Color(0xFFF1C40F), // Dawn gold
+                Color(0xFF1F6F5B),
+                Color(0xFFFFC200),
+                Color(0xFFAD3800),
+                Color(0xFFDC8FE8),
+                Color(0xFF00C8FF),
+                Color(0xFF9F72D8),
+                Color(0xFFF1C40F),
               ],
             ),
           ),
           Column(
             children: [
-              // Personalized Greeting Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Center(
@@ -160,18 +149,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 4.0,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.5),
                         ),
                       ),
                       Text(
                         (name?.split(' ').first ?? "GR0VE").toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                          fontSize: 42,
-                          height: 1.1,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.0,
-                        ),
+                        style: Theme.of(context).textTheme.displayLarge
+                            ?.copyWith(
+                              fontSize: 42,
+                              height: 1.1,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0,
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -181,7 +173,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 2.0,
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.5),
                         ),
                       ),
                     ],
@@ -190,23 +184,31 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
 
-              // Anniversary card — only on Wednesday
               if (debugNow.weekday == DateTime.wednesday)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                          Theme.of(context).colorScheme.primary.withOpacity(0.02),
+                          Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.08),
+                          Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.02),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.12),
                       ),
                     ),
                     child: Column(
@@ -228,7 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             height: 1.4,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.5),
                           ),
                         ),
                       ],
@@ -236,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-              // Content
               Expanded(
                 child: _isLoading
                     ? const Center(child: PremiumLoadingIndicator())
@@ -261,9 +264,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       decoration: BoxDecoration(
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary.withOpacity(0.15),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.15),
                                             blurRadius: 15,
                                             spreadRadius: 2,
                                           ),
@@ -300,7 +304,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 final id = layout[i];
                                 return TweenAnimationBuilder<double>(
                                   key: ValueKey(id.name),
-                                  duration: Duration(milliseconds: 600 + (i * 100)),
+                                  duration: Duration(
+                                    milliseconds: 600 + (i * 100),
+                                  ),
                                   curve: Curves.easeOutQuart,
                                   tween: Tween(begin: 0.0, end: 1.0),
                                   builder: (context, value, child) {
@@ -337,9 +343,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   const SnapshotAbsenceCard(
                                                     compact: false,
                                                   ),
-                                                CardId.buses => const SnapshotBusCard(
-                                                  compact: false,
-                                                ),
+                                                CardId.buses =>
+                                                  const SnapshotBusCard(
+                                                    compact: false,
+                                                  ),
                                                 CardId.weather =>
                                                   const SnapshotWeatherCard(
                                                     compact: false,
@@ -366,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
               ),
-              // Subtle Footer Edit Button
+
               Padding(
                 padding: const EdgeInsets.only(bottom: 24, top: 0),
                 child: Center(
@@ -380,7 +387,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surface.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: Theme.of(
@@ -396,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               icon: HugeIcons.strokeRoundedPaintBoard,
                               size: 14,
                               color: Theme.of(
-                                 context,
+                                context,
                               ).colorScheme.onSurface.withOpacity(0.3),
                             ),
                             const SizedBox(width: 8),
@@ -425,10 +434,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ════════════════════════════════════════════════════════════════
-  // ACTIONS
-  // ════════════════════════════════════════════════════════════════
-
   void _showLayoutSettings(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -437,10 +442,6 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => const _LayoutEditorSheet(),
     );
   }
-
-  // ════════════════════════════════════════════════════════════════
-  // HELPER
-  // ════════════════════════════════════════════════════════════════
 
   Widget _buildSectionTile(String title, dynamic icon) {
     final colors = Theme.of(context).colorScheme;
@@ -499,19 +500,31 @@ class _HomeScreenState extends State<HomeScreen> {
   String _getDateString() {
     final now = DateTime.now();
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final days = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
     ];
     return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INTERACTIVE UTILITIES
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _PressScaleWrapper extends StatefulWidget {
   const _PressScaleWrapper({required this.child});
@@ -533,9 +546,10 @@ class _PressScaleWrapperState extends State<_PressScaleWrapper>
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.975).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.975,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -554,10 +568,6 @@ class _PressScaleWrapperState extends State<_PressScaleWrapper>
     );
   }
 }
-
-// ════════════════════════════════════════════════════════════════
-// LAYOUT EDITOR SHEET
-// ════════════════════════════════════════════════════════════════
 
 class _LayoutEditorSheet extends StatefulWidget {
   const _LayoutEditorSheet();
@@ -747,7 +757,10 @@ class _LayoutEditorSheetState extends State<_LayoutEditorSheet>
                             fontSize: 13,
                           ),
                         ),
-                        const Text('Before 4:10 PM', style: TextStyle(fontSize: 10)),
+                        const Text(
+                          'Before 4:10 PM',
+                          style: TextStyle(fontSize: 10),
+                        ),
                       ],
                     ),
                   ),
@@ -780,7 +793,10 @@ class _LayoutEditorSheetState extends State<_LayoutEditorSheet>
                             fontSize: 13,
                           ),
                         ),
-                        const Text('After 5:30 PM', style: TextStyle(fontSize: 10)),
+                        const Text(
+                          'After 5:30 PM',
+                          style: TextStyle(fontSize: 10),
+                        ),
                       ],
                     ),
                   ),

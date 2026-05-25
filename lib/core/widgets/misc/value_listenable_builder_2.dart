@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// A widget that rebuilds when either of two [ValueListenable]s changes.
 class ValueListenableBuilder2<A, B> extends StatelessWidget {
   final ValueListenable<A> first;
   final ValueListenable<B> second;

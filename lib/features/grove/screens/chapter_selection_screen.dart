@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/features/grove/episodes/episode_registry.dart';
-// Removed import
+
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 import 'package:gr0ve/features/grove/screens/grove_chat_screen.dart';
 import 'package:gr0ve/core/services/network_time_service.dart';
-import 'package:intl/intl.dart';
 import 'package:gr0ve/features/grove/screens/inventory_sheet.dart';
 import 'package:gr0ve/features/grove/widgets/stat_scale_widget.dart';
 
@@ -66,13 +65,13 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     if (mounted) {
       setState(() {
         _gameState = state ?? GroveGameState();
-        // Sync beta status from widget to state
+
         if (widget.isBetaTester) {
           _gameState!.isBetaTester = true;
         }
         _isLoading = false;
       });
-      // Start the staggered lift animation
+
       _animCtrl.forward();
       _startTimer();
     }
@@ -120,16 +119,13 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
   void _resetProgress() async {
     setState(() => _isLoading = true);
     try {
-      // Clear from firestore entirely
       await GroveProgressService.clear();
 
-      // Lock them in runtime UI globally
       lockStoryPfp('newton');
       lockStoryPfp('darwin');
       lockStoryPfp('salix');
       lockStoryPfp('london');
 
-      // If active profile is a story profile that was just locked, reset to default
       final current = ProfilePictureService.activeVariant.value;
       if (['newton', 'darwin', 'salix', 'london'].contains(current.key)) {
         await ProfilePictureService.setVariant(
@@ -235,7 +231,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                     episode.number,
                   );
 
-                  // Lock story profile pictures based on the reset episode
                   if (episode.number <= 3) lockStoryPfp('london');
                   if (episode.number <= 2) lockStoryPfp('salix');
                   if (episode.number <= 1) {
@@ -243,7 +238,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                     lockStoryPfp('darwin');
                   }
 
-                  // Reset active profile if it was locked
                   final currentPfp = ProfilePictureService.activeVariant.value;
                   if ((episode.number <= 1 &&
                           ['newton', 'darwin'].contains(currentPfp.key)) ||
@@ -320,38 +314,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     TInventorySheet.show(context, _gameState!.inventory);
   }
 
-  Widget _statDesc(String code, String name, String desc, ColorScheme colors) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                '$code: ',
-                style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontWeight: FontWeight.bold,
-                  color: colors.primary,
-                ),
-              ),
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            desc,
-            style: TextStyle(
-              fontSize: 12,
-              color: colors.onSurface.withOpacity(0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -370,7 +332,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     final targetDate = DateTime(2026, 5, 20, 8, 0, 0);
     final isBeforeAnniversary = _currentTime.isBefore(targetDate);
 
-    // If it's before the anniversary AND hasn't been bypassed, show full screen lock
     if (isBeforeAnniversary && !_bypassedAnniversary) {
       return Scaffold(
         backgroundColor: colors.surface,
@@ -401,12 +362,13 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                           ? colors.surfaceContainerHighest.withOpacity(0.3)
                           : colors.surfaceContainerHighest.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: colors.outline.withOpacity(0.15)),
+                      border: Border.all(
+                        color: colors.outline.withOpacity(0.15),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // SEED WARMTH
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -447,7 +409,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                           color: colors.outline.withOpacity(0.2),
                         ),
                         const SizedBox(width: 8),
-                        // STATS
+
                         Material(
                           color: Colors.transparent,
                           child: InkWell(
@@ -487,7 +449,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                           height: 16,
                           color: colors.outline.withOpacity(0.2),
                         ),
-                        // ACTIONS
+
                         IconButton(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           constraints: const BoxConstraints(),
@@ -527,85 +489,82 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
           ),
           const SizedBox(height: 32),
 
-            // ── Anniversary Countdown Banner ─────────────────────
-            if (_currentTime.isBefore(DateTime(2026, 5, 20, 8, 0, 0))) ...[
-              _buildAnniversaryCountdown(colors, isDark),
-              const SizedBox(height: 24),
-            ],
+          if (_currentTime.isBefore(DateTime(2026, 5, 20, 8, 0, 0))) ...[
+            _buildAnniversaryCountdown(colors, isDark),
+            const SizedBox(height: 24),
+          ],
 
-            // ── Chapter 1 Header ─────────────────────
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(
-                'CHAPTER 1: THE ENTRY',
-                style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: colors.primary,
-                  letterSpacing: 2.0,
-                ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              'CHAPTER 1: THE ENTRY',
+              style: TextStyle(
+                fontFamily: 'JetBrains Mono',
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: colors.primary,
+                letterSpacing: 2.0,
               ),
             ),
+          ),
 
-            ...List.generate(groveEpisodes.length, (index) {
-              final ep = groveEpisodes[index];
-              final isUnlocked = ep.number <= maxEpisode;
-              final isCompleted = ep.number < maxEpisode;
-              final inProgress = ep.number == maxEpisode;
+          ...List.generate(groveEpisodes.length, (index) {
+            final ep = groveEpisodes[index];
+            final isUnlocked = ep.number <= maxEpisode;
+            final isCompleted = ep.number < maxEpisode;
+            final inProgress = ep.number == maxEpisode;
 
-              final delay = index * 0.1;
-              final slideAnim =
-                  Tween<Offset>(
-                    begin: const Offset(0, 0.2),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(
-                      parent: _animCtrl,
-                      curve: Interval(
-                        delay,
-                        (delay + 0.5).clamp(0.0, 1.0),
-                        curve: Curves.easeOutCubic,
-                      ),
-                    ),
-                  );
-              final fadeAnim = Tween<double>(begin: 0, end: 1).animate(
-                CurvedAnimation(
-                  parent: _animCtrl,
-                  curve: Interval(
-                    delay,
-                    (delay + 0.5).clamp(0.0, 1.0),
-                    curve: Curves.easeOut,
-                  ),
-                ),
-              );
-
-              return FadeTransition(
-                opacity: fadeAnim,
-                child: SlideTransition(
-                  position: slideAnim,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildChapterCard(
-                      ep,
-                      isUnlocked,
-                      isCompleted,
-                      inProgress,
-                      colors,
-                      pc,
-                      isDark,
+            final delay = index * 0.1;
+            final slideAnim =
+                Tween<Offset>(
+                  begin: const Offset(0, 0.2),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _animCtrl,
+                    curve: Interval(
+                      delay,
+                      (delay + 0.5).clamp(0.0, 1.0),
+                      curve: Curves.easeOutCubic,
                     ),
                   ),
+                );
+            final fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+              CurvedAnimation(
+                parent: _animCtrl,
+                curve: Interval(
+                  delay,
+                  (delay + 0.5).clamp(0.0, 1.0),
+                  curve: Curves.easeOut,
                 ),
-              );
-            }),
-          ],
-        ),
+              ),
+            );
+
+            return FadeTransition(
+              opacity: fadeAnim,
+              child: SlideTransition(
+                position: slideAnim,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildChapterCard(
+                    ep,
+                    isUnlocked,
+                    isCompleted,
+                    inProgress,
+                    colors,
+                    pc,
+                    isDark,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildAnniversaryCountdown(ColorScheme colors, bool isDark) {
-    // May 20, 2026 at 8:00 AM EDT (UTC-4)
     final targetDate = DateTime(2026, 5, 20, 8, 0, 0);
     final remaining = targetDate.difference(_currentTime);
 
@@ -652,7 +611,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          // 2x2 countdown grid: DD HH / MM SS
+
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -812,13 +771,13 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       "Take what works. Move.",
       "Anything else is loss.",
     ];
-    // Change quote every 4 seconds
+
     final quoteIndex = (_currentTime.second ~/ 4) % quotes.length;
     final currentQuote = quotes[quoteIndex];
 
     return Container(
       width: double.infinity,
-      color: colors.surface, // Clean white/black background
+      color: colors.surface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -850,7 +809,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              // Big 2x2 countdown grid
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

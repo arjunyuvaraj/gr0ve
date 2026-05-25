@@ -1,25 +1,6 @@
-// polly_service.dart [REFACTORED v2 - Production Grade]
-//
-// Major improvements:
-// ✓ Fixed TTS→STT race condition with proper delays & state management
-// ✓ Better audio session lifecycle (playback → record handoff)
-// ✓ Atomic playback completion detection (iOS + Android)
-// ✓ Cleaner state machine (initializing → ready → playing → stopping)
-// ✓ Safer teardown with proper cancellation tokens
-// ✓ Better logging for debugging
-// ✓ Extracted session configuration into reusable methods
-//
-// Key fixes:
-// - Added `_playbackCompletedController` for clean handoff to STT
-// - Better audio session reset timing (800ms buffer for AVAudioEngine)
-// - Proper stream subscription cleanup
-// - Atomic stop flag with checks in critical sections
-
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:just_audio/just_audio.dart';
@@ -27,11 +8,6 @@ import 'package:audio_session/audio_session.dart' as session;
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:http/http.dart' as http;
 
-// ═══════════════════════════════════════════════════════════════════
-// CONFIGURATION
-// ═══════════════════════════════════════════════════════════════════
-
-/// Maps each counselor persona to a Polly neural voice
 class _PollyVoiceConfig {
   final String voiceId;
   final String engine;
@@ -64,7 +40,6 @@ const _voiceConfigs = {
   ),
 };
 
-/// Natural conversation fillers per persona
 const _fillerWords = {
   CounselorPersona.grover: [
     'Yeah, so — ',
@@ -125,10 +100,6 @@ String _addFiller(String text, CounselorPersona persona) {
   return '${fillers[index]}$text';
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// AWS SIGNATURE V4 SIGNER
-// ═══════════════════════════════════════════════════════════════════
-
 class _AwsV4Signer {
   final String accessKey;
   final String secretKey;
@@ -139,11 +110,8 @@ class _AwsV4Signer {
     required this.accessKey,
     required this.secretKey,
     required this.region,
-    // ignore: unused_element_parameter
-    this.service = 'polly',
-  });
+  }) : service = 'polly';
 
-  /// Sign an HTTP request with AWS Signature Version 4
   Map<String, String> sign({
     required String method,
     required Uri uri,
@@ -226,28 +194,9 @@ class _AwsV4Signer {
       .join('\n');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// POLLY SERVICE - Main API
-// ═══════════════════════════════════════════════════════════════════
-
-/// Cloud TTS via AWS Polly with neural voices
-///
-/// State machine:
-/// - [_PollyState.uninitialized]: Not ready to use
-/// - [_PollyState.ready]: Initialized, idle
-/// - [_PollyState.speaking]: Audio playing
-/// - [_PollyState.stopping]: Teardown in progress
-///
-/// Manages:
-/// - Audio synthesis via AWS Polly API
-/// - Playback via just_audio
-/// - iOS/Android audio session configuration
-/// - Error recovery and retries
-/// - Clean TTS→STT handoff with proper delays
 class PollyService {
   PollyService._();
 
-  // ── State ──
   static AudioPlayer? _player;
   static bool _stopRequested = false;
   static bool _initialized = false;
@@ -255,26 +204,17 @@ class PollyService {
   static final StreamController<void> _playbackCompletedController =
       StreamController<void>.broadcast();
 
-  // ── Env ──
   static String get _accessKey => dotenv.env['AWS_ACCESS_KEY_ID'] ?? '';
   static String get _secretKey => dotenv.env['AWS_SECRET_ACCESS_KEY'] ?? '';
   static String get _region => dotenv.env['AWS_REGION'] ?? 'us-east-1';
 
   static bool get isPlaying => _player?.playing ?? false;
 
-  /// Check if Polly is initialized
   static bool get isInitialized => _initialized;
 
-  /// Stream that emits when playback completes cleanly
-  /// Listen to this if you need to transition from TTS to STT
   static Stream<void> get onPlaybackCompleted =>
       _playbackCompletedController.stream;
 
-  // ════════════════════════════════════════════════════════════════
-  // LIFECYCLE
-  // ════════════════════════════════════════════════════════════════
-
-  /// Initialize Polly service (must be called once at app startup)
   static Future<bool> initialize() async {
     if (_initialized) return true;
 
@@ -298,7 +238,6 @@ class PollyService {
     }
   }
 
-  /// Clean up resources
   static Future<void> dispose() async {
     debugPrint('[Polly] Disposing...');
     _stopRequested = true;
@@ -320,17 +259,6 @@ class PollyService {
     _initialized = false;
   }
 
-  // ════════════════════════════════════════════════════════════════
-  // PUBLIC API
-  // ════════════════════════════════════════════════════════════════
-
-  /// Synthesize and play audio
-  ///
-  /// Calls [onReady] when audio starts playing (not when it finishes loading).
-  /// Calls [onDone] when playback completes OR is stopped.
-  ///
-  /// The [onPlaybackCompleted] stream is also signaled when playback
-  /// completes cleanly (without user interruption).
   static Future<void> speak({
     required String text,
     required CounselorPersona persona,
@@ -374,37 +302,23 @@ class PollyService {
     }
   }
 
-  /// Stop current playback and prepare for audio input (STT)
-  ///
-  /// This is safer than raw [stop()] because it:
-  /// 1. Stops the player cleanly
-  /// 2. Resets the audio session to record mode
-  /// 3. Waits for AVAudioEngine initialization on iOS
   static Future<void> stopAndPrepareForListening() async {
     debugPrint('[Polly] Stopping and preparing for listening...');
     _stopRequested = true;
     await _stopPlayer();
 
-    // Reset audio session to recording mode
     await _configureRecordingAudioSession();
 
-    // Critical delay for AVAudioEngine on iOS
     await Future.delayed(const Duration(milliseconds: 300));
     debugPrint('[Polly] ✓ Ready for STT');
   }
 
-  /// Stop current playback immediately
   static Future<void> stop() async {
     debugPrint('[Polly] Stopping...');
     _stopRequested = true;
     await _stopPlayer();
   }
 
-  // ════════════════════════════════════════════════════════════════
-  // AUDIO SESSION MANAGEMENT
-  // ════════════════════════════════════════════════════════════════
-
-  /// Configure audio session for playback (initial app state)
   static Future<void> _setupPlaybackAudioSession() async {
     try {
       debugPrint('[Polly] Configuring AudioSession for playback...');
@@ -435,7 +349,6 @@ class PollyService {
     }
   }
 
-  /// Configure audio session for recording (STT mode)
   static Future<void> _configureRecordingAudioSession() async {
     try {
       debugPrint('[Polly] Configuring AudioSession for recording...');
@@ -467,8 +380,6 @@ class PollyService {
     }
   }
 
-  /// Configure audio session for playback during an active voice session
-  /// (less aggressive than initial setup)
   static Future<void> _configurePlaybackDuringVoiceSession() async {
     try {
       debugPrint(
@@ -502,10 +413,6 @@ class PollyService {
       debugPrint('[Polly] ⚠ Playback session config failed: $e');
     }
   }
-
-  // ════════════════════════════════════════════════════════════════
-  // SYNTHESIS & PLAYBACK
-  // ════════════════════════════════════════════════════════════════
 
   static Future<Uint8List?> _synthesizeAudio(
     String text,
@@ -566,7 +473,6 @@ class PollyService {
 
       await _configurePlaybackDuringVoiceSession();
 
-      // Critical: Wait for audio system to stabilize
       await Future.delayed(const Duration(milliseconds: 800));
 
       await _loadAndPlayBytes(mp3Bytes, onReady, onDone);
@@ -605,14 +511,12 @@ class PollyService {
         '[Polly] Player state: playing=${state.playing}, processingState=${state.processingState}, lastState=$lastProcessingState',
       );
 
-      // Call onReady when playback starts
       if (state.playing && !onReadyCalled) {
         onReadyCalled = true;
         debugPrint('[Polly] ✓ Audio started, calling onReady');
         onReady?.call();
       }
 
-      // Detect playback completion
       if (onReadyCalled && lastProcessingState != null) {
         final isIosCompletion =
             lastProcessingState == ProcessingState.buffering &&
@@ -628,7 +532,6 @@ class PollyService {
           );
           playbackCompletedEmitted = true;
 
-          // Emit to stream so voice screen can react
           if (!_stopRequested) {
             _playbackCompletedController.add(null);
           }
@@ -671,7 +574,6 @@ class PollyService {
       debugPrint('[Polly] ❌ Failed to load after 3 attempts');
       if (onReady != null) onReady();
 
-      // Simulate playback duration
       final estimatedDurationMs = ((mp3Bytes.length / 128000) * 1000 * 8)
           .toInt();
       await Future.delayed(Duration(milliseconds: estimatedDurationMs));
@@ -711,10 +613,6 @@ class PollyService {
       }
     }
   }
-
-  // ════════════════════════════════════════════════════════════════
-  // TEXT PROCESSING
-  // ════════════════════════════════════════════════════════════════
 
   static String _stripMarkdown(String text) {
     return text

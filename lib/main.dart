@@ -22,18 +22,15 @@ import 'package:gr0ve/features/navigation/screens/navigation_screen.dart';
 import 'package:gr0ve/features/privacy_policy/screens/privacy_policy_screen.dart';
 import 'package:gr0ve/legal/terms_screen.dart';
 import 'package:gr0ve/services/notifications/notification_service.dart';
-import 'package:gr0ve/features/absence/services/teacher_service.dart';
 import 'package:gr0ve/features/authentication/services/authentication_service.dart';
 import 'package:gr0ve/core/helper/landing_decider.dart';
 import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:gr0ve/core/helper/teacher_utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'configuration/firebase_options.dart';
 import 'package:gr0ve/features/onboarding/screens/loading_screen.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 
-// ── Services that need to boot on login ──────────────────────────────────────
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/features/calendar/services/calendar_service.dart';
@@ -49,13 +46,9 @@ import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
 import 'package:gr0ve/services/settings/fun_mode_service.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
 
-// Global navigator key for handling notification taps
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// ── DEBUG: Override current date to test day-specific features ──────────────
-// Set to a specific date to simulate that day (e.g. a Wednesday for anniversary).
-// Set to null for real time.
-DateTime? debugDateOverride = null; // Wednesday, May 20
+DateTime? debugDateOverride = null;
 DateTime get debugNow => debugDateOverride ?? DateTime.now();
 
 void main() async {
@@ -64,7 +57,6 @@ void main() async {
   if (kDebugMode)
     print('[BOOT] WidgetsBinding: ${bootWatch.elapsedMilliseconds}ms');
 
-  // Initialize Firebase first as everything depends on it
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -84,33 +76,22 @@ void main() async {
   if (kDebugMode)
     print('[BOOT] Firebase.init: ${bootWatch.elapsedMilliseconds}ms');
 
-  // 1. Critical UI-blocking init — ONLY local/instant services needed for
-  //    the very first frame (SharedPreferences reads, ~5ms each).
-  //    NO Firestore calls here — those require a gRPC channel that takes
-  //    hundreds of ms to establish on Android cold start.
   await Future.wait([
-    AccessibilityService.init(), // SharedPreferences only
-    ThemeColorService.init(), // SharedPreferences only
-    FunModeService.init(), // SharedPreferences only
+    AccessibilityService.init(),
+    ThemeColorService.init(),
+    FunModeService.init(),
   ]);
   if (kDebugMode)
     print('[BOOT] SharedPrefs init: ${bootWatch.elapsedMilliseconds}ms');
 
-  // 2. Render the app IMMEDIATELY — splash screen appears
   runApp(const MyApp());
   if (kDebugMode)
     print('[BOOT] runApp called: ${bootWatch.elapsedMilliseconds}ms');
 
-  // 3. Deferred init — everything that touches Firestore or network.
-  //    Runs AFTER the first frame is painted, so the user sees the splash
-  //    instantly instead of staring at a blank screen.
   _deferredInit(bootWatch);
 }
 
-/// Services that can init after the first frame — Firestore, FCM, etc.
-/// All of these use ValueNotifiers, so the UI updates reactively when ready.
 void _deferredInit(Stopwatch bootWatch) {
-  // Load dotenv and feature flags — lightweight, non-blocking
   dotenv.load(fileName: ".env").whenComplete(() {
     if (kDebugMode)
       print('[BOOT] dotenv ready: ${bootWatch.elapsedMilliseconds}ms');
@@ -125,66 +106,35 @@ void _deferredInit(Stopwatch bootWatch) {
       print('[BOOT] Notifications ready: ${bootWatch.elapsedMilliseconds}ms');
   });
 
-  // Network time sync — prevents local clock manipulation for travel timers
   NetworkTimeService.sync().then((_) {
     if (kDebugMode)
       print('[BOOT] Time sync ready: ${bootWatch.elapsedMilliseconds}ms');
   });
-
-  // Teacher list — background, non-blocking
-  _backgroundInit();
 }
 
-/// Tasks that can run in the background after/during boot without blocking runApp
-void _backgroundInit() {
-  fetchTeacherListFromFirebase()
-      .then((list) {
-        teacherList = list;
-        if (kDebugMode)
-          print('[BOOT] Teacher list loaded: ${list.length} entries');
-      })
-      .catchError((e) {
-        if (kDebugMode) print('[BOOT] Error loading teachers: $e');
-        teacherList = {};
-      });
-  absenceList = {};
-}
-
-// ── Boots every service that feeds snapshot cards + home screen widgets ───────
-// OPTIMIZED: Fetch user doc ONCE, then share it across all services that need it.
 Future<void> _bootUserServices(User user) async {
   if (kDebugMode) print('[BOOT] Booting services for ${user.uid}');
 
   final sw = Stopwatch()..start();
 
-  // Phase 1: Fetch the user document ONCE (this is the single most expensive
-  // operation — gRPC channel establishment on cold start)
   final userData = await UserDocCache.get();
   if (kDebugMode) print('[BOOT] UserDoc fetched (${sw.elapsedMilliseconds}ms)');
 
-  // Safety check: if user doc doesn't exist, sign out immediately
-  // (can happen if account was just deleted but auth session still active)
   if (userData == null) {
     if (kDebugMode) print('[BOOT] User document missing - signing out');
     AuthenticationService().signOut();
     return;
   }
 
-  // Phase 2: Boot all services in parallel, sharing the cached user doc.
-  // CounselorPersona and ProfilePicture both need unlock flags from the user doc.
-  // DawnUnlock needs the dawn_avatar_unlocked field.
-  // StarredTeacher/Bus need their own sub-collections (separate reads, but small).
-  // LayoutService needs user settings sub-collection.
-  // PomPrefs needs user settings sub-collection.
   await Future.wait([
     CounselorPersonaService.init(cachedUserData: userData),
     ProfilePictureService.init(cachedUserData: userData),
     DawnUnlockService.init(cachedUserData: userData),
     GroveUnlockService.init(cachedUserData: userData),
-    StarredTeacherService.load(), // Small sub-collection read
-    StarredBusService.load(), // Small sub-collection read
-    LayoutService.load(), // Small sub-collection read
-    PomPrefsService.load(), // Small sub-collection read
+    StarredTeacherService.load(),
+    StarredBusService.load(),
+    LayoutService.load(),
+    PomPrefsService.load(),
   ]).timeout(
     const Duration(seconds: 10),
     onTimeout: () {
@@ -197,17 +147,10 @@ Future<void> _bootUserServices(User user) async {
     print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
   }
 
-  // Phase 3: Calendar is the heaviest service — it queries groups, BCA events,
-  // personal events, and sets up Firestore streams. Run it AFTER core services
-  // so the UI can render while it loads. The calendar widget uses ValueNotifiers
-  // and will update reactively.
-  CalendarService.loadAllEvents().then((_) {
-    if (kDebugMode)
-      print('[BOOT] Calendar ready (${sw.elapsedMilliseconds}ms)');
-  });
+  if (kDebugMode)
+    print('[BOOT] User services ready (${sw.elapsedMilliseconds}ms)');
 }
 
-// ── Tears down everything on logout ──────────────────────────────────────────
 void _teardownUserServices() {
   StarredTeacherService.reset();
   StarredBusService.reset();
@@ -247,15 +190,10 @@ class _MyAppState extends State<MyApp> {
       } else {
         if (isFirst) {
           if (kDebugMode) print('[MAIN] Starting boot for initial user...');
-          // Delay notifications slightly to prioritize core UI boot
-          Future.delayed(const Duration(milliseconds: 500), () {
-            NotificationService().startListening();
-          });
 
           await _bootUserServices(user);
           print('[MAIN] Boot complete: ${initWatch.elapsedMilliseconds}ms');
         } else {
-          NotificationService().startListening();
           print('[MAIN] Starting boot for newly logged in user...');
           _bootUserServices(user);
         }
@@ -372,7 +310,6 @@ class _MyAppState extends State<MyApp> {
                           first: AppFeatureFlags.isReady,
                           second: AppFeatureFlags.lockdownMode,
                           builder: (context, isReady, isLocked, _) {
-                            // Don't show anything until we know the status
                             if (!isReady)
                               return const Scaffold(
                                 backgroundColor: Colors.black,
@@ -383,7 +320,6 @@ class _MyAppState extends State<MyApp> {
                               user?.email,
                             );
 
-                            // If locked and user is NOT a beta tester, show maintenance
                             if (isLocked && !isBeta) {
                               return const MaintenanceScreen();
                             }

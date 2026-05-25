@@ -5,15 +5,10 @@ import 'package:gr0ve/features/bus/services/bus_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 
-// ════════════════════════════════════════════════════════════════
-// CARD: BUSES
-// ════════════════════════════════════════════════════════════════
-
 class SnapshotBusCard extends StatelessWidget {
   final bool compact;
   const SnapshotBusCard({super.key, this.compact = false});
 
-  // ── A "?" code means the route is unknown/parking — treat as error ────────
   bool _isUnknown(BusRoute bus) =>
       bus.code.trim() == '?' || bus.code.trim().isEmpty;
 
@@ -30,10 +25,9 @@ class SnapshotBusCard extends StatelessWidget {
     }
   }
 
-  // ── Semantic colors — never primary ──────────────────────────────────────
   Color _statusColor(BusRoute bus, BuildContext context) =>
       switch (_statusLabel(bus)) {
-        'Arrived' => context.colors.success, // success green
+        'Arrived' => context.colors.success,
         _ => context.colors.error,
       };
 
@@ -135,7 +129,7 @@ class SnapshotBusCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        // Route code badge — red background when unknown
+
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 250),
                           child: Container(
@@ -175,7 +169,6 @@ class SnapshotBusCard extends StatelessWidget {
   }
 }
 
-// ── Skeleton shimmer ──────────────────────────────────────────────────────────
 class _ShimmerTile extends StatefulWidget {
   final ColorScheme c;
   const _ShimmerTile({required this.c});

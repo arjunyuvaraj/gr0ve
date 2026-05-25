@@ -42,7 +42,7 @@ class QuestionReply {
   final String id;
   final String authorId;
   final String authorName;
-  final bool isStaff; // true if mod or admin
+  final bool isStaff;
   final String content;
   final DateTime createdAt;
 

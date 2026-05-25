@@ -2,18 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TERMS OF SERVICE DATA
-// ─────────────────────────────────────────────────────────────────────────────
-
 final List<Map<String, String>> termsAndPolicySections = [
   {
     "title": "Gr0ve Terms of Service & Privacy Policy",
     "content": "Last Updated: April 5, 2026",
   },
-  // ═════════════════════════════════════════════════════════════════
-  // DISCLAIMERS
-  // ═════════════════════════════════════════════════════════════════
+
   {
     "title": "IMPORTANT DISCLAIMERS",
     "content":
@@ -22,7 +16,7 @@ final List<Map<String, String>> termsAndPolicySections = [
   {
     "title": "Counselor Information",
     "content":
-        "The Counselor feature uses AI to generate responses and is NOT a substitute for professional mental health, academic, or legal advice. AI-generated responses may be inaccurate or incomplete. Always consult a qualified professional for important decisions. The Forgotten Trees personas (Abies, Ash) are entertainment features only and must not be relied upon for any guidance.",
+        "The Counselor feature generates responses and is NOT a substitute for professional mental health, academic, or legal advice. Automated responses may be inaccurate or incomplete. Always consult a qualified professional for important decisions. The Forgotten Trees personas (Abies, Ash) are entertainment features only and must not be relied upon for any guidance.",
   },
   {
     "title": "Absences",
@@ -44,9 +38,7 @@ final List<Map<String, String>> termsAndPolicySections = [
     "content":
         "Gr0ve is NOT responsible for content, conduct, or safety within the Groups/Clubs feature. Users are responsible for their own interactions. Report inappropriate behavior through the app or to school administration.",
   },
-  // ═════════════════════════════════════════════════════════════════
-  // PRIVACY POLICY
-  // ═════════════════════════════════════════════════════════════════
+
   {"title": "PRIVACY POLICY", "content": ""},
   {
     "title": "01. Information Collection",
@@ -99,10 +91,6 @@ final List<Map<String, String>> termsAndPolicySections = [
         "Gr0ve may provide links to external resources (e.g., school quick links, app stores). These links are provided for convenience. Gr0ve is not responsible for the privacy practices of external websites or services.",
   },
 ];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TERMS OF SERVICE MODAL
-// ─────────────────────────────────────────────────────────────────────────────
 
 class TermsOfServiceModal extends StatefulWidget {
   final bool isBlockingCounselorAccess;
@@ -190,7 +178,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
       ),
       child: Column(
         children: [
-          // ── Header ────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
             decoration: BoxDecoration(
@@ -239,7 +226,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
             ),
           ),
 
-          // ── Content (scrollable) ──────────────────────────
           Expanded(
             child: CustomScrollView(
               controller: _scrollController,
@@ -310,7 +296,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
             ),
           ),
 
-          // ── Scroll indicator ──────────────────────────────
           Container(
             height: 3,
             decoration: BoxDecoration(color: colors.outline.withOpacity(0.1)),
@@ -321,7 +306,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
             ),
           ),
 
-          // ── Footer ────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
             decoration: BoxDecoration(
@@ -333,7 +317,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Checkbox
                 GestureDetector(
                   onTap: () => setState(() => _hasRead = !_hasRead),
                   child: Container(
@@ -383,7 +366,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
                 ),
                 const SizedBox(height: 16),
 
-                // Accept button (both modes)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -396,8 +378,7 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
                         : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.primary,
-                      disabledBackgroundColor:
-                          colors.primary.withOpacity(0.35),
+                      disabledBackgroundColor: colors.primary.withOpacity(0.35),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -416,7 +397,6 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
                   ),
                 ),
 
-                // Decline button (blocking mode only)
                 if (widget.isBlockingCounselorAccess) ...[
                   const SizedBox(height: 10),
                   SizedBox(
@@ -424,8 +404,7 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
                     child: OutlinedButton(
                       onPressed: _handleDecline,
                       style: OutlinedButton.styleFrom(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         side: BorderSide(
                           color: colors.outline.withOpacity(0.3),
                         ),
@@ -452,16 +431,10 @@ class _TermsOfServiceModalState extends State<TermsOfServiceModal> {
   }
 }
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TERMS OF SERVICE SERVICE
-// ─────────────────────────────────────────────────────────────────────────────
-
 class TermsOfServiceService {
   static const String _termsKey = 'accepted_terms_of_service';
   static bool? _localAcceptedCache;
 
-  /// Check if user has accepted the Terms of Service
   static Future<bool> hasAcceptedTerms() async {
     if (_localAcceptedCache == true) return true;
 
@@ -479,7 +452,6 @@ class TermsOfServiceService {
       return accepted;
     } catch (_) {
       try {
-        // Fall back to local cache if network times out
         final cacheDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -493,30 +465,33 @@ class TermsOfServiceService {
     }
   }
 
-  /// Accept and save terms to Firestore
   static Future<void> acceptTerms() async {
     _localAcceptedCache = true;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        _termsKey: true,
-        'terms_accepted_at': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true)).timeout(
-        const Duration(seconds: 2),
-        onTimeout: () {
-          debugPrint('[TermsOfService] Network slow, queued write locally.');
-        },
-      );
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({
+            _termsKey: true,
+            'terms_accepted_at': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true))
+          .timeout(
+            const Duration(seconds: 2),
+            onTimeout: () {
+              debugPrint(
+                '[TermsOfService] Network slow, queued write locally.',
+              );
+            },
+          );
       debugPrint('[TermsOfService] Terms accepted and saved');
     } catch (e) {
       debugPrint('[TermsOfService] Error saving acceptance: $e');
-      // Proceed anyway, the user clicked accept.
     }
   }
 
-  /// Show terms ONLY if not accepted (non-dismissible)
   static Future<void> showIfNeeded(
     BuildContext context, {
     bool isBlockingCounselorAccess = true,
@@ -535,11 +510,10 @@ class TermsOfServiceService {
     }
   }
 
-  /// Force show terms (for account page revisit)
   static void showForce(BuildContext context, {VoidCallback? onAccepted}) {
     showDialog(
       context: context,
-      barrierDismissible: true, // Can dismiss when reviewing
+      barrierDismissible: true,
       builder: (_) => TermsOfServiceModal(
         isBlockingCounselorAccess: false,
         onAccepted: onAccepted,
@@ -547,7 +521,6 @@ class TermsOfServiceService {
     );
   }
 
-  /// Reset terms acceptance (for testing)
   static Future<void> reset() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;

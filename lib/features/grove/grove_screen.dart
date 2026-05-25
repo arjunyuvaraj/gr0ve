@@ -67,11 +67,7 @@ class _GroveScreenState extends State<GroveScreen>
     final targetDate = DateTime(2026, 5, 20, 8, 0, 0);
     final isBeforeAnniversary = DateTime.now().isBefore(targetDate);
 
-    // If it's before the anniversary, or Dawn is unlocked, show the chapter screen
-    // (The ChapterSelectionScreen handles the actual full-screen countdown overlay)
-    // If Dawn is not unlocked, show the requirement dialog and a locked placeholder
     if (!_dawnUnlocked && !isBeforeAnniversary) {
-      // Trigger dialog after first build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _showDawnRequirementDialog(context);
       });
@@ -107,7 +103,6 @@ class _GroveScreenState extends State<GroveScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with Dawn Image
               Container(
                 height: 180,
                 width: double.infinity,
@@ -120,18 +115,20 @@ class _GroveScreenState extends State<GroveScreen>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Decorative circles
-                    ...List.generate(3, (i) => Container(
-                      width: 100.0 + (i * 40.0),
-                      height: 100.0 + (i * 40.0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: dawnColor.withOpacity(0.1 - (i * 0.03)),
+                    ...List.generate(
+                      3,
+                      (i) => Container(
+                        width: 100.0 + (i * 40.0),
+                        height: 100.0 + (i * 40.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: dawnColor.withOpacity(0.1 - (i * 0.03)),
+                          ),
                         ),
                       ),
-                    )),
-                    // Dawn Image
+                    ),
+
                     Image.asset(
                       isDark
                           ? 'assets/story/characters/ep0/dawn_dark.png'

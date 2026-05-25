@@ -197,7 +197,6 @@ class _AdminRequestCardState extends State<_AdminRequestCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -231,7 +230,6 @@ class _AdminRequestCardState extends State<_AdminRequestCard> {
               ),
               const SizedBox(height: 8),
 
-              // Description
               Text(
                 request.description,
                 style: text.bodyMedium?.copyWith(
@@ -240,7 +238,6 @@ class _AdminRequestCardState extends State<_AdminRequestCard> {
               ),
               const SizedBox(height: 16),
 
-              // Requester info
               Row(
                 children: [
                   Icon(
@@ -280,7 +277,6 @@ class _AdminRequestCardState extends State<_AdminRequestCard> {
               ),
               const SizedBox(height: 16),
 
-              // Action buttons
               Row(
                 children: [
                   Expanded(

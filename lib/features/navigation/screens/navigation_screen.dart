@@ -17,7 +17,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
 import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 
-// Import your screens
 import 'package:gr0ve/features/account/screens/account_screen.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
 import 'package:gr0ve/features/admin/screens/admin_calendar_requests_screen.dart';
@@ -34,7 +33,6 @@ import 'package:gr0ve/features/navigation/models/nav_config.dart';
 import 'package:gr0ve/features/navigation/services/navigation_persistence_service.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
 
-// SCREEN: Main navigation hub with role-based access control
 class NavigationScreen extends StatefulWidget {
   final int initialIndex;
 
@@ -55,7 +53,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   final NavigationPersistenceService _persistenceService =
       NavigationPersistenceService();
   List<String>? _customOrder;
-  String _selectedTabId = 'home'; // Track by ID to prevent re-order glitches
+  String _selectedTabId = 'home';
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -65,18 +63,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
   Map<String, int> _unreadAnnouncementsByClub = {};
   Map<String, int> _unreadQAByClub = {};
 
-  // Feature flags
   bool _enableClubs = false;
   bool _enableCounselor = false;
   bool _isBetaTester = false;
   bool _isGroveUnlocked = false;
-  bool _isDawnUnlocked = false;
 
-  // Onboarding state
   bool _isCheckingOnboarding = true;
   bool _needsOnboarding = false;
 
-  // IDs hidden from the nav bar — accessible via More > Extra
   static const _extraScreenIds = {'lunch_menu', 'news', 'help', 'changelog'};
 
   @override
@@ -95,8 +89,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     GroveUnlockService.isUnlocked.addListener(_onGroveUnlockChanged);
     _isGroveUnlocked = GroveUnlockService.isUnlocked.value;
     DawnUnlockService.isUnlocked.addListener(_onDawnUnlockChanged);
-    _isDawnUnlocked = DawnUnlockService.isUnlocked.value;
-    _onBetaStatusChanged(); // Sync initial state
+    _onBetaStatusChanged();
     _initAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) DawnUnlockService.checkAndUnlock(context);
@@ -126,13 +119,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
   void _onDawnUnlockChanged() {
     if (mounted) {
       setState(() {
-        _isDawnUnlocked = DawnUnlockService.isUnlocked.value;
         _buildNavigation();
       });
     }
   }
 
-  /// Parallelizes all async init work that was previously done sequentially.
   Future<void> _initAll() async {
     await Future.wait([
       _checkOnboarding(),
@@ -168,10 +159,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     super.dispose();
   }
 
-  // ============================================================================
-  // ONBOARDING CHECK
-  // ============================================================================
-
   Future<void> _checkOnboarding() async {
     if (_user == null) {
       if (mounted)
@@ -194,15 +181,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
       return;
     }
 
-    // Don't block on reload — use the current verification state
     final isEmailVerified = _user!.emailVerified;
 
     try {
-      // Use cached user doc — already fetched during boot
       final data = await UserDocCache.get();
 
-      // If we couldn't fetch the data (timeout or error), don't force onboarding.
-      // We only want to onboard if we POSITIVELY know the fields are missing.
       if (data == null) {
         if (mounted) {
           setState(() {
@@ -231,10 +214,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
         });
     }
   }
-
-  // ============================================================================
-  // USER ROLE & ACCESS CONTROL
-  // ============================================================================
 
   void _determineUserRole() {
     final email = _user?.email ?? '';
@@ -274,10 +253,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  // ============================================================================
-  // NAVIGATION CONFIGURATION
-  // ============================================================================
-
   void _buildNavigation() {
     final baseDocs = _getNavigationForRole(_userRole, _isPlatformAdmin);
 
@@ -301,7 +276,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
     _screens = _navConfigs.map((c) => c.screen).toList();
 
-    // Sync index with selected ID
     final newIndex = _navConfigs.indexWhere((c) => c.id == _selectedTabId);
     if (newIndex != -1) {
       _selectedIndex = newIndex;
@@ -362,8 +336,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: 'Calendar',
             screen: const CalendarScreen(),
           ),
-          // Extra screens — registered so deep-links & notification routing work,
-          // but hidden from the nav bar. Accessible via ··· > Extra.
+
           NavConfig(
             id: 'lunch_menu',
             iconData: HugeIcons.strokeRoundedRestaurant02,
@@ -390,7 +363,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
         ];
 
-        // Gr0ve becomes available only after the changelog Easter egg unlocks it.
         if (_isGroveUnlocked) {
           baseNav.add(
             NavConfig(
@@ -480,10 +452,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  // ============================================================================
-  // NOTIFICATION HANDLING
-  // ============================================================================
-
   void _subscribeToUnreadCounts() {
     _unreadCountSubscription = NotificationService().unreadCountStream.listen((
       data,
@@ -560,10 +528,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  // ============================================================================
-  // VERSION MANAGEMENT
-  // ============================================================================
-
   Future<void> _loadVersionInfo() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -587,10 +551,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
       return false;
     }
   }
-
-  // ============================================================================
-  // NAVIGATION LOGIC
-  // ============================================================================
 
   void _changeIndex(int index) {
     if (index == -1 || index >= _navConfigs.length) return;
@@ -618,10 +578,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     return count;
   }
 
-  // ============================================================================
-  // UI - MORE MENU
-  // ============================================================================
-
   void _showMoreMenu() {
     showModalBottomSheet(
       context: context,
@@ -635,7 +591,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     final colors = Theme.of(context).colorScheme;
     final isStudent = _userRole == UserRole.student;
 
-    // Only non-extra configs count toward overflow items
     final visibleConfigs = _navConfigs
         .where((c) => !_extraScreenIds.contains(c.id))
         .toList();
@@ -659,7 +614,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
           Container(
             width: 40,
             height: 4,
@@ -679,7 +633,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Customize Navigation button
           InkWell(
             onTap: () {
               Navigator.pop(context);
@@ -719,7 +672,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Overflow nav items
           if (moreItems.isNotEmpty)
             Flexible(
               child: ListView.separated(
@@ -800,7 +752,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
               ),
             ),
 
-          // ── Extra entry — BCA students only ────────────────────────────────
           if (isStudent) ...[
             Divider(height: 32, color: colors.onSurface.withOpacity(0.08)),
             InkWell(
@@ -859,10 +810,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
       ),
     );
   }
-
-  // ============================================================================
-  // UI - EXTRA MENU (Lunch, News, Help)
-  // ============================================================================
 
   void _showExtraMenu() {
     showModalBottomSheet(
@@ -982,10 +929,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
-  // ============================================================================
-  // UI - MAIN BUILD
-  // ============================================================================
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -1026,13 +969,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
-  // ============================================================================
-  // UI - WIDE LAYOUT
-  // ============================================================================
-
   Widget _buildWideLayout(BuildContext context, ColorScheme colors) {
-    // Extra screens are not shown in the sidebar either — still accessible
-    // via the More / Extra flow if needed, or directly by deep-link.
     final sidebarConfigs = _navConfigs
         .where((c) => !_extraScreenIds.contains(c.id))
         .toList();
@@ -1193,12 +1130,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
-  // ============================================================================
-  // UI - MOBILE LAYOUT
-  // ============================================================================
-
   Widget _buildMobileLayout(BuildContext context, ColorScheme colors) {
-    // Filter out extra screens — they don't appear in the bottom bar
     final visibleConfigs = _navConfigs
         .where((c) => !_extraScreenIds.contains(c.id))
         .toList();
@@ -1235,16 +1167,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
                   FadeTransition(opacity: animation, child: child),
               child: KeyedSubtree(
                 key: ValueKey<String>(_selectedTabId),
-                // Inject nav-bar clearance so every screen's scrollable content
-                // stops above the floating pill. Nav pill sits at bottom:20
-                // with all(10) padding + 28px icons + 24px v-pad ≈ 120px total.
+
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-                    // padding is used by SafeArea / scroll views for auto-insets
                     padding: MediaQuery.of(
                       context,
                     ).padding.copyWith(bottom: 120),
-                    // viewPadding is used by Scaffold, keyboard, etc.
+
                     viewPadding: MediaQuery.of(
                       context,
                     ).viewPadding.copyWith(bottom: 120),
@@ -1253,7 +1182,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 ),
               ),
             ),
-            // Mask for the bottom area to prevent content from being visible behind/below the pill
+
             Positioned(
               bottom: 0,
               left: 0,
@@ -1436,10 +1365,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
       ),
     );
   }
-
-  // ============================================================================
-  // UI - REORDERING
-  // ============================================================================
 
   void _showReorderMenu() {
     showModalBottomSheet(

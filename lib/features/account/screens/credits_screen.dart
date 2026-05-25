@@ -26,7 +26,6 @@ class CreditsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: Row(
@@ -118,7 +117,6 @@ class CreditsScreen extends StatelessWidget {
                 ),
               ),
 
-              // Bottom Button
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: CustomSecondaryButton(

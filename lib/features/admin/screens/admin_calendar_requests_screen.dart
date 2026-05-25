@@ -177,7 +177,7 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {}, // could expand or show details
+          onTap: () {},
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -194,7 +194,6 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header + status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -239,7 +238,6 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
                 ),
                 const SizedBox(height: 8),
 
-                // Group
                 Row(
                   children: [
                     Icon(
@@ -259,7 +257,6 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
                 ),
                 const SizedBox(height: 12),
 
-                // Date & time
                 Row(
                   children: [
                     Icon(Icons.calendar_today, size: 14, color: colors.primary),
@@ -282,7 +279,6 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
                   ],
                 ),
 
-                // Description
                 if (description != null && description.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
@@ -295,7 +291,6 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
                   ),
                 ],
 
-                // Requested at
                 if (requestedAt != null) ...[
                   const SizedBox(height: 12),
                   Text(
@@ -307,7 +302,6 @@ class _PublicEventRequestCardState extends State<PublicEventRequestCard> {
                   ),
                 ],
 
-                // Action buttons
                 if (status == 'pending') ...[
                   const SizedBox(height: 16),
                   Row(

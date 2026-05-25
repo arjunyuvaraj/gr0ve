@@ -4,10 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AccessibilityService {
   AccessibilityService._();
 
-  static final ValueNotifier<bool> accessibleColors = ValueNotifier<bool>(false);
+  static final ValueNotifier<bool> accessibleColors = ValueNotifier<bool>(
+    false,
+  );
   static const _accessibleColorsKey = 'accessible_colors_enabled';
 
-  static final ValueNotifier<bool> autoVoiceGreeting = ValueNotifier<bool>(true);
+  static final ValueNotifier<bool> autoVoiceGreeting = ValueNotifier<bool>(
+    true,
+  );
   static const _autoVoiceGreetingKey = 'auto_voice_greeting_enabled';
 
   static Future<void> init() async {

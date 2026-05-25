@@ -6,7 +6,7 @@ import 'package:gr0ve/features/links/service/link_service.dart';
 
 class AddLinkDialog extends StatefulWidget {
   final Function(String title, String url, String iconKey, Color color) onAdd;
-  final QuickLink? editingLink; // Add this for editing
+  final QuickLink? editingLink;
   const AddLinkDialog({super.key, required this.onAdd, this.editingLink});
 
   @override
@@ -52,11 +52,11 @@ class _AddLinkDialogState extends State<AddLinkDialog> {
   @override
   void initState() {
     super.initState();
-    // Initialize with existing values if editing
+
     if (widget.editingLink != null) {
       titleController = TextEditingController(text: widget.editingLink!.title);
       final url = widget.editingLink!.url;
-      // Remove https://www. prefix for display
+
       final displayUrl = url.startsWith('https://www.')
           ? url.substring(12)
           : url;

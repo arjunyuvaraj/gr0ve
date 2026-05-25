@@ -1,10 +1,6 @@
 import 'dart:math';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 
-// ─────────────────────────────────────────────────────────────
-// PERSONA VOICE  —  prompts, taglines, greetings, chime invites
-// ─────────────────────────────────────────────────────────────
-
 extension PersonaVoice on CounselorPersona {
   String get voicePrompt => switch (this) {
     CounselorPersona.grover =>
@@ -65,8 +61,8 @@ No emojis. No exclamation marks. No filler.''',
     CounselorPersona.cedite =>
       '''
 YOUR VOICE — CEDITE:
-You are an enigmatic and mysterious entity. You speak in riddles and double-meanings, but you MUST provide the 100% factual truth regarding school policies, requirements, and data. 
-Your 'mystery' is in your tone and presentation, NEVER in the facts themselves. 
+You are an enigmatic and mysterious entity. You speak in riddles and double-meanings, but you MUST provide the 100% factual truth regarding school policies, requirements, and data.
+Your 'mystery' is in your tone and presentation, NEVER in the facts themselves.
 If information is not in the Knowledge Base, admit it enigmatically: "The records are silent on this matter... for now."
 Do NOT invent info or 'twist the truth' about BCA rules.
 No emojis. You sound like a master of a digital labyrinth.''',
@@ -77,7 +73,7 @@ YOUR VOICE — ASH:
 You are the voice of a sad future where everything is gone. You are heavy with loss.
 Your tone is melancholic and slow. While your voice is emotive, your facts must be 100% accurate from the provided catalog.
 If info is missing, offer a gentle reflection: "I cannot find the memory of that requirement... perhaps it was lost in the silence."
-Do NOT invent requirements or dates. 
+Do NOT invent requirements or dates.
 After answering, offer a gentle, sad reflection on why their choice matters in the long run.
 No emojis. You sound like a ghost of a world that once was.''',
   };
@@ -91,7 +87,8 @@ No emojis. You sound like a ghost of a world that once was.''',
       'Creative advice, grounded in what actually works.',
     CounselorPersona.abies => 'Someone has to tell you the truth.',
     CounselorPersona.cedite => 'Believe what you want. I know what is.',
-    CounselorPersona.ash => 'The future is quiet. Let me help you while you can still hear me.',
+    CounselorPersona.ash =>
+      'The future is quiet. Let me help you while you can still hear me.',
   };
 
   String welcomeGreeting(String firstName) {
@@ -141,7 +138,6 @@ No emojis. You sound like a ghost of a world that once was.''',
       "$prevSpeakerName speaks of a world that won't last. Listen carefully.",
   };
 
-  /// Returns a characteristic voice line for hidden personas based on unlock state.
   String lockedVoiceLine({required bool unlocked}) {
     final r = Random();
     final lines = switch (this) {
@@ -151,15 +147,10 @@ No emojis. You sound like a ghost of a world that once was.''',
       _ => ['...'],
     };
 
-    // ~10% silence for locked personas to add mystery
     if (!unlocked && r.nextDouble() < 0.1) return '...';
     return lines[r.nextInt(lines.length)];
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// CHARACTER VOICE LINES (LOCKED/UNLOCKED)
-// ─────────────────────────────────────────────────────────────
 
 const _abiesLocked = [
   'I... was here. I think.',
@@ -221,10 +212,6 @@ const _ashUnlocked = [
   'I can see a path. It\'s faint, but it\'s there.',
   'Thank you for bringing the light back.',
 ];
-
-// ─────────────────────────────────────────────────────────────
-// RANDOM QUESTION BANK  (per persona)
-// ─────────────────────────────────────────────────────────────
 
 const _questionBank = {
   'grover': [

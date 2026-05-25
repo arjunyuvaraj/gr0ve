@@ -34,7 +34,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
     _addLog("SYSTEM_BOOT_SEQUENCE_START");
     _addLog("INITIALIZING_MAINTENANCE_MODE");
     _addLog("LOCKDOWN_PROTOCOL_ACTIVE");
-    
+
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       if (mounted) {
         setState(() {
@@ -56,7 +56,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
 
   void _addLog(String msg) {
     setState(() {
-      _logs.add("[${DateTime.now().toString().split(' ').last.substring(0, 8)}] $msg");
+      _logs.add(
+        "[${DateTime.now().toString().split(' ').last.substring(0, 8)}] $msg",
+      );
     });
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -72,7 +74,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
   @override
   Widget build(BuildContext context) {
     final dots = "." * _dotCount;
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -81,11 +83,13 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(4),
@@ -112,8 +116,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                 ],
               ),
               const SizedBox(height: 32),
-              
-              // Big Title
+
               Text(
                 "UNDER_MAINTENANCE",
                 style: GoogleFonts.jetBrainsMono(
@@ -131,10 +134,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
-              // Terminal Output
+
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -162,10 +164,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
-              // Footer
+
               Center(
                 child: Column(
                   children: [

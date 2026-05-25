@@ -36,12 +36,10 @@ class _SchoolClosedOverlayState extends State<SchoolClosedOverlay> {
   bool _isSchoolClosed() {
     final now = DateTime.now();
 
-    // 1. Check weekends
     if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
       return true;
     }
 
-    // 2. Check "School Closed" or "Holiday" in events
     final todayEvents = CalendarService.getEventsForDate(now);
     for (final event in todayEvents) {
       final title = event.title.toLowerCase();
@@ -68,7 +66,7 @@ class _SchoolClosedOverlayState extends State<SchoolClosedOverlay> {
     return Stack(
       children: [
         widget.child,
-        // Full screen blur + overlay
+
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -80,7 +78,6 @@ class _SchoolClosedOverlayState extends State<SchoolClosedOverlay> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Sarcastic image
                       ClipRRect(
                         borderRadius: BorderRadius.circular(24),
                         child: Image.asset(
@@ -103,7 +100,6 @@ class _SchoolClosedOverlayState extends State<SchoolClosedOverlay> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Message
                       Text(
                         _message,
                         textAlign: TextAlign.center,
@@ -123,7 +119,6 @@ class _SchoolClosedOverlayState extends State<SchoolClosedOverlay> {
 
                       const SizedBox(height: 48),
 
-                      // Continue button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

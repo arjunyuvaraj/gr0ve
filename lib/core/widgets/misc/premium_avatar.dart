@@ -19,7 +19,7 @@ class PremiumAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    
+
     return Stack(
       children: [
         Container(
@@ -44,7 +44,8 @@ class PremiumAvatar extends StatelessWidget {
                 ? Image.asset(
                     imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => _buildFallback(colors),
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildFallback(colors),
                   )
                 : _buildFallback(colors),
           ),
@@ -59,10 +60,7 @@ class PremiumAvatar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF4CAF50),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: colors.surface,
-                  width: 2,
-                ),
+                border: Border.all(color: colors.surface, width: 2),
               ),
             ),
           ),

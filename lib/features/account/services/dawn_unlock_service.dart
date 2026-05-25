@@ -18,8 +18,6 @@ class DawnUnlockService {
     } catch (_) {}
   }
 
-  /// Called when user opens the app or "checks in".
-  /// Returns true if it was just unlocked during this exact call.
   static Future<bool> checkAndUnlock(BuildContext context) async {
     if (isUnlocked.value) return false;
 
@@ -27,7 +25,6 @@ class DawnUnlockService {
     final isWeekend =
         now.weekday == DateTime.saturday || now.weekday == DateTime.sunday;
 
-    // Simplistic holiday check (e.g. Christmas, New Year, Thanksgiving estimation)
     final isHoliday =
         (now.month == 12 && now.day >= 24) ||
         (now.month == 1 && now.day == 1) ||

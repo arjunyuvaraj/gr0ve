@@ -3,10 +3,6 @@ import 'package:gr0ve/core/theme/persona_theme.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 import 'package:gr0ve/features/calendar/services/calendar_service.dart';
 
-// ════════════════════════════════════════════════════════════════
-// CARD: UPCOMING  (StreamBuilder<List<CalendarEvent>> — live)
-// ════════════════════════════════════════════════════════════════
-
 Color _urgC(CalendarEvent r, ColorScheme c) {
   final d = r.date.difference(DateTime.now()).inDays;
   return d <= 0
@@ -56,8 +52,6 @@ class _SnapshotUpcomingCardState extends State<SnapshotUpcomingCard> {
       children: [
         const SizedBox(height: 8),
 
-        // ── Live event list ───────────────────────────────────────
-        // Uses a real stream so additions/deletions push instantly.
         StreamBuilder<List<CalendarEvent>>(
           stream: CalendarService.upcomingEventsStream(days: 7, limit: 5),
           builder: (_, snap) {

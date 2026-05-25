@@ -52,7 +52,6 @@ class _PremiumLoadingIndicatorState extends State<PremiumLoadingIndicator>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Outer pulsing circle
                 Opacity(
                   opacity:
                       (1.2 - _scaleAnimation.value) * _opacityAnimation.value,
@@ -68,7 +67,7 @@ class _PremiumLoadingIndicatorState extends State<PremiumLoadingIndicator>
                     ),
                   ),
                 ),
-                // Inner pulsing circle
+
                 Transform.scale(
                   scale: _scaleAnimation.value,
                   child: Container(

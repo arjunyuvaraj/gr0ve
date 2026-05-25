@@ -1,7 +1,3 @@
-// EXPANDED EPISODE 1: THE ORCHARD (~30 minutes per path)
-// Added: More NPCs, deeper puzzles, branching conversations, environmental storytelling
-// FIXED: Story flow, scene redirects, and Bob the lost sparrow lore
-
 import 'dart:math';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
@@ -448,9 +444,6 @@ List<Scene> buildEpisode01Orchard() {
       },
     ),
 
-    // ══════════════════════════════════════════════════════════
-    // PATH A: NEWTON'S APPLE ORCHARD (~30 MINUTES)
-    // ══════════════════════════════════════════════════════════
     Scene(
       id: 'newton_entrance',
       lines: const [
@@ -1192,9 +1185,6 @@ List<Scene> buildEpisode01Orchard() {
       waitDuration: Duration(hours: 36),
     ),
 
-    // ══════════════════════════════════════════════════════════
-    // PATH B: DARWIN'S ORANGE GROVE (EXPANDED ~30 MINUTES)
-    // ══════════════════════════════════════════════════════════
     Scene(
       id: 'darwin_entrance',
       lines: const [
@@ -1920,7 +1910,6 @@ List<Scene> buildEpisode01Orchard() {
       onEnter: (state) {
         state.seedWarmth = max(0, state.seedWarmth - 10);
         state.transience += 1;
-        // Don't add to inventory
       },
     ),
 
@@ -1967,9 +1956,6 @@ List<Scene> buildEpisode01Orchard() {
       nextScene: 'ep1_complete',
     ),
 
-    // ══════════════════════════════════════════════════════════
-    // EPISODE 1 COMPLETE
-    // ══════════════════════════════════════════════════════════
     Scene(
       id: 'ep1_complete',
       lines: const [
@@ -1985,9 +1971,8 @@ List<Scene> buildEpisode01Orchard() {
       ],
       inputType: InputType.none,
       onEnter: (state) {
-        // Final clamped range check
         state.seedWarmth = state.seedWarmth.clamp(60, 90);
-        state.episodeComplete = true; // Mark episode as done
+        state.episodeComplete = true;
         if (state.chosenPath == 'apple') {
           state.newtonUnlocked = true;
           state.darwinUnlocked = false;
@@ -2000,7 +1985,6 @@ List<Scene> buildEpisode01Orchard() {
   ];
 }
 
-// Helper for exit retry scenes
 List<Scene> _buildExitRetryScenes(String variant, String response) {
   return [
     Scene(

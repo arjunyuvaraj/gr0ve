@@ -28,26 +28,21 @@ class BusRoute {
   }
 }
 
-/// Configuration for Google Sheets
 class SheetsConfig {
-  // Your Google Sheets ID
   static const String spreadsheetId =
       '1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o';
 
-  // The gid (sheet tab ID) - change if using different tab
   static const String gid = '0';
 
-  // CSV export URL
   static String get csvUrl =>
       'https://docs.google.com/spreadsheets/d/$spreadsheetId/export?format=csv&gid=$gid';
 }
 
-/// Stream bus routes from Firestore for real-time updates
 Stream<List<BusRoute>> getBusRoutesStream() {
   return FirebaseFirestore.instance
       .collection('public_data')
       .doc('bus_routes')
-      .snapshots(includeMetadataChanges: true)
+      .snapshots()
       .map((snapshot) {
         final List<BusRoute> routes = [];
 
@@ -66,15 +61,12 @@ Stream<List<BusRoute>> getBusRoutesStream() {
           return routes;
         }
 
-        // Get the routes map
         if (data.containsKey('routes')) {
           final routesMap = data['routes'] as Map<String, dynamic>;
           if (kDebugMode) {
             print('Found ${routesMap.length} bus routes in Firestore');
           }
 
-          // Convert map to list of BusRoute objects
-          // Python script keys by town name, not route_N
           routesMap.forEach((key, value) {
             final routeData = value as Map<String, dynamic>;
             routes.add(BusRoute.fromJson(routeData));
@@ -95,15 +87,12 @@ Stream<List<BusRoute>> getBusRoutesStream() {
       });
 }
 
-/// Refresh: Fetch from Google Sheets and update Firestore
-/// This is called when user pulls to refresh or for manual sync
 Future<void> refreshBusRoutesFromSheets() async {
   try {
     if (kDebugMode) {
       print('🔄 Fetching latest bus routes from Google Sheets...');
     }
 
-    // Step 1: Fetch from Google Sheets
     final url = Uri.parse(SheetsConfig.csvUrl);
     final response = await http.get(url).timeout(const Duration(seconds: 10));
 
@@ -114,56 +103,42 @@ Future<void> refreshBusRoutesFromSheets() async {
       );
     }
 
-    // Parse CSV data
     final csvData = const CsvDecoder().convert(response.body);
 
     final List<BusRoute> routes = [];
 
-    // ONLY pull from rows 2-24 (index 1 to 23 inclusive) to match Python script
-    // Python script uses all_values[1:24]
     final int endRow = csvData.length.clamp(0, 24);
 
     for (int i = 1; i < endRow; i++) {
       final row = csvData[i];
 
-      // Skip completely empty rows
       if (row.isEmpty) continue;
 
-      // --- LEFT COLUMNS: A (index 0) = Town, B (index 1) = Code ---
       if (row.length >= 2) {
         final town1 = row[0].toString().trim();
         if (town1.isNotEmpty) {
           String code1 = row[1].toString().trim();
-          // Skip if marked as 'missing' (case-insensitive) to match Python
+
           if (code1.toLowerCase() == 'missing') {
             code1 = "";
           }
-          
+
           final status = code1.isNotEmpty ? 'Arrived' : 'Not here yet';
-          routes.add(BusRoute(
-            town: town1, 
-            code: code1, 
-            status: status,
-          ));
+          routes.add(BusRoute(town: town1, code: code1, status: status));
         }
       }
 
-      // --- RIGHT COLUMNS: C (index 2) = Town, D (index 3) = Code ---
       if (row.length >= 4) {
         final town2 = row[2].toString().trim();
         if (town2.isNotEmpty) {
           String code2 = row[3].toString().trim();
-          // Skip if marked as 'missing' (case-insensitive) to match Python
+
           if (code2.toLowerCase() == 'missing') {
             code2 = "";
           }
-          
+
           final status = code2.isNotEmpty ? 'Arrived' : 'Not here yet';
-          routes.add(BusRoute(
-            town: town2, 
-            code: code2, 
-            status: status,
-          ));
+          routes.add(BusRoute(town: town2, code: code2, status: status));
         }
       }
     }
@@ -172,8 +147,6 @@ Future<void> refreshBusRoutesFromSheets() async {
       throw Exception('No valid routes found in Google Sheets');
     }
 
-    // Step 3: Update Firestore with new data
-    // Match Python script structure exactly
     final Map<String, dynamic> routesMap = {};
     for (final route in routes) {
       routesMap[route.town] = {
@@ -202,27 +175,6 @@ Future<void> refreshBusRoutesFromSheets() async {
   }
 }
 
-/// Watch mode: Continuously refresh bus routes every [intervalSeconds] for [durationMinutes]
-///
-/// This mimics the Python script's dismissal mode:
-/// - Default: 30s interval, 60min duration
-/// - Fetches from Google Sheets and updates Firestore repeatedly
-/// - Useful during school dismissal when bus locations change frequently
-///
-/// Example usage:
-/// ```dart
-/// // Start watch mode with callbacks
-/// watchBusRoutesForDismissal(
-///   intervalSeconds: 30,
-///   durationMinutes: 60,
-///   onSyncStart: (syncCount, nextSync) {
-///     print('Sync #$syncCount scheduled for $nextSync');
-///   },
-///   onSyncError: (syncCount, error) {
-///     print('Sync #$syncCount failed: $error');
-///   },
-/// );
-/// ```
 Future<void> watchBusRoutesForDismissal({
   int intervalSeconds = 30,
   int durationMinutes = 60,
@@ -281,13 +233,10 @@ Future<void> watchBusRoutesForDismissal({
   onComplete?.call();
 }
 
-/// Fetch bus routes from Firestore (one-time fetch)
-/// Kept for backward compatibility if needed elsewhere
 Future<List<BusRoute>> fetchBusRoutes() async {
   final List<BusRoute> routes = [];
 
   try {
-    // Read from Firestore
     final doc = await FirebaseFirestore.instance
         .collection('public_data')
         .doc('bus_routes')
@@ -308,15 +257,12 @@ Future<List<BusRoute>> fetchBusRoutes() async {
       return [];
     }
 
-    // Get the routes map
     if (data.containsKey('routes')) {
       final routesMap = data['routes'] as Map<String, dynamic>;
       if (kDebugMode) {
         print('Found ${routesMap.length} bus routes in Firestore');
       }
 
-      // Convert map to list of BusRoute objects
-      // Python script keys by town name
       routesMap.forEach((key, value) {
         final routeData = value as Map<String, dynamic>;
         routes.add(BusRoute.fromJson(routeData));

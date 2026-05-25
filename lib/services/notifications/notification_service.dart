@@ -4,15 +4,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
-import 'package:gr0ve/features/bus/services/bus_service.dart';
-import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (kDebugMode) print('[NOTIF] Background message received: ${message.messageId}');
+  if (kDebugMode)
+    print('[NOTIF] Background message received: ${message.messageId}');
 }
 
 class NotificationService {
@@ -27,21 +26,15 @@ class NotificationService {
 
   final List<StreamSubscription> _subscriptions = [];
   final Set<String> _processedIds = {};
-  final Map<String, DateTime> _notifiedBuses = {};
   final Map<String, DateTime> _lastShownPayloads = {};
-  Timer? _busCheckTimer;
+  static bool realtimeUnreadListenersEnabled = false;
 
   void Function(NotificationResponse)? _onNotificationTapCallback;
 
-  static const String _notifiedBusesKey = 'notified_buses';
-
-  // Unread tracking
   final Map<String, int> _unreadAnnouncementsByClub = {};
   final Map<String, int> _unreadQAByClub = {};
-  final Map<String, int> _unreadQAByAnnouncement =
-      {}; // NEW: unread Q&A by announcement
-  final Map<String, int> _unreadQuestionsById =
-      {}; // NEW: unread by question ID
+  final Map<String, int> _unreadQAByAnnouncement = {};
+  final Map<String, int> _unreadQuestionsById = {};
   final Map<String, int> _unreadCounts = {
     'join_requests': 0,
     'club_requests': 0,
@@ -70,14 +63,9 @@ class NotificationService {
     if (kDebugMode) print('[NOTIF] Notification tap callback registered');
   }
 
-  // ---------------------------------------------------------------------------
-  // Initialise
-  // ---------------------------------------------------------------------------
-
   Future<void> initialize() async {
     if (kDebugMode) print('[NOTIF] Initializing notification service...');
 
-    await _loadNotifiedBuses();
     await _loadUnreadCounts();
 
     const androidSettings = AndroidInitializationSettings(
@@ -102,10 +90,6 @@ class NotificationService {
 
     if (kDebugMode) print('[NOTIF] Notification service initialized');
   }
-
-  // ---------------------------------------------------------------------------
-  // Persistence
-  // ---------------------------------------------------------------------------
 
   Future<void> _loadUnreadCounts() async {
     try {
@@ -286,54 +270,14 @@ class NotificationService {
   int getAnnouncementUnreadQACount(String announcementId) =>
       _unreadQAByAnnouncement[announcementId] ?? 0;
 
-  // ---------------------------------------------------------------------------
-  // Persisted bus tracking
-  // ---------------------------------------------------------------------------
-
-  Future<void> _loadNotifiedBuses() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final storedData = prefs.getString(_notifiedBusesKey);
-      if (storedData != null) {
-        final Map<String, dynamic> decoded = json.decode(storedData);
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-        decoded.forEach((town, timestampString) {
-          final notifiedDate = DateTime.parse(timestampString);
-          if (!notifiedDate.isBefore(today)) {
-            _notifiedBuses[town] = notifiedDate;
-          }
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error loading notified buses: $e');
-    }
-  }
-
-  Future<void> _saveNotifiedBuses() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final Map<String, String> toStore = {};
-      _notifiedBuses.forEach((town, dt) {
-        toStore[town] = dt.toIso8601String();
-      });
-      await prefs.setString(_notifiedBusesKey, json.encode(toStore));
-    } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error saving notified buses: $e');
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // FCM
-  // ---------------------------------------------------------------------------
-
   Future<void> _initializeFCM() async {
     if (kDebugMode) print('[NOTIF] Initializing FCM...');
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     try {
       final token = await _messaging.getToken();
       if (token != null) {
-        if (kDebugMode) print('[NOTIF] FCM Token: ${token.substring(0, 20)}...');
+        if (kDebugMode)
+          print('[NOTIF] FCM Token: ${token.substring(0, 20)}...');
         await _saveFCMToken(token);
       }
     } catch (e) {
@@ -349,8 +293,6 @@ class NotificationService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
-      // Store a single FCM token per user (overwrite, not append).
-      // This ensures each user has exactly ONE token associated with their account.
       await _firestore.collection('users').doc(user.uid).set({
         'fcmToken': token,
         'lastTokenUpdate': FieldValue.serverTimestamp(),
@@ -372,7 +314,8 @@ class NotificationService {
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {
-    if (kDebugMode) print('[NOTIF] App opened from notification: ${message.data}');
+    if (kDebugMode)
+      print('[NOTIF] App opened from notification: ${message.data}');
   }
 
   Future<void> _requestPermissions() async {
@@ -399,10 +342,6 @@ class NotificationService {
     _onNotificationTapCallback?.call(response);
   }
 
-  // ---------------------------------------------------------------------------
-  // Start / Stop
-  // ---------------------------------------------------------------------------
-
   Future<void> startListening() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -411,12 +350,13 @@ class NotificationService {
     await stopListening();
     _processedIds.clear();
 
-    // OPTIMIZATION: Fetch ALL active groups ONCE instead of 4 separate times.
-    // Previously each listener method fetched the full groups collection
-    // independently, resulting in 4× the Firestore reads.
-    final memberGroups = <String>[]; // groups the user is a member of
-    final staffGroups =
-        <String, String>{}; // groupId -> groupName for admin/mod groups
+    if (!realtimeUnreadListenersEnabled) {
+      if (kDebugMode) print('[NOTIF] Realtime unread listeners disabled');
+      return;
+    }
+
+    final memberGroups = <String>[];
+    final staffGroups = <String, String>{};
     QuerySnapshot? groupsSnapshot;
 
     try {
@@ -426,8 +366,6 @@ class NotificationService {
           .get()
           .timeout(const Duration(seconds: 8));
 
-      // OPTIMIZATION: Check membership for ALL groups in parallel (not sequential).
-      // Previously each listener did sequential `await` per group — N+1 pattern × 4.
       final membershipFutures = groupsSnapshot.docs.map((groupDoc) async {
         try {
           final memberDoc = await _firestore
@@ -441,12 +379,10 @@ class NotificationService {
             memberGroups.add(groupDoc.id);
             final role = memberDoc['role'] as String? ?? 'member';
             if (role == 'admin' || role == 'moderator') {
-              staffGroups[groupDoc.id] =
-                  groupDoc['name'] as String? ?? 'Group';
+              staffGroups[groupDoc.id] = groupDoc['name'] as String? ?? 'Group';
             }
           }
         } catch (e) {
-          // Individual group membership check failed, skip this group
           if (kDebugMode) {
             print(
               '[NOTIF] Error checking membership for group ${groupDoc.id}: $e',
@@ -462,19 +398,18 @@ class NotificationService {
         );
       }
     } catch (e) {
-      if (kDebugMode) print('[NOTIF] Critical error fetching groups collection: $e');
-      // If we can't read the groups collection, we can't set up group-specific listeners.
-      // We log and return, allowing the app to keep running without these notifications.
+      if (kDebugMode)
+        print('[NOTIF] Critical error fetching groups collection: $e');
+
       return;
     }
 
-    // Now set up all listeners using the pre-resolved data (no more redundant reads)
     _listenForAnnouncementsResolved(user.uid, memberGroups);
     _listenForJoinRequestsResolved(user.uid, staffGroups);
     _listenForClubCreationRequestsResolved(user.uid);
     _listenForQARepliesResolved(
       user.uid,
-      groupsSnapshot!,
+      groupsSnapshot,
       memberGroups,
       staffGroups,
     );
@@ -488,65 +423,7 @@ class NotificationService {
       await sub.cancel();
     }
     _subscriptions.clear();
-    _busCheckTimer?.cancel();
-    _busCheckTimer = null;
   }
-
-  // ---------------------------------------------------------------------------
-  // Bus monitoring
-  // ---------------------------------------------------------------------------
-
-  void _startBusArrivalMonitoring() {
-    _busCheckTimer?.cancel();
-    _busCheckTimer = Timer.periodic(
-      const Duration(seconds: 30),
-      (_) => _checkStarredBusArrivals(),
-    );
-    _checkStarredBusArrivals();
-  }
-
-  Future<void> _checkStarredBusArrivals() async {
-    try {
-      final now = DateTime.now();
-      final currentTime = now.hour * 60 + now.minute;
-      final lunchStart = 12 * 60;
-      final lunchEnd = 13 * 60 + 30;
-      final afternoonStart = 15 * 60 + 45;
-      final afternoonEnd = 17 * 60 + 45;
-      final isAllowed =
-          (currentTime >= lunchStart && currentTime <= lunchEnd) ||
-          (currentTime >= afternoonStart && currentTime <= afternoonEnd);
-      if (!isAllowed) return;
-
-      final starredTowns = StarredBusService.starredTowns.value;
-      if (starredTowns.isEmpty) return;
-
-      final routes = await fetchBusRoutes();
-      final today = DateTime(now.year, now.month, now.day);
-
-      for (final route in routes) {
-        if (starredTowns.contains(route.town) && route.status == 'Arrived') {
-          final lastNotified = _notifiedBuses[route.town];
-          if (lastNotified == null || lastNotified.isBefore(today)) {
-            _notifiedBuses[route.town] = now;
-            await _saveNotifiedBuses();
-            await _showNotification(
-              id: route.town.hashCode,
-              title: '🚌 ${route.town}',
-              body: 'Parking spot: ${route.code}',
-              payload: 'bus:${route.town}',
-            );
-          }
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error checking starred bus arrivals: $e');
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Announcement listener (OPTIMIZED — accepts pre-resolved member groups)
-  // ---------------------------------------------------------------------------
 
   void _listenForAnnouncementsResolved(
     String userId,
@@ -591,13 +468,10 @@ class NotificationService {
         _subscriptions.add(sub);
       }
     } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error setting up announcement listeners: $e');
+      if (kDebugMode)
+        print('[NOTIF] Error setting up announcement listeners: $e');
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Q&A reply listener (OPTIMIZED — uses pre-resolved membership data)
-  // ---------------------------------------------------------------------------
 
   void _listenForQARepliesResolved(
     String userId,
@@ -614,7 +488,6 @@ class NotificationService {
         final groupName =
             (groupDoc.data() as Map<String, dynamic>)['name'] ?? 'Group';
 
-        // Track per-question reply subscriptions dynamically
         final Map<String, StreamSubscription> questionReplySubs = {};
 
         final announcementsRef = _firestore
@@ -737,10 +610,6 @@ class NotificationService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Join request listener (OPTIMIZED — uses pre-resolved staff groups)
-  // ---------------------------------------------------------------------------
-
   void _listenForJoinRequestsResolved(
     String userId,
     Map<String, String> staffGroups,
@@ -788,13 +657,10 @@ class NotificationService {
         _subscriptions.add(sub);
       }
     } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error setting up join request listeners: $e');
+      if (kDebugMode)
+        print('[NOTIF] Error setting up join request listeners: $e');
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Club creation request listener (OPTIMIZED — uses UserDocCache)
-  // ---------------------------------------------------------------------------
 
   void _listenForClubCreationRequestsResolved(String userId) {
     try {
@@ -833,13 +699,10 @@ class NotificationService {
           });
       _subscriptions.add(sub);
     } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error setting up club creation listener: $e');
+      if (kDebugMode)
+        print('[NOTIF] Error setting up club creation listener: $e');
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Show notification
-  // ---------------------------------------------------------------------------
 
   Future<void> _showNotification({
     required int id,
@@ -847,11 +710,13 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
-    // Deduplicate by payload within a short window (5 seconds)
     if (payload != null) {
       final now = DateTime.now();
       if (_lastShownPayloads.containsKey(payload)) {
-        if (kDebugMode) print('[NOTIF] Skipping duplicate notification for payload: $payload');
+        if (kDebugMode)
+          print(
+            '[NOTIF] Skipping duplicate notification for payload: $payload',
+          );
         return;
       }
       _lastShownPayloads[payload] = now;
@@ -897,11 +762,6 @@ class NotificationService {
     _unreadCountController.close();
   }
 
-  // ---------------------------------------------------------------------------
-  // New Question listener (OPTIMIZED — uses pre-resolved staff groups)
-  // Notifies mod/admin when a member asks a question in an announcement.
-  // ---------------------------------------------------------------------------
-
   void _listenForNewQuestionsResolved(
     String userId,
     Map<String, String> staffGroups,
@@ -916,7 +776,6 @@ class NotificationService {
             .doc(groupId)
             .collection('announcements');
 
-        // REACTIVE: Watch announcements stream so new ones get monitored too.
         final announcementSub = announcementsRef.snapshots().listen((
           announcementSnapshot,
         ) {
@@ -930,7 +789,6 @@ class NotificationService {
                     as String? ??
                 'Announcement';
 
-            // Watch all questions in this announcement, sorted newest-first.
             final sub = announcementsRef
                 .doc(announcementId)
                 .collection('questions')
@@ -949,9 +807,8 @@ class NotificationService {
                   final authorId = data['authorId'] as String?;
                   final createdAt = data['createdAt'] as Timestamp?;
 
-                  // Skip own questions
                   if (authorId == userId) return;
-                  // Skip stale questions (older than 10 seconds)
+
                   if (createdAt == null) return;
                   if (DateTime.now().difference(createdAt.toDate()).inSeconds >
                       10)
@@ -974,7 +831,8 @@ class NotificationService {
         _subscriptions.add(announcementSub);
       }
     } catch (e) {
-      if (kDebugMode) print('[NOTIF] Error setting up new question listeners: $e');
+      if (kDebugMode)
+        print('[NOTIF] Error setting up new question listeners: $e');
     }
   }
 }

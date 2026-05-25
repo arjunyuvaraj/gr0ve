@@ -6,10 +6,6 @@ import 'package:gr0ve/features/grove/episodes/episode_registry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 
-// ─────────────────────────────────────────────────────────────
-// GROVE GAME STATE
-// ─────────────────────────────────────────────────────────────
-
 class GroveGameState {
   String currentScene;
   int stability;
@@ -18,25 +14,24 @@ class GroveGameState {
   int transience;
   int seedWarmth;
   List<String> inventory;
-  String? chosenPath; // 'apple' or 'orange'
+  String? chosenPath;
   int currentEpisode;
   bool episodeComplete;
   bool newtonUnlocked;
   bool darwinUnlocked;
   bool salixUnlocked;
   bool londonUnlocked;
-  int? busyUntil; // epoch milliseconds
-  String? pendingScene; // Scene to load once busyUntil expires
-  int skips1h; // 1-hour skips
-  int skips3h; // 3-hour skips
-  int skips5h; // 5-hour skips
-  // Steve path tracking
+  int? busyUntil;
+  String? pendingScene;
+  int skips1h;
+  int skips3h;
+  int skips5h;
+
   int newtonRiddleAttempts;
   bool newtonRiddleSolved;
   int newtonExitAttempts;
   bool newtonExitSolved;
 
-  // Andy path tracking
   bool darwinConversationHad;
   bool darwinDefaultModeUnlocked;
 
@@ -114,13 +109,12 @@ class GroveGameState {
       'skips3h': skips3h,
       'skips5h': skips5h,
       'isBetaTester': isBetaTester,
-      // To prevent cyclic errors, we don't save histories/startStates inside themselves
+
       'episodeHistories': episodeHistories,
       'episodeStartStates': episodeStartStates,
     };
   }
 
-  /// Special toJson for nested storage to prevent recursion cycles
   Map<String, dynamic> toNestedJson() {
     final map = toJson();
     map.remove('episodeHistories');
@@ -153,9 +147,7 @@ class GroveGameState {
           json['darwinDefaultModeUnlocked'] as bool? ?? false,
       busyUntil: json['busyUntil'] as int?,
       pendingScene: json['pendingScene'] as String?,
-      skips1h:
-          json['skips1h'] as int? ??
-          (json['skipTokens'] as int? ?? 0), // Migrate old tokens
+      skips1h: json['skips1h'] as int? ?? (json['skipTokens'] as int? ?? 0),
       skips3h: json['skips3h'] as int? ?? 0,
       skips5h: json['skips5h'] as int? ?? 0,
       isBetaTester: json['isBetaTester'] as bool? ?? false,
@@ -247,21 +239,51 @@ class GroveGameState {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// GROVE PROGRESS SERVICE
-// ─────────────────────────────────────────────────────────────
-
 class GroveProgressService {
   static const _prefsKey = 'grove_game_state';
   static const _firestoreCollection = 'users';
   static const _firestoreField = 'grove_progress';
 
-  /// Save game state to both SharedPreferences and Firestore
+  static int? _lastSyncedSkips1h;
+  static int? _lastSyncedSkips3h;
+  static int? _lastSyncedSkips5h;
+
+  static void _rememberSyncedSkips(GroveGameState state) {
+    _lastSyncedSkips1h = state.skips1h;
+    _lastSyncedSkips3h = state.skips3h;
+    _lastSyncedSkips5h = state.skips5h;
+  }
+
+  static Map<String, FieldValue> _skipDeltaUpdates(GroveGameState state) {
+    final updates = <String, FieldValue>{};
+
+    if (_lastSyncedSkips1h == null ||
+        _lastSyncedSkips3h == null ||
+        _lastSyncedSkips5h == null) {
+      return updates;
+    }
+
+    final delta1h = state.skips1h - _lastSyncedSkips1h!;
+    final delta3h = state.skips3h - _lastSyncedSkips3h!;
+    final delta5h = state.skips5h - _lastSyncedSkips5h!;
+
+    if (delta1h != 0) {
+      updates['$_firestoreField.skips1h'] = FieldValue.increment(delta1h);
+    }
+    if (delta3h != 0) {
+      updates['$_firestoreField.skips3h'] = FieldValue.increment(delta3h);
+    }
+    if (delta5h != 0) {
+      updates['$_firestoreField.skips5h'] = FieldValue.increment(delta5h);
+    }
+
+    return updates;
+  }
+
   static Future<void> save(GroveGameState state) async {
     final json = state.toJson();
     final jsonString = jsonEncode(json);
 
-    // Save locally
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefsKey, jsonString);
@@ -269,11 +291,9 @@ class GroveProgressService {
       debugPrint('[GroveProgress] Local save error: $e');
     }
 
-    // Save to Firestore - Optimized targeted update
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        final epKey = 'ep${state.currentEpisode}';
         final updates = {
           '$_firestoreField.currentScene': state.currentScene,
           '$_firestoreField.stability': state.stability,
@@ -291,44 +311,63 @@ class GroveProgressService {
           '$_firestoreField.londonUnlocked': state.londonUnlocked,
           '$_firestoreField.busyUntil': state.busyUntil,
           '$_firestoreField.pendingScene': state.pendingScene,
-          '$_firestoreField.skips1h': state.skips1h,
-          '$_firestoreField.skips3h': state.skips3h,
-          '$_firestoreField.skips5h': state.skips5h,
           '$_firestoreField.isBetaTester': state.isBetaTester,
 
-          // Sync top-level unlock flags for other services
           'story_newton_unlocked': state.newtonUnlocked,
           'story_darwin_unlocked': state.darwinUnlocked,
           'story_salix_unlocked': state.salixUnlocked,
           'story_london_unlocked': state.londonUnlocked,
         };
+        final skipUpdates = _skipDeltaUpdates(state);
+        if (_lastSyncedSkips1h == null ||
+            _lastSyncedSkips3h == null ||
+            _lastSyncedSkips5h == null) {
+          updates.addAll({
+            '$_firestoreField.skips1h': state.skips1h,
+            '$_firestoreField.skips3h': state.skips3h,
+            '$_firestoreField.skips5h': state.skips5h,
+          });
+        } else {
+          updates.addAll(skipUpdates);
+        }
 
         await FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
             .update(updates)
             .catchError((_) {
-              // If update fails (doc doesn't exist), use set with merge
-              final map = state.toNestedJson(); // Use nested to omit histories
+              final map = state.toNestedJson();
               return FirebaseFirestore.instance
                   .collection(_firestoreCollection)
                   .doc(user.uid)
                   .set({_firestoreField: map}, SetOptions(merge: true));
             });
-        // IMPORTANT: Invalidate cache so other services see the new data
-        UserDocCache.invalidate();
+        _rememberSyncedSkips(state);
+
+        final cached = UserDocCache.getCached();
+        if (cached != null) {
+          final updated = Map<String, dynamic>.from(cached);
+          final progress = Map<String, dynamic>.from(
+            (updated[_firestoreField] as Map?) ?? {},
+          );
+          progress.addAll(state.toNestedJson());
+          updated[_firestoreField] = progress;
+          updated['story_newton_unlocked'] = state.newtonUnlocked;
+          updated['story_darwin_unlocked'] = state.darwinUnlocked;
+          updated['story_salix_unlocked'] = state.salixUnlocked;
+          updated['story_london_unlocked'] = state.londonUnlocked;
+          UserDocCache.update(updated);
+        }
       } catch (e) {
         debugPrint('[GroveProgress] Firestore save error: $e');
       }
     }
   }
 
-  /// Load game state — tries Firestore first, falls back to local
   static Future<GroveGameState?> load() async {
     final user = FirebaseAuth.instance.currentUser;
     GroveGameState? state;
 
-    // 1. Always load local state first (this contains the bulky histories)
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString(_prefsKey);
@@ -340,15 +379,14 @@ class GroveProgressService {
       debugPrint('[GroveProgress] Local load error: $e');
     }
 
-    // 2. Fetch the cloud 'Core State' and merge it over the local state
     if (user != null) {
       try {
         final data = await UserDocCache.get();
+
         if (data != null && data[_firestoreField] != null) {
           final cloudProgress = data[_firestoreField] as Map<String, dynamic>;
           final cloudState = GroveGameState.fromJson(cloudProgress);
 
-          // If we have a local state, preserve its history but use cloud's core progression
           if (state != null) {
             state = cloudState.copyWith(
               episodeHistories: state.episodeHistories,
@@ -363,10 +401,13 @@ class GroveProgressService {
       }
     }
 
+    if (state != null) {
+      _rememberSyncedSkips(state);
+    }
+
     return state;
   }
 
-  /// Clear saved progress (for reset/debug)
   static Future<void> clear() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -387,7 +428,6 @@ class GroveProgressService {
               'story_london_unlocked': FieldValue.delete(),
             });
 
-        // Delete history subcollection docs
         final historyDocs = await FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
@@ -397,32 +437,39 @@ class GroveProgressService {
           await doc.reference.delete();
         }
 
-        // IMPORTANT: Invalidate cache so other services see the new data
-        UserDocCache.invalidate();
+        _lastSyncedSkips1h = null;
+        _lastSyncedSkips3h = null;
+        _lastSyncedSkips5h = null;
+        final cached = UserDocCache.getCached();
+        if (cached != null) {
+          final updated = Map<String, dynamic>.from(cached);
+          updated.remove(_firestoreField);
+          updated.remove('story_newton_unlocked');
+          updated.remove('story_darwin_unlocked');
+          updated.remove('story_salix_unlocked');
+          updated.remove('story_london_unlocked');
+          UserDocCache.update(updated);
+        }
       } catch (_) {}
     }
   }
 
-  /// Resets progress to the beginning of a specific episode.
   static Future<GroveGameState> resetToEpisode(
     GroveGameState current,
     int episodeNumber,
   ) async {
     final epKey = 'ep$episodeNumber';
 
-    // Find if we have a saved start state for this episode
     final startStateJson = current.episodeStartStates[epKey];
     GroveGameState newState;
 
     if (startStateJson != null) {
       newState = GroveGameState.fromJson(startStateJson);
-      // Ensure beta status is preserved
+
       newState.isBetaTester = current.isBetaTester;
-      // Preserve start states for the future
+
       newState.episodeStartStates = Map.from(current.episodeStartStates);
     } else {
-      // Fallback: Just set the episode and initial scene
-      // This is for existing users who haven't saved start states yet
       final episode = groveEpisodes.firstWhere(
         (e) => e.number == episodeNumber,
       );
@@ -440,7 +487,6 @@ class GroveProgressService {
       );
     }
 
-    // Manually prune inventory and unlock flags for this and subsequent episodes
     if (episodeNumber <= 3) {
       newState.londonUnlocked = false;
       newState.inventory.remove('Mossy Residue');
@@ -462,7 +508,6 @@ class GroveProgressService {
       newState.inventory.remove('Cool Rock');
     }
 
-    // Clear histories and start states for this and subsequent episodes
     for (int i = episodeNumber; i <= 10; i++) {
       newState.episodeHistories.remove('ep$i');
       if (i > episodeNumber) {
@@ -474,7 +519,6 @@ class GroveProgressService {
     return newState;
   }
 
-  /// Mark a story profile picture as unlocked in Firestore
   static Future<void> unlockProfilePicture(String key) async {
     final field = 'story_${key}_unlocked';
     final user = FirebaseAuth.instance.currentUser;
@@ -489,7 +533,6 @@ class GroveProgressService {
     }
   }
 
-  /// Mark a story profile picture as locked in Firestore
   static Future<void> lockProfilePicture(String key) async {
     final field = 'story_${key}_unlocked';
     final user = FirebaseAuth.instance.currentUser;
@@ -504,7 +547,6 @@ class GroveProgressService {
     }
   }
 
-  /// Check if a story profile picture is unlocked
   static Future<bool> isProfilePictureUnlocked(String key) async {
     final field = 'story_${key}_unlocked';
     final user = FirebaseAuth.instance.currentUser;

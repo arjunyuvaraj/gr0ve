@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -103,10 +102,6 @@ const _pollyVoices = [
 const _testPhrase =
     "Hello. I can help you figure out the best path forward — just tell me what you're working on.";
 
-// ─────────────────────────────────────────────────────────────
-// AWS V4 SIGNER (simplified for tester)
-// ─────────────────────────────────────────────────────────────
-
 class _AwsV4Signer {
   final String accessKey;
   final String secretKey;
@@ -180,10 +175,6 @@ class _AwsV4Signer {
       '${_fmtDate(dt)}T${dt.hour.toString().padLeft(2, '0')}${dt.minute.toString().padLeft(2, '0')}${dt.second.toString().padLeft(2, '0')}Z';
 }
 
-// ─────────────────────────────────────────────────────────────
-// SCREEN
-// ─────────────────────────────────────────────────────────────
-
 class VoiceTesterScreen extends StatefulWidget {
   const VoiceTesterScreen({super.key});
 
@@ -209,7 +200,6 @@ class _VoiceTesterScreenState extends State<VoiceTesterScreen> {
   Future<void> _play(String voiceId) async {
     if (_loadingId == voiceId) return;
 
-    // Stop current
     await _activePlayer?.stop();
     await _activePlayer?.dispose();
     _activePlayer = null;

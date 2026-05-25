@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-// MODEL: Legacy navigation item model (kept for backward compatibility)
-// NOTE: The main NavigationScreen now uses NavConfig internally
 class NavigationItem {
   final IconData icon;
   final String label;

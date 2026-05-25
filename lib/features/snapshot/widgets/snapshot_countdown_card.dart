@@ -5,10 +5,6 @@ import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/theme/persona_theme.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 
-// ════════════════════════════════════════════════════════════════
-// SCHEDULE DATA
-// ════════════════════════════════════════════════════════════════
-
 class _Period {
   final String label;
   final int sh, sm, eh, em;
@@ -62,10 +58,6 @@ List<_Period> _sched(String s) => switch (s) {
   'delayed_opening' => _delayed,
   _ => _normal,
 };
-
-// ════════════════════════════════════════════════════════════════
-// SCHEDULE STATE
-// ════════════════════════════════════════════════════════════════
 
 sealed class _SS {}
 
@@ -132,10 +124,6 @@ String _fmtSec(int s) {
   final mm = m.toString().padLeft(2, '0'), ss = sc.toString().padLeft(2, '0');
   return h > 0 ? '${h.toString().padLeft(2, '0')}:$mm:$ss' : '$mm:$ss';
 }
-
-// ════════════════════════════════════════════════════════════════
-// WIDGET
-// ════════════════════════════════════════════════════════════════
 
 const _doneMsgs = [
   'You survived. 🎉',

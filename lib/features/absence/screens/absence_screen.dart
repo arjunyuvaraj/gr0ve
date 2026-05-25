@@ -29,7 +29,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
   Timer? _refreshTimer;
 
-  // These aren't used anymore but kept for backwards compatibility
   static const _spreadsheetId = '1Ocm7wpxK9_xlkJGe9z8zH-I5TPsio1fZAxUf0rNs5Jk';
   static const _worksheetTitle = 'Absences';
 
@@ -118,7 +117,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   Future<void> _loadAbsences({bool silent = false}) async {
     if (!silent) setState(() => isLoading = true);
 
-    // Fetch teacher list and absences in parallel
     final results = await Future.wait([
       fetchTeacherListFromFirebase(),
       fetchGoogleSheetAbsences(
@@ -161,7 +159,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
           return rawStatus.toUpperCase().contains("IGS");
         }
 
-        // Expand ranges so "Periods 2-9" matches period 3, 4, 5, etc.
         final periodNum = int.tryParse(selectedPeriod);
         if (periodNum != null) {
           return _statusContainsPeriod(rawStatus, periodNum);
@@ -174,12 +171,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     }).toList();
   }
 
-  /// Check if a raw status string (e.g. "Periods 2-9" or "Periods 5-9")
-  /// includes a specific period number.
   bool _statusContainsPeriod(String rawStatus, int period) {
     if (rawStatus.toLowerCase() == 'all day') return true;
 
-    // Extract the period portion after "Period(s) "
     final match = RegExp(
       r'Period[s]?\s+(.+)',
       caseSensitive: false,
@@ -276,7 +270,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     final deptCtrl = TextEditingController(text: teacher?['department'] ?? '');
     final emailCtrl = TextEditingController(text: teacher?['email'] ?? '');
 
-    // Parse current status to determine selected periods
     final currentStatus = teacher != null
         ? _statusFor(teacher['name'])
         : 'Present';
@@ -374,7 +367,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
             child: Material(
               color: Colors.transparent,
               child: Container(
-                width: 340, // More compact width
+                width: 340,
                 margin: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 40,
@@ -481,7 +474,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                     Container(
                       decoration: BoxDecoration(
                         color: colors.onSurface.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(20), // Pill-ish
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: colors.onSurface.withOpacity(0.08),
                         ),
@@ -492,7 +485,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                         crossAxisCount: 5,
                         mainAxisSpacing: 1,
                         crossAxisSpacing: 1,
-                        childAspectRatio: 1.2, // More compact/pillish
+                        childAspectRatio: 1.2,
                         physics: const NeverScrollableScrollPhysics(),
                         children:
                             ['1', '2', 'HR', '3', '4', '5', '6', '7', '8', '9']

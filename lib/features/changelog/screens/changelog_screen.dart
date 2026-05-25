@@ -9,7 +9,6 @@ import 'package:gr0ve/features/changelog/data/changelog_models.dart';
 import 'package:gr0ve/features/changelog/data/changelog_data.dart';
 import 'package:gr0ve/features/changelog/screens/original_seed_screen.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
-import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 
 class ChangelogScreen extends StatefulWidget {
   const ChangelogScreen({super.key});
@@ -58,7 +57,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                     },
                   ),
                 ),
-                // Page Indicator
+
                 if (changelogVersions.length > 1)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 24),
@@ -112,7 +111,6 @@ class _VersionPage extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       children: [
-        // Version header with overlapping avatars
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
@@ -154,7 +152,7 @@ class _VersionPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Overlapping Avatars
+
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
@@ -231,7 +229,6 @@ class _VersionPage extends StatelessWidget {
 
         const SizedBox(height: 32),
 
-        // Features
         ...version.features.map((feature) {
           return _ChangelogFeatureCard(feature: feature);
         }),

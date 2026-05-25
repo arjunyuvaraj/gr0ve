@@ -4,10 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-// ════════════════════════════════════════════════════════════════
-// LAYOUT MODEL (Migrated from snapshot_overlay)
-// ════════════════════════════════════════════════════════════════
-
 enum CardId {
   countdown,
   absence,
@@ -56,17 +52,11 @@ enum TimePeriod {
   };
 }
 
-// ════════════════════════════════════════════════════════════════
-// LAYOUT SERVICE
-// ════════════════════════════════════════════════════════════════
-
 class LayoutService {
-  // Notifiers for each individual time's configured layout
   static final schoolLayout = ValueNotifier<List<CardId>>(_defSchool());
   static final afternoonLayout = ValueNotifier<List<CardId>>(_defAfternoon());
   static final eveningLayout = ValueNotifier<List<CardId>>(_defEvening());
 
-  // Dynamic notifier serving the CORRECT layout depending on current clock time
   static final currentLayout = ValueNotifier<List<CardId>>(_defSchool());
   static Timer? _timeChecker;
 
@@ -109,20 +99,15 @@ class LayoutService {
     final now = DateTime.now();
     final totalMinutes = now.hour * 60 + now.minute;
 
-    // School: Before 4:10 PM (16:10 = 970 minutes)
     if (totalMinutes < 970) {
       if (currentLayout.value != schoolLayout.value) {
         currentLayout.value = schoolLayout.value;
       }
-    }
-    // Afternoon: 4:10 PM to 5:30 PM (17:30 = 1050 minutes)
-    else if (totalMinutes < 1050) {
+    } else if (totalMinutes < 1050) {
       if (currentLayout.value != afternoonLayout.value) {
         currentLayout.value = afternoonLayout.value;
       }
-    }
-    // Evening: After 5:30 PM
-    else {
+    } else {
       if (currentLayout.value != eveningLayout.value) {
         currentLayout.value = eveningLayout.value;
       }
@@ -147,26 +132,22 @@ class LayoutService {
       if (doc.exists) {
         final data = doc.data()!;
 
-        // Load School
         if (data.containsKey('school_order')) {
           final List<dynamic> o = data['school_order'];
           schoolLayout.value = _parseOrder(o);
         }
 
-        // Load Afternoon
         if (data.containsKey('afternoon_order')) {
           final List<dynamic> o = data['afternoon_order'];
           afternoonLayout.value = _parseOrder(o);
         }
 
-        // Load Evening
         if (data.containsKey('evening_order')) {
           final List<dynamic> o = data['evening_order'];
           eveningLayout.value = _parseOrder(o);
         }
       }
 
-      // Update the active observer immediately
       _updateCurrentLayout();
     } catch (_) {}
   }
@@ -180,7 +161,6 @@ class LayoutService {
   }
 
   static Future<void> save(TimePeriod period, List<CardId> ids) async {
-    // Optimistic UI update
     switch (period) {
       case TimePeriod.school:
         schoolLayout.value = ids;

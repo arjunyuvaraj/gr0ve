@@ -27,9 +27,9 @@ class StarredBusService {
     if (user == null) return;
 
     try {
-      final doc = await _docRef(user.uid).get().timeout(
-        const Duration(seconds: 5),
-      );
+      final doc = await _docRef(
+        user.uid,
+      ).get().timeout(const Duration(seconds: 5));
 
       if (doc.exists) {
         final data = doc.data();
@@ -43,10 +43,9 @@ class StarredBusService {
       _loaded = true;
     } catch (e) {
       print('[StarredBus] Error loading preferences: $e');
-      // Set to empty but don't mark as fully loaded so we can retry later if needed,
-      // or mark as loaded to prevent infinite retries in boot loop.
+
       starredTowns.value = {};
-      _loaded = true; // Mark as loaded to satisfy boot sequence
+      _loaded = true;
     }
   }
 

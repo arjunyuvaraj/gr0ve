@@ -119,7 +119,6 @@ class StatScaleWidget extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Center marking
                     Container(
                       width: 2,
                       height: 14,

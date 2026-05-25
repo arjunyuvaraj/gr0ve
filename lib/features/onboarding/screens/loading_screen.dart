@@ -16,7 +16,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
   late AnimationController _controller;
   String _version = '';
 
-  // Staggered animations - optimized with early termination
   late Animation<double> _logoOpacity;
   late Animation<double> _logoScale;
   late Animation<double> _logoGlow;
@@ -39,7 +38,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       duration: const Duration(milliseconds: 1200),
     );
 
-    // Logo animations
     _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -54,7 +52,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       ),
     );
 
-    // Subtle glow pulse on logo
     _logoGlow = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -62,7 +59,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       ),
     );
 
-    // Tree animations with staggered timing
     _treeOpacities = List.generate(4, (index) {
       double start = 0.4 + (index * 0.1);
       double end = (start + 0.2).clamp(0.0, 1.0);
@@ -85,7 +81,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       );
     });
 
-    // Subtle rotation for organic feel
     _treeRotations = List.generate(4, (index) {
       double start = 0.4 + (index * 0.1);
       double end = (start + 0.25).clamp(0.0, 1.0);
@@ -98,7 +93,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       );
     });
 
-    // Subtle slide-up effect
     _treeSlides = List.generate(4, (index) {
       double start = 0.4 + (index * 0.1);
       double end = (start + 0.3).clamp(0.0, 1.0);
@@ -114,8 +108,10 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
     });
 
     _controller.forward();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 10));
-    // Only celebrate on Wednesday (the half-year anniversary day)
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 10),
+    );
+
     if (debugNow.weekday == DateTime.wednesday) {
       _confettiController.play();
     }
@@ -159,7 +155,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo with glow effect
                 AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) {
@@ -170,7 +165,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Glow background
                             if (_logoGlow.value > 0.01)
                               Container(
                                 width: 120,
@@ -188,7 +182,7 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                                   ],
                                 ),
                               ),
-                            // Logo text
+
                             Text(
                               "gr0ve",
                               style: text.displayLarge?.copyWith(
@@ -204,7 +198,7 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                   },
                 ),
                 const SizedBox(height: 60),
-                // Trees with enhanced animations
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(4, (index) {
@@ -300,7 +294,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
     );
   }
 
-  /// Build optimized shadow based on theme
   List<BoxShadow> _buildTreeShadow({
     required bool isDark,
     required dynamic colors,

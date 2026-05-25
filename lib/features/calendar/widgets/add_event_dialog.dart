@@ -27,7 +27,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
   final _descriptionController = TextEditingController();
 
   String _selectedCategory = 'homework';
-  String _eventScope = 'personal'; // personal, club, public
+  String _eventScope = 'personal';
   bool _isAllDay = true;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -37,7 +37,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
   bool _isClubAdmin = false;
   bool _isLoadingClubInfo = true;
 
-  // For group selection dropdown
   List<Group> _adminGroups = [];
   Group? _selectedGroup;
   bool _isLoadingAdminGroups = false;
@@ -91,7 +90,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
         return;
       }
 
-      // Get all active groups
       final groupsSnapshot = await FirebaseFirestore.instance
           .collection('groups')
           .where('status', isEqualTo: 'active')
@@ -109,7 +107,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
         setState(() {
           _adminGroups = adminGroups;
           _isLoadingAdminGroups = false;
-          // Auto-select first group if available and none selected
+
           if (_selectedGroup == null && adminGroups.isNotEmpty) {
             _selectedGroup = adminGroups.first;
           }
@@ -231,7 +229,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
         }
         FirebaseAnalytics.instance.logEvent(name: "add_event_club");
       } else if (_eventScope == 'public') {
-        // Request public event (requires admin approval unless platform admin)
         final groupId = _selectedGroup?.id ?? _userClub?.id ?? 'platform';
         final groupName =
             _selectedGroup?.name ?? _userClub?.name ?? 'Platform Admin';
@@ -290,7 +287,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   Row(
                     children: [
                       Container(
@@ -330,7 +326,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Event Scope Selector (only for admins or club admins)
                   if ((widget.isPlatformAdmin || _isClubAdmin) &&
                       !_isLoadingClubInfo) ...[
                     Text(
@@ -375,7 +370,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Info banner for public events
                     if (_eventScope == 'public' && !widget.isPlatformAdmin)
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -407,7 +401,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                         ),
                       ),
 
-                    // Group dropdown when group scope is selected
                     if (_eventScope == 'club') ...[
                       const SizedBox(height: 16),
                       if (_isLoadingAdminGroups)
@@ -494,7 +487,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                     const SizedBox(height: 24),
                   ],
 
-                  // Error Message
                   if (_errorMessage != null) ...[
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -527,7 +519,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                     const SizedBox(height: 16),
                   ],
 
-                  // Title
                   TextFormField(
                     controller: _titleController,
                     style: TextStyle(fontSize: 16, color: colors.onSurface),
@@ -565,7 +556,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Description
                   TextFormField(
                     controller: _descriptionController,
                     style: TextStyle(fontSize: 16, color: colors.onSurface),
@@ -599,7 +589,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Category for personal events
                   if (_eventScope == 'personal') ...[
                     DropdownButtonFormField<String>(
                       value: _selectedCategory,
@@ -658,7 +647,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                     const SizedBox(height: 16),
                   ],
 
-                  // All Day toggle
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -696,7 +684,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
                     ),
                   ),
 
-                  // Start/End times if not all day
                   if (!_isAllDay) ...[
                     const SizedBox(height: 16),
                     Row(
@@ -781,7 +768,6 @@ class _AddEventDialogState extends State<AddEventDialog> {
 
                   const SizedBox(height: 24),
 
-                  // Action buttons
                   Row(
                     children: [
                       Expanded(
@@ -856,7 +842,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
       onTap: () {
         setState(() {
           _eventScope = value;
-          // Load admin groups when group scope is selected
+
           if (_eventScope == 'club' &&
               _adminGroups.isEmpty &&
               !_isLoadingAdminGroups) {

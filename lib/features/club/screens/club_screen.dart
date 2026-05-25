@@ -41,121 +41,118 @@ class _ClubScreenState extends State<ClubScreen>
       description: "Please verify your email address to access BCA Groups.",
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-      child: Column(
-        children: [
-          /// Header
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutCubic,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
-                  child: child,
-                ),
-              );
-            },
-            child: CustomHeader(title: "Groups".capitalized),
-          ),
-          const SizedBox(height: 16),
-
-          /// Tabs (segmented control style) with notification indicator
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutCubic,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.translate(
-                  offset: Offset(0, 15 * (1 - value)),
-                  child: child,
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.onSurface.withAlpha(14),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+        child: Column(
+          children: [
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutCubic,
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: child,
                   ),
-                ],
-              ),
-              child: TabBar(
-                controller: _tabController,
-                labelPadding: EdgeInsets.zero,
-                indicator: BoxDecoration(
-                  color: colors.primary.withAlpha(28),
-                  borderRadius: BorderRadius.circular(10),
+                );
+              },
+              child: CustomHeader(title: "Groups".capitalized),
+            ),
+            const SizedBox(height: 16),
+
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutCubic,
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 15 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.onSurface.withAlpha(14),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                labelColor: colors.primary,
-                unselectedLabelColor: colors.onSurface.withAlpha(140),
-                tabs: [
-                  const Tab(text: "Browse"),
-                  // My Clubs tab with notification indicator
-                  Tab(
-                    child: StreamBuilder<Map<String, dynamic>>(
-                      stream: NotificationService().unreadCountStream,
-                      builder: (context, snapshot) {
-                        final data = snapshot.data;
-                        bool hasUnread = false;
+                child: TabBar(
+                  controller: _tabController,
+                  labelPadding: EdgeInsets.zero,
+                  indicator: BoxDecoration(
+                    color: colors.primary.withAlpha(28),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  labelColor: colors.primary,
+                  unselectedLabelColor: colors.onSurface.withAlpha(140),
+                  tabs: [
+                    const Tab(text: "Browse"),
 
-                        if (data != null) {
-                          final announcementsMap =
-                              data['announcementsByClub'] != null
-                              ? Map.from(data['announcementsByClub'] as Map)
-                              : null;
-                          final qaMap = data['qaByClub'] != null
-                              ? Map.from(data['qaByClub'] as Map)
-                              : null;
+                    Tab(
+                      child: StreamBuilder<Map<String, dynamic>>(
+                        stream: NotificationService().unreadCountStream,
+                        builder: (context, snapshot) {
+                          final data = snapshot.data;
+                          bool hasUnread = false;
 
-                          final Map<String, int> announcements =
-                              announcementsMap?.map(
-                                (key, value) =>
-                                    MapEntry(key.toString(), value as int),
-                              ) ??
-                              {};
-                          final Map<String, int> unreadQA =
-                              qaMap?.map(
-                                (key, value) =>
-                                    MapEntry(key.toString(), value as int),
-                              ) ??
-                              {};
+                          if (data != null) {
+                            final announcementsMap =
+                                data['announcementsByClub'] != null
+                                ? Map.from(data['announcementsByClub'] as Map)
+                                : null;
+                            final qaMap = data['qaByClub'] != null
+                                ? Map.from(data['qaByClub'] as Map)
+                                : null;
 
-                          hasUnread =
-                              announcements.values.any((c) => c > 0) ||
-                              unreadQA.values.any((c) => c > 0);
-                        } else {
-                          // Initial load
-                          hasUnread =
-                              NotificationService()
-                                  .unreadAnnouncementsByClub
-                                  .values
-                                  .any((c) => c > 0) ||
-                              NotificationService().unreadQAByClub.values.any(
-                                (c) => c > 0,
-                              );
-                        }
+                            final Map<String, int> announcements =
+                                announcementsMap?.map(
+                                  (key, value) =>
+                                      MapEntry(key.toString(), value as int),
+                                ) ??
+                                {};
+                            final Map<String, int> unreadQA =
+                                qaMap?.map(
+                                  (key, value) =>
+                                      MapEntry(key.toString(), value as int),
+                                ) ??
+                                {};
 
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Text(
-                              "My Groups",
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (hasUnread)
-                              Positioned(
+                            hasUnread =
+                                announcements.values.any((c) => c > 0) ||
+                                unreadQA.values.any((c) => c > 0);
+                          } else {
+                            hasUnread =
+                                NotificationService()
+                                    .unreadAnnouncementsByClub
+                                    .values
+                                    .any((c) => c > 0) ||
+                                NotificationService().unreadQAByClub.values.any(
+                                  (c) => c > 0,
+                                );
+                          }
+
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              const Text(
+                                "My Groups",
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (hasUnread)
+                                Positioned(
                                   right: -12,
                                   top: -4,
                                   child: Container(
@@ -171,44 +168,43 @@ class _ClubScreenState extends State<ClubScreen>
                                     ),
                                   ),
                                 ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const Tab(text: "Create"),
-                ],
+                    const Tab(text: "Create"),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          /// Content
-          Expanded(
-            child: TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutCubic,
-              tween: Tween(begin: 0.0, end: 1.0),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 10 * (1 - value)),
-                    child: child,
-                  ),
-                );
-              },
-              child: TabBarView(
-                controller: _tabController,
-                children: const [
-                  ClubBrowseTab(),
-                  ClubMyClubsTab(),
-                  ClubCreateTab(),
-                ],
+            Expanded(
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 10 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: TabBarView(
+                  controller: _tabController,
+                  children: const [
+                    ClubBrowseTab(),
+                    ClubMyClubsTab(),
+                    ClubCreateTab(),
+                  ],
+                ),
               ),
             ),
-          ),
           ],
         ),
       ),

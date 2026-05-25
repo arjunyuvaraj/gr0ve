@@ -106,7 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Logo/Title Section
                       Text(
                         "GR0VE",
                         style: text.displayMedium?.copyWith(
@@ -128,7 +127,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 64),
 
-                      // Email Field
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -174,7 +172,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Password Field
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
@@ -229,7 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
 
-                      // Error Message
                       if (_errorMessage != null) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -264,7 +260,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Sign In Button
                       CustomPrimaryButton(
                         label: _isLoading ? "SIGNING IN..." : "SIGN IN",
                         onTap: _isLoading ? () {} : _handleLogin,
@@ -272,7 +267,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Divider
                       Row(
                         children: [
                           Expanded(
@@ -300,7 +294,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Guest Button
                       InkWell(
                         onTap: _isLoading ? null : _handleAnonymousAuth,
                         borderRadius: BorderRadius.circular(12),
@@ -334,7 +327,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Sign Up Link
                       TextButton(
                         onPressed: _isLoading
                             ? null
@@ -354,7 +346,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Footer Text
                       Text(
                         "Sign in with a @bergen.org email to access more",
                         style: text.bodySmall?.copyWith(

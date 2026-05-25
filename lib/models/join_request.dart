@@ -6,7 +6,7 @@ enum JoinRequestStatus {
   rejected;
 
   String toJson() => name;
-  
+
   static JoinRequestStatus fromJson(String json) {
     return JoinRequestStatus.values.firstWhere((e) => e.name == json);
   }
