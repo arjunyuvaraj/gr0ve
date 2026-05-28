@@ -143,14 +143,27 @@ class SnapshotCountdownCard extends StatefulWidget {
 
 class _SnapshotCountdownCardState extends State<SnapshotCountdownCard> {
   DateTime _now = DateTime.now();
+  String _schoolStatus = 'normal';
   Timer? _t;
 
   @override
   void initState() {
     super.initState();
+    _loadSchoolStatus();
     _t = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _now = DateTime.now());
     });
+  }
+
+  Future<void> _loadSchoolStatus() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('app_config')
+          .doc('school_status')
+          .get();
+      final status = doc.data()?['status'] as String? ?? 'normal';
+      if (mounted) setState(() => _schoolStatus = status);
+    } catch (_) {}
   }
 
   @override
@@ -162,17 +175,7 @@ class _SnapshotCountdownCardState extends State<SnapshotCountdownCard> {
   @override
   Widget build(BuildContext ctx) {
     final c = Theme.of(ctx).colorScheme;
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('app_config')
-          .doc('school_status')
-          .snapshots(),
-      builder: (_, snap) {
-        final status =
-            (snap.data?.data() as Map?)?['status'] as String? ?? 'normal';
-        return _buildState(_compute(_now, status), c);
-      },
-    );
+    return _buildState(_compute(_now, _schoolStatus), c);
   }
 
   Widget _buildState(_SS state, ColorScheme c) {

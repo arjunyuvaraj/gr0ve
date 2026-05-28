@@ -62,28 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleAnonymousAuth() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await _authService.signInAnonymously();
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/navigation');
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -263,66 +241,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomPrimaryButton(
                         label: _isLoading ? "SIGNING IN..." : "SIGN IN",
                         onTap: _isLoading ? () {} : _handleLogin,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              color: colors.outline.withOpacity(0.2),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              "OR",
-                              style: text.bodySmall?.copyWith(
-                                color: colors.onSurface.withOpacity(0.4),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              color: colors.outline.withOpacity(0.2),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      InkWell(
-                        onTap: _isLoading ? null : _handleAnonymousAuth,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          decoration: BoxDecoration(
-                            color: colors.primary.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_outline_rounded,
-                                size: 20,
-                                color: colors.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "CONTINUE AS GUEST",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: colors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
 
                       const SizedBox(height: 24),

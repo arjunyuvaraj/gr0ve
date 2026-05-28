@@ -751,7 +751,7 @@ class _AccountScreenState extends State<AccountScreen> {
     if (user == null || user!.isAnonymous) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password reset is not available for guest accounts'),
+          content: Text('Password reset is not available for this account'),
           behavior: SnackBarBehavior.floating,
         ),
       );

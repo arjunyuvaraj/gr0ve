@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:background="@drawable/widget_card_background"
+    android:layout_marginBottom="5dp">
+
+    <ImageView
+        android:id="@+id/event_item_dot"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:src="@drawable/circle_dot" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="10dp">
+
+        <TextView
+            android:id="@+id/event_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_primary_text"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/event_item_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BCA"
+            android:textSize="10sp"
+            android:textColor="@color/widget_secondary_text"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/event_item_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="All day"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:textColor="@color/gr0ve_accent"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:background="@drawable/status_pill_background" />
+
+</LinearLayout>

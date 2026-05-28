@@ -45,6 +45,7 @@ import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
 import 'package:gr0ve/services/settings/fun_mode_service.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
+import 'package:gr0ve/services/widgets/home_widget_data_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -147,11 +148,14 @@ Future<void> _bootUserServices(User user) async {
     print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
   }
 
+  unawaited(HomeWidgetDataService.start());
+
   if (kDebugMode)
     print('[BOOT] User services ready (${sw.elapsedMilliseconds}ms)');
 }
 
 void _teardownUserServices() {
+  unawaited(HomeWidgetDataService.stop());
   StarredTeacherService.reset();
   StarredBusService.reset();
   CalendarService.reset();

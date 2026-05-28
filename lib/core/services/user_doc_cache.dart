@@ -38,8 +38,6 @@ class UserDocCache {
         if (cacheDoc.exists) {
           _data = cacheDoc.data();
           if (kDebugMode) print('[UserDocCache] Using CACHE data');
-
-          _refreshFromNetwork(user.uid);
           return _data;
         }
       } catch (_) {}
@@ -62,22 +60,6 @@ class UserDocCache {
     }
 
     return _data;
-  }
-
-  static void _refreshFromNetwork(String uid) {
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get(const GetOptions(source: Source.server))
-        .then((doc) {
-          if (doc.exists) {
-            _data = doc.data();
-            if (kDebugMode) print('[UserDocCache] Background refresh complete');
-          }
-        })
-        .catchError((e) {
-          if (kDebugMode) print('[UserDocCache] Background refresh failed: $e');
-        });
   }
 
   static void invalidate() {

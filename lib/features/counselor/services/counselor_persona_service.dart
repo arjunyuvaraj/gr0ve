@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -133,70 +132,44 @@ class AppFeatureFlags {
   static bool get ashUnlocked => false;
 
   static Future<void> load() async {
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      _startListener();
-    });
-
-    final completer = Completer<void>();
-    _startListener(
-      onFirstData: () {
-        if (!completer.isCompleted) completer.complete();
-      },
-    );
-
-    await completer.future.timeout(
+    await _loadFlags().timeout(
       const Duration(seconds: 2),
-      onTimeout: () => print('[FLAGS] Sync timed out, proceeding...'),
+      onTimeout: () => print('[FLAGS] Load timed out, proceeding...'),
     );
     isReady.value = true;
   }
 
-  static StreamSubscription? _sub;
-  static void _startListener({VoidCallback? onFirstData}) {
-    _sub?.cancel();
+  static Future<void> _loadFlags() async {
     try {
-      _sub = FirebaseFirestore.instance
+      final doc = await FirebaseFirestore.instance
           .collection('app_config')
           .doc('feature_flags')
-          .snapshots()
-          .listen(
-            (doc) {
-              if (doc.exists) {
-                final data = doc.data();
-                lockdownMode.value = data?['lockdown_mode'] ?? false;
+          .get();
+      if (!doc.exists) return;
 
-                final testers = List<String>.from(data?['beta_testers'] ?? []);
-                _betaTesters.clear();
-                _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
+      final data = doc.data();
+      lockdownMode.value = data?['lockdown_mode'] ?? false;
 
-                final currentEmail = FirebaseAuth.instance.currentUser?.email;
-                final isBetaTesterFlag = isBetaTester(currentEmail);
-                isBeta.value = isBetaTesterFlag;
+      final testers = List<String>.from(data?['beta_testers'] ?? []);
+      _betaTesters.clear();
+      _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
 
-                enableClubs.value =
-                    (data?['enable_clubs'] ?? false) || isBetaTesterFlag;
-                enableCounselor.value =
-                    (data?['enable_counselor'] ?? false) || isBetaTesterFlag;
+      final currentEmail = FirebaseAuth.instance.currentUser?.email;
+      final isBetaTesterFlag = isBetaTester(currentEmail);
+      isBeta.value = isBetaTesterFlag;
 
-                print('[FLAGS] --- SYSTEM STATUS ---');
-                print('[FLAGS] Lockdown Active: ${lockdownMode.value}');
-                print('[FLAGS] User Is Beta: $isBetaTesterFlag');
-                print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
-                print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
-                print('[FLAGS] -----------------------');
+      enableClubs.value = (data?['enable_clubs'] ?? false) || isBetaTesterFlag;
+      enableCounselor.value =
+          (data?['enable_counselor'] ?? false) || isBetaTesterFlag;
 
-                onFirstData?.call();
-              }
-            },
-            onError: (e) {
-              print('[FLAGS] Firestore restricted access: $e');
-
-              onFirstData?.call();
-            },
-          );
+      print('[FLAGS] --- SYSTEM STATUS ---');
+      print('[FLAGS] Lockdown Active: ${lockdownMode.value}');
+      print('[FLAGS] User Is Beta: $isBetaTesterFlag');
+      print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
+      print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
+      print('[FLAGS] -----------------------');
     } catch (e) {
-      print('[FLAGS] Fatal listener error: $e');
-      onFirstData?.call();
+      print('[FLAGS] Load error: $e');
     }
   }
 

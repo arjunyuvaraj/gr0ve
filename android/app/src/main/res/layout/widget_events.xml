@@ -1,39 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/widget_teacher.xml -->
 <LinearLayout
-    android:id="@+id/widget_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="14dp"
     android:background="@drawable/widget_background">
 
-    <!-- Header -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TEACHERS"
+        android:text="TODAY"
         android:textSize="9sp"
         android:textStyle="bold"
         android:letterSpacing="0.15"
         android:textColor="@color/widget_secondary_text"
         android:layout_marginBottom="8dp" />
 
-    <!-- Empty state -->
     <TextView
-        android:id="@+id/teacher_empty_text"
+        android:id="@+id/events_empty_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No teachers starred"
+        android:text="No events today"
         android:textSize="12sp"
         android:textColor="@color/widget_secondary_text"
         android:gravity="center"
         android:visibility="gone" />
 
-    <!-- Scrollable list -->
     <LinearLayout
-        android:id="@+id/teacher_items"
+        android:id="@+id/event_items"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" />

@@ -43,17 +43,17 @@ final List<Map<String, String>> termsAndPolicySections = [
   {
     "title": "01. Information Collection",
     "content":
-        "Gr0ve collects minimal personal information. This includes data required for optional account creation, such as email addresses and passwords. For guest users, no persistent personal data is stored. Non-sensitive usage data (like feature access and preferences) may be stored locally to improve app functionality.",
+        "Gr0ve collects minimal personal information. This includes data required for account creation, such as email addresses and passwords. Non-sensitive usage data, like feature access and preferences, may be stored locally to improve app functionality.",
   },
   {
     "title": "02. Account Management",
     "content":
-        "Users may create accounts to access additional features. Email verification is required for @bergen.org accounts. Users can delete their accounts at any time via the Account page, which immediately removes all associated data from the device and the authentication system. Guest accounts are temporary and are cleared after the session ends.",
+        "Users may create accounts to access app features. Email verification is required for @bergen.org accounts. Users can delete their accounts at any time via the Account page, which immediately removes associated data from the device and the authentication system.",
   },
   {
     "title": "03. Access to Features",
     "content":
-        "Certain features, such as teacher-specific tools, require verified @bergen.org accounts. Guest users have limited access. The app clearly indicates which features are available to which user types.",
+        "Certain features, such as teacher-specific tools, require verified @bergen.org accounts. The app clearly indicates which features are available to each account type.",
   },
   {
     "title": "04. Use of Information",

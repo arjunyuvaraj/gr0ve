@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- res/layout/widget_bus.xml -->
 <LinearLayout
+    android:id="@+id/widget_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -46,12 +47,10 @@
         android:visibility="gone" />
 
     <!-- Scrollable list -->
-    <ListView
-        android:id="@+id/bus_list_view"
+    <LinearLayout
+        android:id="@+id/bus_items"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:scrollbars="none" />
+        android:orientation="vertical" />
 
 </LinearLayout>

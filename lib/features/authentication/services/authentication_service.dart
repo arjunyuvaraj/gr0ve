@@ -86,22 +86,6 @@ class AuthenticationService {
     }
   }
 
-  Future<User?> signInAnonymously() async {
-    try {
-      final UserCredential userCredential = await _auth.signInAnonymously();
-
-      if (userCredential.user != null) {
-        await _createUserDocument(userCredential.user!);
-      }
-
-      return userCredential.user;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('An unexpected error occurred. Please try again.');
-    }
-  }
-
   Future<void> signOut() async {
     try {
       StarredTeacherService.reset();

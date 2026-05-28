@@ -737,6 +737,175 @@ struct Gr0veScheduleWidget: Widget {
 }
 
 // ══════════════════════════════════════════════════════════════
+// MARK: — EVENTS WIDGET
+// ══════════════════════════════════════════════════════════════
+
+struct EventsWidgetEntryView: View {
+    var entry: SimpleEntry
+    @Environment(\.widgetFamily) var family
+
+    private var events: [[String: Any]] { jsonArray("events_data") }
+
+    var body: some View {
+        Group {
+            switch family {
+            case .systemSmall: EventsSmall(events: events)
+            case .systemMedium: EventsMedium(events: events)
+            case .systemLarge: EventsLarge(events: events)
+            default: EventsSmall(events: events)
+            }
+        }
+        .containerBackground(Color.gr0veBG, for: .widget)
+    }
+}
+
+private func eventAccent(_ event: [String: Any]) -> Color {
+    switch event["category"] as? String ?? "" {
+    case "personal": return .gr0veAmber
+    case "club": return .gr0veGreen
+    default: return Color.accentColor
+    }
+}
+
+private struct EventsSmall: View {
+    let events: [[String: Any]]
+
+    var body: some View {
+        if let event = events.first {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("TODAY", systemImage: "calendar")
+                    .font(.system(size: 9, weight: .black))
+                    .tracking(1.5)
+                    .foregroundColor(.secondary)
+                EventRow(event: event, compact: true)
+                Spacer()
+            }
+            .padding(14)
+        } else {
+            EmptyEventsPlaceholder()
+        }
+    }
+}
+
+private struct EventsMedium: View {
+    let events: [[String: Any]]
+
+    var body: some View {
+        if events.isEmpty {
+            EmptyEventsPlaceholder()
+        } else {
+            VStack(alignment: .leading, spacing: 7) {
+                Label("TODAY", systemImage: "calendar")
+                    .font(.system(size: 9, weight: .black))
+                    .tracking(1.5)
+                    .foregroundColor(.secondary)
+                ForEach(Array(events.prefix(2).enumerated()), id: \.offset) { _, event in
+                    EventRow(event: event, compact: true)
+                }
+            }
+            .padding(14)
+        }
+    }
+}
+
+private struct EventsLarge: View {
+    let events: [[String: Any]]
+
+    var body: some View {
+        if events.isEmpty {
+            EmptyEventsPlaceholder()
+        } else {
+            VStack(alignment: .leading, spacing: 7) {
+                Label("TODAY", systemImage: "calendar")
+                    .font(.system(size: 9, weight: .black))
+                    .tracking(1.5)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 14)
+                ForEach(Array(events.prefix(5).enumerated()), id: \.offset) { _, event in
+                    EventRow(event: event, compact: false)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 14)
+        }
+    }
+}
+
+private struct EventRow: View {
+    let event: [String: Any]
+    let compact: Bool
+
+    private var title: String { event["title"] as? String ?? "Event" }
+    private var time: String { event["time"] as? String ?? "All day" }
+    private var category: String {
+        let raw = event["category"] as? String ?? "event"
+        return raw.prefix(1).uppercased() + raw.dropFirst()
+    }
+
+    var body: some View {
+        let accent = eventAccent(event)
+        HStack(spacing: 10) {
+            Circle()
+                .fill(accent)
+                .frame(width: 8, height: 8)
+                .shadow(color: accent.opacity(0.6), radius: 4)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: compact ? 12 : 14, weight: .bold))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                Text(category)
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+            Text(time)
+                .font(.system(size: 10, weight: .bold))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 3)
+                .background(accent.opacity(0.15))
+                .foregroundColor(accent)
+                .clipShape(Capsule())
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, compact ? 7 : 10)
+        .background(Color.gr0veSurface)
+        .cornerRadius(12)
+    }
+}
+
+private struct EmptyEventsPlaceholder: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "calendar.badge.checkmark")
+                .font(.system(size: 24))
+                .foregroundColor(.secondary.opacity(0.4))
+            Text("No events today")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary.opacity(0.5))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct Gr0veEventsWidget: Widget {
+    let kind = "Gr0veEventsWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SimpleProvider()) { entry in
+            EventsWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("gr0ve Events")
+        .description("Today's events from gr0ve.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
 // MARK: — BUNDLE
 // ══════════════════════════════════════════════════════════════
 
@@ -746,5 +915,6 @@ struct Gr0veWidgetBundle: WidgetBundle {
         Gr0veBusWidget()
         Gr0veTeacherWidget()
         Gr0veScheduleWidget()
+        Gr0veEventsWidget()
     }
 }
