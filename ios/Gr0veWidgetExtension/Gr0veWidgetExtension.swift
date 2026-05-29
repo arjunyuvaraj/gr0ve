@@ -210,9 +210,11 @@ private struct BusCircleCard: View {
             Text(town)
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.primary.opacity(0.7))
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: size + 10)
+                .lineLimit(2)
+                .minimumScaleFactor(0.72)
+                .multilineTextAlignment(.center)
+                .frame(width: size + 18, alignment: .top)
+                .frame(minHeight: 22, alignment: .top)
         }
     }
 }
@@ -280,37 +282,45 @@ private struct TeacherRow: View {
     private var status: String { teacher["status"]     as? String ?? "Present" }
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(alignment: .top, spacing: 9) {
             Circle()
                 .fill(teacherStatusColor(status))
                 .frame(width: 8, height: 8)
                 .shadow(color: teacherStatusColor(status).opacity(0.6), radius: 4)
+                .padding(.top, 5)
 
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(name)
-                    .font(.system(size: compact ? 12 : 14, weight: .bold))
+                    .font(.system(size: compact ? 12 : 13, weight: .bold))
                     .foregroundColor(.primary)
-                    .lineLimit(1)
-                if !compact {
+                    .lineLimit(compact ? 2 : 2)
+                    .minimumScaleFactor(0.78)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .layoutPriority(2)
+                if !compact, !dept.isEmpty {
                     Text(dept)
-                        .font(.system(size: 10))
+                        .font(.system(size: 9))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Text(status)
-                .font(.system(size: 10, weight: .bold))
-                .padding(.horizontal, 9)
+                .font(.system(size: 9, weight: .bold))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+                .padding(.horizontal, 7)
                 .padding(.vertical, 3)
                 .background(teacherStatusColor(status).opacity(0.15))
                 .foregroundColor(teacherStatusColor(status))
                 .clipShape(Capsule())
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, compact ? 7 : 10)
+        .padding(.horizontal, 12)
+        .padding(.vertical, compact ? 8 : 9)
         .background(Color.gr0veSurface)
-        .cornerRadius(12)
+        .cornerRadius(10)
     }
 }
 
@@ -318,15 +328,15 @@ private struct TeacherSmall: View {
     let teachers: [[String: Any]]
     var body: some View {
         if let t = teachers.first {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 7) {
                 Label("TEACHER", systemImage: "person.fill")
                     .font(.system(size: 9, weight: .black))
                     .tracking(1.5)
                     .foregroundColor(.secondary)
-                TeacherRow(teacher: t, compact: false)
+                TeacherRow(teacher: t, compact: true)
                 Spacer()
             }
-            .padding(14)
+            .padding(12)
         } else {
             EmptyTeacherPlaceholder()
         }
@@ -339,19 +349,19 @@ private struct TeacherMedium: View {
         if teachers.isEmpty {
             EmptyTeacherPlaceholder()
         } else {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 7) {
                 Label("TEACHERS", systemImage: "person.2.fill")
                     .font(.system(size: 9, weight: .black))
                     .tracking(1.5)
                     .foregroundColor(.secondary)
                 HStack(spacing: 8) {
                     ForEach(Array(teachers.prefix(2).enumerated()), id: \.offset) { _, t in
-                        TeacherRow(teacher: t, compact: false)
-                            .frame(maxWidth: .infinity)
+                    TeacherRow(teacher: t, compact: true)
+                        .frame(maxWidth: .infinity)
                     }
                 }
             }
-            .padding(14)
+            .padding(12)
         }
     }
 }
@@ -362,7 +372,7 @@ private struct TeacherLarge: View {
         if teachers.isEmpty {
             EmptyTeacherPlaceholder()
         } else {
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 6) {
                 Label("TEACHERS", systemImage: "person.2.fill")
                     .font(.system(size: 9, weight: .black))
                     .tracking(1.5)
@@ -370,7 +380,7 @@ private struct TeacherLarge: View {
                     .padding(.horizontal, 14)
                     .padding(.top, 14)
 
-                ForEach(Array(teachers.prefix(5).enumerated()), id: \.offset) { _, t in
+                ForEach(Array(teachers.prefix(4).enumerated()), id: \.offset) { _, t in
                     TeacherRow(teacher: t, compact: false)
                 }
                 Spacer()
@@ -497,18 +507,23 @@ private struct ScheduleSmall: View {
                     .shadow(color: accent.opacity(0.7), radius: 3)
                 Text(label.uppercased())
                     .font(.system(size: 9, weight: .black))
-                    .tracking(1.2)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
             }
             Spacer()
             if phase == "done" {
                 Text("Done! 🎉")
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundColor(accent)
+                    .minimumScaleFactor(0.75)
+                    .lineLimit(1)
             } else if phase == "pre" {
                 Text("8:00 AM")
                     .font(.system(size: 26, weight: .black, design: .monospaced))
                     .foregroundColor(.primary)
+                    .minimumScaleFactor(0.75)
+                    .lineLimit(1)
             } else {
                 Text(fmtSec(secs))
                     .font(.system(size: 30, weight: .black, design: .monospaced))
@@ -517,7 +532,7 @@ private struct ScheduleSmall: View {
                     .lineLimit(1)
             }
         }
-        .padding(14)
+        .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 }
@@ -533,8 +548,9 @@ private struct ScheduleMedium: View {
                     .shadow(color: accent.opacity(0.7), radius: 4)
                 Text(label.uppercased())
                     .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Spacer()
                 Text(timeString())
                     .font(.system(size: 10, weight: .medium, design: .monospaced))
@@ -560,10 +576,11 @@ private struct ScheduleMedium: View {
                     }
                 }
                 if phase == "passing", !next.isEmpty {
-                    Text("→ \(next)")
+                    Text("to \(next)")
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.78)
                 }
                 if phase == "period" {
                     Text("remaining")
@@ -586,7 +603,7 @@ private struct ScheduleMedium: View {
                 .frame(height: 3)
             }
         }
-        .padding(16)
+        .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -609,8 +626,9 @@ private struct ScheduleLarge: View {
                             .shadow(color: accent.opacity(0.8), radius: 5)
                         Text(label.uppercased())
                             .font(.system(size: 10, weight: .black))
-                            .tracking(1.8)
                             .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
                     Text(timeString())
                         .font(.system(size: 13, weight: .medium, design: .monospaced))
@@ -651,10 +669,14 @@ private struct ScheduleLarge: View {
                         Text("→ \(next)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(accent)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                     } else if phase == "period" {
                         Text("remaining in \(label)")
                             .font(.system(size: 15))
                             .foregroundColor(.secondary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                     } else if phase == "countdown" {
                         Text("until school")
                             .font(.system(size: 15))
@@ -772,7 +794,7 @@ private struct EventsSmall: View {
 
     var body: some View {
         if let event = events.first {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 7) {
                 Label("TODAY", systemImage: "calendar")
                     .font(.system(size: 9, weight: .black))
                     .tracking(1.5)
@@ -780,7 +802,7 @@ private struct EventsSmall: View {
                 EventRow(event: event, compact: true)
                 Spacer()
             }
-            .padding(14)
+            .padding(12)
         } else {
             EmptyEventsPlaceholder()
         }
@@ -794,7 +816,7 @@ private struct EventsMedium: View {
         if events.isEmpty {
             EmptyEventsPlaceholder()
         } else {
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 6) {
                 Label("TODAY", systemImage: "calendar")
                     .font(.system(size: 9, weight: .black))
                     .tracking(1.5)
@@ -803,7 +825,7 @@ private struct EventsMedium: View {
                     EventRow(event: event, compact: true)
                 }
             }
-            .padding(14)
+            .padding(12)
         }
     }
 }
@@ -815,14 +837,14 @@ private struct EventsLarge: View {
         if events.isEmpty {
             EmptyEventsPlaceholder()
         } else {
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 6) {
                 Label("TODAY", systemImage: "calendar")
                     .font(.system(size: 9, weight: .black))
                     .tracking(1.5)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 14)
                     .padding(.top, 14)
-                ForEach(Array(events.prefix(5).enumerated()), id: \.offset) { _, event in
+                ForEach(Array(events.prefix(4).enumerated()), id: \.offset) { _, event in
                     EventRow(event: event, compact: false)
                 }
                 Spacer()
@@ -846,35 +868,43 @@ private struct EventRow: View {
 
     var body: some View {
         let accent = eventAccent(event)
-        HStack(spacing: 10) {
+        HStack(alignment: .top, spacing: 9) {
             Circle()
                 .fill(accent)
                 .frame(width: 8, height: 8)
                 .shadow(color: accent.opacity(0.6), radius: 4)
-            VStack(alignment: .leading, spacing: 1) {
+                .padding(.top, 5)
+
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: compact ? 12 : 14, weight: .bold))
+                    .font(.system(size: compact ? 12 : 13, weight: .bold))
                     .foregroundColor(.primary)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.78)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .layoutPriority(2)
                 Text(category)
-                    .font(.system(size: 10))
+                    .font(.system(size: 9))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Text(time)
-                .font(.system(size: 10, weight: .bold))
-                .padding(.horizontal, 9)
+                .font(.system(size: 9, weight: .bold))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+                .padding(.horizontal, 7)
                 .padding(.vertical, 3)
                 .background(accent.opacity(0.15))
                 .foregroundColor(accent)
                 .clipShape(Capsule())
-                .lineLimit(1)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, compact ? 7 : 10)
+        .padding(.horizontal, 12)
+        .padding(.vertical, compact ? 8 : 9)
         .background(Color.gr0veSurface)
-        .cornerRadius(12)
+        .cornerRadius(10)
     }
 }
 

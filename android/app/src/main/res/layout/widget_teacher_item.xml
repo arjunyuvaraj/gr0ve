@@ -3,11 +3,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="52dp"
+    android:layout_height="60dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
     android:paddingTop="6dp"
     android:paddingBottom="6dp"
     android:background="@drawable/widget_card_background"
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="10dp">
+        android:layout_marginStart="9dp">
 
         <TextView
             android:id="@+id/teacher_item_name"
@@ -34,18 +34,22 @@
             android:textSize="12sp"
             android:textStyle="bold"
             android:textColor="@color/widget_primary_text"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:maxLines="2"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="12sp" />
 
         <TextView
             android:id="@+id/teacher_item_dept"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Mathematics"
-            android:textSize="10sp"
+            android:textSize="9sp"
             android:textColor="@color/widget_secondary_text"
             android:maxLines="1"
-            android:ellipsize="end" />
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="7sp"
+            android:autoSizeMaxTextSize="9sp" />
 
     </LinearLayout>
 
@@ -54,13 +58,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Present"
-        android:textSize="9sp"
+        android:textSize="8sp"
         android:textStyle="bold"
         android:textColor="@color/gr0ve_green"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
-        android:background="@drawable/status_pill_background" />
+        android:background="@drawable/status_pill_background"
+        android:maxLines="2"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="6sp"
+        android:autoSizeMaxTextSize="8sp" />
 
 </LinearLayout>

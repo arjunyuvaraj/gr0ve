@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="14dp"
     android:background="@drawable/widget_background">
 
     <!-- Header row: dot + label -->
@@ -26,14 +26,19 @@
 
         <TextView
             android:id="@+id/schedule_label"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginStart="6dp"
             android:text="PERIOD 4"
             android:textSize="9sp"
             android:textStyle="bold"
-            android:letterSpacing="0.15"
-            android:textColor="@color/widget_secondary_text" />
+            android:letterSpacing="0.08"
+            android:textColor="@color/widget_secondary_text"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="7sp"
+            android:autoSizeMaxTextSize="9sp" />
     </LinearLayout>
 
     <!-- Big countdown -->
@@ -42,13 +47,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="24:30"
-        android:textSize="42sp"
+        android:textSize="40sp"
         android:textStyle="bold"
         android:fontFamily="monospace"
         android:textColor="@color/gr0ve_accent"
         android:autoSizeTextType="uniform"
         android:autoSizeMinTextSize="20sp"
-        android:autoSizeMaxTextSize="48sp"
+        android:autoSizeMaxTextSize="44sp"
         android:maxLines="1" />
 
     <!-- Subtitle -->
@@ -57,12 +62,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="remaining in Period 4"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:textColor="@color/widget_secondary_text"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="10dp"
-        android:maxLines="1"
-        android:ellipsize="end" />
+        android:maxLines="2"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="11sp" />
 
     <!-- Progress bar container -->
     <LinearLayout

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="14dp"
+    android:padding="12dp"
     android:background="@drawable/widget_background">
 
     <!-- Header -->
@@ -24,14 +24,18 @@
             android:tint="@color/widget_secondary_text" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginStart="5dp"
             android:text="BUSES"
             android:textSize="9sp"
             android:textStyle="bold"
-            android:letterSpacing="0.15"
-            android:textColor="@color/widget_secondary_text" />
+            android:textColor="@color/widget_secondary_text"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="7sp"
+            android:autoSizeMaxTextSize="9sp" />
 
     </LinearLayout>
 

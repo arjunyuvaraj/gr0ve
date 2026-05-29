@@ -23,7 +23,7 @@ private fun launchIntent(context: Context) =
 
 private fun rowsFor(options: Bundle?): Int {
     val height = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) ?: 110
-    return max(1, ((height - 56) / 56).coerceAtMost(5))
+    return max(1, ((height - 48) / 64).coerceAtMost(4))
 }
 
 private fun JSONArray.objects(): List<JSONObject> =
