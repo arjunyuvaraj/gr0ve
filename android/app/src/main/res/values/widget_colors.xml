@@ -5,16 +5,17 @@
     this file if you don't have one yet.
 -->
 <resources>
-    <!-- gr0ve palette — matches iOS swift colors exactly -->
-    <color name="gr0ve_green">#33E580</color>   <!-- 0.20 0.90 0.50 -->
-    <color name="gr0ve_red">#F87070</color>     <!-- 0.97 0.44 0.44 -->
+    <!-- gr0ve palette — matches the Flutter app theme -->
+    <color name="gr0ve_green">#1F6F5B</color>
+    <color name="gr0ve_red">#C62828</color>
     <color name="gr0ve_amber">#FABF24</color>   <!-- 0.98 0.75 0.14 -->
-    <color name="gr0ve_accent">#4A90D9</color>  <!-- default accent blue -->
+    <color name="gr0ve_accent">#1F6F5B</color>
 
     <!-- Widget surface colors — auto light/dark via night qualifier -->
-    <color name="widget_background">#FFFFFFFF</color>
-    <color name="widget_card_bg">#FFF5F5F5</color>
-    <color name="widget_primary_text">#FF1C1C1E</color>
-    <color name="widget_secondary_text">#FF8E8E93</color>
+    <color name="widget_background">#FFF8F9F9</color>
+    <color name="widget_card_bg">#FFFFFFFF</color>
+    <color name="widget_status_bg">#FFF2F4F4</color>
+    <color name="widget_primary_text">#FF1A1D1F</color>
+    <color name="widget_secondary_text">#FF454C52</color>
     <color name="widget_progress_bg">#1A000000</color>
 </resources>

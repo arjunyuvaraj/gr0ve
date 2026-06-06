@@ -54,15 +54,30 @@ private func jsonDict(_ key: String) -> [String: Any] {
 // ══════════════════════════════════════════════════════════════
 
 private extension Color {
-    static let gr0veGreen   = Color(red: 0.20, green: 0.90, blue: 0.50)
-    static let gr0veRed     = Color(red: 0.97, green: 0.44, blue: 0.44)
+    static let gr0veGreen   = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.28, green: 0.65, blue: 0.55, alpha: 1) : UIColor(red: 0.12, green: 0.44, blue: 0.36, alpha: 1) })
+    static let gr0veRed     = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 1.00, green: 0.54, blue: 0.54, alpha: 1) : UIColor(red: 0.78, green: 0.16, blue: 0.16, alpha: 1) })
     static let gr0veAmber   = Color(red: 0.98, green: 0.75, blue: 0.14)
-    static let gr0veSurface = Color(UIColor.secondarySystemBackground)
-    static let gr0veBG      = Color(UIColor.systemBackground)
+    static let gr0veSurface = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1) : UIColor.white })
+    static let gr0veTertiary = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1) : UIColor(red: 0.95, green: 0.96, blue: 0.96, alpha: 1) })
+    static let gr0veBG      = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.07, green: 0.07, blue: 0.07, alpha: 1) : UIColor(red: 0.97, green: 0.98, blue: 0.98, alpha: 1) })
+}
+
+private struct WidgetHeader: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .font(.system(size: 9, weight: .black))
+            .tracking(1.4)
+            .foregroundColor(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.72)
+    }
 }
 
 // ══════════════════════════════════════════════════════════════
-// MARK: — SHARED TIMELINE PROVIDER (simple every-30-min refresh)
+// MARK: — SHARED TIMELINE PROVIDER (local cache refresh; Firebase is throttled in Dart)
 // ══════════════════════════════════════════════════════════════
 
 struct SimpleProvider: TimelineProvider {
@@ -73,7 +88,7 @@ struct SimpleProvider: TimelineProvider {
         completion(SimpleEntry(date: Date()))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
-        let next = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
+        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
         completion(Timeline(entries: [SimpleEntry(date: Date())], policy: .after(next)))
     }
 }
@@ -108,8 +123,12 @@ private struct BusSmall: View {
     let buses: [[String: Any]]
     var body: some View {
         if let bus = buses.first {
-            BusCircleCard(bus: bus, size: 90)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(alignment: .leading, spacing: 7) {
+                WidgetHeader(title: "BUSES", systemImage: "bus.fill")
+                BusRow(bus: bus, compact: true)
+                Spacer()
+            }
+            .padding(12)
         } else {
             EmptyBusPlaceholder()
         }
@@ -122,17 +141,14 @@ private struct BusMedium: View {
     var body: some View {
         if buses.isEmpty {
             EmptyBusPlaceholder()
-        } else if buses.count == 1 {
-            BusCircleCard(bus: buses[0], size: 80)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                WidgetHeader(title: "BUSES", systemImage: "bus.fill")
                 ForEach(Array(buses.prefix(2).enumerated()), id: \.offset) { _, bus in
-                    BusCircleCard(bus: bus, size: 72)
-                        .frame(maxWidth: .infinity)
+                    BusRow(bus: bus, compact: true)
                 }
             }
-            .padding(14)
+            .padding(12)
         }
     }
 }
@@ -145,37 +161,64 @@ private struct BusLarge: View {
             EmptyBusPlaceholder()
         } else {
             let grid = Array(buses.prefix(4))
-            VStack(spacing: 10) {
-                HStack {
-                    Image(systemName: "bus.fill")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.secondary)
-                    Text("BUSES")
-                        .font(.system(size: 10, weight: .black))
-                        .tracking(2)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
+            VStack(alignment: .leading, spacing: 6) {
+                WidgetHeader(title: "BUSES", systemImage: "bus.fill")
                 .padding(.horizontal, 16)
                 .padding(.top, 14)
 
-                let rows = stride(from: 0, to: grid.count, by: 2).map {
-                    Array(grid[$0..<min($0+2, grid.count)])
-                }
-                ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                    HStack(spacing: 10) {
-                        ForEach(Array(row.enumerated()), id: \.offset) { _, bus in
-                            BusCircleCard(bus: bus, size: 80)
-                                .frame(maxWidth: .infinity)
-                        }
-                        if row.count == 1 { Spacer().frame(maxWidth: .infinity) }
-                    }
+                ForEach(Array(grid.enumerated()), id: \.offset) { _, bus in
+                    BusRow(bus: bus, compact: false)
                 }
                 Spacer()
             }
             .padding(.horizontal, 14)
             .padding(.bottom, 14)
         }
+    }
+}
+
+private struct BusRow: View {
+    let bus: [String: Any]
+    let compact: Bool
+
+    private var code: String { bus["code"] as? String ?? "?" }
+    private var town: String { bus["town"] as? String ?? "" }
+    private var status: String { bus["status"] as? String ?? "Not here yet" }
+    private var isArrived: Bool { status.lowercased() == "arrived" }
+    private var isUnknown: Bool { code == "?" || code.isEmpty }
+    private var accentColor: Color { isArrived ? .gr0veGreen : .gr0veRed }
+    private var displayCode: String { isUnknown ? "?" : code }
+    private var displayStatus: String { isUnknown ? "Unknown" : status }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            Text(displayCode)
+                .font(.system(size: compact ? 17 : 19, weight: .black, design: .rounded))
+                .foregroundColor(accentColor)
+                .minimumScaleFactor(0.62)
+                .lineLimit(1)
+                .frame(width: compact ? 42 : 46)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(town)
+                    .font(.system(size: compact ? 12 : 13, weight: .bold))
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.78)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .layoutPriority(2)
+                Text(displayStatus)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(accentColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, compact ? 9 : 10)
+        .background(Color.gr0veSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
@@ -320,7 +363,7 @@ private struct TeacherRow: View {
         .padding(.horizontal, 12)
         .padding(.vertical, compact ? 8 : 9)
         .background(Color.gr0veSurface)
-        .cornerRadius(10)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
@@ -329,10 +372,7 @@ private struct TeacherSmall: View {
     var body: some View {
         if let t = teachers.first {
             VStack(alignment: .leading, spacing: 7) {
-                Label("TEACHER", systemImage: "person.fill")
-                    .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
-                    .foregroundColor(.secondary)
+                WidgetHeader(title: "TEACHER", systemImage: "person.fill")
                 TeacherRow(teacher: t, compact: true)
                 Spacer()
             }
@@ -350,10 +390,7 @@ private struct TeacherMedium: View {
             EmptyTeacherPlaceholder()
         } else {
             VStack(alignment: .leading, spacing: 7) {
-                Label("TEACHERS", systemImage: "person.2.fill")
-                    .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
-                    .foregroundColor(.secondary)
+                WidgetHeader(title: "TEACHERS", systemImage: "person.2.fill")
                 HStack(spacing: 8) {
                     ForEach(Array(teachers.prefix(2).enumerated()), id: \.offset) { _, t in
                     TeacherRow(teacher: t, compact: true)
@@ -373,10 +410,7 @@ private struct TeacherLarge: View {
             EmptyTeacherPlaceholder()
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                Label("TEACHERS", systemImage: "person.2.fill")
-                    .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
-                    .foregroundColor(.secondary)
+                WidgetHeader(title: "TEACHERS", systemImage: "person.2.fill")
                     .padding(.horizontal, 14)
                     .padding(.top, 14)
 
@@ -465,7 +499,7 @@ struct ScheduleWidgetEntryView: View {
         case "done":    return .gr0veGreen
         case "passing": return .gr0veAmber
         case "pre":     return .secondary
-        default:        return Color.accentColor
+        default:        return .gr0veGreen
         }
     }
 
@@ -785,7 +819,7 @@ private func eventAccent(_ event: [String: Any]) -> Color {
     switch event["category"] as? String ?? "" {
     case "personal": return .gr0veAmber
     case "club": return .gr0veGreen
-    default: return Color.accentColor
+    default: return .gr0veGreen
     }
 }
 
@@ -795,10 +829,7 @@ private struct EventsSmall: View {
     var body: some View {
         if let event = events.first {
             VStack(alignment: .leading, spacing: 7) {
-                Label("TODAY", systemImage: "calendar")
-                    .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
-                    .foregroundColor(.secondary)
+                WidgetHeader(title: "TODAY", systemImage: "calendar")
                 EventRow(event: event, compact: true)
                 Spacer()
             }
@@ -817,10 +848,7 @@ private struct EventsMedium: View {
             EmptyEventsPlaceholder()
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                Label("TODAY", systemImage: "calendar")
-                    .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
-                    .foregroundColor(.secondary)
+                WidgetHeader(title: "TODAY", systemImage: "calendar")
                 ForEach(Array(events.prefix(2).enumerated()), id: \.offset) { _, event in
                     EventRow(event: event, compact: true)
                 }
@@ -838,10 +866,7 @@ private struct EventsLarge: View {
             EmptyEventsPlaceholder()
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                Label("TODAY", systemImage: "calendar")
-                    .font(.system(size: 9, weight: .black))
-                    .tracking(1.5)
-                    .foregroundColor(.secondary)
+                WidgetHeader(title: "TODAY", systemImage: "calendar")
                     .padding(.horizontal, 14)
                     .padding(.top, 14)
                 ForEach(Array(events.prefix(4).enumerated()), id: \.offset) { _, event in
@@ -904,7 +929,7 @@ private struct EventRow: View {
         .padding(.horizontal, 12)
         .padding(.vertical, compact ? 8 : 9)
         .background(Color.gr0veSurface)
-        .cornerRadius(10)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 

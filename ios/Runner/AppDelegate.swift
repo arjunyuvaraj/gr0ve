@@ -20,6 +20,7 @@ import WidgetKit
             WidgetCenter.shared.reloadTimelines(ofKind: "Gr0veBusWidget")
             WidgetCenter.shared.reloadTimelines(ofKind: "Gr0veTeacherWidget")
             WidgetCenter.shared.reloadTimelines(ofKind: "Gr0veScheduleWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "Gr0veEventsWidget")
         }
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)

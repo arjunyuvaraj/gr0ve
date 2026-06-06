@@ -13,10 +13,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.max
 
-private const val GREEN = "#33E580"
-private const val RED = "#F87070"
+private const val GREEN = "#1F6F5B"
+private const val RED = "#C62828"
 private const val AMBER = "#FABF24"
-private const val ACCENT = "#4A90D9"
+private const val ACCENT = "#1F6F5B"
 
 private fun launchIntent(context: Context) =
     HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
@@ -67,7 +67,7 @@ class Gr0veBusWidgetProvider : HomeWidgetProvider() {
                 val row = RemoteViews(context.packageName, R.layout.widget_bus_item)
                 val code = bus.optString("code").ifBlank { "?" }
                 val status = bus.optString("status", "Not here yet")
-                val color = if (status.equals("Arrived", true)) GREEN else if (code == "?") RED else AMBER
+                val color = if (status.equals("Arrived", true)) GREEN else RED
 
                 row.setTextViewText(R.id.bus_item_code, code)
                 row.setTextColor(R.id.bus_item_code, Color.parseColor(color))

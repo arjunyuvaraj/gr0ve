@@ -53,5 +53,7 @@ android/app/google-services.json
 # Assets
 assets/credentials/gsheets.jsonassets/credentials/*.json
 # scripts/
+scripts/chrome_state.json
+scripts/.chrome_state_profile/
 gr0ve_accessKeys.csv
 assets/credentials/service_account.json

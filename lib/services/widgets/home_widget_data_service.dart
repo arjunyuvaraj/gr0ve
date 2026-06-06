@@ -9,11 +9,20 @@ import 'package:gr0ve/features/calendar/services/calendar_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeWidgetDataService {
   static const _appGroupId = 'group.com.arjunyuvaraj.gr0ve';
+  static const _busRefreshKey = 'home_widget_bus_refreshed_at';
+  static const _teacherRefreshKey = 'home_widget_teacher_refreshed_at';
+  static const _eventsRefreshKey = 'home_widget_events_refreshed_at';
+  static const _schoolStatusRefreshKey =
+      'home_widget_school_status_refreshed_at';
+  static const _schoolStatusCacheKey = 'home_widget_school_status';
   static Timer? _scheduleTimer;
-  static Timer? _refreshDebounce;
+  static Timer? _busRefreshDebounce;
+  static Timer? _teacherRefreshDebounce;
+  static Timer? _eventsRefreshDebounce;
   static bool _started = false;
 
   static Future<void> start() async {
@@ -21,29 +30,35 @@ class HomeWidgetDataService {
     _started = true;
 
     await HomeWidget.setAppGroupId(_appGroupId);
-    StarredBusService.starredTowns.addListener(_scheduleRefresh);
-    StarredTeacherService.starredTeachers.addListener(_scheduleRefresh);
-    CalendarService.eventsVersion.addListener(_scheduleRefresh);
+    StarredBusService.starredTowns.addListener(_scheduleBusRefresh);
+    StarredTeacherService.starredTeachers.addListener(_scheduleTeacherRefresh);
+    CalendarService.eventsVersion.addListener(_scheduleEventsRefresh);
 
     _scheduleTimer = Timer.periodic(
       const Duration(minutes: 1),
       (_) => refreshSchedule(),
     );
 
-    await refreshAll();
+    await refreshAll(forceFirebase: false);
   }
 
   static Future<void> stop() async {
     if (!_started) return;
     _started = false;
 
-    StarredBusService.starredTowns.removeListener(_scheduleRefresh);
-    StarredTeacherService.starredTeachers.removeListener(_scheduleRefresh);
-    CalendarService.eventsVersion.removeListener(_scheduleRefresh);
+    StarredBusService.starredTowns.removeListener(_scheduleBusRefresh);
+    StarredTeacherService.starredTeachers.removeListener(
+      _scheduleTeacherRefresh,
+    );
+    CalendarService.eventsVersion.removeListener(_scheduleEventsRefresh);
     _scheduleTimer?.cancel();
-    _refreshDebounce?.cancel();
+    _busRefreshDebounce?.cancel();
+    _teacherRefreshDebounce?.cancel();
+    _eventsRefreshDebounce?.cancel();
     _scheduleTimer = null;
-    _refreshDebounce = null;
+    _busRefreshDebounce = null;
+    _teacherRefreshDebounce = null;
+    _eventsRefreshDebounce = null;
 
     await Future.wait([
       HomeWidget.saveWidgetData<String>('bus_data', '[]'),
@@ -54,25 +69,51 @@ class HomeWidgetDataService {
     await _updateWidgets();
   }
 
-  static void _scheduleRefresh() {
-    _refreshDebounce?.cancel();
-    _refreshDebounce = Timer(const Duration(milliseconds: 400), refreshAll);
+  static void _scheduleBusRefresh() {
+    _busRefreshDebounce?.cancel();
+    _busRefreshDebounce = Timer(
+      const Duration(milliseconds: 400),
+      () => refreshBuses(force: true),
+    );
   }
 
-  static Future<void> refreshAll() async {
+  static void _scheduleTeacherRefresh() {
+    _teacherRefreshDebounce?.cancel();
+    _teacherRefreshDebounce = Timer(
+      const Duration(milliseconds: 400),
+      () => refreshTeachers(force: true),
+    );
+  }
+
+  static void _scheduleEventsRefresh() {
+    _eventsRefreshDebounce?.cancel();
+    _eventsRefreshDebounce = Timer(
+      const Duration(milliseconds: 400),
+      () => refreshEvents(force: true),
+    );
+  }
+
+  static Future<void> refreshAll({bool forceFirebase = false}) async {
     try {
       await Future.wait([
-        refreshBuses(),
-        refreshTeachers(),
+        refreshBuses(force: forceFirebase),
+        refreshTeachers(force: forceFirebase),
         refreshSchedule(),
-        refreshEvents(),
+        refreshEvents(force: forceFirebase),
       ]);
     } catch (e) {
       if (kDebugMode) print('[Widgets] refresh failed: $e');
     }
   }
 
-  static Future<void> refreshBuses() async {
+  static Future<void> refreshBuses({bool force = false}) async {
+    if (!force && !await _shouldRefresh(_busRefreshKey, _busTtl())) {
+      await _updateWidgets(
+        names: const ['Gr0veBusWidget', 'Gr0veBusWidgetProvider'],
+      );
+      return;
+    }
+
     final starred = StarredBusService.starredTowns.value;
     final routes = await fetchBusRoutes();
     final data = routes
@@ -81,12 +122,24 @@ class HomeWidgetDataService {
         .toList();
 
     await HomeWidget.saveWidgetData<String>('bus_data', jsonEncode(data));
+    await _markRefreshed(_busRefreshKey);
     await _updateWidgets(
       names: const ['Gr0veBusWidget', 'Gr0veBusWidgetProvider'],
     );
   }
 
-  static Future<void> refreshTeachers() async {
+  static Future<void> refreshTeachers({bool force = false}) async {
+    if (!force &&
+        !await _shouldRefresh(
+          _teacherRefreshKey,
+          const Duration(minutes: 30),
+        )) {
+      await _updateWidgets(
+        names: const ['Gr0veTeacherWidget', 'Gr0veTeacherWidgetProvider'],
+      );
+      return;
+    }
+
     final starred = StarredTeacherService.starredTeachers.value.toList()
       ..sort();
     final absences = await fetchGoogleSheetAbsences(
@@ -119,6 +172,7 @@ class HomeWidgetDataService {
     });
 
     await HomeWidget.saveWidgetData<String>('teacher_data', jsonEncode(data));
+    await _markRefreshed(_teacherRefreshKey);
     await _updateWidgets(
       names: const ['Gr0veTeacherWidget', 'Gr0veTeacherWidgetProvider'],
     );
@@ -133,7 +187,15 @@ class HomeWidgetDataService {
     );
   }
 
-  static Future<void> refreshEvents() async {
+  static Future<void> refreshEvents({bool force = false}) async {
+    if (!force &&
+        !await _shouldRefresh(_eventsRefreshKey, const Duration(minutes: 15))) {
+      await _updateWidgets(
+        names: const ['Gr0veEventsWidget', 'Gr0veEventsWidgetProvider'],
+      );
+      return;
+    }
+
     if (CalendarService.eventsVersion.value == 0) {
       await CalendarService.loadAllEvents();
     }
@@ -155,6 +217,7 @@ class HomeWidgetDataService {
     }).toList();
 
     await HomeWidget.saveWidgetData<String>('events_data', jsonEncode(data));
+    await _markRefreshed(_eventsRefreshKey);
     await _updateWidgets(
       names: const ['Gr0veEventsWidget', 'Gr0veEventsWidgetProvider'],
     );
@@ -182,16 +245,52 @@ class HomeWidgetDataService {
   }
 
   static Future<String> _schoolStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cached = prefs.getString(_schoolStatusCacheKey) ?? 'normal';
+    if (!await _shouldRefresh(
+      _schoolStatusRefreshKey,
+      const Duration(minutes: 15),
+    )) {
+      return cached;
+    }
+
     try {
       final doc = await FirebaseFirestore.instance
           .collection('app_config')
           .doc('school_status')
           .get()
           .timeout(const Duration(seconds: 4));
-      return doc.data()?['status']?.toString() ?? 'normal';
+      final status = doc.data()?['status']?.toString() ?? 'normal';
+      await prefs.setString(_schoolStatusCacheKey, status);
+      await _markRefreshed(_schoolStatusRefreshKey);
+      return status;
     } catch (_) {
-      return 'normal';
+      return cached;
     }
+  }
+
+  static Duration _busTtl() {
+    final now = DateTime.now();
+    final weekday =
+        now.weekday >= DateTime.monday && now.weekday <= DateTime.friday;
+    final minute = now.hour * 60 + now.minute;
+    final dismissalWindow = minute >= 14 * 60 && minute <= 17 * 60;
+    return weekday && dismissalWindow
+        ? const Duration(minutes: 2)
+        : const Duration(minutes: 10);
+  }
+
+  static Future<bool> _shouldRefresh(String key, Duration ttl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = prefs.getInt(key);
+    if (last == null) return true;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - last;
+    return elapsed >= ttl.inMilliseconds;
+  }
+
+  static Future<void> _markRefreshed(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(key, DateTime.now().millisecondsSinceEpoch);
   }
 
   static Map<String, dynamic> _schedulePayload(DateTime now, String status) {
