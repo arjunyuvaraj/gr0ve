@@ -71,7 +71,7 @@ void main() {
       );
 
       expect(find.text('TEST TITLE'), findsOneWidget);
-      expect(find.text('WELCOME TO GROVE'), findsOneWidget);
+      expect(find.text('THE ALL IN ONE BCA APP'), findsOneWidget);
     });
 
     testWidgets('CustomTextField displays hint and accepts input', (
@@ -210,7 +210,7 @@ void main() {
       );
 
       expect(find.text('TEST PAGE'), findsOneWidget);
-      expect(find.text('WELCOME TO GROVE'), findsOneWidget);
+      expect(find.text('THE ALL IN ONE BCA APP'), findsOneWidget);
       expect(find.text('ACTION'), findsOneWidget);
 
       await tester.tap(find.text('ACTION'));

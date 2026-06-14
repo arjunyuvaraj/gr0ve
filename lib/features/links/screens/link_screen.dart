@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/misc/not_logged_in.dart';
@@ -172,8 +173,19 @@ class _LinksScreenState extends State<LinksScreen> {
       if (link.url.startsWith("/")) {
         Navigator.pushNamed(context, link.url);
       } else {
-        final uri = Uri.parse(link.url);
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        String urlString = link.url.trim();
+        if (!urlString.contains("://") &&
+            !urlString.startsWith("mailto:") &&
+            !urlString.startsWith("tel:")) {
+          urlString = 'https://$urlString';
+        }
+        final uri = Uri.parse(urlString);
+        await launchUrl(
+          uri,
+          mode: kIsWeb
+              ? LaunchMode.platformDefault
+              : LaunchMode.externalApplication,
+        );
       }
     } catch (e) {
       if (mounted) {

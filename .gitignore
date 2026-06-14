@@ -55,5 +55,7 @@ assets/credentials/gsheets.jsonassets/credentials/*.json
 # scripts/
 scripts/chrome_state.json
 scripts/.chrome_state_profile/
+scripts/.bus_routes_cache.json
+scripts/.teacher_absences_cache.json
 gr0ve_accessKeys.csv
 assets/credentials/service_account.json

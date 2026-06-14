@@ -14,13 +14,15 @@ class BergenOnboardingScreen extends StatefulWidget {
   State<BergenOnboardingScreen> createState() => _BergenOnboardingScreenState();
 }
 
-class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
-  final user = FirebaseAuth.instance.currentUser;
+class _BergenOnboardingScreenState extends State<BergenOnboardingScreen>
+    with WidgetsBindingObserver {
+  User? _user = FirebaseAuth.instance.currentUser;
 
   bool isEmailVerified = false;
   String? selectedGrade;
   String? selectedAcademy;
   bool isLoading = false;
+  bool isCheckingEmail = false;
   bool isSaving = false;
   Timer? _verificationTimer;
 
@@ -40,6 +42,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkEmailVerification();
     _startVerificationTimer();
     FirebaseAnalytics.instance.logEvent(name: 'screen_onboarding');
@@ -54,17 +57,41 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _verificationTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _checkEmailVerification() async {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkEmailVerification();
+    }
+  }
+
+  Future<User?> _reloadCurrentUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return null;
+
+    await currentUser.reload();
+    final refreshedUser = FirebaseAuth.instance.currentUser;
+    if (refreshedUser != null) {
+      await refreshedUser.getIdToken(true);
+    }
+
+    return refreshedUser;
+  }
+
+  Future<void> _checkEmailVerification({bool showFeedback = false}) async {
+    if (showFeedback && mounted) {
+      setState(() => isCheckingEmail = true);
+    }
+
     try {
-      await FirebaseAuth.instance.currentUser?.reload();
+      final currentUser = await _reloadCurrentUser();
 
       if (!mounted) return;
 
-      final currentUser = FirebaseAuth.instance.currentUser;
       final verified = currentUser?.emailVerified ?? false;
 
       if (verified && !isEmailVerified) {
@@ -72,8 +99,25 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
       }
 
       setState(() {
+        _user = currentUser;
         isEmailVerified = verified;
       });
+
+      if (showFeedback) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              verified
+                  ? 'Email verified! You can finish setup now.'
+                  : 'Still waiting on verification. Try again after opening the email link.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: verified
+                ? Theme.of(context).colorScheme.primary
+                : null,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -83,15 +127,20 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
           ),
         );
       }
+    } finally {
+      if (showFeedback && mounted) {
+        setState(() => isCheckingEmail = false);
+      }
     }
   }
 
   Future<void> _sendVerificationEmail() async {
-    if (user == null || user!.emailVerified) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.emailVerified) return;
 
     setState(() => isLoading = true);
     try {
-      await user!.sendEmailVerification();
+      await user.sendEmailVerification();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -115,6 +164,9 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
   }
 
   Future<void> _saveProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     if (selectedGrade == null || selectedAcademy == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -129,7 +181,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
     try {
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(user!.uid)
+          .doc(user.uid)
           .update({'grade': selectedGrade, 'academy': selectedAcademy})
           .timeout(const Duration(seconds: 5));
 
@@ -210,7 +262,7 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
                   textTheme,
                   stepNumber: 1,
                   title: 'Verify Your Email',
-                  subtitle: user?.email ?? '',
+                  subtitle: _user?.email ?? '',
                   isComplete: isEmailVerified,
                   child: Column(
                     children: [
@@ -261,7 +313,10 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
                         ),
                         const SizedBox(height: 12),
                         InkWell(
-                          onTap: _checkEmailVerification,
+                          onTap: isCheckingEmail
+                              ? null
+                              : () =>
+                                    _checkEmailVerification(showFeedback: true),
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -278,11 +333,21 @@ class _BergenOnboardingScreenState extends State<BergenOnboardingScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.refresh_rounded,
-                                  size: 18,
-                                  color: colors.primary,
-                                ),
+                                if (isCheckingEmail)
+                                  SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: colors.primary,
+                                    ),
+                                  )
+                                else
+                                  Icon(
+                                    Icons.refresh_rounded,
+                                    size: 18,
+                                    color: colors.primary,
+                                  ),
                                 const SizedBox(width: 10),
                                 Text(
                                   'I\'ve Verified My Email',

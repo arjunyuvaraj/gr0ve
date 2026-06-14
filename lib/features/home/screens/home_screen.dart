@@ -63,6 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkOnboarding() async {
+    await FirebaseAuth.instance.currentUser?.reload();
+    _user = FirebaseAuth.instance.currentUser;
+
     if (_user == null) {
       _needsOnboarding = false;
       return;

@@ -14,7 +14,13 @@ class CustomHeader extends StatelessWidget {
 
   String _getSarcasticSubtitle(String title) {
     final t = title.toUpperCase();
-    final user = FirebaseAuth.instance.currentUser?.displayName ?? "";
+    var user = "";
+    try {
+      user = FirebaseAuth.instance.currentUser?.displayName ?? "";
+    } catch (_) {
+      user = "";
+    }
+
     if (t.contains('THE GR0VE')) return "WELCOME TO";
     if (t.contains('GR0VE')) return "LET'S TAKE A LOOK";
     if (t.contains('BUSES')) return "FINALLY LEAVING";
@@ -33,7 +39,9 @@ class CustomHeader extends StatelessWidget {
     if (t.contains('LINKS')) return "HANDY LITTLE SHORTCUTS";
     if (t.contains('PENDING EVENTS')) return "SADLY SOCIAL";
     if (t.contains('NEWS')) return "Academy Chronicle".capitalized;
-    if (t.contains(user.capitalized)) return "NICE TO SEE YOU";
+    if (user.isNotEmpty && t.contains(user.capitalized)) {
+      return "NICE TO SEE YOU";
+    }
     if (t.contains("GROVER")) return "STRUCTURED GUIDENCE".capitalized;
     if (t.contains("ASPEN")) return "Explore Your Path".capitalized;
     if (t.contains("ROWAN")) return "Practical Direction".capitalized;

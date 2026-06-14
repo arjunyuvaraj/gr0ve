@@ -1,4 +1,6 @@
 final Map<String, String> changelogEntries = {
+  "v2.2.1":
+      "Smarter teacher and bus updates are here. Gr0ve now checks local changes before touching Firestore, which keeps updates lighter and lets notifications come back without noisy repeats.",
   "v1.4.5":
       "Sadly, a minor bug was discoverd with the bus refreshing system, that has successfully been patched. Also minor restyling in calendar and help pages",
   "v1.4.4":

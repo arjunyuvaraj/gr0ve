@@ -1,7 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/calendar/services/calendar_service.dart';
-import 'dart:ui';
-import 'dart:math';
 
 class SchoolClosedOverlay extends StatefulWidget {
   final Widget child;
@@ -53,103 +53,120 @@ class _SchoolClosedOverlayState extends State<SchoolClosedOverlay> {
     return false;
   }
 
+  void _dismiss() {
+    setState(() {
+      _dismissed = true;
+      _sessionDismissed = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_sessionDismissed || _dismissed || !_isSchoolClosed()) {
       return widget.child;
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final colors = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return Stack(
       children: [
         widget.child,
-
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              color: colors.surface.withOpacity(0.85),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Image.asset(
-                          isDark
-                              ? 'assets/app_icons/png/dawn_dark.png'
-                              : 'assets/app_icons/png/dawn_light.png',
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                height: 200,
-                                color: colors.primary.withOpacity(0.1),
-                                child: Icon(
-                                  Icons.wb_sunny_rounded,
-                                  size: 64,
-                                  color: colors.primary,
-                                ),
-                              ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      Text(
-                        _message,
-                        textAlign: TextAlign.center,
-                        style: textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: colors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "There are zero academic reasons for you to be opening this app right now. Go live your life.",
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colors.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-
-                      const SizedBox(height: 48),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _dismissed = true;
-                              _sessionDismissed = true;
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colors.primary,
-                            foregroundColor: colors.onPrimary,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Text(
-                            "Continue to gr0ve",
-                            style: TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Material(
+            type: MaterialType.transparency,
+            child: _SchoolClosedBanner(
+              message: _message,
+              onDismiss: _dismiss,
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SchoolClosedBanner extends StatelessWidget {
+  final String message;
+  final VoidCallback onDismiss;
+
+  const _SchoolClosedBanner({required this.message, required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Material(
+            elevation: 10,
+            shadowColor: Colors.black.withOpacity(0.16),
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colors.primary.withOpacity(0.18)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.weekend_rounded,
+                      color: colors.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message,
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: colors.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "School looks closed today, but gr0ve is still available.",
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colors.onSurface.withOpacity(0.62),
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: onDismiss,
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: colors.onSurface.withOpacity(0.64),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

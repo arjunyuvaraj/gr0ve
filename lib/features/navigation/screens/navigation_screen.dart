@@ -160,6 +160,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
   }
 
   Future<void> _checkOnboarding() async {
+    await FirebaseAuth.instance.currentUser?.reload();
+    _user = FirebaseAuth.instance.currentUser;
+
     if (_user == null) {
       if (mounted)
         setState(() {

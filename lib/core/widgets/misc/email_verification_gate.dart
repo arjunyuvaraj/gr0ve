@@ -24,12 +24,13 @@ class EmailVerificationGate extends StatefulWidget {
 class _EmailVerificationGateState extends State<EmailVerificationGate> {
   bool _isRefreshing = false;
   Timer? _timer;
+  User? _user;
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
+    _user = FirebaseAuth.instance.currentUser;
+    if (_user != null && !_user!.emailVerified) {
       _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
         _checkVerificationStatus();
       });
@@ -42,14 +43,26 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
     super.dispose();
   }
 
-  Future<void> _checkVerificationStatus() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+  Future<User?> _reloadCurrentUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return null;
 
-    await user.reload();
-    if (user.emailVerified && mounted) {
+    await currentUser.reload();
+    final refreshedUser = FirebaseAuth.instance.currentUser;
+    if (refreshedUser != null) {
+      await refreshedUser.getIdToken(true);
+    }
+
+    return refreshedUser;
+  }
+
+  Future<void> _checkVerificationStatus() async {
+    final user = await _reloadCurrentUser();
+    if (!mounted) return;
+
+    setState(() => _user = user);
+    if (user?.emailVerified == true) {
       _timer?.cancel();
-      setState(() {});
     }
   }
 
@@ -79,10 +92,11 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
   Future<void> _refreshStatus(User user) async {
     setState(() => _isRefreshing = true);
     try {
-      await user.reload();
+      final updatedUser = await _reloadCurrentUser();
       if (mounted) {
-        final updatedUser = FirebaseAuth.instance.currentUser;
+        setState(() => _user = updatedUser);
         if (updatedUser?.emailVerified == true) {
+          _timer?.cancel();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text("Email verified! Unlocking feature..."),
@@ -108,7 +122,7 @@ class _EmailVerificationGateState extends State<EmailVerificationGate> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _user ?? FirebaseAuth.instance.currentUser;
 
     if (user == null || !user.emailVerified) {
       return _buildVerifyState(context, user);
