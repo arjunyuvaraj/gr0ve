@@ -3,7 +3,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:icons_plus/icons_plus.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/extensions/string_extensions.dart';
@@ -299,7 +298,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('milk') || lower.contains('dairy')) {
       return {
-        'icon': Icon(Bootstrap.cup_fill, size: 14, color: Colors.white),
+        'icon': const Icon(Icons.local_drink, size: 14, color: Colors.white),
         'label': 'Milk',
         'color': Colors.blue.withAlpha(150),
       };
@@ -307,7 +306,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('egg')) {
       return {
-        'icon': const Icon(Bootstrap.egg_fill, size: 14, color: Colors.white),
+        'icon': const Icon(Icons.egg, size: 14, color: Colors.white),
         'label': 'Egg',
         'color': Colors.orange.withAlpha(150),
       };
@@ -316,7 +315,7 @@ class _MenuItemCard extends StatelessWidget {
     if (lower.contains('wheat') || lower.contains('gluten')) {
       return {
         'icon': const Icon(
-          Bootstrap.exclamation_triangle_fill,
+          Icons.warning_rounded,
           size: 14,
           color: Colors.white,
         ),
@@ -327,7 +326,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('soy')) {
       return {
-        'icon': const Icon(Bootstrap.flower1, size: 14, color: Colors.white),
+        'icon': const Icon(Icons.eco, size: 14, color: Colors.white),
         'label': 'Soy',
         'color': Colors.green.withAlpha(150),
       };
@@ -335,7 +334,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('sesame')) {
       return {
-        'icon': const Icon(Bootstrap.asterisk, size: 14, color: Colors.white),
+        'icon': const Icon(Icons.grain, size: 14, color: Colors.white),
         'label': 'Sesame',
         'color': Colors.amber.shade400.withAlpha(150),
       };
@@ -344,7 +343,7 @@ class _MenuItemCard extends StatelessWidget {
     if (lower.contains('tree nut') || lower.contains('nuts')) {
       return {
         'icon': const Icon(
-          Bootstrap.exclamation_circle_fill,
+          Icons.error_rounded,
           size: 14,
           color: Colors.white,
         ),
@@ -356,7 +355,7 @@ class _MenuItemCard extends StatelessWidget {
     if (lower.contains('peanut')) {
       return {
         'icon': const Icon(
-          Bootstrap.exclamation_circle_fill,
+          Icons.error_rounded,
           size: 14,
           color: Colors.white,
         ),
@@ -368,7 +367,7 @@ class _MenuItemCard extends StatelessWidget {
     if (lower.contains('fish')) {
       return {
         'icon': const Icon(
-          FontAwesome.fish_solid,
+          Icons.set_meal,
           size: 14,
           color: Colors.white,
         ),
@@ -380,7 +379,7 @@ class _MenuItemCard extends StatelessWidget {
     if (lower.contains('shellfish') || lower.contains('crustacean')) {
       return {
         'icon': const Icon(
-          FontAwesome.shrimp_solid,
+          Icons.restaurant,
           size: 14,
           color: Colors.white,
         ),
