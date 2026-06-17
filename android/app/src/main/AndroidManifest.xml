@@ -155,50 +155,6 @@
 
         <meta-data android:name="flutterEmbedding" android:value="2"/>
 
-        <receiver
-            android:name=".Gr0veBusWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/gr0ve_bus_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".Gr0veTeacherWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/gr0ve_teacher_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".Gr0veScheduleWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/gr0ve_schedule_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".Gr0veEventsWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/gr0ve_events_widget_info" />
-        </receiver>
-
     </application>
 
     <!-- Permissions -->

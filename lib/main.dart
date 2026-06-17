@@ -45,7 +45,6 @@ import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
 import 'package:gr0ve/services/settings/fun_mode_service.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
-import 'package:gr0ve/services/widgets/home_widget_data_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -118,11 +117,25 @@ Future<void> _bootUserServices(User user) async {
 
   final sw = Stopwatch()..start();
 
-  final userData = await UserDocCache.get();
+  // Retry up to 3 times with a short delay to handle the race condition where
+  // a newly-created Firestore document hasn't propagated by the time we boot.
+  Map<String, dynamic>? userData;
+  for (int attempt = 1; attempt <= 3; attempt++) {
+    userData = await UserDocCache.get();
+    if (userData != null) break;
+    if (attempt < 3) {
+      if (kDebugMode) {
+        print('[BOOT] UserDoc null on attempt $attempt — retrying in 1.5s');
+      }
+      UserDocCache.invalidate();
+      await Future.delayed(const Duration(milliseconds: 1500));
+    }
+  }
+
   if (kDebugMode) print('[BOOT] UserDoc fetched (${sw.elapsedMilliseconds}ms)');
 
   if (userData == null) {
-    if (kDebugMode) print('[BOOT] User document missing - signing out');
+    if (kDebugMode) print('[BOOT] User document missing after retries - signing out');
     AuthenticationService().signOut();
     return;
   }
@@ -148,14 +161,12 @@ Future<void> _bootUserServices(User user) async {
     print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
   }
 
-  unawaited(HomeWidgetDataService.start());
 
   if (kDebugMode)
     print('[BOOT] User services ready (${sw.elapsedMilliseconds}ms)');
 }
 
 void _teardownUserServices() {
-  unawaited(HomeWidgetDataService.stop());
   StarredTeacherService.reset();
   StarredBusService.reset();
   CalendarService.reset();

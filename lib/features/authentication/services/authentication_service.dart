@@ -14,7 +14,11 @@ class AuthenticationService {
     return email.toLowerCase().endsWith('@bergen.org');
   }
 
-  Future<void> _createUserDocument(User user, {String? email}) async {
+  Future<void> _createUserDocument(
+    User user, {
+    String? email,
+    String? displayName,
+  }) async {
     final userEmail = email ?? user.email ?? '';
     final isBCA = userEmail.isNotEmpty ? _isBCAEmail(userEmail) : false;
     final userDoc = _firestore.collection('users').doc(user.uid);
@@ -26,6 +30,7 @@ class AuthenticationService {
       await userDoc.set({
         'uid': user.uid,
         'email': userEmail,
+        'displayName': displayName ?? user.displayName ?? '',
         'isBCA': isBCA,
         'isAnonymous': user.isAnonymous,
         'createdAt': FieldValue.serverTimestamp(),
@@ -52,8 +57,19 @@ class AuthenticationService {
           );
 
       if (userCredential.user != null) {
-        await _createUserDocument(userCredential.user!, email: trimmedEmail);
+        // Update display name first so _createUserDocument can read it.
         await userCredential.user?.updateDisplayName(name);
+        try {
+          await _createUserDocument(
+            userCredential.user!,
+            email: trimmedEmail,
+            displayName: name,
+          );
+        } catch (firestoreError) {
+          // Document creation failed (e.g. rules / network), but the Auth
+          // account already exists. Log and continue — do NOT block the user.
+          print('[AuthService] Warning: failed to create user document: $firestoreError');
+        }
         await userCredential.user?.reload();
       }
       return userCredential.user;
@@ -76,7 +92,14 @@ class AuthenticationService {
           );
 
       if (userCredential.user != null) {
-        await _createUserDocument(userCredential.user!, email: trimmedEmail);
+        try {
+          await _createUserDocument(
+            userCredential.user!,
+            email: trimmedEmail,
+          );
+        } catch (firestoreError) {
+          print('[AuthService] Warning: failed to update user document on login: $firestoreError');
+        }
       }
       return userCredential.user;
     } on FirebaseAuthException catch (e) {

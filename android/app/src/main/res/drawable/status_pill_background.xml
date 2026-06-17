@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- res/drawable/status_pill_background.xml -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="@color/widget_status_bg" />
-    <corners android:radius="99dp" />
-</shape>

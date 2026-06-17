@@ -27,7 +27,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
   bool _isLoading = true;
   Timer? _refreshTimer;
   DateTime _currentTime = NetworkTimeService.now;
-  bool _bypassedAnniversary = false;
 
   late AnimationController _animCtrl;
 
@@ -318,8 +317,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final pc = colors.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     if (_isLoading) {
       return Scaffold(
         backgroundColor: colors.surface,
@@ -328,17 +325,8 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     }
 
     final maxEpisode = _gameState?.currentEpisode ?? 0;
-
-    final targetDate = DateTime(2026, 5, 20, 8, 0, 0);
-    final isBeforeAnniversary = _currentTime.isBefore(targetDate);
-
-    if (isBeforeAnniversary && !_bypassedAnniversary) {
-      return Scaffold(
-        backgroundColor: colors.surface,
-        body: _buildFullScreenAnniversaryOverlay(colors, isDark, targetDate),
-      );
-    }
-
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: ListView(
@@ -489,11 +477,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
           ),
           const SizedBox(height: 32),
 
-          if (_currentTime.isBefore(DateTime(2026, 5, 20, 8, 0, 0))) ...[
-            _buildAnniversaryCountdown(colors, isDark),
-            const SizedBox(height: 24),
-          ],
-
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
@@ -636,7 +619,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
                 HapticFeedback.heavyImpact();
                 setState(() {
                   _gameState!.currentEpisode = groveEpisodes.length;
-                  _bypassedAnniversary = true;
                 });
                 GroveProgressService.save(_gameState!);
               },
@@ -865,9 +847,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
               if (widget.isBetaTester) ...[
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() => _bypassedAnniversary = true);
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red.withOpacity(0.2),
                     foregroundColor: Colors.redAccent,

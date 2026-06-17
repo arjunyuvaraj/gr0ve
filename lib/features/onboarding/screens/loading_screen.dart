@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
-import 'package:confetti/confetti.dart';
-import 'package:gr0ve/main.dart' show debugNow;
 
 class LogoLoadingScreen extends StatefulWidget {
   const LogoLoadingScreen({super.key});
@@ -24,7 +22,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
   late List<Animation<double>> _treeScales;
   late List<Animation<double>> _treeRotations;
   late List<Animation<Offset>> _treeSlides;
-  late ConfettiController _confettiController;
 
   @override
   void initState() {
@@ -108,19 +105,11 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
     });
 
     _controller.forward();
-    _confettiController = ConfettiController(
-      duration: const Duration(seconds: 10),
-    );
-
-    if (debugNow.weekday == DateTime.wednesday) {
-      _confettiController.play();
-    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _confettiController.dispose();
     super.dispose();
   }
 
@@ -136,21 +125,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
       backgroundColor: colors.surface,
       body: Stack(
         children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: true,
-              colors: [
-                colors.primary,
-                colors.secondary,
-                colors.tertiary,
-                Colors.orange,
-                Colors.purple,
-              ],
-            ),
-          ),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -263,18 +237,6 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                 duration: const Duration(milliseconds: 500),
                 child: Column(
                   children: [
-                    if (debugNow.weekday == DateTime.wednesday) ...[
-                      Text(
-                        'GR0VE / Happy Half-Year Anniversary!',
-                        textAlign: TextAlign.center,
-                        style: text.labelSmall?.copyWith(
-                          color: colors.primary.withOpacity(0.8),
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
                     Text(
                       _version,
                       textAlign: TextAlign.center,

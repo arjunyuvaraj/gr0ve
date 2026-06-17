@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- res/values/widget_strings.xml -->
-<!-- Merge into your existing strings.xml -->
-<resources>
-    <string name="bus_widget_description">Live status for your starred bus routes.</string>
-    <string name="teacher_widget_description">Absence status for your starred teachers.</string>
-    <string name="schedule_widget_description">Live period countdown and school day progress.</string>
-    <string name="events_widget_description">Events today from gr0ve.</string>
-</resources>

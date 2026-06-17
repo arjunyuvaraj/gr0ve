@@ -57,5 +57,15 @@ scripts/chrome_state.json
 scripts/.chrome_state_profile/
 scripts/.bus_routes_cache.json
 scripts/.teacher_absences_cache.json
+scripts/.bus_starred_tokens_cache.json
+scripts/.teacher_absence_tokens_cache.json
+scripts/.field_day_scores_cache.json
+scripts/.field_day_action_cache.json
+scripts/chrome_state_field.json
+scripts/field_day_cookies.json
+scripts/field_day_full_dump.json
+scripts/field_day_state.json
+scripts/debug_field_day.html
+scripts/debug_field_day.png
 gr0ve_accessKeys.csv
 assets/credentials/service_account.json

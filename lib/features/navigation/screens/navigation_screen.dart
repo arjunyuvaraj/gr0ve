@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_screen.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
+import 'package:gr0ve/features/field_day/field_day_screen.dart';
 import 'package:gr0ve/features/grove/grove_screen.dart';
 import 'package:gr0ve/features/help/help_screen.dart';
 import 'package:gr0ve/features/links/screens/link_screen.dart';
@@ -16,7 +17,6 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
 import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
-
 import 'package:gr0ve/features/account/screens/account_screen.dart';
 import 'package:gr0ve/features/admin/screens/admin_panel_screen.dart';
 import 'package:gr0ve/features/admin/screens/admin_calendar_requests_screen.dart';
@@ -339,7 +339,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: 'Calendar',
             screen: const CalendarScreen(),
           ),
-
           NavConfig(
             id: 'lunch_menu',
             iconData: HugeIcons.strokeRoundedRestaurant02,
@@ -421,6 +420,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
         }
 
         baseNav.addAll([
+          NavConfig(
+            id: 'field_day',
+            iconData: HugeIcons.strokeRoundedRacingFlag,
+            label: 'Field Day',
+            screen: const FieldDayPage(),
+          ),
           NavConfig(
             id: 'links',
             iconData: HugeIcons.strokeRoundedLink01,

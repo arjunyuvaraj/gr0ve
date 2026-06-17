@@ -17,9 +17,6 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		E70472D52F59E7C000ECCF79 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E73DFADF2F4E2D89009AE38F /* WidgetKit.framework */; };
-		E70472D62F59E7C000ECCF79 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E73DFAE12F4E2D8A009AE38F /* SwiftUI.framework */; };
-		E70472E32F59E7C200ECCF79 /* Gr0veWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E70472D42F59E7C000ECCF79 /* Gr0veWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,13 +26,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
-		};
-		E70472E12F59E7C200ECCF79 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E70472D32F59E7C000ECCF79;
-			remoteInfo = Gr0veWidgetExtensionExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -48,17 +38,6 @@
 			files = (
 			);
 			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E73DFAF42F4E2D8B009AE38F /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				E70472E32F59E7C200ECCF79 /* Gr0veWidgetExtension.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -86,52 +65,11 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2315B0CB588B460E121481B /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		A84B2B26F0AB555EE0E9D02E /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E70472D42F59E7C000ECCF79 /* Gr0veWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Gr0veWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E704731D2F59E8B900ECCF79 /* RunnerRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerRelease.entitlements; sourceTree = "<group>"; };
-		E704731E2F59E8CF00ECCF79 /* Gr0veWidgetExtensionExtensionRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Gr0veWidgetExtensionExtensionRelease.entitlements; sourceTree = "<group>"; };
-		E73DFADF2F4E2D89009AE38F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
-		E73DFAE12F4E2D8A009AE38F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		E73DFAFA2F4E2DCC009AE38F /* Gr0veWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Gr0veWidgetExtension.entitlements; sourceTree = "<group>"; };
 		E7DF42F72ED696A600E70642 /* RunnerDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerDebug.entitlements; sourceTree = "<group>"; };
 		F224C7785227919880EE806D /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F2590C5471920BCADD3C90A9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Runner/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E70472E42F59E7C200ECCF79 /* Exceptions for "Gr0veWidgetExtension" folder in "Gr0veWidgetExtensionExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = E70472D32F59E7C000ECCF79 /* Gr0veWidgetExtensionExtension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		E70472BA2F59E72B00ECCF79 /* Gr0veWidgetExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Gr0veWidgetExtension;
-			sourceTree = "<group>";
-		};
-		E70472D72F59E7C000ECCF79 /* Gr0veWidgetExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				E70472E42F59E7C200ECCF79 /* Exceptions for "Gr0veWidgetExtension" folder in "Gr0veWidgetExtensionExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Gr0veWidgetExtension;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
@@ -147,15 +85,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				62779811A9A8110B8C9FF133 /* Pods_RunnerTests.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E70472D12F59E7C000ECCF79 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E70472D62F59E7C000ECCF79 /* SwiftUI.framework in Frameworks */,
-				E70472D52F59E7C000ECCF79 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,12 +113,8 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
-				E704731E2F59E8CF00ECCF79 /* Gr0veWidgetExtensionExtensionRelease.entitlements */,
-				E73DFAFA2F4E2DCC009AE38F /* Gr0veWidgetExtension.entitlements */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				E70472BA2F59E72B00ECCF79 /* Gr0veWidgetExtension */,
-				E70472D72F59E7C000ECCF79 /* Gr0veWidgetExtension */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				BBB8C81F8E687C10EB4DA69B /* Pods */,
@@ -203,7 +128,6 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
-				E70472D42F59E7C000ECCF79 /* Gr0veWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -241,8 +165,6 @@
 		C10A944181D17349603D93D5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E73DFADF2F4E2D89009AE38F /* WidgetKit.framework */,
-				E73DFAE12F4E2D8A009AE38F /* SwiftUI.framework */,
 				8D253F91757C4D28FE6951FD /* Pods_Runner.framework */,
 				A84B2B26F0AB555EE0E9D02E /* Pods_RunnerTests.framework */,
 			);
@@ -281,7 +203,6 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
-				E73DFAF42F4E2D8B009AE38F /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				091260BB672E88C9FAB49AC3 /* [CP] Embed Pods Frameworks */,
 				1CDE835A97DCD5037E7DCC58 /* [CP] Copy Pods Resources */,
@@ -289,33 +210,13 @@
 			buildRules = (
 			);
 			dependencies = (
-				E70472E22F59E7C200ECCF79 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E70472D32F59E7C000ECCF79 /* Gr0veWidgetExtensionExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E70472E52F59E7C200ECCF79 /* Build configuration list for PBXNativeTarget "Gr0veWidgetExtensionExtension" */;
-			buildPhases = (
-				E70472D02F59E7C000ECCF79 /* Sources */,
-				E70472D12F59E7C000ECCF79 /* Frameworks */,
-				E70472D22F59E7C000ECCF79 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				E70472D72F59E7C000ECCF79 /* Gr0veWidgetExtension */,
-			);
-			name = Gr0veWidgetExtensionExtension;
-			productName = Gr0veWidgetExtensionExtension;
-			productReference = E70472D42F59E7C000ECCF79 /* Gr0veWidgetExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
+
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -335,9 +236,6 @@
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
 					};
-					E70472D32F59E7C000ECCF79 = {
-						CreatedOnToolsVersion = 26.2;
-					};
 				};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
@@ -355,7 +253,6 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
-				E70472D32F59E7C000ECCF79 /* Gr0veWidgetExtensionExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -380,13 +277,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E70472D22F59E7C000ECCF79 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -519,13 +410,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E70472D02F59E7C000ECCF79 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -534,11 +419,7 @@
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
 		};
-		E70472E22F59E7C200ECCF79 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E70472D32F59E7C000ECCF79 /* Gr0veWidgetExtensionExtension */;
-			targetProxy = E70472E12F59E7C200ECCF79 /* PBXContainerItemProxy */;
-		};
+
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -867,135 +748,6 @@
 			};
 			name = Release;
 		};
-		E70472E62F59E7C200ECCF79 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = Gr0veWidgetExtension.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CBX544XVZV;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Gr0veWidgetExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Gr0veWidgetExtension;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.arjunyuvaraj.gr0ve.Gr0veWidgetExtension;
-				PRODUCT_NAME = Gr0veWidgetExtension;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		E70472E72F59E7C200ECCF79 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = Gr0veWidgetExtensionExtensionRelease.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CBX544XVZV;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Gr0veWidgetExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Gr0veWidgetExtension;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.arjunyuvaraj.gr0ve.Gr0veWidgetExtension;
-				PRODUCT_NAME = Gr0veWidgetExtension;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		E70472E82F59E7C200ECCF79 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = Gr0veWidgetExtension.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CBX544XVZV;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Gr0veWidgetExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Gr0veWidgetExtension;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.arjunyuvaraj.gr0ve.Gr0veWidgetExtension;
-				PRODUCT_NAME = Gr0veWidgetExtension;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Profile;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1025,16 +777,6 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E70472E52F59E7C200ECCF79 /* Build configuration list for PBXNativeTarget "Gr0veWidgetExtensionExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E70472E62F59E7C200ECCF79 /* Debug */,
-				E70472E72F59E7C200ECCF79 /* Release */,
-				E70472E82F59E7C200ECCF79 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -12,6 +12,17 @@ class ProfileVariant {
   const ProfileVariant({required this.key, required this.persona});
 
   String get displayName {
+    if (key.startsWith('field_day_')) {
+      final tree = key.replaceFirst('field_day_', '');
+      return {
+            'caeruleus': 'Blue Tree',
+            'flavus': 'Yellow Tree',
+            'viridis': 'Green Tree',
+            'ruber': 'Red Tree',
+          }[tree] ??
+          'Field Day Tree';
+    }
+
     if (persona.isHidden && isDefault) {
       return '${persona.name[0].toUpperCase()}${persona.name.substring(1)}';
     }
@@ -25,6 +36,11 @@ class ProfileVariant {
     final mode = brightness == Brightness.dark ? 'dark' : 'light';
     if (key == 'dawn') {
       return 'assets/app_icons/png/dawn_$mode.png';
+    }
+
+    if (key.startsWith('field_day_')) {
+      final tree = key.replaceFirst('field_day_', '');
+      return 'assets/field_day/${tree}_$mode.png';
     }
 
     if (key == 'newton' ||
@@ -57,6 +73,20 @@ class ProfileVariant {
   String get id => '${persona.name}__$key';
 }
 
+String? _fieldDayTeam;
+
+const Map<String, String> _fieldDayTreeByTeam = {
+  'Blue Team': 'caeruleus',
+  'Green Team': 'viridis',
+  'Red Team': 'ruber',
+  'Yellow Team': 'flavus',
+};
+
+String? _fieldDayTreeKeyForTeam(String? team) {
+  final tree = _fieldDayTreeByTeam[team];
+  return tree == null ? null : 'field_day_$tree';
+}
+
 const List<ProfileVariant> _allVariants = [
   ProfileVariant(key: 'default', persona: CounselorPersona.grover),
   ProfileVariant(key: 'winter', persona: CounselorPersona.grover),
@@ -80,6 +110,11 @@ const List<ProfileVariant> _allVariants = [
 
   ProfileVariant(key: 'dawn', persona: CounselorPersona.grover),
 
+  ProfileVariant(key: 'field_day_caeruleus', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'field_day_flavus', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'field_day_viridis', persona: CounselorPersona.grover),
+  ProfileVariant(key: 'field_day_ruber', persona: CounselorPersona.grover),
+
   ProfileVariant(key: 'newton', persona: CounselorPersona.grover),
   ProfileVariant(key: 'darwin', persona: CounselorPersona.grover),
   ProfileVariant(key: 'salix', persona: CounselorPersona.grover),
@@ -97,6 +132,10 @@ const List<ProfileVariant> _allVariants = [
 List<ProfileVariant> get availableVariants => _allVariants.where((v) {
   if (v.key == 'dawn') {
     return DawnUnlockService.isUnlocked.value;
+  }
+
+  if (v.key.startsWith('field_day_')) {
+    return v.key == _fieldDayTreeKeyForTeam(_fieldDayTeam);
   }
 
   if (v.key == 'newton' ||
@@ -135,6 +174,7 @@ class ProfilePictureService {
   static Future<void> init({Map<String, dynamic>? cachedUserData}) async {
     debugPrint('[ProfilePictureService] Initializing...');
     await _loadStoryUnlocks(cachedUserData: cachedUserData);
+    await _loadFieldDayTeam(cachedUserData: cachedUserData);
     await _loadFromFirestore(cachedUserData: cachedUserData);
   }
 
@@ -148,7 +188,26 @@ class ProfilePictureService {
     }
   }
 
+  static Future<void> _loadFieldDayTeam({
+    Map<String, dynamic>? cachedUserData,
+  }) async {
+    final data = cachedUserData ?? await UserDocCache.get();
+    _fieldDayTeam = data?['fieldDayTeam']?.toString();
+  }
+
+  static bool _isAllowedFieldDayVariant(ProfileVariant variant) {
+    if (!variant.key.startsWith('field_day_')) return true;
+    return variant.key == _fieldDayTreeKeyForTeam(_fieldDayTeam);
+  }
+
   static Future<void> setVariant(ProfileVariant variant) async {
+    if (!_isAllowedFieldDayVariant(variant)) {
+      debugPrint(
+        '[ProfilePictureService] Blocked invalid Field Day variant: ${variant.key}',
+      );
+      return;
+    }
+
     activeVariant.value = variant;
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -173,6 +232,15 @@ class ProfilePictureService {
       if (id != null) {
         final match = _allVariants.where((v) => v.id == id).firstOrNull;
         if (match != null) {
+          if (!_isAllowedFieldDayVariant(match)) {
+            debugPrint(
+              '[ProfilePictureService] Field Day variant no longer matches team, falling back',
+            );
+            activeVariant.value = defaultVariant;
+            await _persistToFirestore(defaultVariant);
+            return;
+          }
+
           debugPrint('[ProfilePictureService] Loaded variant: ${match.id}');
           activeVariant.value = match;
 
@@ -191,6 +259,25 @@ class ProfilePictureService {
         }
       }
     } catch (_) {}
+  }
+
+  static Future<void> refreshFieldDayTeam({
+    Map<String, dynamic>? cachedUserData,
+  }) async {
+    await _loadFieldDayTeam(cachedUserData: cachedUserData);
+
+    final current = activeVariant.value;
+    if (!_isAllowedFieldDayVariant(current)) {
+      final teamKey = _fieldDayTreeKeyForTeam(_fieldDayTeam);
+      if (teamKey != null) {
+        final match = _allVariants.where((v) => v.key == teamKey).firstOrNull;
+        if (match != null) {
+          await setVariant(match);
+          return;
+        }
+      }
+      await setVariant(defaultVariant);
+    }
   }
 
   static Future<void> _persistToFirestore(ProfileVariant variant) async {

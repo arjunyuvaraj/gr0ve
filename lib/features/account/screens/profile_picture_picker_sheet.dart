@@ -49,6 +49,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
           (v) =>
               v.persona == CounselorPersona.grover &&
               !v.key.startsWith('academy_') &&
+              !v.key.startsWith('field_day_') &&
               !['dawn', 'newton', 'darwin', 'salix', 'london'].contains(v.key),
         )
         .toList();
@@ -83,6 +84,9 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
     final academy = variants
         .where((v) => v.key.startsWith('academy_'))
         .toList();
+    final fieldDay = variants
+        .where((v) => v.key.startsWith('field_day_'))
+        .toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -101,14 +105,14 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
                     color: pc.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -142,11 +146,11 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
 
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -157,7 +161,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                       Colors.amber,
                     ),
                     _variantGrid(story, pc, colors, brightness),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 20),
                   ],
 
                   if (academy.isNotEmpty) ...[
@@ -167,7 +171,17 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                       const Color(0xFF3498DB),
                     ),
                     _variantGrid(academy, pc, colors, brightness),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 20),
+                  ],
+
+                  if (fieldDay.isNotEmpty) ...[
+                    _sectionHeader(
+                      'FIELD DAY TREE',
+                      Icons.park_rounded,
+                      const Color(0xFFD4A912),
+                    ),
+                    _variantGrid(fieldDay, pc, colors, brightness),
+                    const SizedBox(height: 20),
                   ],
 
                   _sectionHeader(
@@ -176,7 +190,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                     CounselorPersona.grover.primary(brightness),
                   ),
                   _variantGrid(grover, pc, colors, brightness),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   _sectionHeader(
                     'ASPEN',
@@ -184,7 +198,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                     CounselorPersona.aspen.primary(brightness),
                   ),
                   _variantGrid(aspen, pc, colors, brightness),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   _sectionHeader(
                     'ROWAN',
@@ -192,7 +206,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                     CounselorPersona.rowan.primary(brightness),
                   ),
                   _variantGrid(rowan, pc, colors, brightness),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   _sectionHeader(
                     'SAKURA',
@@ -200,7 +214,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                     CounselorPersona.sakura.primary(brightness),
                   ),
                   _variantGrid(sakura, pc, colors, brightness),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   if (hidden.isNotEmpty) ...[
                     _sectionHeader(
@@ -209,38 +223,39 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                       Colors.purpleAccent,
                     ),
                     _variantGrid(hidden, pc, colors, brightness),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 20),
                   ],
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 18),
                 ],
               ),
             ),
           ),
 
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
             child: SizedBox(
               width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
+              height: 50,
+              child: ElevatedButton.icon(
                 onPressed: () async {
                   await ProfilePictureService.setVariant(_selected);
                   if (context.mounted) Navigator.pop(context);
                 },
+                icon: const Icon(Icons.check_rounded, size: 18),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: pc,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
+                label: const Text(
                   'Save Identity',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
@@ -253,17 +268,25 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
 
   Widget _sectionHeader(String title, IconData icon, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: color.withOpacity(0.8)),
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 13, color: color.withOpacity(0.9)),
+          ),
           const SizedBox(width: 8),
           Text(
             title,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
+              letterSpacing: 1.2,
               color: color.withOpacity(0.9),
             ),
           ),
@@ -281,11 +304,11 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.8,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 96,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 0.88,
       ),
       itemCount: variants.length,
       itemBuilder: (context, i) {
@@ -293,6 +316,8 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
         final isActive = v.id == _selected.id;
         final sectionColor = v.key.startsWith('academy_')
             ? const Color(0xFF3498DB)
+            : v.key.startsWith('field_day_')
+            ? const Color(0xFFD4A912)
             : v.persona.primary(brightness);
 
         return GestureDetector(
@@ -303,19 +328,19 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isActive
                     ? sectionColor
                     : colors.onSurface.withOpacity(0.08),
-                width: isActive ? 2.5 : 1,
+                width: isActive ? 2 : 1,
               ),
               boxShadow: isActive
                   ? [
                       BoxShadow(
                         color: sectionColor.withOpacity(0.2),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ]
                   : [],
@@ -325,9 +350,9 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(3),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
                         v.assetPath(brightness),
                         fit: BoxFit.cover,
@@ -337,10 +362,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 4,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 5),
                   child: Text(
                     v.key.startsWith('academy_')
                         ? v.key.split('_').last.toUpperCase()
@@ -348,7 +370,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
                       color: isActive
                           ? sectionColor

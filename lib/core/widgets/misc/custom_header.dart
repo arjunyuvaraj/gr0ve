@@ -31,6 +31,7 @@ class CustomHeader extends StatelessWidget {
     if (t.contains('GROUPS')) return "BETTER TOGETHER";
     if (t.contains('ACCOUNT')) return "WHO YOU ARE";
     if (t.contains('HELP')) return "WE GOT YOU";
+    if (t.contains('FIELD DAY')) return "POINTS ON THE BOARD";
     if (t.contains('PRIVACY POLICY'))
       return privacyPolicySections[0]["content"].toString();
     if (t.contains('TEACHERS')) return absenceList['date'] ?? "NO DATE FOUND";
