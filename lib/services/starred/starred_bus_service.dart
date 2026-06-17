@@ -66,6 +66,10 @@ class StarredBusService {
     await _docRef(
       user.uid,
     ).set({'towns': updated.toList()}, SetOptions(merge: true));
+    await _firestore.collection('notification_tokens').doc(user.uid).set({
+      'starredTowns': updated.toList(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   static bool isStarred(String town) {

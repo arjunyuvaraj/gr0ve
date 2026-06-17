@@ -5,9 +5,17 @@ import 'package:gr0ve/features/absence/services/teacher_service.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 
-class SnapshotAbsenceCard extends StatelessWidget {
+class SnapshotAbsenceCard extends StatefulWidget {
   final bool compact;
   const SnapshotAbsenceCard({super.key, this.compact = false});
+
+  @override
+  State<SnapshotAbsenceCard> createState() => _SnapshotAbsenceCardState();
+}
+
+class _SnapshotAbsenceCardState extends State<SnapshotAbsenceCard> {
+  late final Future<Map<String, String>> _absencesFuture =
+      fetchTeacherAbsencesFromFirebase();
 
   Color _statusColor(String status, ColorScheme c, BuildContext context) {
     if (status == 'Present') return context.colors.success;
@@ -18,8 +26,8 @@ class SnapshotAbsenceCard extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final c = Theme.of(ctx).colorScheme;
 
-    return StreamBuilder<Map<String, String>>(
-      stream: streamTeacherAbsences(),
+    return FutureBuilder<Map<String, String>>(
+      future: _absencesFuture,
       builder: (_, absSnap) {
         final absences = absSnap.data ?? {};
 
@@ -91,7 +99,7 @@ class SnapshotAbsenceCard extends StatelessWidget {
                   child: SnapshotTile(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: compact ? 10 : 13,
+                      vertical: widget.compact ? 10 : 13,
                     ),
                     child: Row(
                       children: [
@@ -101,7 +109,7 @@ class SnapshotAbsenceCard extends StatelessWidget {
                             name,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: compact ? 13.0 : 16.0,
+                              fontSize: widget.compact ? 13.0 : 16.0,
                               fontWeight: FontWeight.w700,
                               color: c.onSurface,
                             ),

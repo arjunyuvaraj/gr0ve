@@ -5,9 +5,16 @@ import 'package:gr0ve/features/bus/services/bus_service.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/features/snapshot/widgets/snapshot_shared.dart';
 
-class SnapshotBusCard extends StatelessWidget {
+class SnapshotBusCard extends StatefulWidget {
   final bool compact;
   const SnapshotBusCard({super.key, this.compact = false});
+
+  @override
+  State<SnapshotBusCard> createState() => _SnapshotBusCardState();
+}
+
+class _SnapshotBusCardState extends State<SnapshotBusCard> {
+  late final Future<List<BusRoute>> _routesFuture = fetchBusRoutes();
 
   bool _isUnknown(BusRoute bus) =>
       bus.code.trim() == '?' || bus.code.trim().isEmpty;
@@ -35,8 +42,8 @@ class SnapshotBusCard extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final c = Theme.of(ctx).colorScheme;
 
-    return StreamBuilder<List<BusRoute>>(
-      stream: getBusRoutesStream(),
+    return FutureBuilder<List<BusRoute>>(
+      future: _routesFuture,
       builder: (_, snap) {
         return ValueListenableBuilder<Set<String>>(
           valueListenable: StarredBusService.starredTowns,
@@ -104,7 +111,7 @@ class SnapshotBusCard extends StatelessWidget {
                   child: SnapshotTile(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: compact ? 10 : 13,
+                      vertical: widget.compact ? 10 : 13,
                     ),
                     child: Row(
                       children: [
@@ -117,7 +124,7 @@ class SnapshotBusCard extends StatelessWidget {
                                 bus.town,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: compact ? 13.0 : 16.0,
+                                  fontSize: widget.compact ? 13.0 : 16.0,
                                   fontWeight: FontWeight.w700,
                                   color: c.onSurface,
                                 ),

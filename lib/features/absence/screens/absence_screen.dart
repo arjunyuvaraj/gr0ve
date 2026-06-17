@@ -261,6 +261,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
           .collection('teachers')
           .doc(name)
           .delete();
+      invalidateTeacherDataCache();
       _loadAbsences(silent: true);
     }
   }
@@ -582,6 +583,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                   });
                             }
 
+                            invalidateTeacherDataCache();
                             if (mounted) Navigator.pop(ctx);
                             _loadAbsences(silent: true);
                           },

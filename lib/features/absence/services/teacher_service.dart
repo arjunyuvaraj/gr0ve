@@ -2,10 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+Map<String, Map<String, dynamic>>? _teacherListCache;
+DateTime? _teacherListCacheAt;
+Map<String, String>? _absenceCache;
+DateTime? _absenceCacheAt;
+const _teacherListCacheTtl = Duration(hours: 6);
+const _absenceCacheTtl = Duration(minutes: 5);
+
 Future<Map<String, String>> fetchGoogleSheetAbsences({
   required String spreadsheetId,
   required String worksheetTitle,
 }) async {
+  final cachedAt = _absenceCacheAt;
+  final cached = _absenceCache;
+  if (cachedAt != null &&
+      cached != null &&
+      DateTime.now().difference(cachedAt) < _absenceCacheTtl) {
+    return Map<String, String>.from(cached);
+  }
+
   final Map<String, String> absenceMap = {};
 
   final user = FirebaseAuth.instance.currentUser;
@@ -81,6 +96,8 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
     if (kDebugMode) {
       print('Successfully loaded ${absenceMap.length} records from Firestore');
     }
+    _absenceCache = Map<String, String>.from(absenceMap);
+    _absenceCacheAt = DateTime.now();
   } catch (e) {
     if (kDebugMode) {
       print('Error fetching absences from Firestore: $e');
@@ -88,6 +105,10 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
   }
 
   return absenceMap;
+}
+
+Future<Map<String, String>> fetchTeacherAbsencesFromFirebase() {
+  return fetchGoogleSheetAbsences(spreadsheetId: '', worksheetTitle: '');
 }
 
 Stream<Map<String, String>> streamTeacherAbsences() {
@@ -432,6 +453,14 @@ String formatStatusString(String status) {
 }
 
 Future<Map<String, Map<String, dynamic>>> fetchTeacherListFromFirebase() async {
+  final cachedAt = _teacherListCacheAt;
+  final cached = _teacherListCache;
+  if (cachedAt != null &&
+      cached != null &&
+      DateTime.now().difference(cachedAt) < _teacherListCacheTtl) {
+    return Map<String, Map<String, dynamic>>.from(cached);
+  }
+
   try {
     final snapshot = await FirebaseFirestore.instance
         .collection('teachers')
@@ -452,6 +481,8 @@ Future<Map<String, Map<String, dynamic>>> fetchTeacherListFromFirebase() async {
       };
     }
 
+    _teacherListCache = Map<String, Map<String, dynamic>>.from(result);
+    _teacherListCacheAt = DateTime.now();
     return result;
   } catch (e) {
     if (kDebugMode) {
@@ -459,4 +490,11 @@ Future<Map<String, Map<String, dynamic>>> fetchTeacherListFromFirebase() async {
     }
     return {};
   }
+}
+
+void invalidateTeacherDataCache() {
+  _teacherListCache = null;
+  _teacherListCacheAt = null;
+  _absenceCache = null;
+  _absenceCacheAt = null;
 }

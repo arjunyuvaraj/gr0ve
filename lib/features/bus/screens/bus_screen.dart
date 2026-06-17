@@ -20,10 +20,12 @@ class _BusScreenState extends State<BusScreen> {
   String searchQuery = "";
   bool isRefreshing = false;
   bool isAdmin = false;
+  late Future<List<BusRoute>> _routesFuture;
 
   @override
   void initState() {
     super.initState();
+    _routesFuture = fetchBusRoutes();
     StarredBusService.load();
     _checkAdmin();
     FirebaseAnalytics.instance.logEvent(name: 'screen_bus');
@@ -39,6 +41,7 @@ class _BusScreenState extends State<BusScreen> {
 
     try {
       await refreshBusRoutesFromSheets();
+      _routesFuture = fetchBusRoutes();
 
       await Future.delayed(const Duration(milliseconds: 1500));
 
@@ -163,6 +166,10 @@ class _BusScreenState extends State<BusScreen> {
           .collection('public_data')
           .doc('bus_routes')
           .update({'routes.$town': FieldValue.delete()});
+      invalidateBusRoutesCache();
+      if (mounted) {
+        setState(() => _routesFuture = fetchBusRoutes());
+      }
     }
   }
 
@@ -315,6 +322,10 @@ class _BusScreenState extends State<BusScreen> {
                                     'status': status,
                                   },
                                 });
+                            invalidateBusRoutesCache();
+                            if (mounted) {
+                              setState(() => _routesFuture = fetchBusRoutes());
+                            }
 
                             if (mounted) Navigator.pop(ctx);
                           },
@@ -429,8 +440,8 @@ class _BusScreenState extends State<BusScreen> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: StreamBuilder<List<BusRoute>>(
-                stream: getBusRoutesStream(),
+              child: FutureBuilder<List<BusRoute>>(
+                future: _routesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));

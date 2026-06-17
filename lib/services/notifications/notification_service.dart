@@ -295,7 +295,13 @@ class NotificationService {
     try {
       await _firestore.collection('users').doc(user.uid).set({
         'fcmToken': token,
+        'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      await _firestore.collection('notification_tokens').doc(user.uid).set({
+        'token': token,
+        'tokens': FieldValue.arrayUnion([token]),
+        'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
       if (kDebugMode) print('[NOTIF] Error saving FCM token: $e');

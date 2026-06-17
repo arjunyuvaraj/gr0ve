@@ -62,6 +62,7 @@ class _FieldDayPageState extends State<FieldDayPage>
   String? _myTeam;
   bool _savingTeam = false;
   late final AnimationController _pulseController;
+  late Future<DocumentSnapshot<Map<String, dynamic>>> _scoresFuture;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _FieldDayPageState extends State<FieldDayPage>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
+    _scoresFuture = _fetchScores();
     _loadMyTeam();
   }
 
@@ -107,6 +109,13 @@ class _FieldDayPageState extends State<FieldDayPage>
     } finally {
       if (mounted) setState(() => _savingTeam = false);
     }
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>> _fetchScores() {
+    return FirebaseFirestore.instance
+        .collection('public_data')
+        .doc('field_day_scores')
+        .get();
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -154,11 +163,8 @@ class _FieldDayPageState extends State<FieldDayPage>
               const CustomHeader(title: 'Field Day'),
               const SizedBox(height: 12),
               Expanded(
-                child: StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('public_data')
-                      .doc('field_day_scores')
-                      .snapshots(),
+                child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  future: _scoresFuture,
                   builder: (context, snap) {
                     if (snap.hasError) {
                       return _ErrorView(message: snap.error.toString());
@@ -168,7 +174,7 @@ class _FieldDayPageState extends State<FieldDayPage>
                       return const PremiumLoadingIndicator();
                     }
 
-                    final data = snap.data?.data() as Map<String, dynamic>?;
+                    final data = snap.data?.data();
                     final scores = data != null
                         ? _parseScores(data)
                         : <_TeamScore>[];
@@ -182,10 +188,8 @@ class _FieldDayPageState extends State<FieldDayPage>
 
                     return RefreshIndicator(
                       onRefresh: () async {
-                        await FirebaseFirestore.instance
-                            .collection('public_data')
-                            .doc('field_day_scores')
-                            .get();
+                        setState(() => _scoresFuture = _fetchScores());
+                        await _scoresFuture;
                       },
                       child: ListView(
                         physics: const AlwaysScrollableScrollPhysics(
@@ -193,10 +197,6 @@ class _FieldDayPageState extends State<FieldDayPage>
                         ),
                         padding: const EdgeInsets.only(bottom: 28),
                         children: [
-                          _FieldDayStatus(
-                            date: date,
-                            pulseController: _pulseController,
-                          ),
                           const SizedBox(height: 12),
                           _MyTeamBanner(
                             myTeam: _myTeam,
@@ -257,59 +257,6 @@ class _FieldDayPageState extends State<FieldDayPage>
           _saveTeam(team);
         },
       ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Status
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _FieldDayStatus extends StatelessWidget {
-  final String? date;
-  final AnimationController pulseController;
-
-  const _FieldDayStatus({required this.date, required this.pulseController});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            date ?? 'Waiting for scores',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colors.onSurface.withOpacity(0.45),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        AnimatedBuilder(
-          animation: pulseController,
-          builder: (_, __) => Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.green.withOpacity(
-                0.45 + 0.45 * pulseController.value,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          'Live',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colors.onSurface.withOpacity(0.45),
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -2,7 +2,7 @@ name: gr0ve
 description: "Your All-in-One BCA App"
 publish_to: "none"
 
-version: 2.2.2+40
+version: 2.2.3+41
 
 environment:
   sdk: ^3.9.2

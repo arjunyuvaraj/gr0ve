@@ -38,54 +38,9 @@ class SheetsConfig {
       'https://docs.google.com/spreadsheets/d/$spreadsheetId/export?format=csv&gid=$gid';
 }
 
-Stream<List<BusRoute>> getBusRoutesStream() {
-  return FirebaseFirestore.instance
-      .collection('public_data')
-      .doc('bus_routes')
-      .snapshots()
-      .map((snapshot) {
-        final List<BusRoute> routes = [];
-
-        if (!snapshot.exists) {
-          if (kDebugMode) {
-            print('No bus route data found in Firestore');
-          }
-          return routes;
-        }
-
-        final data = snapshot.data();
-        if (data == null) {
-          if (kDebugMode) {
-            print('Bus routes document exists but data is null');
-          }
-          return routes;
-        }
-
-        if (data.containsKey('routes')) {
-          final routesMap = data['routes'] as Map<String, dynamic>;
-          if (kDebugMode) {
-            print('Found ${routesMap.length} bus routes in Firestore');
-          }
-
-          routesMap.forEach((key, value) {
-            final routeData = value as Map<String, dynamic>;
-            routes.add(BusRoute.fromJson(routeData));
-          });
-        } else {
-          if (kDebugMode) {
-            print('WARNING: No routes field found in Firestore document');
-          }
-        }
-
-        if (kDebugMode) {
-          print(
-            'Successfully loaded ${routes.length} bus routes from Firestore',
-          );
-        }
-
-        return routes;
-      });
-}
+List<BusRoute>? _cachedBusRoutes;
+DateTime? _cachedBusRoutesAt;
+const _busRoutesCacheTtl = Duration(minutes: 5);
 
 Future<void> refreshBusRoutesFromSheets() async {
   try {
@@ -163,6 +118,7 @@ Future<void> refreshBusRoutesFromSheets() async {
           'routes': routesMap,
           'updated_at': DateTime.now().toIso8601String(),
         });
+    invalidateBusRoutesCache();
 
     if (kDebugMode) {
       print('✓ Successfully updated Firestore with ${routes.length} routes');
@@ -234,6 +190,14 @@ Future<void> watchBusRoutesForDismissal({
 }
 
 Future<List<BusRoute>> fetchBusRoutes() async {
+  final cachedAt = _cachedBusRoutesAt;
+  final cached = _cachedBusRoutes;
+  if (cachedAt != null &&
+      cached != null &&
+      DateTime.now().difference(cachedAt) < _busRoutesCacheTtl) {
+    return cached;
+  }
+
   final List<BusRoute> routes = [];
 
   try {
@@ -276,6 +240,9 @@ Future<List<BusRoute>> fetchBusRoutes() async {
     if (kDebugMode) {
       print('Successfully loaded ${routes.length} bus routes from Firestore');
     }
+
+    _cachedBusRoutes = routes;
+    _cachedBusRoutesAt = DateTime.now();
   } catch (e) {
     if (kDebugMode) {
       print('Error fetching bus routes from Firestore: $e');
@@ -283,4 +250,9 @@ Future<List<BusRoute>> fetchBusRoutes() async {
   }
 
   return routes;
+}
+
+void invalidateBusRoutesCache() {
+  _cachedBusRoutes = null;
+  _cachedBusRoutesAt = null;
 }
