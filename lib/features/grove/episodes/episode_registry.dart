@@ -1,5 +1,6 @@
 import 'package:gr0ve/features/grove/episodes/episode_02_weeping_willow.dart';
 import 'package:gr0ve/features/grove/episodes/episode_03_tangled_forest.dart';
+import 'package:gr0ve/features/grove/episodes/episode_04_open_shore.dart';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 import 'package:gr0ve/features/grove/episodes/episode_00_dawn.dart';
 import 'package:gr0ve/features/grove/episodes/episode_01_orchard.dart';
@@ -18,7 +19,7 @@ final List<Episode> groveEpisodes = [
     number: 1,
     title: 'The Prosperous Orchard',
     description:
-        'Two orchards stood where choice was drawn, one locked, one wild beneath the dawn.',
+        'Two orchards stood where choice was drawn, one locked, one wild, beneath the dawn.',
     buildScenes: buildEpisode01Orchard,
   ),
   Episode(
@@ -26,7 +27,7 @@ final List<Episode> groveEpisodes = [
     number: 2,
     title: 'The Weeping Willow',
     description:
-        'A silent grove where dark waters lie, the willow weeps beneath a broken sky.',
+        'A silent grove where dark waters lie, the willow weeps beneath the sky.',
     buildScenes: buildEpisode02WeepingWillow,
   ),
   Episode(
@@ -37,4 +38,27 @@ final List<Episode> groveEpisodes = [
         'Through woven roots and dripping stone, the deepest paths are walked alone.',
     buildScenes: buildEpisode03TangledForest,
   ),
+  Episode(
+    id: 'ep4',
+    number: 4,
+    title: 'The Open Shore',
+    description:
+        'A shoreline opens, the weather turns hot, and the ocean begins to speak.',
+    buildScenes: buildEpisode04OpenShore,
+  ),
+  // Episode(
+  //   id: 'ep5',
+  //   number: 5,
+  //   title: 'The Unnamed Waters',
+  //   description:
+  //       'XXXXXX',
+  //   buildScenes: buildEpisode05UnnamedWaters,
+  // ),
+  // Episode(
+  //   id: 'ep6',
+  //   number: 6,
+  //   title: 'The Frigid Landfall',
+  //   description: 'XXXXXX',
+  //   buildScenes: buildEpisode06FrigidLandfall,
+  // ),
 ];

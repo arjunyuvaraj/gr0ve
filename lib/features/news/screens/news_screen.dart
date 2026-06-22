@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/extensions/string_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 import 'package:gr0ve/features/news/screens/news_detail_screen.dart';
 import 'package:gr0ve/features/news/service/news_service.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
@@ -201,12 +202,16 @@ class _NewsScreenState extends State<NewsScreen> {
       child: Column(
         children: [
           CustomHeader(title: 'NEWS'),
-          Text(
-            'All articles are provided by Academy chronicle'.capitalized,
-            style: context.text.labelSmall?.copyWith(
-              color: context.colors.onSurface.withAlpha(100),
-              fontStyle: FontStyle.italic,
-              fontSize: 10,
+          HiddenFishTrigger(
+            id: 'neonfin_after_hours',
+            gesture: HiddenFishTriggerGesture.doubleTap,
+            child: Text(
+              'All articles are provided by Academy chronicle'.capitalized,
+              style: context.text.labelSmall?.copyWith(
+                color: context.colors.onSurface.withAlpha(100),
+                fontStyle: FontStyle.italic,
+                fontSize: 10,
+              ),
             ),
           ),
 

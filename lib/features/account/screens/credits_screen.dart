@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_secondary_button.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class CreditsScreen extends StatelessWidget {
@@ -99,17 +100,21 @@ class CreditsScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 32),
-                      _buildCreditSection(
-                        context,
-                        title: 'DEVELOPMENT',
-                        icon: HugeIcons.strokeRoundedDeveloper,
-                        items: [
-                          _CreditItem(
-                            title: 'The Grove Keeper',
-                            subtitle:
-                                'Built with passion for the BCA community.',
-                          ),
-                        ],
+                      HiddenFishTrigger(
+                        id: 'petalback_thank_u_next',
+                        gesture: HiddenFishTriggerGesture.hover,
+                        child: _buildCreditSection(
+                          context,
+                          title: 'DEVELOPMENT',
+                          icon: HugeIcons.strokeRoundedDeveloper,
+                          items: [
+                            _CreditItem(
+                              title: 'The Grove Keeper',
+                              subtitle:
+                                  'Built with passion for the BCA community.',
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 48),
                     ],

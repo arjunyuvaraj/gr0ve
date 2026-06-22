@@ -48,7 +48,13 @@ Meet Grover, Aspen, Rowan, and the rest of the gang.
 
 ## 📜 Mini Changelog
 
-### **v2.1.0** (Current)
+### **v2.3.0** (Current)
+- **The Journey Continues**: The beginning of Chapter 2 is finally here. Traverse the Open Shore and prepare for the crossing.
+- **Field Day Focus**: Fully implemented the BCA Field Day screen and events widget with custom scheduling.
+- **Security Patches**: Fixed minor stability and session token bugs in the Firebase Authentication system.
+- *Also, pay close attention to the deep waters. They say there are seven hidden orange fishes circling the Unnamed Tree...*
+
+### **v2.1.0**
 - **Refined Admin UI**: A brand new compact grid for absence management.
 - **Detailed Credits**: Recognition for our designers and beta testers.
 - **Legacy History**: Access to the full history from v1.0.0 through version 2.

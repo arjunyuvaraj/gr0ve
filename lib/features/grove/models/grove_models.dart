@@ -25,6 +25,11 @@ enum StoryCharacter {
   abies,
   cedite,
   ash,
+  karl,
+  loulo,
+  lemon,
+  carlos,
+  sunny,
   london,
   squashy,
 }
@@ -53,6 +58,11 @@ extension StoryCharacterX on StoryCharacter {
     StoryCharacter.abies => 'Abies',
     StoryCharacter.cedite => 'Cedite',
     StoryCharacter.ash => 'Ash',
+    StoryCharacter.karl => 'Karl',
+    StoryCharacter.loulo => 'Loulo',
+    StoryCharacter.lemon => 'Lemon',
+    StoryCharacter.carlos => 'Carlos',
+    StoryCharacter.sunny => 'Sunny',
     StoryCharacter.london => 'London',
     StoryCharacter.squashy => 'Squashy',
   };
@@ -89,6 +99,11 @@ extension StoryCharacterX on StoryCharacter {
       StoryCharacter.abies => 'assets/story/characters/abies_$mode.png',
       StoryCharacter.cedite => 'assets/story/characters/cedite_$mode.png',
       StoryCharacter.ash => 'assets/story/characters/ash_$mode.png',
+      StoryCharacter.karl => 'assets/story/characters/ep4/karl_$mode.png',
+      StoryCharacter.loulo => 'assets/story/characters/ep4/loulo_$mode.png',
+      StoryCharacter.lemon => 'assets/story/characters/ep4/lemon_$mode.png',
+      StoryCharacter.carlos => 'assets/story/characters/ep4/carlos_$mode.png',
+      StoryCharacter.sunny => 'assets/story/characters/ep4/sunny_$mode.png',
       StoryCharacter.london => 'assets/story/characters/ep3/london_$mode.png',
       StoryCharacter.squashy => 'assets/story/characters/ep3/squashy_$mode.png',
       _ => 'assets/story/inventory/branch_$mode.png',
@@ -138,6 +153,26 @@ extension StoryCharacterX on StoryCharacter {
       brightness == Brightness.dark
           ? const Color(0xFFE55B5B)
           : const Color(0xFFC43D3D),
+    StoryCharacter.karl =>
+      brightness == Brightness.dark
+          ? const Color(0xFFB86A44)
+          : const Color(0xFF8A4F30),
+    StoryCharacter.loulo =>
+      brightness == Brightness.dark
+          ? const Color(0xFFF38AB7)
+          : const Color(0xFFE46A9F),
+    StoryCharacter.lemon =>
+      brightness == Brightness.dark
+          ? const Color(0xFFF5D94E)
+          : const Color(0xFFD6B80E),
+    StoryCharacter.carlos =>
+      brightness == Brightness.dark
+          ? const Color(0xFF74A7D8)
+          : const Color(0xFF4F7AA8),
+    StoryCharacter.sunny =>
+      brightness == Brightness.dark
+          ? const Color(0xFFF6A13A)
+          : const Color(0xFFE07A14),
     StoryCharacter.london =>
       brightness == Brightness.dark
           ? const Color(0xFF4A7C44)

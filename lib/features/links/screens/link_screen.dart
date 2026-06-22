@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/misc/not_logged_in.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 import 'package:gr0ve/features/links/service/link_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:gr0ve/features/links/widgets/add_link_dialog.dart';
@@ -231,7 +232,12 @@ class _LinksScreenState extends State<LinksScreen> {
     return ListView(
       padding: const EdgeInsets.only(top: 24),
       children: [
-        const CustomHeader(title: "LINKS"),
+        const HiddenFishTrigger(
+          id: 'halves_divide',
+          gesture: HiddenFishTriggerGesture.tapSequence,
+          requiredTaps: 5,
+          child: CustomHeader(title: "LINKS"),
+        ),
         const SizedBox(height: 32),
 
         Padding(

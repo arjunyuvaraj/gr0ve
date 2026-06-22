@@ -45,6 +45,9 @@ class _TInventorySheetState extends State<TInventorySheet> {
         return 'A small circular vial. It contains a strange, glowing mossy substance.';
       case 'warming pouch':
         return 'A thick, insulated pouch. It retains heat during the coldest nights.';
+      case "loulo's pot":
+      case 'pot of sand':
+        return 'A sand-fired vessel from Loulo. It holds intention and remembers who filled it.';
       default:
         return 'An unknown, undocumented artifact. Its origin is a complete mystery.';
     }
@@ -183,6 +186,10 @@ class _TInventorySheetState extends State<TInventorySheet> {
                       break;
                     case 'warming pouch':
                       asset = 'assets/story/inventory/warming_pouch_$mode.png';
+                      break;
+                    case "loulo's pot":
+                    case 'pot of sand':
+                      asset = 'assets/story/inventory/pot_of_sand_$mode.png';
                       break;
                   }
                 }

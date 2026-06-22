@@ -109,6 +109,19 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         });
         return;
       }
+
+      final completedScene = _scenes!
+          .where((s) => s.id == _gameState.currentScene)
+          .firstOrNull;
+      if (_gameState.currentEpisode == widget.episode.number &&
+          _gameState.episodeComplete &&
+          completedScene?.inputType == InputType.none) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToBottom();
+          _showEpisodeComplete();
+        });
+        return;
+      }
     } else if (pastCompleted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showEpisodeComplete();
@@ -289,6 +302,14 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         : 600 + (msg.text.length * 5);
 
     _typeTimer?.cancel();
+
+    if (_currentMsgIdx >= lines.length && _currentScene?.inputType == InputType.none) {
+      _typeTimer = Timer(const Duration(milliseconds: 100), () {
+        if (mounted) _pushNextMessage();
+      });
+      return;
+    }
+
     _typeTimer = Timer(Duration(milliseconds: delay), () {
       if (mounted) _pushNextMessage();
     });
@@ -344,8 +365,8 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         _gameState.darwinUnlocked = false;
         pfpAsset = 'assets/story/characters/ep1/newton_$mode.png';
         pfpName = 'Newton';
-        await GroveProgressService.unlockProfilePicture('newton');
-        await GroveProgressService.lockProfilePicture('darwin');
+        GroveProgressService.unlockProfilePicture('newton');
+        GroveProgressService.lockProfilePicture('darwin');
         markStoryPfpUnlocked('newton');
         lockStoryPfp('darwin');
       } else {
@@ -353,8 +374,8 @@ class _GroveChatScreenState extends State<GroveChatScreen>
         _gameState.newtonUnlocked = false;
         pfpAsset = 'assets/story/characters/ep1/darwin_$mode.png';
         pfpName = 'Darwin';
-        await GroveProgressService.unlockProfilePicture('darwin');
-        await GroveProgressService.lockProfilePicture('newton');
+        GroveProgressService.unlockProfilePicture('darwin');
+        GroveProgressService.lockProfilePicture('newton');
         markStoryPfpUnlocked('darwin');
         lockStoryPfp('newton');
       }
@@ -362,13 +383,13 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       _gameState.salixUnlocked = true;
       pfpAsset = 'assets/story/characters/ep2/salix_$mode.png';
       pfpName = 'Salix';
-      await GroveProgressService.unlockProfilePicture('salix');
+      GroveProgressService.unlockProfilePicture('salix');
       markStoryPfpUnlocked('salix');
     } else if (_gameState.currentEpisode == 3) {
       _gameState.londonUnlocked = true;
       pfpAsset = 'assets/story/characters/ep3/london_$mode.png';
       pfpName = 'London';
-      await GroveProgressService.unlockProfilePicture('london');
+      GroveProgressService.unlockProfilePicture('london');
       markStoryPfpUnlocked('london');
     }
 
@@ -383,22 +404,25 @@ class _GroveChatScreenState extends State<GroveChatScreen>
 
       _gameState.seedWarmth = (_gameState.seedWarmth - 10).clamp(0, 100);
 
-      await GroveProgressService.save(_gameState);
+      GroveProgressService.save(_gameState);
       widget.onProgressUpdated(_gameState);
     }
 
     if (mounted) {
-      EpisodeCompleteSheet.show(
-        context: context,
-        title: widget.episode.title,
-        state: _gameState,
-        unlockedPfpAsset: pfpAsset,
-        unlockedPfpName: pfpName,
-        onReturnToChapters: () {
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
-        },
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        EpisodeCompleteSheet.show(
+          context: context,
+          title: widget.episode.title,
+          state: _gameState,
+          unlockedPfpAsset: pfpAsset,
+          unlockedPfpName: pfpName,
+          onReturnToChapters: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+        );
+      });
     }
   }
 
@@ -434,6 +458,23 @@ class _GroveChatScreenState extends State<GroveChatScreen>
       });
     }
     for (final item in choice.addItems) {
+      final isVessel = item.toLowerCase().contains('pot');
+      final alreadyHasVessel =
+          isVessel &&
+          _gameState.inventory.any(
+            (held) => held.toLowerCase().contains('pot'),
+          );
+      if (alreadyHasVessel) {
+        _addBubble(
+          StoryMessage(
+            'Inventory: [No room for another vessel]',
+            character: StoryCharacter.system,
+            kind: MessageKind.system,
+          ),
+        );
+        continue;
+      }
+
       if (!_gameState.inventory.contains(item)) {
         _gameState.inventory.add(item);
         _addBubble(

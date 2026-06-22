@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/features/calendar/widgets/add_event_dialog.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 import 'package:gr0ve/features/calendar/widgets/calendar_event_card.dart';
 import 'package:gr0ve/features/calendar/widgets/event_details_dialog.dart';
 import 'package:gr0ve/features/calendar/services/calendar_service.dart';
@@ -96,7 +97,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
       padding: const EdgeInsets.only(top: 24),
       child: Column(
         children: [
-          const CustomHeader(title: "CALENDAR"),
+          const HiddenFishTrigger(
+            id: 'polaro_1989',
+            gesture: HiddenFishTriggerGesture.horizontalSwipe,
+            child: CustomHeader(title: "CALENDAR"),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: PageView.builder(

@@ -1,0 +1,1254 @@
+EPISODE 4: THE OPEN SHORE
+Full Story Draft — for review before coding
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPENING — THE SHORE
+
+EPISODE 4: THE OPEN SHORE
+[episodeHeader, isBold]
+
+[waitDuration: 1 hour — the journey from the rainforest exit to the shore]
+
+You clear the last of the tree line, and the world opens.
+
+Just like that. One wingbeat you are in green shadow, the next you are in blinding, unfiltered, completely indifferent sunlight. The kind of sun that does not care at all about what you've been through.
+
+You land on the sand.
+
+The sand is hot. Not "warm" hot. Not "summer afternoon" hot. The kind of hot that communicates something personal about the sun's feelings toward you. Your talons adjust. You hop from foot to foot once, twice, then give up and stand very still with dignity.
+
+[player, dialogue]
+"Okay. Okay. This is fine. I have survived a misty lake of crystallized grief, a rainforest that looped in circles and also contained a philosopher, and a snake who gave me relationship advice. I can handle hot sand."
+
+The wind picks up off the ocean. It's cool and full of salt and completely unbothered by your situation.
+
+You change your assessment. The heat is actually tolerable with the wind. More than tolerable, even. After the suffocating wet warmth of the rainforest, this open brightness feels like a reward you didn't know you'd earned.
+
+You stand at the edge of a very large ocean and look at it.
+
+It looks back at you without expression. Oceans are like that.
+
+[system, italic]
+You have been flying for a long time.
+
+You look down at what you're carrying. Four things. They have been with you long enough now that their weight feels like part of you — the way you no longer notice the weight of your own wings.
+
+Dawn's Branch: heavier than it was in the rainforest, the wood still holding moisture. In this flat coastal light you can see the grain clearly. The alternating rings London read like a story.
+
+The Flask of Tears: warm against your side, the luminous blue liquid inside still pulsing in its slow, steady rhythm. Salix's gift. Four lifetimes of memory, contained.
+
+The Warming Pouch: woven by Squashy. Inside it, Dawn's Seed glows red-gold. The color of late afternoon. The color of something that has not given up.
+
+London's Vial (Mossy Residue): small, circular, and warm to the touch. Inside, the luminous rainforest liquid still pulses with the heat of the tangled forest, waiting for the right moment.
+
+You stand in the sun with your four things and stare at the ocean you have no idea how to cross.
+
+[system]
+Dawn's Seed Warmth: recovering slowly. The sun helps.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KARL — FIRST APPROACH
+
+[waitDuration: 30 minutes — adjusting, getting your bearings]
+
+He comes sideways.
+
+That is the first thing you notice. Not his shell, not his eyes — the angle of his approach. He moves the way something moves when it has given up on the concept of forward entirely and has made peace with it.
+
+He is a crab. Red-brown, the color of old wood left too long in the rain. His eyes sit on stalks that angle slightly downward, giving him the permanent expression of a creature who expected this outcome and remains unsurprised.
+
+He stops beside you without acknowledging he's stopped. He faces the ocean. You face the ocean. For a moment you are simply two beings on a beach, looking at water.
+
+[KARL]
+"...you've got a glow."
+
+He says it like a minor grievance.
+
+[CHOICES]:
+A. "The seed. It's in the pouch."
+B. "I've been told that before. It hasn't helped much."
+C. "Hello to you too."
+D. [Say nothing. Keep watching the ocean.]
+
+---
+
+[If A — "The seed."]
+Karl's eyes swivel toward the pouch. His body doesn't move at all.
+[KARL] "A seed. 'Course it is. Always something."
+He clicks his claws once — a small sound, like punctuation.
+[Continue →]
+
+[If B — "It hasn't helped much."]
+Karl considers this.
+[KARL] "No. Glowing rarely does. Makes you visible. Visibility is... a mixed outcome."
+[Continue →]
+
+[If C — "Hello to you too."]
+[KARL] "Hello."
+A pause.
+[KARL] "You've still got a glow."
+[Continue →]
+
+[If D — Silence]
+Karl doesn't mind. He watches the ocean beside you for a long time. A very, very comfortable silence, coming from him. Not uncomfortable — it's the silence of someone who has stood on this beach enough times that silence is simply the default state.
+[KARL] "Heading across, I assume."
+[Continue →]
+
+---
+
+[KARL]
+"And that vial."
+
+His eyes drop from your chest to your talons.
+
+[KARL]
+"London's work. Only she would try to package the humidity of a forest into a scrap of glass."
+
+He shifts his posture, scuttling a fraction of an inch closer. The heat radiating off his shell is intense, baked in by hours of shore sun.
+
+[KARL]
+"Give it here. Just for a minute."
+
+[CHOICES]:
+A. Hand him the vial.
+B. "Why? What are you going to do with it?"
+C. "It's London's gift. I should keep it safe."
+D. [Keep holding it. Don't move.]
+
+---
+
+[If A — Hand him the vial]
+You place the circular vial in his large claw. It fits neatly against the flat, warm surface of his shell. He doesn't shake it or peer inside; he simply holds it against his carapace, letting the heat of the beach-baked stone transfer into the glass.
+[KARL] "It needs the shore. A forest is warm, but it's wet-warm. Slow. The ocean requires something sharper."
+The liquid inside begins to pulse faster, its light shifting from a dull amber to a bright, golden shimmer.
+[system: London's Vial warmed | The rainforest liquid glows brighter, moving closer to activation.]
+[Continue →]
+
+[If B — "Why?"]
+[KARL] "Because it's cold. Or rather, it's not as warm as it should be. The forest is a green blanket, but the shore is an open oven. It needs the heat if you want it to survive the ice."
+He extends a claw, patient but firm.
+[player] "Okay. Just be careful."
+You hand it to him. He holds it against his warm shell. The liquid inside responds, the pulse quickening, shifting to a brighter gold.
+[system: London's Vial warmed | The rainforest liquid glows brighter, moving closer to activation.]
+[Continue →]
+
+[If C — "I should keep it safe."]
+[KARL] "I'm a crab. I move sideways and eat decaying kelp. I have no use for a bottle of warm forest air."
+He clicks.
+"But if you want it to freeze on the crossing, keep holding it. If you want it to last, let the sand do its work."
+You hesitate, then set the vial on his broad, flat carapace. He sits perfectly still, letting the heat from his shell warm the glass. The liquid inside begins to pulse with a quicker, golden light.
+[system: London's Vial warmed | The rainforest liquid glows brighter, moving closer to activation.]
+[Continue →]
+
+[If D — Silence]
+Karl waits. Then he reaches out with his large, sun-baked claw, not touching you, but hovering just close enough that the heat from his shell radiates onto the glass.
+[KARL] "Stubborn. London likes that. I find it exhausting."
+Even without direct contact, the heat radiating from him is enough. The circular vial warms, and the liquid inside begins to glow a brighter, steadier amber-gold.
+[system: London's Vial warmed | The rainforest liquid glows brighter, moving closer to activation.]
+[Continue →]
+
+---
+
+[KARL]
+"I'm Karl."
+
+He doesn't ask your name. This is not rudeness. It is simply that Karl has learned names come up when they're needed and not a moment before.
+
+[KARL]
+"I live here. On this beach. Have for a long time."
+
+He says "a long time" the way someone says it when they mean something geological.
+
+[CHOICES]:
+A. "Do you like it? Living here?"
+B. "Are you happy here?"
+C. "You don't seem very... happy."
+D. "I met someone who knows you. Salix."
+
+---
+
+[If A — "Do you like it?"]
+[KARL] "Like. That's a word."
+He clicks once.
+[KARL] "The beach is consistent. The ocean doesn't ask anything of me. The sand is hot, which I find... honest."
+[Continue →]
+
+[If B — "Are you happy?"]
+A very long pause. The wind moves between you.
+[KARL] "That's a complicated question for a Tuesday."
+[player] "Is it Tuesday?"
+[KARL] "I don't know. I just wanted it to sound like a reasonable objection."
+[Continue →]
+
+[If C — "You don't seem very happy."]
+[KARL] "I'm not. But I appreciate you saying it plainly. Most people skirt around it."
+He looks at you.
+[KARL] "You're direct. That's something."
+[Continue →]
+
+[If D — "I met Salix."]
+Karl's eyes shift. Something in his posture changes — not much, but something.
+[KARL] "Salix. Yes."
+A pause.
+[KARL] "He told me about his friend. The frozen one. He passes messages through travelers when he can. Trees can't send letters — they have to wait for someone to walk by and agree to carry the words."
+Another pause.
+[KARL] "I agree to carry things more than most people. I have the time."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KARL — THE DIRECTIONS
+
+[waitDuration: 45 minutes — long conversation in the sun]
+
+Eventually — not because Karl rushes, but because Karl gets there when he gets there — he tells you what he knows.
+
+[KARL]
+"To reach the gr0ve — the actual one, not the version people describe to make themselves feel better — you must fly far from here. North and then further north. There's a small island."
+
+He pauses in a way that suggests he's choosing words with some care.
+
+[KARL]
+"I can't promise that's where the gr0ve is. Few have seen it. I'm not one of them."
+
+[KARL]
+"However. I believe Abies is frozen there. On ice, north of the crossing. One of my friends — Salix — told me. He said it years ago. He's still sure."
+
+[player — internal]
+You think about this. Salix weeping beside a lake that cracked the earth open. The word "friend" sitting strangely in Karl's voice — like a word he doesn't use often and handles carefully when he does.
+
+[CHOICES]:
+A. "You and Salix are friends? Have you ever actually met?"
+B. "I've already spoken with Salix. And London, and Squashy."
+C. "How do I cross the water? My wings aren't—"
+D. "You said 'however.' Like you're building to something."
+
+---
+
+[If A — "Have you ever actually met?"]
+[KARL] "No. He doesn't move. I do, but only sideways, and never toward anything on purpose."
+He looks at the ocean.
+[KARL] "We pass messages through travelers. It's an inefficient system. But it's the only one we have."
+A beat.
+[KARL] "He's good. For what it's worth. He carries a lot of grief and he still passes it on accurately, without distorting it. That's rare."
+[Continue →]
+
+[If B — "I've already spoken with Salix. And London. And Squashy."]
+Karl's eyes move to look at you directly. Both of them. This, you realize, is the crab equivalent of turning to face someone fully.
+[KARL] "You talked to London."
+Not a question.
+[KARL] "And you kept moving afterward. Interesting. She has a way of making travelers feel they should stay and think for a long time."
+He clicks.
+[KARL] "And the snake gave you the pouch."
+[player] "How do you know about the pouch?"
+[KARL] "Squashy's made four of them that I know of. She only gives them to birds who've already gotten here."
+A pause.
+[KARL] "You're doing well. Better than you look."
+[player, options]:
+  i. "Is that a compliment?"
+  ii. "I don't know what I look like right now."
+  iii. [Decide not to examine that too closely.]
+
+  [i] [KARL] "It's an observation. Take from it what you want."
+  [ii] [KARL] "Tired. Carrying a lot. Still moving." He pauses. "That's most of what good looks like."
+  [iii] The wind moves between you. Probably wise.
+[Continue →]
+
+[If C — "How do I cross?"]
+[KARL] "Not directly. Not with those wings and not across that much water."
+He says it without meanness. Pure geography.
+[Continue →]
+
+[If D — "'However.' You're building to something."]
+[KARL] "Yes."
+A long pause.
+[KARL] "I do that. Build to things. I have time."
+[Continue →]
+
+---
+
+[KARL]
+"Your wings. They're a specific size."
+
+[player]
+<offended>
+
+[KARL]
+"I'm describing the ocean. It is large. Your wings are a specific size. I'm not criticizing. It's just a spatial relationship."
+
+[player, options]:
+A. "That's still a rude way to put it."
+B. "...okay, fair."
+C. "So what do I do?"
+
+---
+
+[If A — "That's still rude."]
+[KARL] "Perhaps. I've been told my delivery needs work."
+He clicks once.
+[KARL] "I've been trying to fix it for forty years. The beach doesn't give a lot of feedback."
+[Continue →]
+
+[If B — "Fair."]
+[KARL] "Yes."
+[Continue →]
+
+[If C — "So what do I do?"]
+[KARL] "I'm getting there."
+[Continue →]
+
+---
+
+[KARL]
+"In all seriousness. There are rumors. A tree that grows in the deep water. I haven't heard its name."
+
+He says "its name" deliberately. Carefully.
+
+[KARL]
+"The rumors say it grows in total darkness. That it exists in a place below where light goes. That it knows something about the path forward — the actual path, not the one people tell stories about."
+
+[KARL]
+"I've also heard there are fish. Orange fish. Seven of them. They circle the tree. They decide who gets close."
+
+He is quiet for a moment.
+
+[KARL]
+"I don't know why I'm telling you this. You're a small bird with a glowing pouch and you're going to cross a very large ocean, so I suppose I'm telling you everything I have. In case any of it matters later."
+
+[CHOICES]:
+A. "Squashy mentioned the Unnamed Tree. The seven fish."
+B. "Why do you know all of this if you've never left the beach?"
+C. "You're being very kind, for someone who seems to want not to be."
+D. "What else do you know? Tell me everything."
+
+---
+
+[If A — "Squashy mentioned it."]
+[KARL] "She talks more than she used to. That's good."
+He looks at the water.
+[KARL] "She used to not tell anyone about the tree. She said travelers weren't ready. Maybe she's started trusting the travelers more. Or maybe she just trusts you."
+[Continue →]
+
+[If B — "How do you know all this?"]
+[KARL] "The beach is a throughway. Everything passes through a beach eventually. Travelers, news, fragments of things that used to be whole."
+He clicks his claws slowly.
+[KARL] "I sit here. I listen. I move sideways. Things accumulate."
+[Continue →]
+
+[If C — "You're being very kind."]
+Karl is quiet for a long time. The ocean does something indifferent nearby.
+[KARL] "Don't make it strange."
+[player] "I'm not making it strange."
+[KARL] "You looked at me with a specific expression."
+[player] "I'm a bird. My face doesn't do that many things."
+[KARL] "You'd be surprised."
+[Continue →]
+
+[If D — "Tell me everything."]
+[KARL] "That's a lot to ask."
+[player] "Please."
+Another long pause. The wind. The waves.
+[KARL] "...fine."
+[Continue →]
+
+---
+
+[waitDuration: 20 minutes — Karl talking, in his way]
+
+[KARL]
+"The atoll."
+
+[KARL]
+"Halfway across the water — not exactly halfway, but close enough that it functions as halfway — there is a rock. A small one. Barely qualifies as land. The birds know it."
+
+[KARL]
+"You'll need to rest there. Your wings, as we've established, are a specific size. The crossing is long."
+
+[KARL]
+"The atoll is directly above the place where the orange lights are visible at night. I mention this not to suggest you go down there, but so that you're not surprised when you see them."
+
+[CHOICES]:
+A. "Is it safe? The atoll?"
+B. "The fish are directly below the atoll?"
+C. "What lives on the atoll?"
+D. "You've been there?"
+
+---
+
+[If A — "Is it safe?"]
+[KARL] "Safe is relative. It's rock. You can stand on it. Nothing there wants to hurt you specifically."
+[player] "That's not very reassuring."
+[KARL] "I'm not very reassuring. But it's accurate."
+[Continue →]
+
+[If B — "The fish are below the atoll."]
+[KARL] "That's what I said."
+A pause.
+[KARL] "The seagulls know more about it than I do. The ones by the tree. They fly the water routes regularly."
+[Continue →]
+
+[If C — "What lives on the atoll?"]
+[KARL] "Birds, sometimes. Whatever birds rest there on long crossings. Nothing permanent. It's too small."
+He looks at you.
+[KARL] "You'll fit."
+[Continue →]
+
+[If D — "You've been there?"]
+[KARL] "No."
+A long pause.
+[KARL] "I can only go sideways. The atoll is not sideways from here. It's directly out."
+Another pause. Something passes across whatever expression a crab has.
+[KARL] "I have never been further than the tideline."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KARL — PARTING
+
+[waitDuration: 10 minutes]
+
+Karl has said what he came to say. You're not sure if he came to say it, exactly — it seems more like the things accumulated and you happened to be standing next to him when they needed somewhere to go.
+
+[CHOICES]:
+A. "Thank you, Karl. Genuinely."
+B. "Will you be okay? Here, alone?"
+C. "What do you do when there's no one to talk to?"
+D. "I hope the beach is good to you."
+
+---
+
+[If A — "Thank you."]
+[KARL] "You're going to do something meaningful with what I told you, or you're not. Either way, I told you. That's the part I control."
+He clicks.
+[KARL] "Good luck. I mean that in a literal sense, not a polite sense."
+[Continue →]
+
+[If B — "Will you be okay?"]
+A very long pause. The longest pause yet.
+[KARL] "That is a surprisingly affecting question."
+[player] "Sorry. You don't have to—"
+[KARL] "I'll be fine. I'm always fine. That's the part I'm not sure is a good thing."
+[Continue →]
+
+[If C — "What do you do alone?"]
+[KARL] "Walk sideways. Think about things. Watch the water."
+A beat.
+[KARL] "The water changes. People think it doesn't. They think it's just the ocean being the ocean. But if you watch it long enough, it changes. Small things. New patterns."
+He looks at it.
+[KARL] "It's enough."
+[Continue →]
+
+[If D — "I hope the beach is good to you."]
+Karl looks at you. His stalked eyes are very still.
+[KARL] "...that's a nice thing to say."
+[player] "I meant it."
+[KARL] "I know. That's why it's nice."
+He looks back at the ocean.
+[KARL] "Go. The seagulls are over there. They know the water better than I do, and they're considerably louder about it."
+[Continue →]
+
+---
+
+Karl begins moving sideways again. Not toward anything. Not away from anything. Just sideways, in the way of things that have found their direction and committed to it fully.
+
+He doesn't say goodbye.
+
+You watch him go until he's just a small red-brown shape moving along the tideline, and somehow the beach is quieter without him.
+
+[system, italic]
+You think about a creature that has been on this beach for so long that everything eventually arrives. You think about how he calls Salix "a friend" when they've only ever passed words through other people's hands.
+
+You think about what Karl considers "enough."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE PINK PALM TREE — FIRST SIGHT
+
+[waitDuration: 15 minutes — walking along the shore]
+
+You turn back to the ocean. You're composing yourself — making plans, considering the weight of what Karl told you, wondering if "your wings are a specific size" is something you'll be turning over in your head for years — when you see them.
+
+Two seagulls.
+
+They are playing in the sand. Running at waves and retreating from them, the way gulls do, the way creatures do when they've decided that simple things are worth doing with complete commitment.
+
+This is not what stops you.
+
+What stops you is the tree next to them.
+
+It is a palm tree.
+
+It is pink.
+
+It is not "pink in certain lights." It is not "the sun is hitting it at a particular angle." It is not "sort of pinkish if you squint." It is deeply, saturatedly, unapologetically, absolutely pink. The pink of a decision. The pink of something that was asked "what color do you want to be" and said "that one, specifically, without reservation."
+
+[player]
+"..."
+
+[player]
+"...is that tree PINK?"
+
+One of the seagulls looks up.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LOULO, LEMON, CARLOS, AND SUNNY
+
+[waitDuration: 10 minutes]
+
+[SEAGULL 1]
+"Hey! Birdie! Wanna play?"
+
+The seagull is silver-white and moves with the energy of someone who woke up this morning and decided it was going to be a great day, specifically. This is LEMON — though you don't know her name yet. She has bright, attentive eyes and the posture of an older sibling who has learned to be cheerful by choice.
+
+Behind her, two more gulls surface from behind the tree: CARLOS and SUNNY. They are clearly brothers. They have the same face at slightly different angles and the kind of easy physical comfort with each other that comes from having spent a lifetime in the same nest.
+
+Carlos is looking at you with genuine philosophical curiosity.
+Sunny is already waving.
+
+And the tree, behind all of them, is still pink. You are still thinking about this.
+
+[CHOICES]:
+A. Run over and join them immediately
+B. Walk over more cautiously
+C. Call back: "Is that tree pink?!"
+D. Stand here and process this for one more moment
+
+---
+
+[If A — Run over]:
+You're there almost before you decide to be. Something about this beach, this sun, these three chaotic seagulls — it cuts through the weight. You land in the sand beside them and for a moment nobody says anything and then Sunny makes a noise that is approximately "YEAH!" and you are, somehow, playing.
+
+[If B — Walk cautiously]:
+You approach, trying to look like a bird with reasonable caution and not like a bird who has been through several emotionally significant encounters in a row and is slightly overwhelmed by the normalcy of seagulls playing in waves.
+Lemon watches you come with knowing eyes. She knows. She doesn't say anything.
+[Continue →]
+
+[If C — "Is that tree pink?!"]:
+Lemon turns to look at the tree, then back at you, with the expression of someone who has been asked this before and remains unaffected by it.
+[LEMON] "Yes."
+A pause.
+[LEMON] "Her name is Loulo. She's been pink for as long as we've known her."
+Another pause.
+[LEMON] "We've known her our whole lives."
+[Continue →]
+
+[If D — Process for a moment]:
+You stand there.
+The tree is pink.
+[player] "...okay."
+You walk over.
+[Continue →]
+
+---
+
+[Regardless of choice — scene continues]
+
+[waitDuration: 30 minutes — introductions in the sun]
+
+You end up in the sand beside the pink tree, surrounded by the three gulls. This seems to have happened naturally, the way some things happen naturally on beaches when the weather is good.
+
+[SUNNY]
+"I'm Sunny!"
+
+He says this with the confidence of someone who has never once regretted being Sunny. He is younger than Lemon and shares something in his face with Carlos — the same angle to the eyes, the same way of holding his wings — but where Carlos tends toward stillness, Sunny tends toward motion.
+
+[CARLOS]
+"Carlos."
+
+He says it simply. He's looking at the Flask of Tears with the expression of someone who is noticing many things at once and is comfortable with that.
+
+[LEMON]
+"Lemon. Those two are my brothers."
+
+She says "my brothers" with a particular intonation. The intonation of someone who loves her brothers and has also been watching over them since before either of them could properly fly.
+
+[CHOICES]:
+A. "Are you all from here? This beach?"
+B. "How long have you known the pink tree?"
+C. "I'm looking for a way across the ocean. Can you help?"
+D. "Sunny and Carlos? You're twins?"
+
+---
+
+[If A — "Are you from here?"]
+[LEMON] "We fly this stretch of coast. The beach, the water routes, the atoll."
+[SUNNY] "We know the whole thing! All the way out and back!"
+[CARLOS] "It's a good stretch of ocean. Better than it looks from here."
+[Continue →]
+
+[If B — "How long have you known the tree?"]
+[LEMON] "Since we were very young."
+[SUNNY] "Since forever!"
+[CARLOS] "She was here before us. She'll be here after us. The beach knows her."
+[Continue →]
+
+[If C — "Can you help me cross?"]
+Lemon looks at you steadily.
+[LEMON] "Yes. But meet Loulo first."
+She says it not as a condition. More as a fact about how things work in this place.
+[Continue →]
+
+[If D — "You're twins?"]
+[SUNNY] "YES!"
+[CARLOS] "Technically yes."
+[LEMON] "Unfortunately, in the sense that it doubled my responsibilities, yes."
+[CARLOS] "She doesn't mean that."
+[LEMON] "I completely mean that and I love you both very much."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MEETING LOULO
+
+[waitDuration: 15 minutes]
+
+The pink tree has been present this entire time. Not silent, exactly — but patient. Waiting for the right moment with the ease of something that has been waiting for a long time and does not begrudge it.
+
+Now her fronds move. Not in the wind. The wind has stopped, actually. This is a different kind of movement — deliberate, careful. The way you move when you're about to say something you mean.
+
+[LOULO]
+"Hello, little bird."
+
+Her voice is warm. Genuinely warm, the way the sand is warm — not the performance of warmth but the actual thing, accumulated over years of sun and salt and being exactly where she is.
+
+[LOULO]
+"I am Loulo. You stared at me for quite a while before you came over. That's all right. Most people do."
+
+[player]
+"Sorry. You're very—"
+
+[LOULO]
+"Pink."
+
+[player]
+"I was going to say vibrant."
+
+[LOULO]
+"You were going to say pink. That's fine. I am pink. I've always been pink. I'll be pink for as long as I'm a tree, which I intend to be for a very long time."
+
+She says this without any defensiveness whatsoever. It is a statement of fact delivered with the warmth of a preference.
+
+[CHOICES]:
+A. "How? Palm trees aren't — I've never seen a pink palm tree."
+B. "It suits you. It's a very good pink."
+C. "Do people bother you about it?"
+D. "The gulls clearly love you."
+
+---
+
+[If A — "How are you pink?"]
+[LOULO] "How are you a bird who carries a glowing seed across the world? Some things simply are what they are. The how is less interesting than the fact."
+A small rustle of fronds.
+[LOULO] "My roots run deep. Deep enough to find minerals in the rock that other palms don't reach. The minerals give me color. Or I choose to reach for them. I've stopped being certain which."
+[Continue →]
+
+[If B — "It suits you."]
+[LOULO] "I think so too. Thank you for saying it plainly."
+[LEMON, from behind you] "She doesn't need the validation."
+[LOULO] "No, but it's still pleasant to receive."
+[Continue →]
+
+[If C — "Do people bother you about it?"]
+[LOULO] "Sometimes. Travelers come through and spend a long time staring and saying things like 'that's not natural.'"
+A pause.
+[LOULO] "As if the things that are most themselves are the ones least natural."
+Another pause. Smaller.
+[LOULO] "Lemon has some opinions about those travelers."
+[LEMON, firmly] "I handle it."
+[SUNNY] "She yells at them."
+[LEMON] "I speak at elevated volume. For clarity."
+[Continue →]
+
+[If D — "The gulls clearly love you."]
+[LOULO] "And I them. They've been coming here since they were hatchlings. Lemon used to fall asleep against my trunk. She would be embarrassed for me to tell you that."
+[LEMON] "I would."
+[LOULO] "She was very small. It was very sweet."
+[LEMON, resigned] "...it was cold that night."
+[SUNNY] "We all slept against Loulo. It was warm."
+[CARLOS] "It was a good night."
+A moment of quiet between the four of them. The kind of quiet that has a lot of history in it.
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CONVERSATIONS WITH THE GULLS
+
+[waitDuration: 1 hour — afternoon on the shore, longer conversation]
+
+You settle into the sand properly. The sun is moving through the sky at its usual uncaring pace. The waves do what waves do.
+
+The gulls talk. The tree listens. You find yourself talking too — more than you expected to, more than you usually do. There's something about this place, about these four, that makes words come easier.
+
+[CARLOS — on the Flask of Tears]
+Carlos notices it first. He always seems to notice the things that are slightly harder to see.
+
+[CARLOS]
+"That flask. Blue light."
+
+[player]
+"Salix gave it to me. At Lake Lament. It holds memory — pieces of Abies's history."
+
+Carlos nods slowly. He looks at it the way he looks at most things, which is with the patient attention of someone who is never in a hurry to understand.
+
+[CARLOS]
+"Heavy things become lighter when you put them somewhere. I've noticed that."
+
+[player]
+"How do you mean?"
+
+[CARLOS]
+"A fish is heavy in your beak. But in the water it has almost no weight. You put heavy things in the right container and they change."
+
+He looks at the Flask again.
+
+[CARLOS]
+"Salix made the right container. That matters."
+
+[CHOICES]:
+A. "You're oddly philosophical for a seagull."
+B. "The weight doesn't go away though. It's just held."
+C. "Is there a container for things I can't put down?"
+D. [Just think about what he said for a moment.]
+
+---
+
+[If A — "Oddly philosophical."]
+[SUNNY] "He's always like this! We'll be eating and he'll say something like 'the crab didn't die in vain, it fed a purpose larger than its own, which is the nature of—'"
+[CARLOS] "I said that once."
+[SUNNY] "Four times that month."
+[CARLOS] "The crab thing is genuinely interesting if you think about it."
+[LEMON] "No one wants to hear the crab thing."
+[CARLOS, to you, quietly] "The crab thing is interesting."
+[Continue →]
+
+[If B — "The weight doesn't go away."]
+[CARLOS] "No. It doesn't go away. It just stops being the only thing."
+A pause.
+[CARLOS] "When it's in a flask instead of in your chest, you can also look at the ocean. That matters."
+[Continue →]
+
+[If C — "A container for things I can't put down."]
+Carlos is quiet for a moment.
+[CARLOS] "Maybe you. You carry it inside and you choose not to let it be the only thing inside. The container is you."
+A longer pause.
+[CARLOS] "I might be overextending the metaphor."
+[player] "You might be exactly right."
+[CARLOS] "Those are often the same."
+[Continue →]
+
+[If D — Think.]
+[system, italic]
+You sit with what Carlos said. About containers. About weight becoming weightless in the right element. You look at the Flask, and then at the ocean, and find yourself thinking about what Salix was actually doing when he made it.
+He wasn't removing the weight. He was giving you somewhere to put it that wasn't your chest.
+[Continue →]
+
+---
+
+[LEMON — on the crossing]
+
+[waitDuration: 20 minutes]
+
+Lemon has been watching you since you arrived. Not suspiciously — attentively. The way a navigator looks at the sky.
+
+[LEMON]
+"You're going across."
+
+[player]
+"Yes."
+
+[LEMON]
+"Karl told you about the atoll."
+
+[player]
+"He did."
+
+[LEMON]
+"Good. You'll need it."
+
+She tilts her head.
+
+[LEMON]
+"The first leg is manageable. The wind is usually with you in the morning. You'll feel the current shift when you're about three hours out — it pushes slightly south, so you correct north. The water color changes when you're close to the atoll. Greener. Shallower rock below."
+
+She says all of this efficiently, without hesitation, in the way of someone who has flown this route many times and filed every detail.
+
+[CHOICES]:
+A. "You fly this route regularly?"
+B. "How long does the full crossing take?"
+C. "Karl mentioned orange lights. Below the atoll."
+D. "Will you come with me? At least part of the way?"
+
+---
+
+[If A — "You fly this route regularly?"]
+[LEMON] "Every season. We carry news between the shore and the islands further out. Small things — weather patterns, who's seen what. Information."
+[SUNNY] "I love the crossing! The open water part is the best!"
+[LEMON] "The open water is very exposed and requires sustained attention."
+[SUNNY] "That's what I said! Sustained attention! In the wind!"
+[LEMON, to you] "He's not wrong. It's a good crossing if you respect it."
+[Continue →]
+
+[If B — "How long does the full crossing take?"]
+[LEMON] "Depends on the wind. With good wind: two days, with the atoll rest between. Against the wind: longer. You don't want longer. Your seed needs the warmth you're conserving."
+[player] "You know about the seed?"
+[LEMON] "Karl talks when he trusts someone. He doesn't trust most people."
+She looks at you steadily.
+[LEMON] "He told us you were coming. Sideways method — he walked past us on his way back to his rock and mentioned it while facing the other direction."
+[CARLOS] "He cares more than he lets on."
+[LEMON] "He cares enormously and it costs him every time."
+[Continue →]
+
+[If C — "The orange lights."]
+Lemon is quiet for a moment. A specific kind of quiet.
+[LEMON] "I've seen them. Flying over at night. Seven of them, in a slow circle."
+A pause.
+[LEMON] "Deep. Very deep."
+[CARLOS] "The fish don't bother you if you're not trying to take anything. They can tell the difference."
+[SUNNY] "I've never seen them! I always fall asleep before we get to the atoll at night."
+[LEMON] "You fall asleep before we leave the shore, Sunny."
+[SUNNY] "The flying is very soothing."
+[Continue →]
+
+[If D — "Will you come with me?"]
+Lemon doesn't answer immediately. She looks at the ocean.
+[LEMON] "We were planning to fly the northern route this season anyway."
+She says it like it's incidental. Like she hadn't already thought about it.
+[LEMON] "We'll fly the first leg with you. To the atoll."
+[SUNNY] "YES!"
+[CARLOS] "That works."
+[LEMON, to you, quietly] "Sunny gets very excited about crossings. He'll calm down once we're in the air."
+[SUNNY, already excited] "I'm already calm! This is my calm face!"
+[LEMON] "That's his excited face."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CONVERSATION WITH LOULO
+
+[waitDuration: 45 minutes — late afternoon, the light going gold]
+
+The afternoon changes quality while you're not watching. The sun moves lower and the light on the water turns the specific color of things that are almost over.
+
+Most of the conversation you've had has been with the gulls — their quick overlapping voices, the way they talk the way they fly, darting and turning. Loulo has been present throughout, listening, adding small things, letting the gulls have their moment.
+
+Now the gulls chase a wave further down the beach. And it is just you and the tree.
+
+[LOULO]
+"You carry a great deal."
+
+[player]
+"Everyone keeps pointing that out."
+
+[LOULO]
+"That's because it's true, and truth tends to repeat itself until it's heard."
+
+She's quiet for a moment. Her fronds move — that deliberate, unwind-related movement.
+
+[LOULO]
+"Do you know what the crossing does to things you carry?"
+
+[CHOICES]:
+A. "It tests them. Makes sure they're worth holding on to."
+B. "Makes them heavier, probably."
+C. "I don't know. I've never crossed an ocean before."
+D. "Karl said it's very long. I'm thinking mostly about that."
+
+---
+
+[If A — "Tests them."]
+[LOULO] "Yes. And you."
+A pause.
+[LOULO] "The ocean doesn't care about your reasons. It doesn't care about the seed, or what it means, or who gave it to you. It simply is what it is — very large, very cold, very indifferent. And you have to cross it anyway."
+[LOULO] "What holds, holds. What was never truly attached falls away."
+[player, quietly] "That's a terrifying way to describe a trip."
+[LOULO] "Yes. Also honest."
+[Continue →]
+
+[If B — "Makes them heavier."]
+[LOULO] "In some ways. The physical burden of flight over open water is real. But I meant something different."
+She considers.
+[LOULO] "Things you carry out of habit feel heavier at sea. Things you carry because you genuinely chose them feel lighter. The ocean is very clarifying about which is which."
+[Continue →]
+
+[If C — "I've never crossed an ocean."]
+[LOULO] "Then you'll learn something the crossing teaches and nothing else does. It's a particular kind of knowledge. You'll know it when you have it."
+[Continue →]
+
+[If D — "Mostly thinking about the long part."]
+[LOULO]  "That's wise. But I want to say something first, while you're still on land."
+[Continue →]
+
+---
+
+[LOULO]
+"I have watched many travelers come through this beach. They arrive carrying things — burdens, hopes, objects that mean something. And they all face the same crossing."
+
+[LOULO]
+"The ones who make it across are not always the ones you'd expect. They are not always the strongest fliers or the best prepared. Sometimes they are simply the ones who were honest with themselves about what they were carrying and why."
+
+[player]
+"And the ones who don't make it?"
+
+[LOULO]
+"Some turn back. Some drift. Some hold on so tightly to what they're carrying that they forget to fly."
+
+A pause. The waves.
+
+[LOULO]
+"What do you hold most tightly to, little bird?"
+
+[CHOICES]:
+A. "The seed. Everything is about the seed."
+B. "I don't know. Everything, I think. I hold everything tightly."
+C. "I keep trying to figure that out. I'm not there yet."
+D. "The Branch. I don't know why, but the Branch."
+
+---
+
+[If A — "The seed."]
+[LOULO] "Good. Hold the seed. That's the right thing to hold. But make sure you hold it because you chose to — not just because someone handed it to you and you didn't know how to give it back."
+She's quiet.
+[LOULO] "There's a difference between the two. You'll know which it is by the end of the crossing."
+[Continue →]
+
+[If B — "Everything."]
+[LOULO] "Mm."
+A small sound. Thoughtful.
+[LOULO] "London would have something to say about that. The holding of everything."
+[player] "She said something about weight. About being a bridge that goes thin."
+[LOULO] "Yes. She and I have talked. We think differently, London and I — she sheds, I grow, we arrive at the shore from different directions — but we agree on that."
+[LOULO] "You cannot hold everything. Not forever. Something has to be the thing you hold most tightly. The rest has to be... carried, not gripped."
+[Continue →]
+
+[If C — "Still figuring it out."]
+[LOULO] "That is the most honest answer. And honesty is, in my experience, what the ocean respects most."
+A slow, warm rustle of fronds.
+[LOULO] "You'll figure it out. The crossing will help."
+[Continue →]
+
+[If D — "The Branch."]
+A beat. Something in Loulo's presence shifts — not alarmed, but attentive.
+[LOULO] "The Branch."
+[player] "It was Dawn's. It came from the tree he came from. London read the grain and said it was a gate once. A bridge between day and night."
+[LOULO] "Yes. I know what it is."
+A pause.
+[LOULO] "Why do you hold it most tightly?"
+[player] "Because it feels like the question. The seed is the destination. The Flask is what I learned. But the Branch is... why."
+Loulo is quiet for a long time.
+[LOULO] "That's worth knowing."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LOULO'S GIFT — THE CLAY POT
+
+[waitDuration: 20 minutes]
+
+The light is going amber. The gulls have come back, sandy-footed and pleased with themselves, and they settle around Loulo's base in the easy way of creatures who have been doing this for years.
+
+[LOULO]
+"Before you go."
+
+Her lower fronds reach toward the base of her trunk — a slow, deliberate movement. Something rolls across the sand toward you.
+
+You look down at it.
+
+It is a pot. Small, round, smooth, made from packed sand that has been hardened by sun into something like pale clay. It is warm to the touch — the stored warmth of many days in direct sun. Slightly luminous, in a subtle way. Like something that has been in the light long enough to hold a little of it.
+
+The color of it is a soft gold-pink, the color of the tree it came from.
+
+[LOULO]
+"Sand-fired. I've been working on it for a while. The right temperature of sun and time and the right minerals in the sand from my roots."
+
+She lets you hold it.
+
+[LOULO]
+"It is a holding vessel. Different from Salix's Flask — the Flask holds memory. Different from Squashy's pouch — the pouch holds warmth. This holds..."
+
+She considers.
+
+[LOULO]
+"...intention. What you put inside becomes yours to carry with real purpose. The pot remembers who filled it."
+
+[CHOICES]:
+A. "What goes in it? What is it for?"
+B. "This is beautiful. Thank you."
+C. "I — I already have a lot to carry."
+D. "You've been making this... for me?"
+
+---
+
+[If A — "What goes in it?"]
+[LOULO] "You'll know when you find the right thing. You'll know because it will feel like something that needs to be kept."
+A pause.
+[LOULO] "I should tell you — you'll encounter other trees before you reach the gr0ve. Some of them offer pots too. The trees of this world tend to give travelers vessels."
+[Continue →]
+
+[If B — "Thank you."]
+[LOULO] "It was time to give it to someone. You're the right someone."
+She says it simply.
+[Continue →]
+
+[If C — "I already carry so much."]
+[LOULO] "I know. That's why this pot is small."
+A gentle warmth in her voice.
+[LOULO] "I should also tell you, before you decide — you'll encounter other trees on your journey. Some of them also give pots. Each tree's pot holds something different. You can only carry one."
+[Continue →]
+
+[If D — "For me?"]
+[LOULO] "For the right traveler. I didn't know it would be you until you came over and stared at me."
+A small warmth in her voice — amusement, affection.
+[LOULO] "The staring is usually a good sign. It means something in you recognized something in me."
+[Continue →]
+
+---
+
+[LEMON, gently interjecting]
+"We should tell you something."
+
+Lemon steps forward. Her brothers fall quiet behind her — a thing that happens, you notice, when Lemon uses that voice. It is not a loud voice. It is simply a clear one.
+
+[LEMON]
+"Loulo's pot is real and it's good. But she's right — you'll meet others. On the ice, there's a chance Abies gives travelers something. We've heard that. Cedite too, if you reach her."
+
+[CARLOS]
+"Each one holds something different. And they're all worth having. But you can only carry one vessel for intention."
+
+[SUNNY]
+"Which is sad! Because they're all great! But you still have to choose!"
+
+[LEMON]
+"What he said, but delivered with slightly more gravity."
+
+[SUNNY]
+"GRAVITY!"
+
+She looks at you steadily.
+
+[LEMON]
+"You don't have to decide now. You could carry Loulo's pot to the crossing, and if something changes — if you receive another pot and it's the right one for where you're going — you make the switch."
+
+[CHOICES]:
+A. "I'll take it now. Loulo's pot feels right for what I'm carrying."
+B. "I'll wait. I want to see what else is out there first."
+C. "What does each other pot hold, that you know of?"
+D. "Loulo — what do you think I should do?"
+
+---
+
+[If A — "I'll take it now."]
+Something in Loulo settles — not relieved, exactly. More like completed.
+[LOULO] "Then it's yours."
+[player, options for why]:
+  i. "It carries intention. That's what this whole journey has been — intention holding up against uncertainty."
+  ii. "You made it from sunlight and your own roots. That means something."
+  iii. "You're the first pink palm tree I've ever met. I think that's a good reason."
+
+  [i] [LOULO] "Yes. Exactly that." A quiet warmth.
+  [ii] [LOULO] "Those are the most honest ingredients I know."
+  [iii] [LOULO] A small, genuine laugh — a sound like wind through fronds at high noon. "That may be the best reason anyone has ever given me."
+
+[system, bold]
+[Loulo's Pot obtained | A sand-fired vessel, warm gold-pink. Holds intention. Remembers who filled it.]
+[Continue →]
+
+[If B — "I'll wait."]
+[LOULO] "That's also right. You're keeping your options clear."
+She doesn't sound hurt. She sounds like someone who respects a considered decision.
+[LOULO] "The pot will keep. If you come back this way — or if you decide it's the right one — it will be here."
+[player, internal] You think about this. About coming back. About the fact that after the crossing there may not be a coming back in the same way.
+[player, choices]:
+  i. "Actually — I'll take it. I don't think coming back is guaranteed."
+  ii. "Thank you for understanding."
+
+  [i] [LOULO] "Then take it." She says it like it was always going to go this way. You get the pot. [system: Loulo's Pot obtained]
+  [ii] [LOULO] "Of course. Safe crossing."
+[Continue →]
+
+[If C — "What do the other pots hold?"]
+[LEMON] "We don't know exactly. Rumors. We've heard Abies's vessel holds something to do with time — with the difference between memory and the past."
+[CARLOS] "I've heard Cedite's holds balance. The space between two things."
+[SUNNY] "And Ash's — if you ever get to Ash — holds beginning. Like the first moment of something."
+[LEMON] "Those are guesses. We've never seen them ourselves."
+[CARLOS] "Loulo's holds intention. We know that one for certain."
+[LEMON] "It's the one we'd trust most for a journey like yours."
+[player, options]:
+  i. "Then I'll take Loulo's."
+  ii. "I need to think about it on the crossing."
+
+  [i] You take the pot. [system: Loulo's Pot obtained]
+  [ii] [LOULO] "Take it with you. Think on the crossing. Put it back if you find something better."
+[Continue →]
+
+[If D — "Loulo, what do you think?"]
+A long pause. The fronds move.
+[LOULO] "I think you should trust what you already know. You've been doing that this whole journey, even when it didn't feel like it."
+A smaller pause.
+[LOULO] "And I think you already know what this pot is for. You recognized it before I said a word about it."
+[player, quietly] "...yeah."
+You take the pot. [system: Loulo's Pot obtained]
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FAREWELLS AND DEPARTURE
+
+[waitDuration: 30 minutes — the sun getting low, preparing to go]
+
+The sun is low. The water is gold. The kind of evening that doesn't let you delay much longer without the weight of it becoming its own thing.
+
+[SUNNY]
+"Okay! We're flying with you! Right, Lemon? We said we would!"
+
+[LEMON]
+"We did say that."
+
+[CARLOS]
+"The wind is good tonight. We should go soon."
+
+[LOULO — final words, based on what you carry and what you chose]
+
+If you took the pot:
+[LOULO]
+"Fly carefully. Rest at the atoll. And when you find something worth putting in the pot, you'll know."
+
+If you didn't take the pot:
+[LOULO]
+"The offer stands when you come back through. Or send word with Lemon. She always knows where I am."
+
+---
+
+[CHOICES — departure]:
+A. "Thank you — all of you. For the afternoon."
+B. "Karl was right to send me to you."
+C. [To Loulo]: "I've never met a tree like you."
+D. [To Lemon]: "Take care of them." [Meaning Sunny and Carlos.]
+
+---
+
+[If A — "Thank you for the afternoon."]
+[SUNNY] "Anytime! Come back when you're done with the mission!"
+[CARLOS] "The ocean is patient. We'll meet again."
+[LEMON] "Don't get sentimental. You'll see us at the atoll in a few hours."
+[LOULO] "Come back, little bird. I'll still be pink."
+[Continue →]
+
+[If B — "Karl was right to send me."]
+[LEMON] "Karl sends the ones he trusts. He doesn't tell them that."
+[CARLOS] "He trusts most people. He just doesn't want them to know."
+[SUNNY] "Karl is SAD but also GOOD and I love him!"
+[player] "Should someone... tell him that?"
+[LEMON] "He knows. It still makes him sad. Some things are like that."
+[Continue →]
+
+[If C — "I've never met a tree like you."]
+[LOULO]
+"There is only one of me. That's true of most things, if you look closely enough."
+A last warmth, the way the sun gives warmth just before it goes.
+[LOULO]
+"Go. The water is waiting."
+[Continue →]
+
+[If D — "Take care of them." To Lemon.]
+Lemon's expression does something complicated. Something that has years in it.
+[LEMON] "Always."
+[SUNNY] "We don't need—"
+[LEMON] "Always."
+[CARLOS] "She's right. We do."
+Sunny opens his beak to object and then closes it. Grins instead.
+[SUNNY] "Yeah. Okay. We do."
+[Continue →]
+
+---
+
+[waitDuration: 15 minutes — standing at the water's edge]
+
+You stand at the tideline. The water touches your feet and pulls back. Touches and pulls back. An indifferent gesture, but rhythmic. Almost like a signal.
+
+Behind you: the beach, Loulo's pink fronds visible even in the dimming light, Karl somewhere along the tideline being quietly, consistently sad and correct about things.
+
+Beside you: three seagulls, shaking out their wings, falling into a loose formation. Lemon on the left, calibrating something in her head. Carlos in the middle, watching the far horizon with the calm of someone who already knows what's out there. Sunny on the right, vibrating very slightly with enthusiasm.
+
+You look at what you're carrying.
+
+Dawn's Branch.
+The Flask of Tears.
+The Warming Pouch, with the Seed inside, glowing red-gold.
+London's Vial (Mossy Residue), still waiting.
+And now — if you took it — Loulo's Pot, warm in your talon, smelling faintly of salt and sun.
+
+[system, italic]
+You have been flying for a long time. You have met a crab who knows more than he lets on and cares more than he shows. You have met a pink tree who has decided to be exactly herself, fully and without apology. You have met three gulls who are family in the deepest sense of the word — bound not just by blood but by the specific accumulated history of watching each other fly.
+
+You are going across an ocean now.
+
+You spread your wings.
+
+The gulls rise around you.
+
+The water begins.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EPISODE COMPLETE: THE OPEN SHORE
+
+[episodeHeader]
+
+[system, italic]
+The atoll waits in the dark water.
+Below it, in the deep places where light does not reach,
+seven orange lights move slowly in their eternal circle.
+
+The Unnamed Tree is patient.
+
+The Frozen Crossing awaits...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CODING NOTES:
+
+CHARACTER SUMMARY:
+- KARL: StoryCharacter.karl — red-brown crab, walks sideways, chronically sad, quietly brilliant, passes news on beaches
+- LOULO: StoryCharacter.loulo — pink palm tree, warm, certain of herself, has been here a long time
+- LEMON: StoryCharacter.lemon — oldest sibling, navigates everything (ocean routes, her brothers, emotional situations)
+- CARLOS: StoryCharacter.carlos — twin to Sunny, philosophical, quiet, notices the hard-to-see things
+- SUNNY: StoryCharacter.sunny — twin to Carlos, enthusiastic, loves the crossing, genuinely happy
+
+INVENTORY CHANGES:
+- Loulo's Pot: can be obtained or deferred
+  - If obtained now: [Loulo's Pot obtained | Sand-fired vessel. Warm gold-pink. Holds intention. Remembers who filled it.]
+  - If deferred: flagged for future retrieval / choice moment
+- Note: Loulo's Pot replaces one of the other pots if player later takes a different one
+  - Track: state.intentionVessel = 'loulo' / 'abies' / 'cedite' / 'ash' / null
+- The other pots to track for future episodes:
+  - Abies: something about time / memory vs. past
+  - Cedite: balance / the space between
+  - Ash: beginning / the first moment
+
+WAIT DURATIONS (summary):
+- Rainforest to shore: 1 hour
+- Settling / first Karl approach: 30 minutes
+- Karl conversation: 45 minutes
+- Karl departure: 10 minutes
+- First sight of pink tree / walking over: 15 minutes
+- Gull introductions: 10 minutes
+- Meeting Loulo formally: 15 minutes
+- Afternoon conversations (Carlos / Lemon / Loulo): 1 hour + 20 min + 45 min
+- Loulo's pot conversation: 20 minutes
+- Farewells / departure: 30 + 15 minutes
+- Total: roughly 5-6 hours of real time gated behind the episode
+
+STAT EFFECTS (suggested):
+- Karl conversation — long path → connectivity +1
+- Carlos / flask exchange → stability +1
+- Taking Loulo's pot → intention vessel flagged; connectivity +1
+- Seed warmth: should recover during this episode due to sun exposure
+  - Start of ep: low (from ep3)
+  - By departure: stabilized / slightly recovered
+- Sunny departure → vitality +1 (he's infectious)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END DRAFT

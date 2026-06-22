@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/easter_eggs/abies_screen.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:gr0ve/core/widgets/misc/email_verification_gate.dart';
 import 'package:gr0ve/services/settings/fun_mode_service.dart';
@@ -638,41 +639,48 @@ class _CounselorScreenState extends State<CounselorScreen>
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
       child: Row(
         children: [
-          GestureDetector(
-            onLongPress: _showPersonaPicker,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: pc.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: pc.withOpacity(0.2)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.asset(
-                        _persona.avatarAsset(brightness),
-                        width: 22,
-                        height: 22,
-                        fit: BoxFit.cover,
+          HiddenFishTrigger(
+            id: 'somnus_when_we_all_fall_asleep',
+            gesture: HiddenFishTriggerGesture.doubleTap,
+            child: GestureDetector(
+              onLongPress: _showPersonaPicker,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: pc.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: pc.withOpacity(0.2)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: Image.asset(
+                          _persona.avatarAsset(brightness),
+                          width: 22,
+                          height: 22,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 7),
-                  Text(
-                    _persona.displayName,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: pc,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
+                    const SizedBox(width: 7),
+                    Text(
+                      _persona.displayName,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: pc,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

@@ -4,6 +4,42 @@ import 'changelog_models.dart';
 
 final List<ChangelogVersion> changelogVersions = [
   ChangelogVersion(
+    version: '2.3.0',
+    tagline: 'The Journey Continues',
+    description:
+        'Chapter 2 is finally here, along with major updates to Field Day and subtle mysteries to discover.',
+    features: [
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedBookOpen01,
+        title: 'Chapter 2: The Open Shore',
+        description:
+            'Traverse the Open Shore and prepare for the crossing. The story continues.',
+        color: const Color(0xFF3B82F6),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedCalendar03,
+        title: 'Field Day Focus',
+        description:
+            'Fully implemented the BCA Field Day screen and events widget with custom scheduling.',
+        color: const Color(0xFF10B981),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedLockPassword,
+        title: 'Security Patches',
+        description:
+            'Fixed minor stability and session token bugs in the Firebase Authentication system.',
+        color: const Color(0xFFF59E0B),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedSparkles,
+        title: 'Deep Waters',
+        description:
+            'Pay close attention to the deep waters. They say there are seven hidden orange fishes circling the Unnamed Tree...',
+        color: const Color(0xFFEC4899),
+      ),
+    ],
+  ),
+  ChangelogVersion(
     version: '2.2.0',
     tagline: 'The Half Anniversary Update',
     description:

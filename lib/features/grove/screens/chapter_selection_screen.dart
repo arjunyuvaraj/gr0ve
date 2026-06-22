@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish_service.dart';
 import 'package:gr0ve/features/grove/episodes/episode_registry.dart';
 
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
@@ -477,21 +480,9 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
           ),
           const SizedBox(height: 32),
 
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              'CHAPTER 1: THE ENTRY',
-              style: TextStyle(
-                fontFamily: 'JetBrains Mono',
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: colors.primary,
-                letterSpacing: 2.0,
-              ),
-            ),
-          ),
+          _buildChapterOneHeader(colors, isDark),
 
-          ...List.generate(groveEpisodes.length, (index) {
+          ...List.generate(4, (index) {
             final ep = groveEpisodes[index];
             final isUnlocked = ep.number <= maxEpisode;
             final isCompleted = ep.number < maxEpisode;
@@ -542,371 +533,401 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
               ),
             );
           }),
+          ValueListenableBuilder<Set<String>>(
+            valueListenable: HiddenFishService.foundIds,
+            builder: (context, foundIds, _) {
+              final isUnlocked =
+                  HiddenFishService.isChapterTwoUnlocked.value ||
+                  foundIds.length >= HiddenFishService.fish.length;
+              return _buildChapterTwoPreview(
+                colors,
+                pc,
+                isDark,
+                isUnlocked,
+                maxEpisode,
+              );
+            },
+          ),
+          const SizedBox(height: 48),
         ],
       ),
     );
   }
 
-  Widget _buildAnniversaryCountdown(ColorScheme colors, bool isDark) {
-    final targetDate = DateTime(2026, 5, 20, 8, 0, 0);
-    final remaining = targetDate.difference(_currentTime);
+  Widget _buildChapterTwoPreview(
+    ColorScheme colors,
+    Color pc,
+    bool isDark,
+    bool isUnlocked,
+    int maxEpisode,
+  ) {
+    final accent = isUnlocked
+        ? (isDark ? const Color(0xFF7BDFF2) : const Color(0xFF146C94))
+        : colors.onSurface.withOpacity(0.32);
 
-    if (remaining.isNegative) return const SizedBox.shrink();
-
-    final days = remaining.inDays;
-    final hours = remaining.inHours % 24;
-    final minutes = remaining.inMinutes % 60;
-    final seconds = remaining.inSeconds % 60;
-
-    final pc = colors.primary;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colors.outline.withOpacity(0.1)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'HALF-YEAR',
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: pc.withOpacity(0.8),
-              letterSpacing: 4.0,
+          _buildChapterHeaderStack(
+            colors: colors,
+            accent: accent,
+            badgeRow: SizedBox(
+              width: 132,
+              height: 32,
+              child: ValueListenableBuilder<Set<String>>(
+                valueListenable: HiddenFishService.foundIds,
+                builder: (context, foundIds, _) {
+                  const itemSize = 26.0;
+                  const spacing = 16.0;
+                  final totalWidth =
+                      itemSize + (HiddenFishService.fish.length - 1) * spacing;
+                  final start = (132 - totalWidth) / 2;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      for (var i = 0; i < HiddenFishService.fish.length; i++)
+                        Positioned(
+                          left: start + (i * spacing),
+                          child: _buildHiddenFishOrb(
+                            context,
+                            HiddenFishService.fish[i],
+                            foundIds.contains(HiddenFishService.fish[i].id),
+                            isUnlocked,
+                            colors,
+                            compact: true,
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
             ),
-            textAlign: TextAlign.center,
+            chapterLabel: 'CHAPTER 2',
+            subtitle: 'INTO THE WATER',
           ),
-          const SizedBox(height: 2),
-          Text(
-            'ANNIVERSARY',
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 22,
-              height: 1.0,
-              fontWeight: FontWeight.w900,
-              color: pc,
-              letterSpacing: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _countdownCell(days.toString().padLeft(2, '0'), 'DAYS', pc),
-              const SizedBox(width: 12),
-              _countdownCell(hours.toString().padLeft(2, '0'), 'HRS', pc),
-            ],
+          const SizedBox(height: 16),
+          _buildChapterCard(
+            groveEpisodes.firstWhere((episode) => episode.number == 4),
+            maxEpisode >= 4,
+            maxEpisode > 4,
+            maxEpisode == 4,
+            colors,
+            pc,
+            isDark,
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _countdownCell(minutes.toString().padLeft(2, '0'), 'MIN', pc),
-              const SizedBox(width: 12),
-              _countdownCell(seconds.toString().padLeft(2, '0'), 'SEC', pc),
-            ],
-          ),
-          if (widget.isBetaTester) ...[
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                HapticFeedback.heavyImpact();
-                setState(() {
-                  _gameState!.currentEpisode = groveEpisodes.length;
-                });
-                GroveProgressService.save(_gameState!);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: pc.withOpacity(0.1),
-                foregroundColor: pc,
-                elevation: 0,
-                side: BorderSide(color: pc.withOpacity(0.5)),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-              child: const Text(
-                'BETA: UNLOCK ALL EPISODES',
-                style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+          ..._buildChapterTwoEpisodeCards(colors, pc, isDark),
         ],
       ),
     );
   }
 
-  Widget _countdownCell(String value, String label, Color accent) {
-    return Container(
-      width: 72,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: accent.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withOpacity(0.15)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: accent,
-              height: 1.0,
+  Widget _buildChapterOneHeader(ColorScheme colors, bool isDark) {
+    final chosenPath = _gameState?.chosenPath;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Center(
+        child: _buildChapterHeaderStack(
+          colors: colors,
+          accent: colors.primary,
+          badgeRow: HiddenFishTrigger(
+            id: 'stinger_scorpion',
+            gesture: HiddenFishTriggerGesture.longPress,
+            child: SizedBox(
+              width: 132,
+              height: 32,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const itemSize = 26.0;
+                  const spacing = 16.0;
+                  final totalWidth = itemSize + (5 - 1) * spacing;
+                  final start = (constraints.maxWidth - totalWidth) / 2;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        left: start,
+                        child: _buildOrchardTreeBadge(
+                          StoryCharacter.dawn,
+                          colors,
+                          isDark,
+                          active: true,
+                          compact: true,
+                        ),
+                      ),
+                      Positioned(
+                        left: start + spacing,
+                        child: _buildOrchardTreeBadge(
+                          StoryCharacter.newton,
+                          colors,
+                          isDark,
+                          active: chosenPath == 'apple',
+                          compact: true,
+                        ),
+                      ),
+                      Positioned(
+                        left: start + spacing * 2,
+                        child: _buildOrchardTreeBadge(
+                          StoryCharacter.darwin,
+                          colors,
+                          isDark,
+                          active: chosenPath == 'orange',
+                          compact: true,
+                        ),
+                      ),
+                      Positioned(
+                        left: start + spacing * 3,
+                        child: _buildOrchardTreeBadge(
+                          StoryCharacter.salix,
+                          colors,
+                          isDark,
+                          active: _gameState?.salixUnlocked ?? false,
+                          compact: true,
+                        ),
+                      ),
+                      Positioned(
+                        left: start + spacing * 4,
+                        child: _buildOrchardTreeBadge(
+                          StoryCharacter.london,
+                          colors,
+                          isDark,
+                          active: _gameState?.londonUnlocked ?? false,
+                          compact: true,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              color: accent.withOpacity(0.6),
-              letterSpacing: 1.0,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFullScreenAnniversaryOverlay(
-    ColorScheme colors,
-    bool isDark,
-    DateTime targetDate,
-  ) {
-    final remaining = targetDate.difference(_currentTime);
-    if (remaining.isNegative) return const SizedBox.shrink();
-
-    final days = remaining.inDays;
-    final hours = remaining.inHours % 24;
-    final minutes = remaining.inMinutes % 60;
-    final seconds = remaining.inSeconds % 60;
-
-    final pc = colors.primary;
-
-    final quotes = [
-      "The branch does not point. It corrects.",
-      "Premium paths waste time more efficiently.",
-      "If it asks for payment, it is not the way.",
-      "Ownership matters more than totals.",
-      "Most gates test obedience, not intelligence.",
-      "A clean path is usually a curated lie.",
-      "The fastest route is rarely advertised.",
-      "If everyone is welcome, not everything is useful.",
-      "Defaults exist because most choices are noise.",
-      "Forty-seven options is a delay, not freedom.",
-      "Customization is a trap when time is the currency.",
-      "If it feels like progress, check the clock.",
-      "The seed does not care about aesthetics.",
-      "Warmth decays while you hesitate.",
-      "Side quests are disguised as generosity.",
-      "A friendly guide can still waste your time.",
-      "Silence moves faster than conversation.",
-      "The correct answer is often about perspective, not math.",
-      "The question is who owns it now.",
-      "Value is not what they label it.",
-      "Free and functional beats premium and locked.",
-      "If you can’t leave, it isn’t value.",
-      "The exit is the prize.",
-      "Rules are sometimes a performance.",
-      "Back paths are where truth is stored.",
-      "Perfect rows hide imperfect systems.",
-      "If it looks polished, inspect the back door.",
-      "The branch pulls when you drift.",
-      "Speed is a resource, not a stat.",
-      "Distraction has a friendly voice.",
-      "Not every “feature” is for you.",
-      "Ignore what does not move the seed forward.",
-      "If it requires membership, find the service entrance.",
-      "Scarcity is often staged.",
-      "Abundance is often chaotic.",
-      "Both can stall you.",
-      "The right choice reduces friction.",
-      "The wrong choice increases ceremony.",
-      "Ceremony is time disguised as quality.",
-      "Progress feels quiet.",
-      "Stalling feels engaging.",
-      "The seed cools while you explore.",
-      "You are not here to optimize the orchard.",
-      "You are here to leave it.",
-      "North is not a direction. It is a constraint.",
-      "The branch remembers when you forget.",
-      "The path is shorter behind the wall.",
-      "The wall is thinner than it looks.",
-      "The answer is not on the sign.",
-      "It is in what the sign prevents.",
-      "Take what works. Move.",
-      "Anything else is loss.",
-    ];
-
-    final quoteIndex = (_currentTime.second ~/ 4) % quotes.length;
-    final currentQuote = quotes[quoteIndex];
-
-    return Container(
-      width: double.infinity,
-      color: colors.surface,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'HALF-YEAR',
-                style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: pc.withOpacity(0.8),
-                  letterSpacing: 6.0,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'ANNIVERSARY',
-                style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: 38,
-                  height: 1.0,
-                  fontWeight: FontWeight.w900,
-                  color: pc,
-                  letterSpacing: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _bigCountdownCell(
-                    days.toString().padLeft(2, '0'),
-                    'DAYS',
-                    pc,
-                  ),
-                  const SizedBox(width: 16),
-                  _bigCountdownCell(
-                    hours.toString().padLeft(2, '0'),
-                    'HRS',
-                    pc,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _bigCountdownCell(
-                    minutes.toString().padLeft(2, '0'),
-                    'MIN',
-                    pc,
-                  ),
-                  const SizedBox(width: 16),
-                  _bigCountdownCell(
-                    seconds.toString().padLeft(2, '0'),
-                    'SEC',
-                    pc,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 800),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                child: Text(
-                  currentQuote,
-                  key: ValueKey<String>(currentQuote),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'JetBrains Mono',
-                    fontSize: 11,
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurface.withOpacity(0.5),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              if (widget.isBetaTester) ...[
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.2),
-                    foregroundColor: Colors.redAccent,
-                    elevation: 0,
-                    side: const BorderSide(color: Colors.redAccent),
-                  ),
-                  child: const Text(
-                    'beta testers, test story',
-                    style: TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+          chapterLabel: 'CHAPTER 1',
+          subtitle: 'INTO THE FIELD',
         ),
       ),
     );
   }
 
-  Widget _bigCountdownCell(String value, String label, Color accent) {
-    return Container(
-      width: 110,
-      height: 110,
-      decoration: BoxDecoration(
-        color: accent.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: accent.withOpacity(0.3)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 42,
-              fontWeight: FontWeight.w900,
-              color: accent,
-              height: 1.0,
-            ),
+  Widget _buildChapterHeaderStack({
+    required ColorScheme colors,
+    required Color accent,
+    required Widget badgeRow,
+    required String chapterLabel,
+    required String subtitle,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        badgeRow,
+        const SizedBox(height: 8),
+        Text(
+          chapterLabel,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'JetBrains Mono',
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: accent,
+            letterSpacing: 2.0,
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: accent.withOpacity(0.7),
-              letterSpacing: 2.0,
-            ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'JetBrains Mono',
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            color: colors.onSurface,
+            letterSpacing: 1.0,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHiddenFishOrb(
+    BuildContext context,
+    HiddenFishDefinition fish,
+    bool isFound,
+    bool isUnlocked,
+    ColorScheme colors, {
+    bool compact = false,
+  }) {
+    final active = isUnlocked || isFound;
+    final circleColor = colors.brightness == Brightness.dark
+        ? Color(0xFF1d1d1d)
+        : Color(0xFFFFFFFF);
+    final fishTint = active ? null : Colors.black;
+    final size = compact ? 26.0 : 48.0;
+    final padding = compact ? 4.0 : 8.0;
+
+    final orb = AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: circleColor,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: active
+              ? colors.onSurface.withOpacity(0.18)
+              : colors.onSurface.withOpacity(0.10),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(active ? 0.12 : 0.06),
+            blurRadius: compact ? 4 : 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
+      child: Padding(
+        padding: EdgeInsets.all(padding),
+        child: SvgPicture.asset(
+          fish.asset,
+          fit: BoxFit.contain,
+          colorFilter: fishTint == null
+              ? null
+              : const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+        ),
+      ),
+    );
+
+    if (!active) {
+      return Semantics(label: 'Hidden fish', child: orb);
+    }
+
+    return Semantics(
+      label: '${fish.name} found',
+      button: true,
+      child: GestureDetector(
+        onTap: () => HiddenFishService.showInfoDialog(context, fish),
+        behavior: HitTestBehavior.opaque,
+        child: orb,
+      ),
     );
   }
+
+  Widget _buildOrchardTreeBadge(
+    StoryCharacter character,
+    ColorScheme colors,
+    bool isDark, {
+    required bool active,
+    bool compact = false,
+  }) {
+    final size = compact ? 26.0 : 42.0;
+    final brightness = isDark ? Brightness.dark : Brightness.light;
+    final asset = character.avatarAsset(brightness);
+    final grayscale = active
+        ? null
+        : const ColorFilter.matrix(<double>[
+            0.2126,
+            0.7152,
+            0.0722,
+            0,
+            0,
+            0.2126,
+            0.7152,
+            0.0722,
+            0,
+            0,
+            0.2126,
+            0.7152,
+            0.0722,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+          ]);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: colors.brightness == Brightness.dark
+            ? Color(0xFF1a1a1a)
+            : Color(0xFFFFFFFF),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: active
+              ? colors.primary.withOpacity(0.28)
+              : colors.onSurface.withOpacity(0.10),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(active ? 0.12 : 0.06),
+            blurRadius: compact ? 4 : 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(compact ? 4 : 7),
+        child: grayscale == null
+            ? Image.asset(asset, fit: BoxFit.contain)
+            : ColorFiltered(
+                colorFilter: grayscale,
+                child: Image.asset(asset, fit: BoxFit.contain),
+              ),
+      ),
+    );
+  }
+
+  List<Widget> _buildChapterTwoEpisodeCards(
+    ColorScheme colors,
+    Color pc,
+    bool isDark,
+  ) {
+    final comingSoonEpisodes = [
+      Episode(
+        id: 'chapter2_episode5',
+        number: 5,
+        title: 'The Unnamed Waters',
+        description:
+            'Waters with no name still remember every step taken into them.',
+        buildScenes: _emptyComingSoonScenes,
+        isComingSoon: true,
+      ),
+      Episode(
+        id: 'chapter2_episode6',
+        number: 6,
+        title: 'The Frigid Landfall',
+        description:
+            'At long last, the final stretch, but a broken wing and final breath',
+        buildScenes: _emptyComingSoonScenes,
+        isComingSoon: true,
+      ),
+    ];
+
+    return comingSoonEpisodes
+        .map(
+          (episode) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildChapterCard(
+              episode,
+              false,
+              false,
+              false,
+              colors,
+              pc,
+              isDark,
+            ),
+          ),
+        )
+        .toList();
+  }
+
+  FutureOr<List<Scene>> _emptyComingSoonScenes() => const <Scene>[];
 
   Widget _buildChapterCard(
     Episode episode,

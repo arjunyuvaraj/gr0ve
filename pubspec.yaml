@@ -2,7 +2,7 @@ name: gr0ve
 description: "Your All-in-One BCA App"
 publish_to: "none"
 
-version: 2.2.3+42
+version: 2.3.0+45
 
 environment:
   sdk: ^3.9.2
@@ -29,6 +29,7 @@ dependencies:
   html: ^0.15.6
   flutter_html: ^3.0.0
   flutter_markdown: ^0.7.7+1
+  flutter_svg: ^2.2.3
   flutter_dynamic_launcher_icon: ^0.0.2
   dotenv: ^4.2.0
   flutter_dotenv: ^6.0.0
@@ -66,6 +67,7 @@ flutter:
     - assets/credentials/service_account.json
     - assets/profile/academy/
     - assets/field_day/
+    - assets/fish/
     - assets/app_icons/png/
     - assets/profile/grover/
     - assets/profile/aspen/
@@ -81,6 +83,7 @@ flutter:
     - assets/story/characters/ep2/sheep/
     - assets/story/characters/ep2/baby/
     - assets/story/characters/ep3/
+    - assets/story/characters/ep4/
     - assets/story/inventory/
     - shorebird.yaml
     - .env

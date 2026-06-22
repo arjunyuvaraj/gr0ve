@@ -214,6 +214,8 @@ class EpisodeCompleteSheet extends StatelessWidget {
                         value: state.transience,
                         colors: colors,
                       ),
+                      const SizedBox(height: 16),
+                      _SeedWarmthStat(value: state.seedWarmth, colors: colors),
                     ],
                   ),
                 ),
@@ -251,6 +253,92 @@ class EpisodeCompleteSheet extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SeedWarmthStat extends StatelessWidget {
+  final int value;
+  final ColorScheme colors;
+
+  const _SeedWarmthStat({required this.value, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = (value / 100).clamp(0.0, 1.0);
+    final warmthColor = Color.lerp(
+      const Color(0xFFD63031),
+      const Color(0xFFF1C40F),
+      normalized,
+    )!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 12,
+                  color: colors.onSurface.withOpacity(0.5),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'SEED WARMTH',
+                  style: TextStyle(
+                    fontFamily: 'JetBrains Mono',
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: colors.onSurface.withOpacity(0.5),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: warmthColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: warmthColor.withOpacity(0.2)),
+              ),
+              child: Text(
+                '$value%',
+                style: TextStyle(
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: warmthColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          height: 14,
+          decoration: BoxDecoration(
+            color: colors.onSurface.withOpacity(0.04),
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(color: colors.onSurface.withOpacity(0.06)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: normalized,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [warmthColor.withOpacity(0.65), warmthColor],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

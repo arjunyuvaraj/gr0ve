@@ -7,6 +7,7 @@ import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/extensions/string_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 
 class LunchMenuScreen extends StatefulWidget {
   const LunchMenuScreen({super.key});
@@ -141,7 +142,11 @@ class _LunchMenuScreenState extends State<LunchMenuScreen> {
       padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
       child: Column(
         children: [
-          CustomHeader(title: 'LUNCH'.capitalized),
+          HiddenFishTrigger(
+            id: 'solito_un_verano_sin_ti',
+            gesture: HiddenFishTriggerGesture.longPress,
+            child: CustomHeader(title: 'LUNCH'.capitalized),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: searchController,
@@ -342,11 +347,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('tree nut') || lower.contains('nuts')) {
       return {
-        'icon': const Icon(
-          Icons.error_rounded,
-          size: 14,
-          color: Colors.white,
-        ),
+        'icon': const Icon(Icons.error_rounded, size: 14, color: Colors.white),
         'label': 'Nuts',
         'color': Colors.brown.shade600,
       };
@@ -354,11 +355,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('peanut')) {
       return {
-        'icon': const Icon(
-          Icons.error_rounded,
-          size: 14,
-          color: Colors.white,
-        ),
+        'icon': const Icon(Icons.error_rounded, size: 14, color: Colors.white),
         'label': 'Peanut',
         'color': Colors.brown.shade800,
       };
@@ -366,11 +363,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('fish')) {
       return {
-        'icon': const Icon(
-          Icons.set_meal,
-          size: 14,
-          color: Colors.white,
-        ),
+        'icon': const Icon(Icons.set_meal, size: 14, color: Colors.white),
         'label': 'Fish',
         'color': Colors.blueAccent,
       };
@@ -378,11 +371,7 @@ class _MenuItemCard extends StatelessWidget {
 
     if (lower.contains('shellfish') || lower.contains('crustacean')) {
       return {
-        'icon': const Icon(
-          Icons.restaurant,
-          size: 14,
-          color: Colors.white,
-        ),
+        'icon': const Icon(Icons.restaurant, size: 14, color: Colors.white),
         'label': 'Shellfish',
         'color': Colors.pink,
       };

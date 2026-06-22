@@ -130,6 +130,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       _checkAdminStatus(),
       _loadNavigationOrder(),
       _loadVersionInfo(),
+      AppFeatureFlags.load(),
     ]);
   }
 

@@ -1974,9 +1974,24 @@ List<Scene> buildEpisode01Orchard() {
         state.seedWarmth = state.seedWarmth.clamp(60, 90);
         state.episodeComplete = true;
         if (state.chosenPath == 'apple') {
+          state.inventory.removeWhere(
+            (item) => item == 'Orange Juice' || item == 'Custom Orange Juice',
+          );
+          if (!state.inventory.contains('Apple Juice')) {
+            state.inventory.add('Apple Juice');
+          }
           state.newtonUnlocked = true;
           state.darwinUnlocked = false;
         } else {
+          state.inventory.removeWhere(
+            (item) =>
+                item == 'Apple Juice' ||
+                item == 'iJuice Premium™' ||
+                item == 'iJuice Plus™',
+          );
+          if (!state.inventory.contains('Orange Juice')) {
+            state.inventory.add('Orange Juice');
+          }
           state.darwinUnlocked = true;
           state.newtonUnlocked = false;
         }

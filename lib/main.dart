@@ -45,6 +45,7 @@ import 'package:gr0ve/features/home/widgets/school_closed_overlay.dart';
 import 'package:gr0ve/features/maintenance/screens/maintenance_screen.dart';
 import 'package:gr0ve/services/settings/fun_mode_service.dart';
 import 'package:gr0ve/features/grove/services/grove_unlock_service.dart';
+import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -135,7 +136,8 @@ Future<void> _bootUserServices(User user) async {
   if (kDebugMode) print('[BOOT] UserDoc fetched (${sw.elapsedMilliseconds}ms)');
 
   if (userData == null) {
-    if (kDebugMode) print('[BOOT] User document missing after retries - signing out');
+    if (kDebugMode)
+      print('[BOOT] User document missing after retries - signing out');
     AuthenticationService().signOut();
     return;
   }
@@ -145,6 +147,8 @@ Future<void> _bootUserServices(User user) async {
     ProfilePictureService.init(cachedUserData: userData),
     DawnUnlockService.init(cachedUserData: userData),
     GroveUnlockService.init(cachedUserData: userData),
+    AppFeatureFlags.load(),
+    HiddenFishService.init(cachedUserData: userData),
     StarredTeacherService.load(),
     StarredBusService.load(),
     LayoutService.load(),
@@ -161,7 +165,6 @@ Future<void> _bootUserServices(User user) async {
     print('[BOOT] Core services ready (${sw.elapsedMilliseconds}ms)');
   }
 
-
   if (kDebugMode)
     print('[BOOT] User services ready (${sw.elapsedMilliseconds}ms)');
 }
@@ -171,6 +174,7 @@ void _teardownUserServices() {
   StarredBusService.reset();
   CalendarService.reset();
   NotificationService().stopListening();
+  HiddenFishService.reset();
   UserDocCache.invalidate();
 }
 

@@ -21,6 +21,7 @@ class GroveGameState {
   bool darwinUnlocked;
   bool salixUnlocked;
   bool londonUnlocked;
+  String? intentionVessel;
   int? busyUntil;
   String? pendingScene;
   int skips1h;
@@ -54,6 +55,7 @@ class GroveGameState {
     this.darwinUnlocked = false,
     this.salixUnlocked = false,
     this.londonUnlocked = false,
+    this.intentionVessel,
     this.newtonRiddleAttempts = 0,
     this.newtonRiddleSolved = false,
     this.newtonExitAttempts = 0,
@@ -97,6 +99,7 @@ class GroveGameState {
       'darwinUnlocked': darwinUnlocked,
       'salixUnlocked': salixUnlocked,
       'londonUnlocked': londonUnlocked,
+      'intentionVessel': intentionVessel,
       'newtonRiddleAttempts': newtonRiddleAttempts,
       'newtonRiddleSolved': newtonRiddleSolved,
       'newtonExitAttempts': newtonExitAttempts,
@@ -138,6 +141,7 @@ class GroveGameState {
       darwinUnlocked: json['darwinUnlocked'] as bool? ?? false,
       salixUnlocked: json['salixUnlocked'] as bool? ?? false,
       londonUnlocked: json['londonUnlocked'] as bool? ?? false,
+      intentionVessel: json['intentionVessel'] as String?,
       newtonRiddleAttempts: json['newtonRiddleAttempts'] as int? ?? 0,
       newtonRiddleSolved: json['newtonRiddleSolved'] as bool? ?? false,
       newtonExitAttempts: json['newtonExitAttempts'] as int? ?? 0,
@@ -188,6 +192,7 @@ class GroveGameState {
     bool? darwinUnlocked,
     bool? salixUnlocked,
     bool? londonUnlocked,
+    String? intentionVessel,
     int? newtonRiddleAttempts,
     bool? newtonRiddleSolved,
     int? newtonExitAttempts,
@@ -218,6 +223,7 @@ class GroveGameState {
       darwinUnlocked: darwinUnlocked ?? this.darwinUnlocked,
       salixUnlocked: salixUnlocked ?? this.salixUnlocked,
       londonUnlocked: londonUnlocked ?? this.londonUnlocked,
+      intentionVessel: intentionVessel ?? this.intentionVessel,
       newtonRiddleAttempts: newtonRiddleAttempts ?? this.newtonRiddleAttempts,
       newtonRiddleSolved: newtonRiddleSolved ?? this.newtonRiddleSolved,
       newtonExitAttempts: newtonExitAttempts ?? this.newtonExitAttempts,
@@ -331,7 +337,7 @@ class GroveProgressService {
           updates.addAll(skipUpdates);
         }
 
-        await FirebaseFirestore.instance
+        FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
             .update(updates)
@@ -417,7 +423,7 @@ class GroveProgressService {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
+        FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
             .update({
@@ -426,16 +432,18 @@ class GroveProgressService {
               'story_darwin_unlocked': FieldValue.delete(),
               'story_salix_unlocked': FieldValue.delete(),
               'story_london_unlocked': FieldValue.delete(),
-            });
+            }).catchError((_) {});
 
-        final historyDocs = await FirebaseFirestore.instance
+        FirebaseFirestore.instance
             .collection(_firestoreCollection)
             .doc(user.uid)
             .collection('grove_history')
-            .get();
-        for (final doc in historyDocs.docs) {
-          await doc.reference.delete();
-        }
+            .get()
+            .then((historyDocs) {
+          for (final doc in historyDocs.docs) {
+            doc.reference.delete();
+          }
+        }).catchError((_) {});
 
         _lastSyncedSkips1h = null;
         _lastSyncedSkips3h = null;
@@ -491,6 +499,8 @@ class GroveProgressService {
       newState.londonUnlocked = false;
       newState.inventory.remove('Mossy Residue');
       newState.inventory.remove('Warming Pouch');
+      newState.inventory.remove("Loulo's Pot");
+      newState.intentionVessel = null;
     }
     if (episodeNumber <= 2) {
       newState.salixUnlocked = false;
