@@ -76,6 +76,15 @@ Future<Map<String, String>> fetchGoogleSheetAbsences({
       }
     }
 
+    if (data.containsKey('lastUpdated')) {
+      final ts = data['lastUpdated'];
+      if (ts is Timestamp) {
+        absenceMap['lastUpdated'] = ts.toDate().toIso8601String();
+      } else {
+        absenceMap['lastUpdated'] = ts.toString();
+      }
+    }
+
     if (data.containsKey('teachers')) {
       final teachers = data['teachers'] as Map<String, dynamic>;
       if (kDebugMode) {

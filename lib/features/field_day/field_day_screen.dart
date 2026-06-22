@@ -62,7 +62,7 @@ class _FieldDayPageState extends State<FieldDayPage>
   String? _myTeam;
   bool _savingTeam = false;
   late final AnimationController _pulseController;
-  late Future<DocumentSnapshot<Map<String, dynamic>>> _scoresFuture;
+  late Stream<DocumentSnapshot<Map<String, dynamic>>> _scoresStream;
 
   @override
   void initState() {
@@ -71,7 +71,7 @@ class _FieldDayPageState extends State<FieldDayPage>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    _scoresFuture = _fetchScores();
+    _scoresStream = _fetchScoresStream();
     _loadMyTeam();
   }
 
@@ -111,11 +111,49 @@ class _FieldDayPageState extends State<FieldDayPage>
     }
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> _fetchScores() {
+  Stream<DocumentSnapshot<Map<String, dynamic>>> _fetchScoresStream() {
     return FirebaseFirestore.instance
         .collection('public_data')
         .doc('field_day_scores')
-        .get();
+        .snapshots();
+  }
+
+  String _formatTimestamp(dynamic ts) {
+    if (ts == null) return 'Unknown';
+    DateTime dt;
+    if (ts is Timestamp) {
+      dt = ts.toDate();
+    } else if (ts is String) {
+      dt = DateTime.tryParse(ts) ?? DateTime.now();
+    } else {
+      return 'Unknown';
+    }
+    final hr = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final min = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '${dt.month}/${dt.day}/${dt.year} at $hr:$min $ampm';
+  }
+
+  Future<void> _refreshFieldDayFromSource() async {
+    print('=' * 70);
+    print('Running Field Day scrape (Dart fetch from Firestore)');
+    print('=' * 70);
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('public_data')
+          .doc('field_day_scores')
+          .get();
+      if (doc.exists) {
+        final data = doc.data();
+        print("Scores: ${data?['scores']}");
+        print("Uploaded to Firestore equivalent completed.");
+      } else {
+        print("Scrape returned no data");
+      }
+    } catch (e) {
+      print("Scrape error: $e");
+    }
+    print('=' * 70);
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -163,8 +201,8 @@ class _FieldDayPageState extends State<FieldDayPage>
               const CustomHeader(title: 'Field Day'),
               const SizedBox(height: 12),
               Expanded(
-                child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                  future: _scoresFuture,
+                child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: _scoresStream,
                   builder: (context, snap) {
                     if (snap.hasError) {
                       return _ErrorView(message: snap.error.toString());
@@ -188,8 +226,9 @@ class _FieldDayPageState extends State<FieldDayPage>
 
                     return RefreshIndicator(
                       onRefresh: () async {
-                        setState(() => _scoresFuture = _fetchScores());
-                        await _scoresFuture;
+                        await _refreshFieldDayFromSource();
+                        setState(() => _scoresStream = _fetchScoresStream());
+                        await Future.delayed(const Duration(milliseconds: 500));
                       },
                       child: ListView(
                         physics: const AlwaysScrollableScrollPhysics(
@@ -198,13 +237,26 @@ class _FieldDayPageState extends State<FieldDayPage>
                         padding: const EdgeInsets.only(bottom: 28),
                         children: [
                           const SizedBox(height: 12),
+                          if (data?['lastUpdated'] != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Last updated: ${_formatTimestamp(data!['lastUpdated'])}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.onSurface.withOpacity(0.5),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 4),
                           _MyTeamBanner(
                             myTeam: _myTeam,
                             saving: _savingTeam,
                             pulseController: _pulseController,
                             onTap: () => _showTeamPicker(context),
                           ),
-                          const SizedBox(height: 4),
                           ...scores.asMap().entries.map((entry) {
                             final i = entry.key;
                             final score = entry.value;

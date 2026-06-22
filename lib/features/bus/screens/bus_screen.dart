@@ -368,6 +368,22 @@ class _BusScreenState extends State<BusScreen> {
     );
   }
 
+  String _formatTimestamp(dynamic ts) {
+    if (ts == null) return 'Unknown';
+    DateTime dt;
+    if (ts is Timestamp) {
+      dt = ts.toDate();
+    } else if (ts is String) {
+      dt = DateTime.tryParse(ts) ?? DateTime.now();
+    } else {
+      return 'Unknown';
+    }
+    final hr = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final min = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '${dt.month}/${dt.day}/${dt.year} at $hr:$min $ampm';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
@@ -415,6 +431,19 @@ class _BusScreenState extends State<BusScreen> {
                 ),
               ),
             const SizedBox(height: 8),
+            if (busRoutesLastUpdated != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Last updated: ${_formatTimestamp(busRoutesLastUpdated)}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
             TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 600),
               curve: Curves.easeOutCubic,

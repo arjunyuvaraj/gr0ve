@@ -40,6 +40,7 @@ class SheetsConfig {
 
 List<BusRoute>? _cachedBusRoutes;
 DateTime? _cachedBusRoutesAt;
+String? busRoutesLastUpdated;
 const _busRoutesCacheTtl = Duration(minutes: 5);
 
 Future<void> refreshBusRoutesFromSheets() async {
@@ -239,6 +240,10 @@ Future<List<BusRoute>> fetchBusRoutes() async {
 
     if (kDebugMode) {
       print('Successfully loaded ${routes.length} bus routes from Firestore');
+    }
+
+    if (data.containsKey('updated_at')) {
+      busRoutesLastUpdated = data['updated_at'].toString();
     }
 
     _cachedBusRoutes = routes;

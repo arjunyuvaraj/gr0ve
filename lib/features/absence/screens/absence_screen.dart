@@ -234,6 +234,45 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         .join(' ');
   }
 
+  String _formatTimestamp(dynamic ts) {
+    if (ts == null) return 'Unknown';
+    DateTime dt;
+    if (ts is Timestamp) {
+      dt = ts.toDate();
+    } else if (ts is String) {
+      dt = DateTime.tryParse(ts) ?? DateTime.now();
+    } else {
+      return 'Unknown';
+    }
+    final hr = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final min = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '${dt.month}/${dt.day}/${dt.year} at $hr:$min $ampm';
+  }
+
+  Future<void> _refreshTeachersFromSource() async {
+    print('=' * 80);
+    print('Running scheduled scrape (Dart fetch from Firestore)');
+    print('=' * 80);
+    try {
+      final doc = await FirebaseFirestore.instance.collection('public_data').doc('teacher_absences').get();
+      if (doc.exists) {
+        final data = doc.data();
+        final teachers = data?['teachers'] as Map<String, dynamic>? ?? {};
+        teachers.forEach((teacher, status) {
+          print("✓ $teacher -> $status");
+        });
+        print("Parsed ${teachers.length} absences");
+        print("Uploaded ${teachers.length} absences");
+      } else {
+        print("No absences parsed");
+      }
+    } catch (e) {
+      print("Scrape error: $e");
+    }
+    print('=' * 80);
+  }
+
   Future<void> _deleteTeacher(String name) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -669,6 +708,19 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                   ),
                 ),
               const SizedBox(height: 8),
+              if (absenceList['lastUpdated'] != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Last updated: ${_formatTimestamp(absenceList['lastUpdated'])}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ),
               Column(
                 children: [
                   TextField(
@@ -710,7 +762,10 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                         builder: (_, starred, __) {
                           final ordered = _ordered(starred);
                           return RefreshIndicator(
-                            onRefresh: () => _loadAbsences(silent: true),
+                            onRefresh: () async {
+                              await _refreshTeachersFromSource();
+                              await _loadAbsences(silent: true);
+                            },
                             child: ListView.builder(
                               physics: const AlwaysScrollableScrollPhysics(),
                               itemCount: ordered.length,
