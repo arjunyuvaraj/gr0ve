@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 
 class TInventorySheet extends StatefulWidget {
   final List<String> items;
@@ -230,7 +231,7 @@ class _TInventorySheetState extends State<TInventorySheet> {
                         ),
                         child: hasItem
                             ? (asset != null
-                                  ? Image.asset(asset, fit: BoxFit.contain)
+                                  ? RemoteAssetImage(asset, fit: BoxFit.contain)
                                   : Text(
                                       itemName.toUpperCase(),
                                       textAlign: TextAlign.center,

@@ -1,11 +1,13 @@
+import 'dart:async';
+import 'dart:io' as io;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
 import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
-import 'dart:io' as io;
 
 enum CounselorPersona { grover, aspen, rowan, sakura, abies, cedite, ash }
 
@@ -122,7 +124,15 @@ class AppFeatureFlags {
   static final ValueNotifier<bool> enableClubs = ValueNotifier(false);
   static final ValueNotifier<bool> enableCounselor = ValueNotifier(false);
   static final ValueNotifier<bool> isReady = ValueNotifier(false);
+  static final ValueNotifier<String> maintenanceTitle = ValueNotifier(
+    'UNDER_MAINTENANCE',
+  );
+  static final ValueNotifier<String> maintenanceMessage = ValueNotifier(
+    "The grove is currently resting. We'll be back shortly.",
+  );
   static final List<String> _betaTesters = [];
+  static StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+  _flagsSubscription;
 
   static bool isBetaTester(String? email) {
     if (email == null) return false;
@@ -136,6 +146,7 @@ class AppFeatureFlags {
       const Duration(seconds: 2),
       onTimeout: () => print('[FLAGS] Load timed out, proceeding...'),
     );
+    _listenForFlagChanges();
     isReady.value = true;
   }
 
@@ -147,30 +158,66 @@ class AppFeatureFlags {
           .get();
       if (!doc.exists) return;
 
-      final data = doc.data();
-      lockdownMode.value = data?['lockdown_mode'] ?? false;
-
-      final testers = List<String>.from(data?['beta_testers'] ?? []);
-      _betaTesters.clear();
-      _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
-
-      final currentEmail = FirebaseAuth.instance.currentUser?.email;
-      final isBetaTesterFlag = isBetaTester(currentEmail);
-      isBeta.value = isBetaTesterFlag;
-
-      enableClubs.value = (data?['enable_clubs'] ?? false) || isBetaTesterFlag;
-      enableCounselor.value =
-          (data?['enable_counselor'] ?? false) || isBetaTesterFlag;
-
-      print('[FLAGS] --- SYSTEM STATUS ---');
-      print('[FLAGS] Lockdown Active: ${lockdownMode.value}');
-      print('[FLAGS] User Is Beta: $isBetaTesterFlag');
-      print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
-      print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
-      print('[FLAGS] -----------------------');
+      _applyFlagData(doc.data());
     } catch (e) {
       print('[FLAGS] Load error: $e');
     }
+  }
+
+  static void _listenForFlagChanges() {
+    if (_flagsSubscription != null) return;
+    if (FirebaseAuth.instance.currentUser == null) return;
+
+    _flagsSubscription = FirebaseFirestore.instance
+        .collection('app_config')
+        .doc('feature_flags')
+        .snapshots()
+        .listen(
+          (doc) {
+            if (!doc.exists) return;
+            _applyFlagData(doc.data());
+          },
+          onError: (Object e) {
+            if (kDebugMode) print('[FLAGS] Realtime listener error: $e');
+            _flagsSubscription?.cancel();
+            _flagsSubscription = null;
+          },
+        );
+  }
+
+  static void _applyFlagData(Map<String, dynamic>? data) {
+    if (data == null) return;
+
+    lockdownMode.value =
+        (data['maintenance_mode'] ?? data['lockdown_mode'] ?? false) == true;
+
+    final testers = List<String>.from(data['beta_testers'] ?? []);
+    _betaTesters.clear();
+    _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
+
+    final title = data['maintenance_title']?.toString().trim();
+    final message = data['maintenance_message']?.toString().trim();
+    maintenanceTitle.value = title != null && title.isNotEmpty
+        ? title
+        : 'UNDER_MAINTENANCE';
+    maintenanceMessage.value = message != null && message.isNotEmpty
+        ? message
+        : "The grove is currently resting. We'll be back shortly.";
+
+    final currentEmail = FirebaseAuth.instance.currentUser?.email;
+    final isBetaTesterFlag = isBetaTester(currentEmail);
+    isBeta.value = isBetaTesterFlag;
+
+    enableClubs.value = (data['enable_clubs'] ?? false) || isBetaTesterFlag;
+    enableCounselor.value =
+        (data['enable_counselor'] ?? false) || isBetaTesterFlag;
+
+    print('[FLAGS] --- SYSTEM STATUS ---');
+    print('[FLAGS] Maintenance Active: ${lockdownMode.value}');
+    print('[FLAGS] User Is Beta: $isBetaTesterFlag');
+    print('[FLAGS] Clubs Enabled: ${enableClubs.value}');
+    print('[FLAGS] Counselor Enabled: ${enableCounselor.value}');
+    print('[FLAGS] -----------------------');
   }
 
   static Future<void> loadUserUnlocks(String uid) async {}

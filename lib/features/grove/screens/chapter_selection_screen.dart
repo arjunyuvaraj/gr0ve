@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish.dart';
 import 'package:gr0ve/features/easter_eggs/hidden_fish/hidden_fish_service.dart';
@@ -482,7 +483,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
 
           _buildChapterOneHeader(colors, isDark),
 
-          ...List.generate(4, (index) {
+          ...List.generate(5, (index) {
             final ep = groveEpisodes[index];
             final isUnlocked = ep.number <= maxEpisode;
             final isCompleted = ep.number < maxEpisode;
@@ -618,7 +619,7 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
             isDark,
           ),
           const SizedBox(height: 12),
-          ..._buildChapterTwoEpisodeCards(colors, pc, isDark),
+          ..._buildChapterTwoEpisodeCards(colors, pc, isDark, maxEpisode),
         ],
       ),
     );
@@ -874,10 +875,10 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
       child: Padding(
         padding: EdgeInsets.all(compact ? 4 : 7),
         child: grayscale == null
-            ? Image.asset(asset, fit: BoxFit.contain)
+            ? RemoteAssetImage(asset, fit: BoxFit.contain)
             : ColorFiltered(
                 colorFilter: grayscale,
-                child: Image.asset(asset, fit: BoxFit.contain),
+                child: RemoteAssetImage(asset, fit: BoxFit.contain),
               ),
       ),
     );
@@ -887,37 +888,21 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
     ColorScheme colors,
     Color pc,
     bool isDark,
+    int maxEpisode,
   ) {
-    final comingSoonEpisodes = [
-      Episode(
-        id: 'chapter2_episode5',
-        number: 5,
-        title: 'The Unnamed Waters',
-        description:
-            'Waters with no name still remember every step taken into them.',
-        buildScenes: _emptyComingSoonScenes,
-        isComingSoon: true,
-      ),
-      Episode(
-        id: 'chapter2_episode6',
-        number: 6,
-        title: 'The Frigid Landfall',
-        description:
-            'At long last, the final stretch, but a broken wing and final breath',
-        buildScenes: _emptyComingSoonScenes,
-        isComingSoon: true,
-      ),
-    ];
+    final chapterTwoEpisodes = groveEpisodes
+        .where((ep) => ep.number >= 5)
+        .toList();
 
-    return comingSoonEpisodes
+    return chapterTwoEpisodes
         .map(
           (episode) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildChapterCard(
               episode,
-              false,
-              false,
-              false,
+              episode.number <= maxEpisode,
+              episode.number < maxEpisode,
+              episode.number == maxEpisode,
               colors,
               pc,
               isDark,
@@ -926,8 +911,6 @@ class _ChapterSelectionScreenState extends State<ChapterSelectionScreen>
         )
         .toList();
   }
-
-  FutureOr<List<Scene>> _emptyComingSoonScenes() => const <Scene>[];
 
   Widget _buildChapterCard(
     Episode episode,

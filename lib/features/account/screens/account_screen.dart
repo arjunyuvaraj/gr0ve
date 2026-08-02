@@ -18,6 +18,7 @@ import 'package:gr0ve/legal/terms_screen.dart';
 import 'package:gr0ve/services/starred/starred_bus_service.dart';
 import 'package:gr0ve/services/starred/starred_teacher_service.dart';
 import 'package:gr0ve/core/widgets/dialogs/confirm_dialog.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_persona_picker.dart';
 import 'package:gr0ve/features/authentication/services/authentication_service.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
@@ -1145,7 +1146,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     left: 4,
                     top: 4,
                     child: ClipOval(
-                      child: Image.asset(
+                      child: RemoteAssetImage(
                         _activeVariant.assetPath(brightness),
                         width: avatarSize - 8,
                         height: avatarSize - 8,
@@ -1365,7 +1366,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     _settingsRow(
                       leadingWidget: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
+                        child: RemoteAssetImage(
                           _activeVariant.assetPath(brightness),
                           width: 34,
                           height: 34,
@@ -1700,7 +1701,7 @@ class _AccountScreenState extends State<AccountScreen> {
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
+                child: RemoteAssetImage(
                   _activePersona.avatarAsset(brightness),
                   width: 34,
                   height: 34,

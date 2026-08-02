@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 
@@ -467,7 +468,7 @@ class _PassphraseScreenState extends State<_PassphraseScreen>
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
+                              child: RemoteAssetImage(
                                 CounselorPersona.ash.avatarAsset(brightness),
                                 width: 64,
                                 height: 64,
@@ -677,7 +678,7 @@ class _AshRevealScreenState extends State<AshRevealScreen>
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
+                              child: RemoteAssetImage(
                                 CounselorPersona.ash.avatarAsset(brightness),
                                 width: 96,
                                 height: 96,

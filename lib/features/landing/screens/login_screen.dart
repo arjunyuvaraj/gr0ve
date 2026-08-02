@@ -1,8 +1,11 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
+import 'package:gr0ve/core/helper/web_device_context.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
 import 'package:gr0ve/features/authentication/services/authentication_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,10 +24,35 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   String? _errorMessage;
 
+  Future<void> _settleKeyboardForNavigation() async {
+    final shouldWaitForMobileWebKeyboard = WebDeviceContext.isMobileWeb(
+      context,
+    );
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    } catch (_) {}
+    if (shouldWaitForMobileWebKeyboard) {
+      await Future<void>.delayed(const Duration(milliseconds: 220));
+    } else {
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     FirebaseAnalytics.instance.logEvent(name: 'screen_login');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (WebDeviceContext.shouldUseDesktopDashboard(context)) {
+        launchUrl(
+          Uri.base.resolve('/dashboard'),
+          mode: LaunchMode.platformDefault,
+          webOnlyWindowName: '_self',
+        );
+      }
+    });
   }
 
   @override
@@ -43,13 +71,27 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      await _settleKeyboardForNavigation();
+      if (!mounted) return;
+
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
       await _authService.signInWithEmail(email, password);
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/navigation');
+        await _settleKeyboardForNavigation();
+        if (!mounted) return;
+
+        if (WebDeviceContext.shouldUseDesktopDashboard(context)) {
+          await launchUrl(
+            Uri.base.resolve('/dashboard'),
+            mode: LaunchMode.platformDefault,
+            webOnlyWindowName: '_self',
+          );
+        } else {
+          Navigator.of(context).pushReplacementNamed('/navigation');
+        }
       }
     } catch (e) {
       setState(() {
@@ -248,7 +290,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextButton(
                         onPressed: _isLoading
                             ? null
-                            : () {
+                            : () async {
+                                await _settleKeyboardForNavigation();
+                                if (!context.mounted) return;
                                 Navigator.of(
                                   context,
                                 ).pushReplacementNamed('/register');

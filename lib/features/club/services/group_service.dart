@@ -165,23 +165,13 @@ class GroupService {
 
     final groupsSnapshot = await _firestore
         .collection('groups')
-        .where('status', isEqualTo: 'active')
-        .where('type', isEqualTo: GroupType.club.toJson())
+        .where('memberIds', arrayContains: user.uid)
         .get()
         .timeout(const Duration(seconds: 5));
 
     for (final doc in groupsSnapshot.docs) {
-      final memberDoc = await _firestore
-          .collection('groups')
-          .doc(doc.id)
-          .collection('members')
-          .doc(user.uid)
-          .get()
-          .timeout(const Duration(seconds: 5));
-
-      if (memberDoc.exists) {
-        return Group.fromFirestore(doc);
-      }
+      final group = Group.fromFirestore(doc);
+      if (group.isActive && group.type == GroupType.club) return group;
     }
 
     return null;
@@ -223,6 +213,7 @@ class GroupService {
       'createdAt': FieldValue.serverTimestamp(),
       'createdBy': requestData.requesterId,
       'adminIds': [requestData.requesterId],
+      'memberIds': [requestData.requesterId],
       'metadata': requestData.metadata,
     });
 
@@ -477,14 +468,19 @@ class GroupService {
       }
     }
 
-    await memberRef.delete();
+    final groupUpdates = <String, dynamic>{
+      'memberIds': FieldValue.arrayRemove([userId]),
+    };
 
     if (targetRole == MemberRole.admin) {
       final updatedAdmins = List<String>.from(group.adminIds)..remove(userId);
-      await _firestore.collection('groups').doc(groupId).update({
-        'adminIds': updatedAdmins,
-      });
+      groupUpdates['adminIds'] = updatedAdmins;
     }
+
+    final batch = _firestore.batch();
+    batch.delete(memberRef);
+    batch.update(_firestore.collection('groups').doc(groupId), groupUpdates);
+    await batch.commit();
   }
 
   Future<void> requestGroupCreation({
@@ -547,23 +543,17 @@ class GroupService {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
 
-    return getActiveGroups(type: type).asyncMap((groups) async {
-      final userGroups = <Group>[];
-      for (var group in groups) {
-        final isMember = await _firestore
-            .collection('groups')
-            .doc(group.id)
-            .collection('members')
-            .doc(user.uid)
-            .get()
-            .timeout(const Duration(seconds: 5))
-            .then((doc) => doc.exists);
-        if (isMember) {
-          userGroups.add(group);
-        }
-      }
-      return userGroups;
-    });
+    return _firestore
+        .collection('groups')
+        .where('memberIds', arrayContains: user.uid)
+        .snapshots()
+        .map((snapshot) {
+          final groups = snapshot.docs.map((doc) => Group.fromFirestore(doc));
+          return groups
+              .where((group) => group.isActive)
+              .where((group) => type == null || group.type == type)
+              .toList();
+        });
   }
 
   Future<Group?> getGroup(String groupId) async {
@@ -726,26 +716,25 @@ class GroupService {
 
     final request = JoinRequest.fromFirestore(requestDoc);
 
-    await _firestore
-        .collection('groups')
-        .doc(groupId)
-        .collection('members')
-        .doc(userId)
-        .set({
-          'userId': userId,
-          'displayName': request.displayName,
-          'email': request.email,
-          'role': MemberRole.member.toJson(),
-          'joinedAt': FieldValue.serverTimestamp(),
-          'addedBy': user.uid,
-        });
+    final groupRef = _firestore.collection('groups').doc(groupId);
+    final batch = _firestore.batch();
 
-    await _firestore
-        .collection('groups')
-        .doc(groupId)
-        .collection('joinRequests')
-        .doc(userId)
-        .update({'status': 'approved'});
+    batch.set(groupRef.collection('members').doc(userId), {
+      'userId': userId,
+      'displayName': request.displayName,
+      'email': request.email,
+      'role': MemberRole.member.toJson(),
+      'joinedAt': FieldValue.serverTimestamp(),
+      'addedBy': user.uid,
+    });
+    batch.update(groupRef, {
+      'memberIds': FieldValue.arrayUnion([userId]),
+    });
+    batch.update(groupRef.collection('joinRequests').doc(userId), {
+      'status': 'approved',
+    });
+
+    await batch.commit();
   }
 
   Future<void> rejectJoinRequest(String groupId, String userId) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/account/services/dawn_unlock_service.dart';
 import 'package:gr0ve/features/grove/screens/chapter_selection_screen.dart';
 
@@ -129,7 +130,7 @@ class _GroveScreenState extends State<GroveScreen>
                       ),
                     ),
 
-                    Image.asset(
+                    RemoteAssetImage(
                       isDark
                           ? 'assets/story/characters/ep0/dawn_dark.png'
                           : 'assets/story/characters/ep0/dawn_light.png',
@@ -249,7 +250,7 @@ class _GroveScreenState extends State<GroveScreen>
                       opacity: 0.4 + _pulseCtrl.value * 0.3,
                       child: child,
                     ),
-                    child: Image.asset(
+                    child: RemoteAssetImage(
                       isDark
                           ? 'assets/story/characters/ep0/dawn_dark.png'
                           : 'assets/story/characters/ep0/dawn_light.png',

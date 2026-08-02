@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 
@@ -353,7 +354,7 @@ class _ProfilePicturePickerSheetState extends State<ProfilePicturePickerSheet> {
                     padding: const EdgeInsets.all(3),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
+                      child: RemoteAssetImage(
                         v.assetPath(brightness),
                         fit: BoxFit.cover,
                         width: double.infinity,

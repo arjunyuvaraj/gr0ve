@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gr0ve/core/helper/web_device_context.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LandingDecider extends StatefulWidget {
   final Widget landingPage;
@@ -30,7 +32,9 @@ class _LandingDeciderState extends State<LandingDecider> {
   @override
   void initState() {
     super.initState();
-    _checkAuthAndLandingStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkAuthAndLandingStatus();
+    });
   }
 
   Future<void> _checkAuthAndLandingStatus() async {
@@ -42,20 +46,42 @@ class _LandingDeciderState extends State<LandingDecider> {
       return;
     }
 
+    if (WebDeviceContext.shouldUseDesktopDashboard(context)) {
+      await _openWebDashboard();
+      return;
+    }
+
+    if (WebDeviceContext.isMobileWeb(context)) {
+      _openAppNavigation();
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool('landing_seen') ?? false;
 
     if (!mounted) return;
 
     if (seen) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
-        }
-      });
+      _openAppNavigation();
     } else {
       setState(() => _loading = false);
     }
+  }
+
+  void _openAppNavigation() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(widget.navigationRoute);
+      }
+    });
+  }
+
+  Future<void> _openWebDashboard() async {
+    await launchUrl(
+      Uri.base.resolve('/dashboard'),
+      mode: LaunchMode.platformDefault,
+      webOnlyWindowName: '_self',
+    );
   }
 
   @override

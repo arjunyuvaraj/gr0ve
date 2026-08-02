@@ -93,10 +93,18 @@ void main() async {
 }
 
 void _deferredInit(Stopwatch bootWatch) {
-  dotenv.load(fileName: ".env").whenComplete(() {
-    if (kDebugMode)
-      print('[BOOT] dotenv ready: ${bootWatch.elapsedMilliseconds}ms');
-  });
+  dotenv
+      .load(fileName: ".env")
+      .then((_) {
+        if (kDebugMode) {
+          print('[BOOT] dotenv ready: ${bootWatch.elapsedMilliseconds}ms');
+        }
+      })
+      .catchError((error) {
+        if (kDebugMode) {
+          print('[BOOT] dotenv unavailable: $error');
+        }
+      });
   AppFeatureFlags.load().then((_) {
     if (kDebugMode)
       print('[BOOT] FeatureFlags ready: ${bootWatch.elapsedMilliseconds}ms');
@@ -339,7 +347,7 @@ class _MyAppState extends State<MyApp> {
                               user?.email,
                             );
 
-                            if (isLocked && !isBeta) {
+                            if (isLocked && user != null && !isBeta) {
                               return const MaintenanceScreen();
                             }
 
@@ -353,7 +361,7 @@ class _MyAppState extends State<MyApp> {
                       ? const LogoLoadingScreen()
                       : LandingDecider(
                           landingPage: kIsWeb
-                              ? const LandingWebsiteScreen()
+                              ? const AdaptiveWebLandingScreen()
                               : const LandingScreen(),
                           loginPage: const LoginScreen(),
                           navigationRoute: '/navigation',

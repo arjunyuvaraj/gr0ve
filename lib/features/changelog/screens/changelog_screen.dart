@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
@@ -185,7 +186,7 @@ class _VersionPage extends StatelessWidget {
                                         ],
                                       ),
                                       child: ClipOval(
-                                        child: Image.asset(
+                                        child: RemoteAssetImage(
                                           basePersonas[basePersonas.length -
                                                   1 -
                                                   index]
@@ -424,7 +425,7 @@ class _Version100EasterEggState extends State<_Version100EasterEgg> {
                     ],
                   ),
                   child: ClipOval(
-                    child: Image.asset(
+                    child: RemoteAssetImage(
                       persona.avatarAsset(Theme.of(context).brightness),
                       width: 32,
                       height: 32,
@@ -476,7 +477,7 @@ class _Version100EasterEggState extends State<_Version100EasterEgg> {
                   ],
                 ),
                 child: ClipOval(
-                  child: Image.asset(
+                  child: RemoteAssetImage(
                     persona.avatarAsset(Theme.of(context).brightness),
                     width: 32,
                     height: 32,

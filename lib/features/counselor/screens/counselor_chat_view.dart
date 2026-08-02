@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 import 'package:gr0ve/models/counselor.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
@@ -163,7 +164,7 @@ class _MessageBubbleState extends State<MessageBubble>
                   height: 28,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(7),
-                    child: Image.asset(
+                    child: RemoteAssetImage(
                       persona.avatarAsset(widget.brightness),
                       width: 28,
                       height: 28,
@@ -321,7 +322,7 @@ class _ChimePromptBubbleState extends State<ChimePromptBubble>
                   height: 28,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(7),
-                    child: Image.asset(
+                    child: RemoteAssetImage(
                       widget.persona.avatarAsset(widget.brightness),
                       width: 28,
                       height: 28,

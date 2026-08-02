@@ -1,9 +1,10 @@
+import 'package:gr0ve/features/grove/episodes/episode_00_dawn.dart';
+import 'package:gr0ve/features/grove/episodes/episode_01_orchard.dart';
 import 'package:gr0ve/features/grove/episodes/episode_02_weeping_willow.dart';
 import 'package:gr0ve/features/grove/episodes/episode_03_tangled_forest.dart';
 import 'package:gr0ve/features/grove/episodes/episode_04_open_shore.dart';
+import 'package:gr0ve/features/grove/episodes/episode_05_unnamed_waters.dart';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
-import 'package:gr0ve/features/grove/episodes/episode_00_dawn.dart';
-import 'package:gr0ve/features/grove/episodes/episode_01_orchard.dart';
 
 final List<Episode> groveEpisodes = [
   Episode(
@@ -46,14 +47,14 @@ final List<Episode> groveEpisodes = [
         'A shoreline opens, the weather turns hot, and the ocean begins to speak.',
     buildScenes: buildEpisode04OpenShore,
   ),
-  // Episode(
-  //   id: 'ep5',
-  //   number: 5,
-  //   title: 'The Unnamed Waters',
-  //   description:
-  //       'XXXXXX',
-  //   buildScenes: buildEpisode05UnnamedWaters,
-  // ),
+  Episode(
+    id: 'ep5',
+    number: 5,
+    title: 'The Unnamed Waters',
+    description:
+        'A whale, a warning, and a tree older than memory — the deep holds what the surface cannot.',
+    buildScenes: buildEpisode05UnnamedWaters,
+  ),
   // Episode(
   //   id: 'ep6',
   //   number: 6,

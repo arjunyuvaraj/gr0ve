@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
 
@@ -209,7 +210,7 @@ class _LogoLoadingScreenState extends State<LogoLoadingScreen>
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
-                                      child: Image.asset(
+                                      child: RemoteAssetImage(
                                         asset,
                                         fit: BoxFit.cover,
                                       ),

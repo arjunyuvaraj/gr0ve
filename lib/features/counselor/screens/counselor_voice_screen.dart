@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/counselor/services/polly_service.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -604,7 +605,7 @@ class _CounselorVoiceScreenState extends State<CounselorVoiceScreen>
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(27),
-                              child: Image.asset(
+                              child: RemoteAssetImage(
                                 widget.persona.avatarAsset(brightness),
                                 fit: BoxFit.cover,
                               ),

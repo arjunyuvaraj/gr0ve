@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
 import 'package:gr0ve/features/grove/widgets/stat_scale_widget.dart';
 
@@ -131,7 +132,7 @@ class EpisodeCompleteSheet extends StatelessWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
+                          child: RemoteAssetImage(
                             unlockedPfpAsset!,
                             width: 48,
                             height: 48,

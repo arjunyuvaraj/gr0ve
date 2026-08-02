@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 
 import 'package:gr0ve/features/grove/grove_progress_service.dart';
@@ -303,7 +304,8 @@ class _GroveChatScreenState extends State<GroveChatScreen>
 
     _typeTimer?.cancel();
 
-    if (_currentMsgIdx >= lines.length && _currentScene?.inputType == InputType.none) {
+    if (_currentMsgIdx >= lines.length &&
+        _currentScene?.inputType == InputType.none) {
       _typeTimer = Timer(const Duration(milliseconds: 100), () {
         if (mounted) _pushNextMessage();
       });
@@ -1314,7 +1316,7 @@ class _ChatBubbleWidgetState extends State<_ChatBubbleWidget>
           child: widget.showAvatar && msg.character.hasAvatar
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(7),
-                  child: Image.asset(
+                  child: RemoteAssetImage(
                     msg.character.avatarAsset(widget.brightness),
                     width: 28,
                     height: 28,

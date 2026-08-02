@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 
 class PremiumAvatar extends StatelessWidget {
   final String? imageUrl;
@@ -41,7 +42,7 @@ class PremiumAvatar extends StatelessWidget {
           ),
           child: ClipOval(
             child: imageUrl != null && imageUrl!.isNotEmpty
-                ? Image.asset(
+                ? RemoteAssetImage(
                     imageUrl!,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>

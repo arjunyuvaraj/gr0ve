@@ -32,6 +32,15 @@ enum StoryCharacter {
   sunny,
   london,
   squashy,
+  hubert,
+  petalblack,
+  somnus,
+  stinger,
+  polaro,
+  solito,
+  halves,
+  neofin,
+  unnamedTree,
 }
 
 extension StoryCharacterX on StoryCharacter {
@@ -65,6 +74,15 @@ extension StoryCharacterX on StoryCharacter {
     StoryCharacter.sunny => 'Sunny',
     StoryCharacter.london => 'London',
     StoryCharacter.squashy => 'Squashy',
+    StoryCharacter.hubert => 'Hubert',
+    StoryCharacter.petalblack => 'Petalblack',
+    StoryCharacter.somnus => 'Somnus',
+    StoryCharacter.stinger => 'Stinger',
+    StoryCharacter.polaro => 'Polaro',
+    StoryCharacter.solito => 'Solito',
+    StoryCharacter.halves => 'Halves',
+    StoryCharacter.neofin => 'Neofin',
+    StoryCharacter.unnamedTree => 'The Unnamed Tree',
   };
 
   String avatarAsset(Brightness brightness) {
@@ -106,6 +124,17 @@ extension StoryCharacterX on StoryCharacter {
       StoryCharacter.sunny => 'assets/story/characters/ep4/sunny_$mode.png',
       StoryCharacter.london => 'assets/story/characters/ep3/london_$mode.png',
       StoryCharacter.squashy => 'assets/story/characters/ep3/squashy_$mode.png',
+      StoryCharacter.hubert => 'assets/story/characters/ep5/hubert_$mode.png',
+      StoryCharacter.petalblack =>
+        'assets/story/characters/ep5/petalback_$mode.png',
+      StoryCharacter.somnus => 'assets/story/characters/ep5/somnus_$mode.png',
+      StoryCharacter.stinger => 'assets/story/characters/ep5/stinger_$mode.png',
+      StoryCharacter.polaro => 'assets/story/characters/ep5/polaro_$mode.png',
+      StoryCharacter.solito => 'assets/story/characters/ep5/solito_$mode.png',
+      StoryCharacter.halves => 'assets/story/characters/ep5/halves_$mode.png',
+      StoryCharacter.neofin => 'assets/story/characters/ep5/neofin_$mode.png',
+      StoryCharacter.unnamedTree =>
+        'assets/story/characters/ep5/unnamed_tree_$mode.png',
       _ => 'assets/story/inventory/branch_$mode.png',
     };
   }

@@ -2,7 +2,7 @@ name: gr0ve
 description: "Your All-in-One BCA App"
 publish_to: "none"
 
-version: 2.3.0+45
+version: 2.5.0+47
 
 environment:
   sdk: ^3.9.2
@@ -63,27 +63,9 @@ flutter:
     enable-swift-package-manager: false
   uses-material-design: true
   assets:
-    - assets/credentials/gsheets.json
-    - assets/credentials/service_account.json
-    - assets/profile/academy/
-    - assets/field_day/
+    - assets/app_icon.png
+    - assets/appicon_dark.png
+    - assets/remote_placeholder.png
     - assets/fish/
-    - assets/app_icons/png/
-    - assets/profile/grover/
-    - assets/profile/aspen/
-    - assets/profile/rowan/
-    - assets/profile/sakura/
-    - assets/profile/abies/
-    - assets/profile/cedite/
-    - assets/profile/ash/
-    - assets/story/characters/
-    - assets/story/characters/ep0/
-    - assets/story/characters/ep1/
-    - assets/story/characters/ep2/
-    - assets/story/characters/ep2/sheep/
-    - assets/story/characters/ep2/baby/
-    - assets/story/characters/ep3/
-    - assets/story/characters/ep4/
-    - assets/story/inventory/
+    - assets/story/story_map.json
     - shorebird.yaml
-    - .env

@@ -1,19 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gr0ve/core/extensions/context_extensions.dart';
+import 'package:gr0ve/core/helper/web_device_context.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/core/widgets/buttons/custom_primary_button.dart';
+import 'package:gr0ve/features/landing/screens/landing_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+class AdaptiveWebLandingScreen extends StatelessWidget {
+  const AdaptiveWebLandingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (WebDeviceContext.shouldUseDesktopDashboard(context)) {
+      return const LandingWebsiteScreen();
+    }
+
+    return const LandingScreen();
+  }
+}
 
 class LandingWebsiteScreen extends StatelessWidget {
   const LandingWebsiteScreen({super.key});
 
-  static const _androidUrl =
-      'https://play.google.com/apps/testing/com.arjunyuvaraj.gr0ve';
-  static const _iosUrl = 'https://apps.apple.com/us/app/gr0ve/id6755570512';
+  static const _apkUrl =
+      'https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.apk';
+  static const _aabUrl =
+      'https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.aab';
 
-  static Future<void> _launch(String url) async {
+  static Future<void> _launch(String url, {String windowName = '_self'}) async {
     await launchUrl(
-      Uri.parse(url),
+      Uri.base.resolve(url),
       mode: LaunchMode.platformDefault,
+      webOnlyWindowName: windowName,
     );
   }
 
@@ -22,6 +41,7 @@ class LandingWebsiteScreen extends StatelessWidget {
     final colors = context.colors;
     final text = context.text;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final device = _WebDeviceContext.from(context);
 
     return Scaffold(
       backgroundColor: colors.surface,
@@ -39,7 +59,7 @@ class LandingWebsiteScreen extends StatelessWidget {
                   Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(18),
-                      child: Image.asset(
+                      child: RemoteAssetImage(
                         'assets/app_icons/png/grover_${isDark ? 'dark' : 'light'}.png',
                         width: 80,
                         height: 80,
@@ -86,7 +106,7 @@ class LandingWebsiteScreen extends StatelessWidget {
                   // Primary action — Log in
                   CustomPrimaryButton(
                     label: 'LOG IN',
-                    onTap: () => Navigator.of(context).pushNamed('/login'),
+                    onTap: () => _launch('/dashboard'),
                   ),
                   const SizedBox(height: 14),
 
@@ -126,14 +146,18 @@ class LandingWebsiteScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Store buttons
+                  _InstallPanel(colors: colors, device: device),
+                  const SizedBox(height: 16),
+
+                  // Direct downloads
                   Row(
                     children: [
                       Expanded(
                         child: _StoreButton(
-                          label: 'App Store',
-                          icon: Icons.apple_rounded,
-                          onTap: () => _launch(_iosUrl),
+                          label: 'APK',
+                          subtitle: 'for MORE features',
+                          icon: Icons.android_rounded,
+                          onTap: () => _launch(_apkUrl, windowName: '_blank'),
                           isDark: isDark,
                           colors: colors,
                         ),
@@ -141,9 +165,10 @@ class LandingWebsiteScreen extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _StoreButton(
-                          label: 'Google Play',
-                          icon: Icons.android_rounded,
-                          onTap: () => _launch(_androidUrl),
+                          label: 'AAB',
+                          subtitle: 'for MORE features',
+                          icon: Icons.inventory_2_rounded,
+                          onTap: () => _launch(_aabUrl, windowName: '_blank'),
                           isDark: isDark,
                           colors: colors,
                         ),
@@ -156,6 +181,124 @@ class LandingWebsiteScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _InstallPanel extends StatelessWidget {
+  final ColorScheme colors;
+  final _WebDeviceContext device;
+
+  const _InstallPanel({required this.colors, required this.device});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = context.text;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final icon = device.isDesktop
+        ? Icons.install_desktop_rounded
+        : device.isAndroid
+        ? Icons.add_to_home_screen_rounded
+        : Icons.ios_share_rounded;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withOpacity(0.06)
+            : Colors.black.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: (isDark ? Colors.white : Colors.black).withOpacity(0.08),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: colors.onSurface.withOpacity(0.72)),
+              const SizedBox(width: 10),
+              Text(
+                device.installTitle,
+                style: text.labelLarge?.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            device.installBody,
+            style: text.bodySmall?.copyWith(
+              color: colors.onSurfaceVariant,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WebDeviceContext {
+  final bool isAndroid;
+  final bool isDesktop;
+  final String installTitle;
+  final String installBody;
+
+  const _WebDeviceContext({
+    required this.isAndroid,
+    required this.isDesktop,
+    required this.installTitle,
+    required this.installBody,
+  });
+
+  factory _WebDeviceContext.from(BuildContext context) {
+    final platform = defaultTargetPlatform;
+    final size = MediaQuery.sizeOf(context);
+    final isPhoneLayout = size.shortestSide < 600;
+    final isAndroid = platform == TargetPlatform.android && isPhoneLayout;
+    final isIos = platform == TargetPlatform.iOS && isPhoneLayout;
+
+    if (isIos) {
+      return const _WebDeviceContext(
+        isAndroid: false,
+        isDesktop: false,
+        installTitle: 'iPhone and iPad',
+        installBody:
+            'Open this site in Safari, tap Share, then Add to Home Screen.',
+      );
+    }
+
+    if (isAndroid) {
+      return const _WebDeviceContext(
+        isAndroid: true,
+        isDesktop: false,
+        installTitle: 'Android phone',
+        installBody:
+            'Open this site in Chrome, tap the menu, then choose Install App or Add to Home screen.',
+      );
+    }
+
+    if (isPhoneLayout) {
+      return const _WebDeviceContext(
+        isAndroid: false,
+        isDesktop: false,
+        installTitle: 'Phone browser',
+        installBody:
+            'Use your browser menu to install gr0ve to your home screen.',
+      );
+    }
+
+    return const _WebDeviceContext(
+      isAndroid: false,
+      isDesktop: true,
+      installTitle: 'Computer browser',
+      installBody:
+          'Use the install icon in Chrome, Edge, or another PWA-ready desktop browser.',
     );
   }
 }
@@ -210,6 +353,7 @@ class _OutlineButton extends StatelessWidget {
 /// Store download button pill.
 class _StoreButton extends StatelessWidget {
   final String label;
+  final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
   final bool isDark;
@@ -217,6 +361,7 @@ class _StoreButton extends StatelessWidget {
 
   const _StoreButton({
     required this.label,
+    required this.subtitle,
     required this.icon,
     required this.onTap,
     required this.isDark,
@@ -231,7 +376,7 @@ class _StoreButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withOpacity(0.06)
@@ -245,14 +390,32 @@ class _StoreButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: colors.onSurface.withOpacity(0.7)),
+            Icon(icon, size: 18, color: colors.onSurface.withOpacity(0.7)),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: text.labelLarge?.copyWith(
-                color: colors.onSurface.withOpacity(0.7),
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.3,
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: text.labelMedium?.copyWith(
+                      color: colors.onSurface.withOpacity(0.78),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.labelSmall?.copyWith(
+                      color: colors.onSurface.withOpacity(0.48),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

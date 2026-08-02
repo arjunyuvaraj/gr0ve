@@ -96,7 +96,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Stand up and dust yourself off.',
           nextScene: 'ep4_karl_first',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -108,7 +108,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Check your belongings.',
           nextScene: 'ep4_karl_first',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -159,7 +159,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'The seed. It\'s in the pouch.',
           nextScene: 'ep4_karl_first_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -171,7 +171,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Hello to you too.',
           nextScene: 'ep4_karl_first_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -285,7 +285,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Hand him the vial.',
           nextScene: 'ep4_karl_vial_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -297,7 +297,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: '"It\'s London\'s gift. I should keep it safe."',
           nextScene: 'ep4_karl_vial_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -439,7 +439,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Do you like it? Living here?',
           nextScene: 'ep4_karl_name_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -451,7 +451,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'You don\'t seem very... happy.',
           nextScene: 'ep4_karl_name_c',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -594,7 +594,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'You and Salix are friends? Have you ever actually met?',
           nextScene: 'ep4_karl_dir_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -606,7 +606,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'How do I cross the water? My wings aren\'t—',
           nextScene: 'ep4_karl_dir_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -770,7 +770,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Thank him properly.',
           nextScene: 'ep4_karl_parting_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -782,7 +782,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'What do you do when there is no one to talk to?',
           nextScene: 'ep4_karl_parting_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -914,7 +914,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Run over and join them immediately.',
           nextScene: 'ep4_shore_games',
-          statEffects: {'vitality': -1},
+          statEffects: {'vitality': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -926,7 +926,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Call out about the tree being pink.',
           nextScene: 'ep4_shore_games',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -966,7 +966,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Join Sunny and race the edge of the surf.',
           nextScene: 'ep4_shore_a',
-          statEffects: {'vitality': -1},
+          statEffects: {'vitality': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -978,7 +978,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Stand with Lemon and ask about the route ahead.',
           nextScene: 'ep4_shore_c',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1128,7 +1128,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'How can a palm tree be pink?',
           nextScene: 'ep4_loulo_intro_a',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1140,7 +1140,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Do people bother you about it?',
           nextScene: 'ep4_loulo_intro_c',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1284,7 +1284,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'You\'re oddly philosophical for a seagull.',
           nextScene: 'ep4_carlos_flask_a',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1296,7 +1296,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Is there a container for what you can\'t put down?',
           nextScene: 'ep4_carlos_flask_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1420,7 +1420,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Do you fly this route often?',
           nextScene: 'ep4_lemon_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1432,7 +1432,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'What are the orange lights?',
           nextScene: 'ep4_lemon_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1617,7 +1617,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'The seed. Everything is about the seed.',
           nextScene: 'ep4_loulo_pot',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1629,7 +1629,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'I\'m still figuring that out.',
           nextScene: 'ep4_loulo_pot',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1679,7 +1679,7 @@ List<Scene> buildEpisode04OpenShore() {
           label: 'Take Loulo\'s Pot now.',
           nextScene: 'ep4_pot_taken',
           addItems: ["Loulo's Pot"],
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1691,7 +1691,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'What do the other vessels hold?',
           nextScene: 'ep4_pot_other_vessels',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1768,7 +1768,7 @@ List<Scene> buildEpisode04OpenShore() {
           label: 'Actually — I\'ll take it. Coming back isn\'t guaranteed.',
           nextScene: 'ep4_pot_taken',
           addItems: ["Loulo's Pot"],
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1830,7 +1830,7 @@ List<Scene> buildEpisode04OpenShore() {
           label: 'Then I\'ll take Loulo\'s.',
           nextScene: 'ep4_pot_taken',
           addItems: ["Loulo's Pot"],
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1867,7 +1867,7 @@ List<Scene> buildEpisode04OpenShore() {
           label: 'Take Loulo\'s Pot.',
           nextScene: 'ep4_pot_taken',
           addItems: ["Loulo's Pot"],
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1908,7 +1908,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'This is mine. I chose it.',
           nextScene: 'ep4_departure',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1920,7 +1920,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Wonder what the other vessels would have asked.',
           nextScene: 'ep4_departure',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -1964,7 +1964,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'I made the choice I can live with.',
           nextScene: 'ep4_departure',
-          statEffects: {'stability': -1},
+          statEffects: {'stability': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -1976,7 +1976,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: 'Ask the gulls not to let you forget.',
           nextScene: 'ep4_departure',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'D',
@@ -2019,7 +2019,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'A',
           label: 'Thank you — all of you. For the afternoon.',
           nextScene: 'ep4_departure_a',
-          statEffects: {'connectivity': -1},
+          statEffects: {'connectivity': 1},
         ),
         SceneChoice(
           letter: 'B',
@@ -2031,7 +2031,7 @@ List<Scene> buildEpisode04OpenShore() {
           letter: 'C',
           label: '[To Loulo]: I\'ve never met a tree like you.',
           nextScene: 'ep4_departure_c',
-          statEffects: {'transience': -1},
+          statEffects: {'transience': 1},
         ),
         SceneChoice(
           letter: 'D',

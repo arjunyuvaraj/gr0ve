@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1089,7 +1090,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                   child: config.id == 'account'
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
+                          child: RemoteAssetImage(
                             ProfilePictureService.activeVariant.value.assetPath(
                               Theme.of(context).brightness,
                             ),
@@ -1268,7 +1269,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 child: config.id == 'account'
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
+                        child: RemoteAssetImage(
                           ProfilePictureService.activeVariant.value.assetPath(
                             Theme.of(context).brightness,
                           ),
@@ -1387,6 +1388,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   Widget _buildReorderMenu() {
     final colors = Theme.of(context).colorScheme;
     List<NavConfig> itemsToReorder = List.from(_navConfigs);
+    bool isSavingOrder = false;
 
     return StatefulBuilder(
       builder: (context, setModalState) {
@@ -1453,23 +1455,46 @@ class _NavigationScreenState extends State<NavigationScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    final newOrder = itemsToReorder.map((c) => c.id).toList();
-                    await _persistenceService.saveOrder(newOrder);
-                    if (mounted) {
-                      setState(() {
-                        _customOrder = newOrder;
-                        _buildNavigation();
-                      });
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Navigation order saved!'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: isSavingOrder
+                      ? null
+                      : () async {
+                          setModalState(() => isSavingOrder = true);
+                          try {
+                            final newOrder = itemsToReorder
+                                .map((c) => c.id)
+                                .toList();
+                            await _persistenceService.saveOrder(newOrder);
+                            if (mounted) {
+                              setState(() {
+                                _customOrder = newOrder;
+                                _buildNavigation();
+                              });
+                            }
+                            if (context.mounted) Navigator.pop(context);
+                            if (mounted) {
+                              ScaffoldMessenger.of(this.context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Navigation order saved!'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          } catch (_) {
+                            if (context.mounted) {
+                              setModalState(() => isSavingOrder = false);
+                            }
+                            if (mounted) {
+                              ScaffoldMessenger.of(this.context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Could not save navigation order.',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primary,
                     foregroundColor: colors.onPrimary,
@@ -1478,24 +1503,49 @@ class _NavigationScreenState extends State<NavigationScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
-                    'Save Order',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  child: isSavingOrder
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text(
+                          'Save Order',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () async {
-                  await _persistenceService.saveOrder([]);
-                  if (mounted) {
-                    setState(() {
-                      _customOrder = null;
-                      _buildNavigation();
-                    });
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: isSavingOrder
+                    ? null
+                    : () async {
+                        setModalState(() => isSavingOrder = true);
+                        try {
+                          await _persistenceService.saveOrder([]);
+                          if (mounted) {
+                            setState(() {
+                              _customOrder = null;
+                              _buildNavigation();
+                            });
+                          }
+                          if (context.mounted) Navigator.pop(context);
+                        } catch (_) {
+                          if (context.mounted) {
+                            setModalState(() => isSavingOrder = false);
+                          }
+                          if (mounted) {
+                            ScaffoldMessenger.of(this.context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Could not reset navigation order.',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        }
+                      },
                 child: Text(
                   'Reset to Default',
                   style: TextStyle(color: colors.error),

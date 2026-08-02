@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Environment variables and secrets
+.env
+
 # Symbolication related
 app.*.symbols
 
@@ -51,21 +54,10 @@ lib/utilities/data/teacher_list.dart
 android/app/google-services.json
 
 # Assets
-assets/credentials/gsheets.jsonassets/credentials/*.json
-# scripts/
-scripts/chrome_state.json
-scripts/.chrome_state_profile/
-scripts/.bus_routes_cache.json
-scripts/.teacher_absences_cache.json
-scripts/.bus_starred_tokens_cache.json
-scripts/.teacher_absence_tokens_cache.json
-scripts/.field_day_scores_cache.json
-scripts/.field_day_action_cache.json
-scripts/chrome_state_field.json
-scripts/field_day_cookies.json
-scripts/field_day_full_dump.json
-scripts/field_day_state.json
-scripts/debug_field_day.html
-scripts/debug_field_day.png
-gr0ve_accessKeys.csv
+assets/credentials/gsheets.json
+assets/credentials/*.json
 assets/credentials/service_account.json
+
+# Scripts folder (contains sensitive data and automation tools)
+scripts/
+gr0ve_accessKeys.csv

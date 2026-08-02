@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_chat_view.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_persona_picker.dart';
 import 'package:gr0ve/features/counselor/screens/counselor_voice_screen.dart';
@@ -368,7 +369,7 @@ class _CounselorScreenState extends State<CounselorScreen>
             const SizedBox(height: 24),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
+              child: RemoteAssetImage(
                 CounselorPersona.abies.avatarAsset(brightness),
                 width: 64,
                 height: 64,
@@ -577,53 +578,57 @@ class _CounselorScreenState extends State<CounselorScreen>
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: EmailVerificationGate(
-        description:
-            "Please verify your email address to talk with the counselor.",
-        child: Column(
-          children: [
-            AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              child: MediaQuery.of(context).viewInsets.bottom > 100
-                  ? const SizedBox(width: double.infinity, height: 0)
-                  : TweenAnimationBuilder<double>(
-                      duration: const Duration(milliseconds: 600),
-                      curve: Curves.easeOutCubic,
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      builder: (context, value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: _buildHeader(colors, textTheme, brightness, pc),
-                    ),
-            ),
-            Expanded(
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOutCubic,
-                tween: Tween(begin: 0.0, end: 1.0),
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 15 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: _hasStarted
-                    ? _buildChatView(colors, textTheme, brightness)
-                    : _buildWelcomeView(colors, textTheme, brightness),
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: EmailVerificationGate(
+          description:
+              "Please verify your email address to talk with the counselor.",
+          child: Column(
+            children: [
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: MediaQuery.of(context).viewInsets.bottom > 100
+                    ? const SizedBox(width: double.infinity, height: 0)
+                    : TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeOutCubic,
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(0, 20 * (1 - value)),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: _buildHeader(colors, textTheme, brightness, pc),
+                      ),
               ),
-            ),
-            _buildInputBar(colors, textTheme, pc),
-          ],
+              Expanded(
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: Transform.translate(
+                        offset: Offset(0, 15 * (1 - value)),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _hasStarted
+                      ? _buildChatView(colors, textTheme, brightness)
+                      : _buildWelcomeView(colors, textTheme, brightness),
+                ),
+              ),
+              _buildInputBar(colors, textTheme, pc),
+            ],
+          ),
         ),
       ),
     );
@@ -662,7 +667,7 @@ class _CounselorScreenState extends State<CounselorScreen>
                       height: 22,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(5),
-                        child: Image.asset(
+                        child: RemoteAssetImage(
                           _persona.avatarAsset(brightness),
                           width: 22,
                           height: 22,
@@ -828,6 +833,7 @@ class _CounselorScreenState extends State<CounselorScreen>
                   child: TextField(
                     controller: _controller,
                     focusNode: _focusNode,
+                    onTapOutside: (_) => _focusNode.unfocus(),
                     textCapitalization: TextCapitalization.sentences,
                     maxLines: viewInsets.bottom > 100 ? 3 : 5,
                     minLines: 1,

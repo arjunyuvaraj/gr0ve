@@ -1,0 +1,1576 @@
+EPISODE 5: THE UNNAMED WATERS
+Full Story Draft — for review before coding
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPENING — DAYS ADRIFT
+
+EPISODE 5: THE UNNAMED WATERS
+[episodeHeader, isBold]
+
+[waitDuration: 3 days — flying over open water, the atoll long behind you]
+
+The land stopped being an option a while ago.
+
+Not suddenly. Gradually, the way most important things stop. First the shore was a line. Then the shore was a smudge. Then the shore was a memory of a line, and now there is nothing behind you and nothing ahead of you except more of the same flat, endless, entirely unbothered blue.
+
+[system, italic]
+You have been flying for three days.
+
+Your wings have developed a rhythm that no longer feels like effort so much as habit — the body doing the thing the body has decided it will do, without consulting you further. Lemon flies point, correcting course by degrees so small you can't see them, only feel them, the way you feel a held note change key. Carlos flies with the calm of someone who made peace with the ocean around day one. Sunny flies like the ocean personally invited him and he intends to make the most of the invitation.
+
+[player, dialogue]
+"How are you three not tired."
+
+[LEMON]
+"We are tired."
+
+[CARLOS]
+"Very tired."
+
+[SUNNY]
+"I'm not tired even a LITTLE—"
+
+He yawns so hard his whole body tips sideways for a second before he rights himself.
+
+[SUNNY]
+"—bit."
+
+[system]
+Dawn's Seed Warmth: stable. Holding steady, for now.
+
+You look down at what you're carrying. Dawn's Branch, worn smooth against your side. The Flask of Tears, its blue light pulsing slow and patient. The Warming Pouch, Dawn's Seed glowing low but even inside it. London's Vial, waiting for whatever it's waiting for. And — if you took it — Loulo's Pot, riding warm against your talon, smelling faintly of sun and salt even three days out.
+
+The water beneath you has gone a color you don't have a name for. Not blue exactly. Deeper than blue. The color water gets when it stops being about the sky and starts being about what's underneath it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE FISHING CONTEST
+
+[waitDuration: 45 minutes — an afternoon of avoiding the boredom of open water]
+
+It is Sunny's idea. Of course it's Sunny's idea.
+
+[SUNNY]
+"Okay. New rule. Whoever catches the biggest fish gets to not do the evening flight check-in."
+
+[CARLOS]
+"That's not a prize. That's just a chore we invented so you could avoid it."
+
+[SUNNY]
+"Exactly! I'm very smart!"
+
+[LEMON]
+"I'm too tired to argue with the logic of that, which is somehow worse than if it made sense."
+
+[CHOICES]:
+A. "I'm in. What are the rules?"
+B. "I'll judge. I don't think my wings can take a dive right now."
+C. "This feels like a bad idea over open ocean."
+D. [Just watch. See how this goes.]
+
+---
+
+[If A — "I'm in."]
+[SUNNY] "YES! Okay, rules: biggest fish wins, style points for anything caught upside down, and Carlos isn't allowed to use 'the fish came to me philosophically' as an excuse again."
+[CARLOS] "It happened once."
+[SUNNY] "It happened TWICE."
+[Continue →]
+
+[If B — "I'll judge."]
+[LEMON] "Thank you. Someone sane needs to hold the results."
+[SUNNY] "Judging is for people who are SCARED—"
+[LEMON] "Judging is for people whose wings have earned a rest, which none of you respect."
+[Continue →]
+
+[If C — "This feels like a bad idea."]
+[CARLOS] "It probably is."
+[LEMON] "It definitely is."
+[SUNNY] "It's FINE, we do this every crossing!"
+[LEMON] "We do this every crossing and every crossing I say the same thing, which is that it's fine right up until it isn't."
+[Continue →]
+
+[If D — Just watch.]
+Sunny is already stripping off toward the water before anyone answers you, which seems to be how most of Sunny's plans get approved — not through consensus, through momentum.
+[Continue →]
+
+---
+
+[waitDuration: 20 minutes — the contest itself]
+
+What follows is, against all odds, one of the more purely enjoyable twenty minutes of your entire journey.
+
+Carlos catches a small silver fish on his first pass and holds it up with the quiet satisfaction of someone who does not need to celebrate loudly to feel the win. Sunny catches nothing on four consecutive attempts and grows more committed with each failure, diving at increasingly improbable angles. Lemon, technically judging, keeps "accidentally" catching fish herself and holding them up for comparison, which everyone agrees is cheating and no one stops her because arguing takes energy none of you have.
+
+[LEMON]
+"For the record, mine is bigger."
+
+[CARLOS]
+"You're the judge. You can't enter."
+
+[LEMON]
+"I can absolutely enter. I wrote the rules in my head just now and they favor me."
+
+[SUNNY, mid-air, upside down, missing a fish entirely]
+"I MEANT TO DO THAT—"
+
+[CHOICES]:
+A. Try your own dive. Go for a fish.
+B. Cheer Sunny on. He needs it.
+C. Point out a strange one — a fish that's the wrong color.
+D. [Just laugh. Let them have this.]
+
+---
+
+[If A — Try a dive.]
+You fold your wings and drop. The water rushes up. For one weightless second you are entirely inside the dive and nothing else exists — not the crossing, not the seed, not the ocean's total indifference to your problems. You come up with a fish half the size of Carlos's, and it feels, absurdly, like one of the better moments of the week.
+[LEMON] "Respectable. Not winning. But respectable."
+[Continue →]
+
+[If B — Cheer Sunny on.]
+[player] "You've got this! Just — commit to an angle!"
+[SUNNY] "I AM COMMITTING—"
+He does not catch a fish. But he comes up grinning anyway, because commitment, to Sunny, is its own kind of victory.
+[CARLOS] "He'll go again in ten seconds."
+[SUNNY] "In ten seconds I'm going again!"
+[Continue →]
+
+[If C — Point out a strange one.]
+You see it before anyone else does, mostly because you're the only one not currently mid-dive or mid-argument. A fish, low in the water, moving slow.
+
+It is bright pink.
+
+Not the muted rose of something dying. Not the pale flush of something young. A saturated, unnatural, wrong pink — the pink of a warning sign, the pink of something that wants very badly to be noticed for reasons that are almost certainly not good ones.
+
+[player]
+"Hey — that one. That fish."
+
+Lemon's head turns. All the exhaustion drops out of her posture at once, replaced by something sharper.
+
+[LEMON]
+"Don't."
+
+[Continue →]
+
+[If D — Just laugh.]
+You watch them for a while, letting the sound of it — Sunny's increasingly theatrical failures, Carlos's dry commentary, Lemon's shameless self-officiating — settle into you like warmth. It is the first time in days you've laughed without also, somewhere underneath, thinking about the seed.
+
+Then you see it. Low in the water. Bright, wrong pink.
+
+[player]
+"...Lemon. That fish."
+
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE PINK FISH
+
+[waitDuration: 2 minutes — but it will not feel like two minutes]
+
+[LEMON]
+"Everyone up. Now. That's not a fish you eat, that's a fish that's telling you something ate near it recently and is probably still nearby."
+
+She says it fast, flat, completely without the warmth she's had all afternoon. This is a different Lemon. The oldest-sibling Lemon. The one who has, somewhere in her feathers, an emergency setting the rest of them don't have.
+
+[CARLOS]
+"Sunny—"
+
+But Sunny is already diving.
+
+[SUNNY]
+"IT'S JUST A FISH, I'M NOT SCARED OF A COLOR—"
+
+[LEMON]
+"SUNNY—"
+
+He hits the water.
+
+For one full second, nothing happens. The ocean is flat and quiet and gives absolutely no indication that anything is wrong, in the specific way oceans have of hiding enormous, terrible things directly beneath a calm surface.
+
+Then the ocean stops being flat.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE WHALE
+
+[waitDuration: this will feel much longer than it is]
+
+It comes up like the sea itself decided to stand.
+
+Gray. Enormous. Water sheeting off a back the size of a hillside, a fin cutting the air like something drawn wrong on purpose, too large, too sudden, too much. The sound of it — a crack and a roar of displaced ocean — hits you a full second after the sight does, which somehow makes it worse. Your brain has to process the impossible thing twice.
+
+[CARLOS]
+"SUNNY—"
+
+[LEMON]
+—doesn't say anything at all, which is the most frightening part of the whole thing. Lemon always says something. Lemon has something to say about everything. Right now there is nothing coming out of her at all, just her wings locked mid-beat and her eyes fixed on the space where her brother used to be.
+
+The whale crests, turns, and comes down.
+
+Where Sunny was.
+
+The water closes over the space. White foam. Then nothing. Then just ocean again, rocking gently, exactly as indifferent as it was thirty seconds ago, as if it hadn't just done anything at all.
+
+[system, italic]
+Hold here.
+
+Nobody moves.
+
+[player, dialogue]
+"...Lemon."
+
+[CARLOS]
+"..."
+
+[LEMON]
+"..."
+
+The silence stretches. It stretches the way silence stretches when everyone in it is doing the same math and getting the same answer and nobody wants to be the one who says it first.
+
+[CHOICES]:
+A. "We have to go down there. Now."
+B. [Say nothing. Just stare at the water.]
+C. "Lemon. Say something. Please."
+D. "Maybe he's — maybe he swam clear—"
+
+---
+
+[If A — "We have to go down there."]
+You're already dropping toward the water before finishing the sentence, every instinct overriding the very reasonable fact that you cannot breathe underwater and have no plan whatsoever.
+[LEMON, snapping out of it, grabbing your wing] "WAIT—"
+[Continue →]
+
+[If B — Say nothing.]
+You stare at the water with the other two. Nobody breathes right. The ocean rocks, patient and unbothered, the way it has been unbothered this entire journey, and for the first time that indifference feels less like scenery and more like something you might genuinely hate.
+[Continue →]
+
+[If C — "Say something, Lemon."]
+Lemon's beak opens. Closes. Opens again.
+[LEMON] "I don't—"
+She stops. Tries again.
+[LEMON] "He's my—"
+She doesn't finish that either. Carlos moves closer to her, wordless, and puts his wing against hers.
+[Continue →]
+
+[If D — "Maybe he swam clear—"]
+[CARLOS] "No."
+He says it quietly. Not cruelly. Just factually, the way Carlos says most things.
+[CARLOS] "I was watching. He didn't."
+[Continue →]
+
+---
+
+[waitDuration: 10 seconds that take much longer than 10 seconds]
+
+The water breaks again.
+
+The whale surfaces slower this time — not lunging, just rising, the way something enormous rises when it has decided there is no hurry left in the situation. Water sheets off gray skin the texture of old riverbed stone. One small, dark eye rolls toward you with an expression that is, unmistakably, apologetic.
+
+And there — held sideways, entirely unharmed, halfway inside a mouth the size of a rowboat, feathers soaked flat and eyes enormous with outrage — is Sunny.
+
+[LEMON]
+"SUNNY."
+
+[SUNNY, muffled, from inside the whale's mouth]
+"I'm FINE, I'm just — this is very WET—"
+
+The whale makes a low, apologetic sound, somewhere between a moan and a hum, and does not close its mouth any further. If anything, it seems slightly embarrassed, in the specific way an enormous creature can look embarrassed while holding a bird hostage in its jaw by accident.
+
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PETALBLACK
+
+[waitDuration: 5 minutes]
+
+Something small breaks the surface beside the whale.
+
+It is a fish. The fish, in fact — the bright, wrong pink one that started all of this — except up close it isn't wrong at all. It's simply small, calm, and entirely unbothered by the fact that it is floating next to a creature roughly four thousand times its size.
+
+[PETALBLACK]
+"Hubert."
+
+Her voice is quiet. Even. The kind of quiet that somehow carries further than shouting.
+
+[PETALBLACK]
+"Spit him out."
+
+The whale — Hubert, apparently — makes a small, pleading sound, and his enormous eye swivels toward her.
+
+[HUBERT]
+"Can I keep just a little of him—"
+
+[PETALBLACK]
+"No."
+
+[HUBERT]
+"A wing—"
+
+[PETALBLACK]
+"Hubert."
+
+There is a pause. Hubert's whole enormous body seems to deflate slightly, the way something the size of a hill deflates — slowly, and with a great deal of feeling.
+
+He opens his mouth.
+
+Sunny drops out into the water with a splash and immediately resurfaces, coughing, indignant, and entirely, gloriously unharmed.
+
+[SUNNY]
+"I have BEEN EATEN—"
+
+[LEMON, dropping to the water beside him, voice cracking with relief she is trying very hard to convert into anger]
+"You have NOT been eaten, you were HELD, there's a difference, and the difference is you're going to hear about for the rest of your LIFE—"
+
+[SUNNY]
+"I was IN A MOUTH, Lemon, that COUNTS—"
+
+[CARLOS, landing beside them both, very quietly]
+"I'm glad you're okay."
+
+[SUNNY]
+"I'M GLAD I'M OKAY TOO—"
+
+[CHOICES]:
+A. "...what just happened."
+B. [To the small pink fish] "Thank you. For that."
+C. [To the whale] "Are you — are you okay?"
+D. Just watch the siblings for a moment. Let them have it.
+
+---
+
+[If A — "What just happened."]
+[PETALBLACK] "Hubert happened. It happens more than it should."
+[HUBERT, small] "I said sorry."
+[PETALBLACK] "You always say sorry. Saying sorry isn't the same as not doing it."
+[HUBERT] "...that's fair."
+[Continue →]
+
+[If B — "Thank you."]
+Petalblack looks at you properly for the first time. Small, orange-pink, entirely unhurried.
+[PETALBLACK] "You're welcome. Though it wasn't really a favor. He does this. I fix it. It's less 'thank you' and more 'Tuesday.'"
+[Continue →]
+
+[If C — "Are you okay?" (to the whale)]
+Hubert's huge eye turns toward you, surprised, like nobody usually asks him that.
+[HUBERT] "Oh! Yes! I'm always okay. I'm very big, not much bothers me. Except her." He tilts his head very slightly toward Petalblack. "She bothers me. In a — a good way. A respectful way."
+[PETALBLACK] "Hubert."
+[HUBERT] "I'll stop talking now."
+[Continue →]
+
+[If D — Watch the siblings.]
+[system, italic]
+You watch Lemon hold both her brothers at once — one talon on each, an old, practiced gesture, the gesture of someone who has been the one holding on since before she can remember choosing to. Sunny is still talking. Carlos has gone very quiet, the quiet of someone recalibrating how afraid he'd actually been.
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INTRODUCTIONS
+
+[waitDuration: 15 minutes — everyone recovering, on the water's surface]
+
+[HUBERT]
+"I'm Hubert! I'm a whale!"
+
+He announces this the way you'd announce good news, with the open, unguarded enthusiasm of a creature who has never once considered that anyone might already know he's a whale.
+
+[PETALBLACK]
+"I'm Petalblack."
+
+She doesn't elaborate. She doesn't need to. There's a settledness to how she says it — like a name that has been the same name for a very, very long time, and has stopped needing an introduction to feel complete.
+
+[LEMON]
+"You two — you know this water?"
+
+[PETALBLACK]
+"We live in this water."
+
+[HUBERT]
+"Can I eat one of them—"
+
+He says it hopefully, nodding toward Carlos.
+
+[PETALBLACK]
+"No."
+
+[HUBERT]
+"Just the small one—"
+
+[PETALBLACK]
+"They're all the small one, Hubert. You're enormous. Everything is the small one to you."
+
+[HUBERT]
+"...that's true. That's a fair point."
+
+He does not look at all discouraged by this. If anything, he looks pleased to have learned something.
+
+[CHOICES]:
+A. [To Petalblack] "Does he ask permission before eating everything?"
+B. [To Hubert] "Do you ever get a yes?"
+C. "You two seem like you've been doing this a while."
+D. [To Petalblack] "Why was your color a warning? Lemon said it meant something was wrong."
+
+---
+
+[If A — "Does he ask permission before eating everything?"]
+[PETALBLACK] "Every time. It's very tedious."
+[HUBERT] "I like to CHECK. Checking is polite."
+[PETALBLACK] "Checking every four minutes is not politeness, Hubert, it's a hobby."
+[HUBERT] "It's a POLITE hobby."
+[Continue →]
+
+[If B — "Do you ever get a yes?"]
+Hubert considers this with real, visible effort.
+[HUBERT] "...once. It was a very old piece of kelp. Nobody wanted it."
+[PETALBLACK] "That doesn't count. I say yes to kelp because kelp doesn't have a family."
+[HUBERT] "It still counts to ME."
+[Continue →]
+
+[If C — "You've been doing this a while."]
+[PETALBLACK] "A long while."
+[HUBERT] "Longer than the coral! Longer than the — what's the — the thing with the current, the—"
+[PETALBLACK] "The trench."
+[HUBERT] "Longer than the trench!"
+[PETALBLACK] "That one isn't true, Hubert."
+[HUBERT] "It FEELS true."
+[Continue →]
+
+[If D — "Why was your color a warning?"]
+Petalblack's expression, small as it is, goes serious.
+[PETALBLACK] "Because in these waters, pink this bright usually means something's been hunting nearby and left the wrong kind of shine on the water. Your friend read it correctly. Most travelers don't. It's why I surface when I see birds circling — to warn them off before Hubert gets curious."
+[HUBERT] "I get curious A LOT."
+[PETALBLACK] "You get curious constantly, yes."
+[Continue →]
+
+---
+
+[LEMON]
+"Well. Thank you both. Genuinely. I thought—"
+
+She stops. Doesn't finish it. She doesn't need to; everyone present did the same math a few minutes ago.
+
+[PETALBLACK]
+"You're welcome."
+
+Her gaze moves, unhurried, across the four of you — Lemon, Carlos, Sunny, and you. It lingers on you a beat longer than the others. Specifically, it lingers on the Warming Pouch at your side, where Dawn's Seed glows low and steady beneath the woven cloth.
+
+Something changes in her stillness. Not alarm. Attention.
+
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LEMON FALTERS
+
+[waitDuration: 5 minutes]
+
+It happens fast, the way these things do.
+
+One moment Lemon is standing on the water's edge of Hubert's enormous flank, scolding Sunny with the last of her adrenaline. The next, her wings buckle beneath her — not folding on purpose, just failing, the way something fails when it's been running on nothing but momentum for three straight days and the momentum finally runs out.
+
+She goes down into the water.
+
+[SUNNY]
+"LEMON—"
+
+[CARLOS]
+"LEMON!"
+
+Carlos is faster than you've ever seen him move, wedging himself under her wing before she goes fully under, holding her head above the surface with a strength you wouldn't have guessed a seagull his size could manage.
+
+[HUBERT]
+"Is she — did I do that? I didn't touch her, I promise, I've been very still—"
+
+[PETALBLACK]
+"You didn't do it, Hubert. Nobody did it. She's been carrying too much for too long, same as the rest of them — except she's the one who never puts any of it down."
+
+[CHOICES]:
+A. "Is she breathing? Is she okay?"
+B. [Help Carlos hold her up.]
+C. "Petalblack — can you help her?"
+D. [To Sunny] "Hey. Look at me. She's going to be okay."
+
+---
+
+[If A — "Is she breathing?"]
+[CARLOS] "She's breathing. Slow. But breathing." His voice is steadier than his eyes are.
+[PETALBLACK] "She's exhausted, not hurt. There's a difference, and it matters which one this is."
+[Continue →]
+
+[If B — Help hold her up.]
+You slide in beside Carlos, wedging your own wing under Lemon's far side. Between the two of you she stays afloat easily — she weighs almost nothing, you realize, in the specific, alarming way tired things weigh nothing.
+[CARLOS, quietly] "Thank you."
+[Continue →]
+
+[If C — "Can you help her?"]
+[PETALBLACK] "I can get her somewhere calm and warm faster than anywhere else in this ocean. That happens to also be exactly where I was already planning to take you."
+[Continue →]
+
+[If D — Reassure Sunny.]
+Sunny's eyes are enormous, all the earlier bravado gone out of him completely.
+[player] "Hey. Look at me. She's going to be okay."
+[SUNNY, small] "She's never the one who — she's always the one who's FINE, she doesn't get to—"
+[player] "She's still fine. She's just tired. Tired isn't the same as not fine."
+[SUNNY] "...okay."
+[Continue →]
+
+---
+
+[waitDuration: 5 minutes]
+
+Petalblack's stillness sharpens into something closer to command.
+
+[PETALBLACK]
+"Hubert. Keep her against your side, out of the swell. Gently."
+
+[HUBERT]
+"Gently! I can do gently! I'm very gentle when it matters—"
+
+He rolls, carefully, achingly slowly for something his size, until Lemon rests in the calm water pooled against his flank, cradled out of the current.
+
+[PETALBLACK]
+"There's no faster rest anywhere in this water than the roots of the tree I watch over. It's the stillest place this ocean has. No current, no swell, no weather at all — just old, patient dark."
+
+She looks at you — at the Warming Pouch, at the glow beneath the cloth — and something in her settles, a decision reached.
+
+[PETALBLACK]
+"That's where we're taking all of you. Her, because she needs it. You, because I think you need to meet the tree regardless. Sometimes the ocean hands you one reason to do something, and it turns out to be two."
+
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE SEED, NOTICED
+
+[waitDuration: 10 minutes]
+
+[PETALBLACK]
+"That glow, on you. What is it?"
+
+[CHOICES]:
+A. "It's a seed. Dawn gave it to me."
+B. "It's a long story."
+C. "Why does it matter to you?"
+D. [Open the pouch. Show her.]
+
+---
+
+[If A — "Dawn gave it to me."]
+Petalblack goes very still — stiller than before, which you wouldn't have thought possible.
+[PETALBLACK] "Dawn."
+Not a question. A word she's turning over, checking its weight.
+[PETALBLACK] "I haven't heard that name spoken by a traveler in longer than you'd believe."
+[Continue →]
+
+[If B — "Long story."]
+[PETALBLACK] "I have time. I live at the bottom of an ocean. Time is not something I'm short on."
+[player] "Fair."
+You tell her. The short version — Dawn, the branch, the fading light, the seed, the gr0ve. She listens without interrupting, the way something listens when it has heard a thousand stories and still gives each one full attention.
+[Continue →]
+
+[If C — "Why does it matter to you?"]
+[PETALBLACK] "Because very few things still glow like that. And the ones that do tend to be looking for one particular place."
+A pause.
+[PETALBLACK] "I need to know which place, before I decide what to do about you."
+[Continue →]
+
+[If D — Open the pouch.]
+You loosen the Warming Pouch and let her see. Dawn's Seed pulses in the low light, red-gold, patient.
+Petalblack's small pink body goes rigid — not with fear. With recognition.
+[PETALBLACK] "...oh."
+[HUBERT] "Ooh! Pretty! Can I—"
+[PETALBLACK] "No, Hubert."
+[HUBERT] "I wasn't going to EAT it, I was going to LOOK at it—"
+[PETALBLACK] "You look with your mouth open. The answer is still no."
+[Continue →]
+
+---
+
+[waitDuration: 15 minutes — Petalblack explaining the plan]
+
+Petalblack is quiet for a moment, watching Lemon's slow, steady breathing against Hubert's side. Beneath her, unseen, you get the sense of something enormous already moving — the decision made, the ocean floor turning over in agreement with it.
+
+[PETALBLACK]
+"There is a tree. Deep below here, past where the light gives up. She has no name — or she has one and has simply stopped telling anyone what it is, which amounts to the same thing after enough centuries."
+
+[PETALBLACK]
+"I am one of seven who watch over her. We don't often bring travelers down. Most who come this far are looking for something they wouldn't survive finding."
+
+[player, dialogue]
+"Am I one of those?"
+
+[PETALBLACK]
+"I don't know yet."
+
+She says it plainly. Not unkindly. Just honestly.
+
+[PETALBLACK]
+"But you carry Dawn's Seed, and Dawn doesn't hand that seed to just anyone. And your friend needs the calmest water in this ocean, and I already told you where that is. I'd rather bring all of you down and be wrong about one of those reasons than turn you away and be wrong about both."
+
+[CHOICES]:
+A. "Thank you. I won't waste her time, or yours."
+B. "What happens if she decides I shouldn't have come?"
+C. "Will Lemon be okay, down there?"
+D. "You said seven of you. Where are the other six?"
+
+---
+
+[If A — "I won't waste her time."]
+[PETALBLACK] "See that you don't. She has had a very long time to grow patient. I would rather not test the edges of it."
+[Continue →]
+
+[If B — "What if she decides I shouldn't have come?"]
+[PETALBLACK] "Then you go back up, and Hubert carries you somewhere less interesting, and this whole afternoon becomes a strange thing that happened once."
+[HUBERT] "I'm very good at carrying people places! Even sad places!"
+[PETALBLACK] "That is not the comfort you think it is, Hubert."
+[Continue →]
+
+[If C — "Will Lemon be okay?"]
+[PETALBLACK] "Better than okay. Down there, nothing pulls at her. No wind, no current, no need to hold anything up — not even her own wings, if she doesn't want to. It's the closest thing to stillness this ocean has to offer, and stillness is exactly what she's out of."
+[CARLOS, quietly, still holding her steady] "Thank you for that."
+[Continue →]
+
+[If D — "Where are the other six?"]
+[PETALBLACK] "Around. Somewhere. They'll show themselves if they feel like it, which is not something any of them can be convinced to do faster than they choose to."
+A small, dry note enters her voice.
+[PETALBLACK] "I'm the one who actually gets things done. That's not vanity. It's just accurate."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE SEVEN
+
+[waitDuration: 20 minutes — the others arrive, one at a time, on their own schedule]
+
+Petalblack gives a low, rippling call — a sound that travels through the water in a way you feel more than hear, a pressure against your feathers where they trail the surface.
+
+One by one, they come.
+
+The first is slow. Achingly slow, a fish moving as if the current itself is optional and mostly not worth the effort. His eyes are half-lidded, his fins drift more than swim.
+
+[SOMNUS]
+"...mm. Visitors."
+
+He says it like a fact he's noticing rather than a greeting.
+
+[SOMNUS]
+"Is it still today."
+
+[PETALBLACK]
+"It's still today, Somnus."
+
+[SOMNUS]
+"...good. I'd hate to have slept through an entire visitor."
+
+He drifts, unbothered, already half-closing his eyes again.
+
+Next comes a fish with fins that fan out into something between a threat and a decoration — sharp-edged, faintly barbed, held at an angle that suggests she's ready to be offended at any moment.
+
+[STINGER]
+"Why is there a whale-sized problem near the tree grounds."
+
+[HUBERT]
+"I didn't MEAN to—"
+
+[STINGER]
+"You never mean to. That's the entire pattern of your existence, Hubert."
+
+[HUBERT]
+"...that's kind of harsh."
+
+[STINGER]
+"It's accurate. Petalblack likes accurate. I'm just delivering it with less patience."
+
+A third arrives facing the wrong way — angled due north with a rigidity that suggests he'd rather stay pointed that way than greet anyone properly.
+
+[POLARO]
+"North is that way."
+
+[player, dialogue]
+"...okay?"
+
+[POLARO]
+"I felt you should know. Most travelers don't know which way is north down here. It matters more than people think."
+
+[PETALBLACK]
+"Polaro. Say hello properly."
+
+[POLARO, still facing north]
+"Hello. North is that way."
+
+[CHOICES]:
+A. "Thank you, Polaro. That's good to know."
+B. [To Petalblack] "Is he always like this?"
+C. "Why does north matter this deep down?"
+D. [Just nod and let it be strange.]
+
+---
+
+[If A — "Thank you, Polaro."]
+Polaro turns, briefly, fully toward you — the first time he's fully faced anyone. It seems to cost him something.
+[POLARO] "You're welcome." A pause. Then he turns back north. "It's still that way."
+[Continue →]
+
+[If B — "Is he always like this?"]
+[PETALBLACK] "Always. He's been oriented north since before I can remember. Nobody's sure why. He's stopped being sure why."
+[POLARO, still facing away] "I have my reasons. I just don't discuss them facing sideways."
+[Continue →]
+
+[If C — "Why does north matter this deep down?"]
+[POLARO] "Because everything eventually needs it. Currents. Migrations. Travelers who think they're lost and aren't, they're just facing the wrong way." A pause. "You'll need it too. Later. Remember that north is patient. It doesn't move to find you. You have to move to find it."
+[Continue →]
+
+[If D — Just nod.]
+You nod. Polaro, satisfied, does not turn back around, and somehow this feels like the correct outcome for everyone involved.
+[Continue →]
+
+---
+
+The fourth arrives already mid-sentence, as if he started talking before he'd finished deciding what to say, and still hasn't quite managed to catch up with himself.
+
+[HALVES]
+"—so I heard there was a whale incident, hang on, wait, I already said that part—"
+
+[HALVES]
+"—whale incident, yes, that's what I meant, I heard there was a whale incident, did I say that already?"
+
+[player, dialogue]
+"...twice, actually."
+
+[HALVES]
+"That happens. My thoughts arrive, and then they arrive again a moment later to make sure the first one landed properly. It's very efficient. It just sounds inefficient."
+
+[PETALBLACK]
+"This is Halves. Don't try to point out when he repeats himself. It only makes him do it slower, on purpose, to prove he meant it both times."
+
+[HALVES]
+"I absolutely do that. I did it just now. Did you catch it? I'll do it again—"
+
+[PETALBLACK]
+"Halves."
+
+[HALVES]
+"—again, if you'd like."
+
+The fifth of the seven arrives late, small even by the standards of the others, darting in quick, excitable loops around the group before settling.
+
+[NEOFIN]
+"Wait wait wait, are these the SURFACE BIRDS? Real actual surface birds? I've never seen a real one up close, is that a WING, can I touch the wing—"
+
+[PETALBLACK]
+"Neofin."
+
+[NEOFIN]
+"I'm not gonna touch it! I'm just gonna ask if I CAN, and then not do it, probably, unless they say yes, in which case I definitely will—"
+
+[SUNNY]
+"I like this one. This one's my favorite."
+
+The sixth of the seven doesn't come close at all. He hangs back at the very edge of the gold light, half-obscured by the tree's roots, close enough to be counted and no closer.
+
+[PETALBLACK]
+"Solito. Come say hello properly."
+
+[SOLITO]
+"I said it from here."
+
+[PETALBLACK]
+"You didn't say anything from there."
+
+[SOLITO]
+"I said it where I could hear myself say it. That should count for something."
+
+He doesn't move any closer, and after a moment, nobody pushes him to.
+
+[SOLITO]
+"Hello. Welcome. I hope it goes well for you, whatever it is you're here for."
+
+That's the whole of it. He drifts back another few inches into the dark at the roots, watching, present, entirely unwilling to be any nearer than that.
+
+[CHOICES]:
+A. [To Neofin] "You can touch the wing. Go ahead."
+B. [To Neofin] "How long have you been the youngest?"
+C. [To Petalblack] "Seven of you, all this different. How does that work?"
+D. [To the group] "Thank you all for coming up to meet us."
+
+---
+
+[If A — "You can touch the wing."]
+Neofin darts forward and brushes a fin along your feathers with the reverent care of someone touching something they've only heard about in stories.
+[NEOFIN] "It's SO SOFT, oh my gosh, Petalblack, feel this—"
+[PETALBLACK] "I'm going to pass, but I appreciate the offer."
+[Continue →]
+
+[If B — "How long have you been the youngest?"]
+[NEOFIN] "Forever! I mean — not forever forever, everyone else was around before me, but by the time you're down here long enough it stops mattering how long 'forever' actually was."
+[SOMNUS, distant, half-asleep] "...she's the newest by at least two centuries."
+[NEOFIN] "SEE, this is what I mean, 'two centuries' is basically nothing to these guys!"
+[Continue →]
+
+[If C — "How does that work?"]
+[PETALBLACK] "We don't ask why we're each the way we are. We just are it, and it turns out seven different ways of paying attention cover more ground than one way would. Somnus notices what's slow to change. Stinger notices what's dangerous. Polaro notices direction. Halves notices everything twice, just to be sure the first time counted. Solito notices from far enough away that he sees the whole of a thing instead of just the part closest to him. Neofin notices what's new."
+[player] "What do you notice?"
+[PETALBLACK] "Whether something is worth the risk of bringing down. That's usually the last question, and someone has to ask it."
+[Continue →]
+
+[If D — "Thank you for coming up."]
+[SOMNUS] "...mm. Welcome." [Already drifting off again.]
+[STINGER] "Don't make it a whole thing."
+[POLARO] "You're welcome. North is still that way."
+[HALVES] "I wouldn't have missed a whale incident for anything — did I already say 'whale incident'? I feel like I already said 'whale incident.'"
+[SOLITO, distant] "You're welcome." [Nothing more. That's the whole reply, and it's enough.]
+[NEOFIN] "THIS IS THE BEST DAY OF MY LIFE."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE DESCENT
+
+[waitDuration: 40 minutes — sinking through the dark]
+
+Petalblack gives a single low note, and the water around all of you begins to change.
+
+It doesn't part so much as agree to hold still. A vast, trembling sphere of pressure and light forms around all of you — pushing the ocean back into a curved wall through which you can see the water without being in it. Lemon rests curled in the center of it, still asleep, her breathing slower and easier than it's been in days. Somewhere beyond the bubble's skin, seven small shapes flank its edges, guiding it down like something being lowered on an invisible thread. Above, blotting out what's left of the daylight, Hubert follows at a respectful distance, careful, for once, not to bump anything.
+
+[system, italic]
+The bubble begins to sink.
+
+The light goes first. Not suddenly — gradually, the way the shore disappeared three days ago, the blue thinning by degrees until there is no blue left at all, only the deep, textured black of water that has never once been touched by sun.
+
+And then, in that black, things begin to glow.
+
+Small drifting motes, blue-green, pulsing faintly, rising past the bubble like slow inverted snow. Larger shapes further out — long, trailing things with lights strung along their length like something built rather than born. Once, far below, a shape passes that might be enormous and might simply be the dark playing games with your eyes; you don't ask, and nobody offers.
+
+[CARLOS, quiet, watching Lemon sleep]
+"She hasn't stopped moving in three days. I don't think I've seen her sleep since the shore."
+
+[SUNNY, unusually subdued]
+"Is it bad that this is the calmest I've felt about her in a while?"
+
+[CARLOS]
+"No. I think it's just honest."
+
+You pass what might be ruins — pale shapes half-buried in silt, too regular to be stone by accident, worn smooth by a weight of time you don't have a word large enough for. Nobody comments on them. It's possible even Petalblack doesn't know what they were.
+
+[CHOICES]:
+A. "Petalblack — how far down does she live?"
+B. "Are those ruins? Down there?"
+C. [Say nothing. Just watch.]
+D. "Does it get any less dark than this?"
+
+---
+
+[If A — "How far down?"]
+[PETALBLACK] "Far enough that the sun is a rumor. Far enough that most things that live nearer the surface would call this place the bottom of everything." A pause. "It isn't, of course. It's just the bottom of what they know."
+[Continue →]
+
+[If B — "Are those ruins?"]
+[PETALBLACK] "Something like that. Older than the tree, maybe. Older than us. We don't disturb them. Some questions aren't ours to answer, and I've learned not to mind that."
+[Continue →]
+
+[If C — Say nothing.]
+[system, italic]
+You watch the dark go by, glowing and slow, and something in you goes quiet in a way it hasn't since Dawn's branch first appeared in your inventory. Not fear. Something closer to reverence.
+[Continue →]
+
+[If D — "Does it get any less dark?"]
+[PETALBLACK] "You'll see."
+She doesn't explain further, and a moment later, you understand why.
+[Continue →]
+
+---
+
+A light appears ahead — not blue-green like the drifting motes, but warm. Gold. Old.
+
+The bubble tilts, following it down, and slowly, the shape resolves.
+
+An enormous tree, rooted not in soil but in stone, in silt, in the accumulated weight of centuries of ocean floor. Its trunk is wider than the widest ancient oak you've ever seen or heard described, pale where the light touches it, fading to black where it doesn't. Its branches spread not upward — there is no upward here, no sky to reach for — but outward, sideways, a slow and patient sprawl across the sea floor, hung with the same soft gold light that drew you in, glowing faintly from within the bark itself, like something that has been quietly burning for longer than fire has had a name.
+
+[system, italic]
+The Unnamed Tree.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE UNNAMED TREE
+
+[waitDuration: 20 minutes]
+
+The bubble settles gently at the base of her roots, and for a long moment, nobody speaks. Even Sunny, remarkably, has nothing to say.
+
+Beside you, Lemon stirs. Her eyes open slowly, unhurried, the gold light of the roots moving across her face before she's even fully awake.
+
+[LEMON, groggy]
+"...why does it smell like warm stone. Where are we. Why is there a tree the size of the sky."
+
+[CARLOS]
+"You fainted. We're at the bottom of the ocean. There's a tree the size of the sky."
+
+[LEMON]
+"...that tracks, actually."
+
+She pushes herself upright, steadier already than she has any right to be, and goes quiet — properly quiet, taking in the size and the age and the gold light of the thing in front of her, the way everyone eventually goes quiet in front of the Unnamed Tree.
+
+Then the tree's voice arrives — not sound exactly, more a kind of warmth that moves through the water the way heat moves through still air, felt before it's heard.
+
+[UNNAMED TREE]
+"Little bird."
+
+[UNNAMED TREE]
+"You've come a long way to stand in the dark and look at an old tree."
+
+[player, dialogue]
+"I — yes. Petalblack brought us. I have—"
+
+[UNNAMED TREE]
+"I know what you have. I've known since before Petalblack surfaced to check on that pink fish of hers."
+
+There's no unkindness in the interruption. Just the calm certainty of something that has stopped needing to wait for information to arrive; it simply already has.
+
+[UNNAMED TREE]
+"Dawn's Seed. Still warm. Still asking. That's rarer than you'd think — most seeds that travel this far have gone cold by now, in one way or another."
+
+[CHOICES]:
+A. "You know Dawn?"
+B. "Petalblack said you don't have a name. Is that true?"
+C. "Can you help me reach the gr0ve?"
+D. "You said 'in one way or another.' What does that mean?"
+
+---
+
+[If A — "You know Dawn?"]
+[UNNAMED TREE] "I know of him. I know of most things that have burned for a long time in one place. I never met him directly — he kept to his threshold, and I keep to my dark, and the world is large enough that even old things don't cross every path."
+[Continue →]
+
+[If B — "Is it true you don't have a name?"]
+[UNNAMED TREE] "It's true that I don't offer one. Whether that's the same as not having one — I've stopped being certain, and I've had a very long time to become certain of things, which should tell you something."
+A pause, gentle, almost amused.
+[UNNAMED TREE] "Names are for being found. I stopped needing to be found a long time before your kind of bird existed."
+[Continue →]
+
+[If C — "Can you help me reach the gr0ve?"]
+[UNNAMED TREE] "Bird. You ask the wrong question."
+The words land soft, but they land completely — the way water finds every gap in a container, not by force, simply by patience.
+[UNNAMED TREE] "You'll understand why, before we're done talking."
+[Continue →]
+
+[If D — "In one way or another?"]
+[UNNAMED TREE] "Some seeds go cold because they're forgotten. Left somewhere and never carried further. Others go cold because they were carried too fast, by someone who never once stopped to ask what they were carrying, or why. Yours is still warm because you keep asking. Keep doing that."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT SHE HAS WITNESSED
+
+[waitDuration: 30 minutes — the heart of the conversation]
+
+[UNNAMED TREE]
+"I am not like the willow who wept beside the frozen lake. I do not hold memory the way she holds it — sharp, precise, aching. And I am not like the tree who read your branch and told you its story in growth rings. I do not hold history that way either — organized, countable, explainable."
+
+[UNNAMED TREE]
+"I have simply watched. For longer than either of them has existed. I watched the first forests take root. I watched every ancient tree be born, grow, and become whatever it was going to become. I watched the gr0ve, once, when it still let itself be watched."
+
+[player, dialogue]
+"What happened to it? The gr0ve?"
+
+A long pause. The gold light along her bark pulses once, slow, like a held breath.
+
+[UNNAMED TREE]
+"The gr0ve was never lost."
+
+[UNNAMED TREE]
+"It simply stopped allowing itself to be found."
+
+[CHOICES]:
+A. "Why would it hide from the world?"
+B. "Was it always hidden? Even at the beginning?"
+C. "Is there something guarding it?"
+D. "What was it like? Before it hid?"
+
+---
+
+[If A — "Why would it hide?"]
+[UNNAMED TREE] "Because for a very long time, every river, every current, every path in this world led toward it. That kind of centrality is a kind of power. And power, little bird, is rarely left alone by those who want it for themselves."
+A pause, heavier.
+[UNNAMED TREE] "It was abused. Not by strangers. By those closest to it, who convinced themselves closeness was the same thing as right. The gr0ve chose, in the end, to close itself rather than keep being taken from."
+[Continue →]
+
+[If B — "Was it always hidden?"]
+[UNNAMED TREE] "No. Once, you could walk toward it from anywhere and eventually arrive. That's not true anymore, and hasn't been for longer than most living things can measure."
+[Continue →]
+
+[If C — "Is something guarding it?"]
+[UNNAMED TREE] "Yes."
+She doesn't elaborate immediately. The silence that follows feels deliberate — the silence of someone choosing, carefully, exactly how much to say.
+[UNNAMED TREE] "A guardian still watches over what remains. I won't tell you who. Not because I'm testing you — I've simply learned that some things are only understood correctly when they're found rather than told."
+[Continue →]
+
+[If D — "What was it like before?"]
+[UNNAMED TREE] "Alive in a way I don't have words generous enough to give you. Aspen connected everything that touched her roots. Rowan illuminated the roads that led travelers home. Grover endured at the center of it all, holding the shape of the place together simply by continuing to exist. Sakura understood endings before they arrived — she always knew a season was closing before anyone else could feel the chill of it."
+A pause, wistful in a way that doesn't quite fit a being this old and this calm, which makes it land harder.
+[UNNAMED TREE] "I watched all of that. I don't expect you to understand it from four sentences. I mention it so you know it existed. So you know what was lost, even if you never learn all of how."
+[Continue →]
+
+---
+
+[waitDuration: 15 minutes]
+
+[UNNAMED TREE]
+"There is something else. Something you should know before you go further, though I suspect it will only give you more questions than it answers."
+
+[UNNAMED TREE]
+"Long after the gr0ve closed itself, something found it anyway. Not tree. Not bird. Not beast — not anything I have a clean word for. It came from somewhere I did not watch closely enough to name, and it still rests beneath the guardian's shade, even now."
+
+[player, dialogue]
+"What is it?"
+
+[UNNAMED TREE]
+"I don't know."
+
+She says this plainly, without embarrassment — the flat honesty of something that has never once needed to pretend at knowledge it doesn't have.
+
+[UNNAMED TREE]
+"That may be the only true mystery I've kept in all my centuries of watching. I offer it to you not as an answer, but as a warning: whatever waits beneath the guardian's shade, it is old, it is patient, and it has been resting there since before your kind had a word for patience at all."
+
+[CHOICES]:
+A. "That's not very reassuring."
+B. "Should I be afraid of it?"
+C. "Does the guardian know what it is?"
+D. [Sit with that for a moment before responding.]
+
+---
+
+[If A — "Not very reassuring."]
+[UNNAMED TREE] "I'm not in the business of reassurance, little bird. I'm in the business of having watched things happen. Reassurance is a kindness I leave to trees who deal in comfort. I deal in what's true."
+[Continue →]
+
+[If B — "Should I be afraid of it?"]
+[UNNAMED TREE] "I don't know that either. Fear is a useful thing when it's pointed at the right target and a wasted thing when it isn't. I can't tell you yet which this is."
+[Continue →]
+
+[If C — "Does the guardian know?"]
+[UNNAMED TREE] "Better than I do, certainly. The guardian has stood closer to it for longer than I've had reason to think about it at all. But that's a question for when you meet the guardian. Not for now, and not for me."
+[Continue →]
+
+[If D — Sit with it.]
+[system, italic]
+You don't say anything for a while. Something not-tree, not-bird, not-beast, resting under a guardian's shade for longer than "patience" has had a name. You decide, quietly, that you'll think about this again later — probably at night, probably when you're trying to sleep, probably for the rest of your life.
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE TWIST
+
+[waitDuration: 20 minutes]
+
+[UNNAMED TREE]
+"You asked, earlier, if I could help you reach the gr0ve. I told you that was the wrong question. Here is why."
+
+[UNNAMED TREE]
+"Countless birds have carried seeds this far. Some carried them further than you have. A few carried them all the way to where the gr0ve should be, by every measure and every direction available to them."
+
+[UNNAMED TREE]
+"None of them succeeded."
+
+[player, dialogue]
+"...why not?"
+
+[UNNAMED TREE]
+"Because what you seek is not the gr0ve. Not yet. If I showed it to you now — if I gave you the exact place, the exact path, and set you flying straight toward it — you would fail all the same."
+
+[CHOICES]:
+A. "Then what am I actually looking for?"
+B. "Why would I fail? I've made it this far."
+C. "Is the seed not enough on its own?"
+D. "How do you know all those birds failed, if the gr0ve doesn't let itself be found?"
+
+---
+
+[If A — "Then what am I looking for?"]
+[UNNAMED TREE] "Dawn's Seed is incomplete. It carries the light of the threshold — the space between day and night, which is a true and important light, but only one of several the gr0ve was built from."
+[Continue →]
+
+[If B — "Why would I fail?"]
+[UNNAMED TREE] "Because a door built for four keys does not open for one, no matter how bright that one key burns. You've made it this far on Dawn's light alone. That was never going to be enough to finish the journey — only enough to begin it."
+[Continue →]
+
+[If C — "Is the seed not enough?"]
+[UNNAMED TREE] "Not alone. It was never meant to be carried alone, not truly — it was meant to be carried alongside what the other ancient trees still hold, each of them their own fading light."
+[Continue →]
+
+[If D — "How do you know they failed?"]
+[UNNAMED TREE] "Because the gr0ve is still closed, little bird. If any of them had opened it, you would already know. The world would look different than it does."
+[Continue →]
+
+---
+
+[waitDuration: 15 minutes]
+
+[UNNAMED TREE]
+"Three others still hold a light of their own, though each of them has faded, in their own way, over time. You've already begun to hear their names, I think, carried to you on other tongues."
+
+[UNNAMED TREE]
+"One keeps what came before. One understands what is, plainly and without illusion. One still imagines what has not yet happened. Each once held a piece of what the gr0ve needs to open again. Each still holds it now, buried under whatever the years have done to them."
+
+[UNNAMED TREE]
+"Find them. Gather what they carry, alongside what Dawn already gave you. Only then will the question of reaching the gr0ve be worth asking me, or anyone."
+
+[player, dialogue]
+"...that's a lot more than I thought I was doing when I picked up one seed."
+
+[UNNAMED TREE]
+"Most important things are."
+
+[CHOICES]:
+A. "Where do I start? Who's closest?"
+B. "Do you know their names?"
+C. "Will you tell me more, if I come back?"
+D. [Just nod. Let it settle.]
+
+---
+
+[If A — "Where do I start?"]
+[UNNAMED TREE] "Hubert will take you as far as the frozen ocean. There is ice there, and something frozen within it that has waited a very long time for someone to arrive who still remembers how to ask the right question. Beyond that, I can't carry you further. My roots don't reach that far, even in the dark."
+[Continue →]
+
+[If B — "Do you know their names?"]
+[UNNAMED TREE] "I know pieces. I've heard them carried by travelers over centuries, the way a current carries silt — worn down, incomplete, but not entirely lost. You'll find the full shape of each name where you find each tree. That's how names work, I've noticed. They complete themselves in the presence of the thing they belong to."
+[Continue →]
+
+[If C — "Will you tell me more if I come back?"]
+[UNNAMED TREE] "Perhaps. I don't make many promises, little bird — I've watched too many go unkept by things far grander than me to trust my own easily. But I will say this: I don't often let the same traveler through my dark twice without reason. If you come back, it will mean something happened worth hearing about."
+[Continue →]
+
+[If D — Just nod.]
+[system, italic]
+You nod, slowly, feeling the shape of the task settle onto you the way the Warming Pouch settled against your side back on the beach — heavier than you expected, and somehow also exactly the right weight to carry.
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE VESSEL
+
+[waitDuration: 15 minutes]
+
+[if player has Loulo's Pot:]
+
+The Unnamed Tree's attention shifts, briefly, to the sea-glass warmth of the pot at your side.
+
+[UNNAMED TREE]
+"You already carry a vessel. Loulo's, unless I misjudge the pink of it — and I rarely do, even down here, even after all this time."
+
+[player, dialogue]
+"Yes. She gave it to me before the crossing."
+
+[UNNAMED TREE]
+"Then I won't offer you another. A traveler who carries two vessels for the same purpose usually ends up trusting neither of them fully. Keep hers. Intention is not a small thing to carry, and she chose well in choosing you to carry it."
+
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[if player does NOT have Loulo's Pot:]
+
+The Unnamed Tree is quiet for a moment, and then something shifts among her lowest roots — a small motion, patient, unhurried.
+
+[UNNAMED TREE]
+"You carry no vessel yet. I have one to offer, if you'll take it."
+
+A shape rises from the silt at the base of her trunk — round, translucent, the pale blue-green of deep water caught and cooled into something solid. Sea glass, worn smooth by centuries of current, glowing faintly from whatever light still lives inside her roots.
+
+[UNNAMED TREE]
+"Loulo's held intention. Mine holds something else. A witness learns, eventually, that the rarest thing in this world isn't wanting something, or knowing something. It's simply staying to see how it turns out. This holds attention — the choosing, over and over, to keep watching something through to its end, instead of looking away when it gets difficult."
+
+[CHOICES]:
+A. "That's a strange thing to put in a pot."
+B. "Why give it to me, and not keep it yourself?"
+C. [Say nothing. Just look at it.]
+
+---
+
+[If A — "Strange thing to put in a pot."]
+[UNNAMED TREE] "Most true things are strange until you've carried them a while."
+[Continue →]
+
+[If B — "Why not keep it yourself?"]
+[UNNAMED TREE] "Because I've already spent my attention on everything, little bird. That's what watching for this long means. I have none left over to concentrate — only the wide, general kind. You're going somewhere that will need the narrow kind. The kind that fixes on one small, difficult thing and does not let it go."
+[Continue →]
+
+[If C — Say nothing.]
+[system, italic]
+You look at it a while longer instead of answering — the pale blue-green of it, the faint light moving inside. The Unnamed Tree doesn't rush you.
+[Continue →]
+
+---
+
+[UNNAMED TREE]
+"Well, little bird? Will you carry it?"
+
+[CHOICES]:
+A. "I'll take it. Thank you."
+B. "No, thank you. I don't think I should carry it."
+
+---
+
+[If A — "I'll take it."]
+[UNNAMED TREE] "Then it's yours."
+[system, bold]
+[Sea-Glass Vessel obtained | Cool, pale blue-green, worn smooth by centuries of current. Holds attention. Remembers what you chose not to look away from.]
+[Continue →]
+
+[If B — "No, thank you."]
+The Unnamed Tree doesn't press you. If anything, something in her stillness seems to approve of the refusal itself.
+[UNNAMED TREE] "That's an answer too. Not every bird is meant to carry every vessel offered to them — sometimes the honest thing is knowing which ones aren't yours to hold yet. Keep going as you are. There will be another chance, further north, if you find you want one after all."
+[system, italic]
+No vessel obtained. You continue on carrying only what you already had.
+[Continue →]
+
+[UNNAMED TREE]
+"One more thing, before Hubert takes you north."
+
+[UNNAMED TREE]
+"You will be offered another vessel before this is over. Whichever one you carry now, you may set it down for that one, if it doesn't feel right when you're holding it. That choice will still be yours to make."
+
+A pause. The gold light along her bark dims, just slightly — the closest thing to solemn you've seen from her yet.
+
+[UNNAMED TREE]
+"But I don't believe you'll be given the choice to refuse the last one. Some things, by the time you reach them, insist on being carried whether you agree to it or not. I only tell you now so it doesn't surprise you later. Surprise is wasted on things you could have been told in advance."
+
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HUBERT'S TASK
+
+[waitDuration: 15 minutes]
+
+[UNNAMED TREE]
+"Hubert."
+
+[HUBERT, immediately attentive, in the particular way of someone who has been waiting the whole conversation to be given a job]
+"Yes! Hello! Present!"
+
+[UNNAMED TREE]
+"Carry them north. As far as the ice allows you. You know the place — Frigid Landfall, where the water stops being water and starts being something harder."
+
+[HUBERT]
+"I know it! I go there every year! Well — I go NEAR there. I don't love the cold part."
+
+[PETALBLACK]
+"Nobody loves the cold part, Hubert. That's why it's called the cold part."
+
+[HUBERT]
+"I can take them right up to where it starts! And then — after that, they have to keep going without me, because I don't have legs, or feet, or any part that works well on ice, I've thought about this a lot—"
+
+[CHOICES]:
+A. [To Hubert] "Thank you. I mean it."
+B. [To Petalblack] "Will you come too? Any of you?"
+C. [To Hubert] "Can you eat anything along the way, or is that still a no?"
+D. [To the Unnamed Tree] "Will I see you again?"
+
+---
+
+[If A — "Thank you, Hubert."]
+[HUBERT] "You're WELCOME! This is the most important job I've ever had! Well — second most important. The first was the time Petalblack asked me to guard a rock for a whole afternoon."
+[PETALBLACK] "That rock was very important, Hubert."
+[HUBERT] "IT WAS."
+[Continue →]
+
+[If B — "Will you come too?"]
+[PETALBLACK] "No. We stay with the tree. That's the whole of what we are — we don't leave her, not for long, not for anyone. But Hubert can go further than any of us. He always has. It's why we ask him."
+[HUBERT] "I go EVERYWHERE! Within reason! Within the reason of a whale, which is a slightly different reason than most reasons!"
+[Continue →]
+
+[If C — "Can you eat anything along the way?"]
+[HUBERT, hopeful] "Can I—"
+[PETALBLACK] "No."
+[HUBERT] "You didn't even let me FINISH—"
+[PETALBLACK] "I didn't need to. I know every version of that sentence you're capable of building, Hubert. The answer is no to all of them."
+[HUBERT, quietly, to you] "...she's usually right. It's very annoying."
+[Continue →]
+
+[If D — "Will I see you again?"]
+[UNNAMED TREE] "Perhaps. As I said — I don't make promises easily. But the dark down here is patient, and so am I, and if your path brings you back this way, I'll know before Petalblack even surfaces to check."
+A pause, almost gentle.
+[UNNAMED TREE] "Go well, little bird. Carry what you're carrying carefully. And remember — the wrong question, asked honestly, is still worth more than a right question asked out of habit."
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FAREWELLS IN THE DARK
+
+[waitDuration: 20 minutes — the bubble rising, the seven fish gathering to see you off]
+
+The bubble begins to climb.
+
+The seven of them gather to watch you go — or six of them gather, and Solito stays exactly where he was, at the very edge of the gold light, watching from there instead. Somnus drifting half-asleep at the edge, Stinger holding her fins at their usual sharp angle, Polaro still faithfully oriented north, Halves quietly repeating his own last sentence to make sure it landed, Neofin darting in one last excited loop, Solito watching silently from the dark at the roots, and Petalblack, still, at the center of all of it, exactly where she's clearly been standing — figuratively, since fish don't stand — for longer than anyone else has been alive.
+
+[CHOICES]:
+A. "Petalblack — thank you. For all of this."
+B. "I don't think I ever thanked Somnus for waking up."
+C. [To Stinger] "You never really said much. Was that on purpose?"
+D. [To Neofin] "I hope you get to see more surface birds someday."
+
+---
+
+[If A — "Thank you, Petalblack."]
+[PETALBLACK] "You're welcome. Come back if you need to. We'll be here. We're always here. That's rather the arrangement."
+A pause, and something that might be the fish equivalent of a small smile.
+[PETALBLACK] "Try not to let Hubert eat anything important on the way."
+[HUBERT, distantly, already swimming ahead] "I HEARD THAT—"
+[Continue →]
+
+[If B — "I never thanked Somnus."]
+[SOMNUS, barely opening his eyes] "...you're welcome. For whatever it was."
+[STINGER] "He wasn't awake for most of the conversation."
+[SOMNUS] "I was awake for the important parts. I sleep selectively."
+[Continue →]
+
+[If C — "Was your quiet on purpose, Stinger?"]
+[STINGER] "Mostly. Someone has to notice what's dangerous instead of talking about it. Talking is Petalblack's job. Noticing is mine."
+A pause, almost warmer than her usual tone.
+[STINGER] "You weren't dangerous. That's why I let you get this close without saying anything about it."
+[Continue →]
+
+[If D — "I hope you see more surface birds, Neofin."]
+[NEOFIN] "ME TOO! Tell them all about me if you see any more! Tell them Neofin says hi! Tell them the wings are SO SOFT—"
+[PETALBLACK] "Neofin. Let them go."
+[NEOFIN] "Right, sorry, bye, GOOD LUCK, COME BACK SOMETIME—"
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BACK TO THE LIGHT
+
+[waitDuration: 40 minutes — the long rise]
+
+The bubble climbs the way it descended — slow, patient, guided by unseen fins somewhere far below. The glowing motes drift past you again, this time rising alongside you rather than past you going down. The pale ruins fall away into the dark behind. And eventually, gradually, the black begins to soften.
+
+Blue returns first as a suggestion. Then a certainty. Then, all at once, the surface breaks around you and the world is bright and loud and full of wind again, and you are floating on open ocean with Lemon, Carlos, and Sunny beside you, all of you blinking against a sun that feels, after the deep, almost too honest to look at directly.
+
+[SUNNY]
+"That was the BEST DAY. I got eaten AND I met an underwater tree. Nobody is going to believe this."
+
+[LEMON]
+"You weren't eaten."
+
+[SUNNY]
+"I was HELD IN A MOUTH—"
+
+[CARLOS]
+"We know, Sunny."
+
+[LEMON, quieter, mostly to herself]
+"I fainted. In front of a whale. And a tree older than the concept of time."
+
+[CARLOS]
+"You needed it."
+
+[LEMON]
+"I know. That doesn't make it less embarrassing."
+
+[SUNNY]
+"IT WAS A LITTLE FUNNY—"
+
+[LEMON]
+"Sunny."
+
+[SUNNY]
+"—a little!"
+
+Hubert's back breaks the surface nearby, an entire gray hillside of a creature turning gently, carefully, so as not to splash anyone this time.
+
+[HUBERT]
+"Everyone ready? I go slow at first! And I ask permission before I dive, so nobody gets a surprise whale-mouth situation again!"
+
+[LEMON]
+"We appreciate that."
+
+[player, dialogue]
+"...how do we get on him?"
+
+[HUBERT]
+"However you'd like! I have a very large back! There's room for opinions!"
+
+[CHOICES]:
+A. Land on Hubert's back and settle in.
+B. "Are you sure this is comfortable for you?"
+C. [To Lemon, Carlos, and Sunny] "This is where you three turn back, isn't it?"
+D. [Take one last look down at the water before boarding.]
+
+---
+
+[If A — Land and settle in.]
+You drop onto the wide gray plain of Hubert's back. It's warm, in an odd way — sun-heated skin over something enormous and alive — and surprisingly stable, like standing on a very slow-moving island.
+[HUBERT] "Comfortable? Say the word if you need anything adjusted! I can flex certain areas!"
+[player] "...I'll let you know."
+[Continue →]
+
+[If B — "Are you sure this is comfortable for you?"]
+[HUBERT] "Oh, very! I love having passengers! It gets lonely, being this big. Petalblack says I take up too much room for company most of the time. It's nice when someone doesn't mind."
+[Continue →]
+
+[If C — "This is where you three turn back."]
+Lemon's expression does something complicated.
+[LEMON] "It is. We fly the southern water. This is as far north as we go."
+[CARLOS] "You'll be fine with Hubert. He's slow, but he's careful, and careful matters more than fast out here."
+[SUNNY] "Come back and tell us EVERYTHING! Especially the whale parts, since I have the most experience with those—"
+[LEMON] "You have exactly one experience with those, Sunny."
+[SUNNY] "One GREAT experience."
+[Continue →]
+
+[If D — Take one last look down.]
+[system, italic]
+You look down at the water one more time before boarding — flat, blue, giving nothing away, exactly as unreadable now as it was three days ago. Somewhere far beneath it, seven small lights are already settling back into their slow, eternal circle around a tree that has watched everything and told you only some of it.
+[Continue →]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DEPARTURE
+
+[waitDuration: 15 minutes — final goodbyes on the water]
+
+[LEMON]
+"We'll tell Karl and Loulo you made it this far. They'll want to know."
+
+[CARLOS]
+"Tell whatever you meet next that a seagull sends regards. It rarely helps, but it's never once hurt."
+
+[SUNNY]
+"And tell THEM about the whale thing! In detail! Accurately, meaning: very dramatically!"
+
+[CHOICES]:
+A. "I will. Thank you — for the crossing, for all of it."
+B. "Lemon — take care of them."
+C. "I'll come back this way. I mean that."
+D. [Say nothing. Just look at the three of them for a long moment.]
+
+---
+
+[If A — "Thank you for all of it."]
+[LEMON] "You're welcome. Fly safe, little bird. The cold ahead doesn't forgive mistakes the way the ocean sometimes does."
+[Continue →]
+
+[If B — "Take care of them, Lemon."]
+[LEMON] "Always."
+[SUNNY] "We don't need—"
+[LEMON] "Always."
+[CARLOS] "Just let her have this one. It's easier."
+[SUNNY, grinning] "Fine. Yeah. We do."
+[Continue →]
+
+[If C — "I'll come back this way."]
+[LEMON] "Good. We'll hold you to that."
+[CARLOS] "The ocean's patient. It'll still be here."
+[SUNNY] "AND SO WILL WE, PROBABLY, UNLESS WE'RE FISHING—"
+[Continue →]
+
+[If D — Say nothing.]
+[system, italic]
+You look at the three of them — Lemon, steady and tired and endlessly responsible; Carlos, quiet and noticing everything; Sunny, still damp, still grinning, somehow entirely unbothered by having been recently inside a whale. You don't say anything, because there isn't really anything better to say than the moment itself.
+[Continue →]
+
+---
+
+[waitDuration: 10 minutes]
+
+The three gulls lift off the water together, circling once above you and Hubert, and then bank south — back toward the beach, toward Karl and his sideways patience, toward Loulo standing pink and certain against the tide.
+
+You watch them go until they're small. Then smaller. Then gone.
+
+[system, italic]
+You have been flying — and now riding — for a long time. You have met a fish who leads by simply being the one who decides, and a whale who asks permission for everything and receives it almost never. You have met six other guardians who each notice a different piece of the world, and a tree older than memory itself, who told you the truth by telling you what she didn't know.
+
+You are going north now. Toward the ice. Toward whatever is frozen there, waiting, the way Petalblack said it would be — for someone who still remembers how to ask the right question.
+
+Hubert turns, patient and enormous, and begins to swim.
+
+[HUBERT]
+"North! I know the way! Mostly! Polaro would be so proud of me right now!"
+
+The wind picks up. The water streams past Hubert's sides in long white lines. Somewhere behind you, the warm gold-lit dark keeps its slow, ancient watch. Somewhere ahead, the ocean is already beginning, by degrees too small to notice yet, to turn cold.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EPISODE COMPLETE: THE UNNAMED WATERS
+
+[episodeHeader]
+
+[system, italic]
+The ice is close now. Closer than it has ever been.
+Somewhere within it, something frozen still remembers how to wait.
+
+Frigid Landfall awaits...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CODING NOTES:
+
+CHARACTER SUMMARY:
+- HUBERT: StoryCharacter.hubert — enormous gray whale, gentle, innocent, constantly asks permission to eat things, almost always told no, genuinely loves having passengers
+- PETALBLACK: StoryCharacter.petalblack — small bright-pink fish, calm, unhurried, unmistakably in charge of the seven, dry sense of humor, protective of Hubert despite the exasperation
+- SOMNUS: StoryCharacter.somnus — perpetually drowsy, half-asleep, claims to "sleep selectively" and notices what's slow to change
+- STINGER: StoryCharacter.stinger — sharp-finned, blunt, notices danger, softer under the bluntness than she lets on
+- POLARO: StoryCharacter.polaro — permanently oriented north, cryptic about why, genuinely useful when it counts
+- SOLITO: StoryCharacter.solito — keeps physical distance from the group at all times, speaks briefly and only from the edge of the light, prefers to be counted present without being close; notices the whole of a thing by watching from far enough away to see all of it at once
+- HALVES: StoryCharacter.halves — a single fish who repeats and restates himself mid-sentence, as if his own thoughts arrive twice to double-check each other; notices everything twice, just to be sure the first time counted
+- NEOFIN: StoryCharacter.neofin — youngest by centuries, endlessly curious and enthusiastic, adores the surface birds
+- THE UNNAMED TREE: StoryCharacter.unnamedTree — ancient witness, calm, patient, answers questions with perspective rather than direct explanation, has watched the gr0ve's entire history unfold
+- LEMON, CARLOS, SUNNY: carried over from Episode 4, depart at episode's end back toward the shore. NOTE: Lemon faints from accumulated exhaustion (three days of flying + the adrenaline crash after the whale scare) roughly midway through the episode — this is the narrative reason the group descends to the Unnamed Tree, alongside the seed. She's unconscious for the descent, wakes as the bubble settles at the tree, and is fully recovered by the surface.
+
+NOTE ON THE SEVEN: all seven speak in this episode, though not equally — Petalblack carries most of the dialogue as leader, Somnus/Stinger/Polaro/Halves/Neofin each get a distinct introductory beat plus a farewell line, and Solito is deliberately kept to a handful of short lines delivered from a physical distance, consistent with his character (present, but never close).
+
+INVENTORY CHANGES:
+- If player already holds Loulo's Pot: no new vessel given; Unnamed Tree explicitly declines to duplicate it
+- If player does NOT hold Loulo's Pot: Sea-Glass Vessel obtained | Cool, pale blue-green, worn smooth by centuries of current. Holds attention. Remembers what you chose not to look away from.
+  - Track: state.intentionVessel = 'loulo' / 'unnamedTree' / 'abies' / 'cedite' / 'ash' / null
+- Dawn's Seed: confirmed still warm, but revealed to be incomplete — needs the lights still held by Abies, Cedite, and Ash before the gr0ve can be reached
+- No items lost this episode
+
+VESSEL SEQUENCE — FUTURE EPISODE PLANNING NOTE:
+- Loulo (Ep4): optional
+- Unnamed Tree (Ep5, this episode): optional, only offered if Loulo's pot wasn't taken
+- Next vessel, at Frigid Landfall (Ep6): optional — player may decline and keep whichever vessel they currently hold
+- Final vessel (Ash, presumably the last ancient tree reached): FORCED — player cannot decline this one regardless of what they already carry
+- The Unnamed Tree explicitly foreshadows this in dialogue at the end of THE VESSEL section ("I don't believe you'll be given the choice to refuse the last one") — keep this consistent when writing the Frigid Landfall and Ash scenes
+
+LORE FLAGS ESTABLISHED:
+- state.groveLore.hidNotLost = true (the gr0ve "stopped allowing itself to be found," not destroyed or misplaced)
+- state.groveLore.abusedPower = true (motive for the gr0ve's closure)
+- state.groveLore.guardianExists = true, guardian identity = unrevealed
+- state.groveLore.unknownEntity = true (something not-tree/not-bird/not-beast rests beneath the guardian's shade) — flag as a major open mystery for a later episode
+- state.groveLore.ancientNetwork = referenced (Aspen, Rowan, Grover, Sakura) — kept brief per Unnamed Tree's nature, not to be expanded until a later, dedicated reveal
+- state.groveLore.threeRemainingLights = true (Abies/past, Cedite/present, Ash/future — phrased by the Unnamed Tree as memory/truth/possibility, consistent with the past/present/future framing already established via Salix in Episode 2)
+- state.nextDestination = 'Frigid Landfall'
+
+WAIT DURATIONS (summary):
+- Days adrift, opening: 3 days (compressed narratively)
+- Fishing contest setup + contest itself: 45 + 20 minutes
+- The pink fish sighting: 2 minutes
+- The whale surfacing / held beat: unspecified, deliberately slow
+- Petalblack's rescue + aftermath: 5 + 10 minutes
+- Lemon Falters (fainting + Hubert settling her): 5 + 5 minutes
+- The seed noticed: 10 + 15 minutes
+- The seven fish arriving: 20 minutes
+- The descent: 40 minutes
+- Meeting the Unnamed Tree through the lore reveal: 20 + 30 + 15 + 20 + 15 minutes
+- The vessel exchange: 15 minutes
+- Hubert's task assignment: 15 minutes
+- Farewells in the dark: 20 minutes
+- The rise back to the surface: 40 minutes
+- Departure from Lemon, Carlos, and Sunny: 15 + 10 minutes
+- Total: roughly 6-7 hours of real time gated behind the episode, plus the compressed 3-day opening
+
+STAT EFFECTS (suggested):
+- Surviving the whale scare together → connectivity +1 (Lemon/Carlos/Sunny)
+- Choosing to comfort Lemon/Carlos during the "held" beat → connectivity +1
+- Helping hold Lemon up / reassuring Sunny during Lemon Falters → connectivity +1
+- Lemon fainting should visibly flag her fatigue stat for continuity into Episode 6 — she shouldn't reset to full energy off-screen without at least a line acknowledging the rest she got at the tree's roots
+- Full lore conversation with the Unnamed Tree → insight/understanding +2
+- Accepting the Sea-Glass Vessel → intention vessel flagged; attentiveness +1
+- Declining the Sea-Glass Vessel → no penalty; simply leaves state.intentionVessel as whatever it already was (likely null, if Loulo's wasn't taken either) — the Frigid Landfall offer remains available either way
+- Farewell choice "I'll come back this way" → connectivity +1, flags a future return-visit hook
+- Dawn's Seed Warmth: stable throughout, unaffected by the descent (the Unnamed Tree's depths are cold but the seed's warmth is unrelated to ambient temperature — worth a one-line system note in final coding pass if warmth mechanics are visible to the player)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END DRAFT

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/account/services/profile_picture_service.dart';
 import 'package:gr0ve/core/widgets/misc/custom_header.dart';
 import 'package:gr0ve/core/widgets/misc/premium_loading_indicator.dart';
@@ -216,7 +217,6 @@ class _FieldDayPageState extends State<FieldDayPage>
                     final scores = data != null
                         ? _parseScores(data)
                         : <_TeamScore>[];
-                    final date = data?['date'] as String?;
 
                     if (scores.isEmpty) {
                       return _EmptyScores(
@@ -926,7 +926,7 @@ class _TeamDetailScreen extends StatelessWidget {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(18),
-                          child: Image.asset(
+                          child: RemoteAssetImage(
                             _teamTreeAsset(
                               score.name,
                               Theme.of(context).brightness,

@@ -4,6 +4,71 @@ import 'changelog_models.dart';
 
 final List<ChangelogVersion> changelogVersions = [
   ChangelogVersion(
+    version: '2.5.0',
+    tagline: 'Welcome Back, BCA!',
+    description:
+        'The first release of the new school year, featuring the all-new BCA Dashboard and a shift to Progressive Web Apps.',
+    features: [
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedGridView,
+        title: 'BCA Dashboard',
+        description:
+            'A brand new centralized hub for all your BCA needs. Everything you use daily, now in one place.',
+        color: const Color(0xFF3B82F6),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedGlobe,
+        title: 'Progressive Web Apps',
+        description:
+            'gr0ve is now available as a PWA! Install it directly on your devices for a native-like experience.',
+        color: const Color(0xFF10B981),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedSettings01,
+        title: 'Minor Patches',
+        description:
+            'Various small improvements and bug fixes throughout the app for a smoother experience.',
+        color: const Color(0xFF6366F1),
+      ),
+    ],
+  ),
+  ChangelogVersion(
+    version: '2.4.0',
+    tagline: 'Stability & Foundation',
+    description:
+        'Critical bug fixes and behind-the-scenes work laying the groundwork for something big.',
+    features: [
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedArrowLeft01,
+        title: 'Navigation Fixes',
+        description:
+            'Fixed an issue where specific click patterns could lead to a blank page. Navigation is now rock solid.',
+        color: const Color(0xFF3B82F6),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedSettings01,
+        title: 'Keyboard Improvements',
+        description:
+            'The keyboard now dismisses properly on all pages. No more stuck keyboards getting in the way.',
+        color: const Color(0xFF10B981),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedCalendar03,
+        title: 'Field Day Patches',
+        description:
+            'Various fixes and improvements to the Field Day system for a more reliable experience.',
+        color: const Color(0xFFF59E0B),
+      ),
+      ChangelogFeature(
+        icon: HugeIcons.strokeRoundedSparkles,
+        title: 'BCA Dashboard Preview',
+        description:
+            'Started work on the BCA Dashboard. Something new is coming to gr0ve...',
+        color: const Color(0xFFEC4899),
+      ),
+    ],
+  ),
+  ChangelogVersion(
     version: '2.3.0',
     tagline: 'The Journey Continues',
     description:

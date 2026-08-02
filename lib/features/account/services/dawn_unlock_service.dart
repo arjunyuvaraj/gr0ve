@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gr0ve/core/services/user_doc_cache.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/grove/models/grove_models.dart';
 
 class DawnUnlockService {
@@ -113,7 +114,7 @@ class DawnUnlockService {
                             ),
                           ],
                         ),
-                        child: Image.asset(
+                        child: RemoteAssetImage(
                           StoryCharacter.dawn.avatarAsset(brightness),
                           width: 68,
                           height: 68,

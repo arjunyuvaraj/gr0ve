@@ -1,0 +1,4413 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-color="grover">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gr0ve · Dashboard</title>
+  <meta name="description" content="gr0ve — the BCA student dashboard">
+  <meta name="application-name" content="gr0ve">
+  <meta name="theme-color" content="#111111">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="gr0ve">
+  <link rel="apple-touch-icon" href="../icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="../icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="../icons/Icon-512.png">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icons/Icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../icons/Icon-512.png">
+  <link rel="manifest" href="../manifest.json" id="app-manifest">
+  <script>
+    const dashboardUa = navigator.userAgent || '';
+    const dashboardIsIPadOS =
+      navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    const dashboardIsMobileDevice =
+      /Android|iPad|iPhone|iPod|Mobile|Mobi/i.test(dashboardUa) ||
+      dashboardIsIPadOS ||
+      window.matchMedia('(pointer: coarse) and (max-width: 820px)').matches;
+
+    if (dashboardIsMobileDevice) {
+      location.replace('/');
+    }
+
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') {
+      const manifest = document.getElementById('app-manifest');
+      if (manifest) manifest.remove();
+    }
+  </script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* ─── gr0ve Design Tokens — exact from persona_theme.dart ─── */
+    :root {
+      /* scaffoldBg / surface / tertiary (elevated) */
+      --scaffold: #111111;
+      --surface: #1A1A1A;
+      --elevated: #262626;
+
+      /* text */
+      --on-surface: #FFFFFF;
+      --on-surface-v: #9AA0A6;
+      /* onSurfaceVariant */
+      --on-surface-mid: rgba(255, 255, 255, 0.45);
+      --on-surface-dim: rgba(255, 255, 255, 0.32);
+      --on-surface-ghost: rgba(255, 255, 255, 0.20);
+
+      /* outline — exact from colorScheme */
+      --outline: #3A3A3A;
+      --outline-faint: rgba(58, 58, 58, 0.06);
+      /* c.outline.withOpacity(0.06) — SnapshotTile border */
+      --outline-subtle: rgba(58, 58, 58, 0.15);
+      /* section header divider */
+
+      /* primary — default grover */
+      --primary: #35B595;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(53, 181, 149, 0.10);
+      /* primary.withOpacity(0.10) — icon box bg */
+      --primary-80: rgba(53, 181, 149, 0.80);
+      /* primary.withOpacity(0.80) — icon color */
+      --primary-50: rgba(53, 181, 149, 0.50);
+      /* date string */
+      --primary-15: rgba(53, 181, 149, 0.15);
+      /* pill bg */
+      --primary-13: rgba(53, 181, 149, 0.13);
+      /* bus code badge */
+
+      /* semantic */
+      --success: #35B595;
+      --success-15: rgba(53, 181, 149, 0.15);
+      --error: #FF8A8A;
+      --error-15: rgba(255, 138, 138, 0.15);
+      --error-13: rgba(255, 138, 138, 0.13);
+      --warning: #FFB800;
+
+      /* tile shadow — Colors.black.withOpacity(0.03), blurRadius 20, offset (0,8) */
+      --tile-shadow: 0 10px 24px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --tile-shadow-hover: 0 16px 36px rgba(0, 0, 0, 0.11), 0 3px 8px rgba(0, 0, 0, 0.06);
+
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Manrope', sans-serif;
+
+      /* radial glow behind greeting */
+      --glow: rgba(31, 111, 91, 0.16);
+    }
+
+    /* ─── Light mode ─── */
+    [data-theme="light"] {
+      --scaffold: #F8F9F9;
+      --surface: #FFFFFF;
+      --elevated: #F2F4F4;
+      --on-surface: #1A1D1F;
+      --on-surface-v: #454C52;
+      --on-surface-mid: rgba(26, 29, 31, 0.45);
+      --on-surface-dim: rgba(26, 29, 31, 0.32);
+      --on-surface-ghost: rgba(26, 29, 31, 0.20);
+      --outline: #E0E0E0;
+      --outline-faint: rgba(224, 224, 224, 0.06);
+      --outline-subtle: rgba(224, 224, 224, 0.15);
+      --primary: #1F6F5B;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(31, 111, 91, 0.10);
+      --primary-80: rgba(31, 111, 91, 0.80);
+      --primary-50: rgba(31, 111, 91, 0.50);
+      --primary-15: rgba(31, 111, 91, 0.15);
+      --primary-13: rgba(31, 111, 91, 0.13);
+      --success: #1F6F5B;
+      --success-15: rgba(31, 111, 91, 0.15);
+      --error: #C62828;
+      --error-15: rgba(198, 40, 40, 0.15);
+      --error-13: rgba(198, 40, 40, 0.13);
+      --tile-shadow: 0 10px 24px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --tile-shadow-hover: 0 16px 36px rgba(0, 0, 0, 0.13), 0 3px 8px rgba(0, 0, 0, 0.06);
+      --glow: rgba(31, 111, 91, 0.07);
+    }
+
+    /* ─── Color themes — dark values, exact from AppThemeColor.color(Brightness.dark) ─── */
+    [data-color="aspen"] {
+      --primary: #FFDD71;
+      --primary-on: #000000;
+      --primary-10: rgba(255, 221, 113, .10);
+      --primary-80: rgba(255, 221, 113, .80);
+      --primary-50: rgba(255, 221, 113, .50);
+      --primary-15: rgba(255, 221, 113, .15);
+      --primary-13: rgba(255, 221, 113, .13);
+      --glow: rgba(255, 221, 113, .12);
+    }
+
+    [data-color="rowan"] {
+      --primary: #FF6F2A;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(255, 111, 42, .10);
+      --primary-80: rgba(255, 111, 42, .80);
+      --primary-50: rgba(255, 111, 42, .50);
+      --primary-15: rgba(255, 111, 42, .15);
+      --primary-13: rgba(255, 111, 42, .13);
+      --glow: rgba(255, 111, 42, .12);
+    }
+
+    [data-color="sakura"] {
+      --primary: #EEC3F5;
+      --primary-on: #000000;
+      --primary-10: rgba(238, 195, 245, .10);
+      --primary-80: rgba(238, 195, 245, .80);
+      --primary-50: rgba(238, 195, 245, .50);
+      --primary-15: rgba(238, 195, 245, .15);
+      --primary-13: rgba(238, 195, 245, .13);
+      --glow: rgba(238, 195, 245, .12);
+    }
+
+    [data-color="abies"] {
+      --primary: #00C8FF;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(0, 200, 255, .10);
+      --primary-80: rgba(0, 200, 255, .80);
+      --primary-50: rgba(0, 200, 255, .50);
+      --primary-15: rgba(0, 200, 255, .15);
+      --primary-13: rgba(0, 200, 255, .13);
+      --glow: rgba(0, 200, 255, .12);
+    }
+
+    [data-color="cedite"] {
+      --primary: #B388EB;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(179, 136, 235, .10);
+      --primary-80: rgba(179, 136, 235, .80);
+      --primary-50: rgba(179, 136, 235, .50);
+      --primary-15: rgba(179, 136, 235, .15);
+      --primary-13: rgba(179, 136, 235, .13);
+      --glow: rgba(179, 136, 235, .12);
+    }
+
+    [data-color="ash"] {
+      --primary: #E55B5B;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(229, 91, 91, .10);
+      --primary-80: rgba(229, 91, 91, .80);
+      --primary-50: rgba(229, 91, 91, .50);
+      --primary-15: rgba(229, 91, 91, .15);
+      --primary-13: rgba(229, 91, 91, .13);
+      --glow: rgba(229, 91, 91, .12);
+    }
+
+    [data-color="monochrome"] {
+      --primary: #FFFFFF;
+      --primary-on: #000000;
+      --primary-10: rgba(255, 255, 255, .10);
+      --primary-80: rgba(255, 255, 255, .80);
+      --primary-50: rgba(255, 255, 255, .50);
+      --primary-15: rgba(255, 255, 255, .15);
+      --primary-13: rgba(255, 255, 255, .13);
+      --glow: rgba(255, 255, 255, .12);
+    }
+
+    /* ─── Color themes — light values, exact from AppThemeColor.color(Brightness.light) ───
+         (grover's light value is already handled by the base [data-theme="light"] block above) */
+    [data-theme="light"][data-color="aspen"] {
+      --primary: #FFC200;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(255, 194, 0, .10);
+      --primary-80: rgba(255, 194, 0, .80);
+      --primary-50: rgba(255, 194, 0, .50);
+      --primary-15: rgba(255, 194, 0, .15);
+      --primary-13: rgba(255, 194, 0, .13);
+      --glow: rgba(255, 194, 0, .12);
+    }
+
+    [data-theme="light"][data-color="rowan"] {
+      --primary: #AD3800;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(173, 56, 0, .10);
+      --primary-80: rgba(173, 56, 0, .80);
+      --primary-50: rgba(173, 56, 0, .50);
+      --primary-15: rgba(173, 56, 0, .15);
+      --primary-13: rgba(173, 56, 0, .13);
+      --glow: rgba(173, 56, 0, .12);
+    }
+
+    [data-theme="light"][data-color="sakura"] {
+      --primary: #DC8FE8;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(220, 143, 232, .10);
+      --primary-80: rgba(220, 143, 232, .80);
+      --primary-50: rgba(220, 143, 232, .50);
+      --primary-15: rgba(220, 143, 232, .15);
+      --primary-13: rgba(220, 143, 232, .13);
+      --glow: rgba(220, 143, 232, .12);
+    }
+
+    [data-theme="light"][data-color="cedite"] {
+      --primary: #9F72D8;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(159, 114, 216, .10);
+      --primary-80: rgba(159, 114, 216, .80);
+      --primary-50: rgba(159, 114, 216, .50);
+      --primary-15: rgba(159, 114, 216, .15);
+      --primary-13: rgba(159, 114, 216, .13);
+      --glow: rgba(159, 114, 216, .12);
+    }
+
+    [data-theme="light"][data-color="ash"] {
+      --primary: #C43D3D;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(196, 61, 61, .10);
+      --primary-80: rgba(196, 61, 61, .80);
+      --primary-50: rgba(196, 61, 61, .50);
+      --primary-15: rgba(196, 61, 61, .15);
+      --primary-13: rgba(196, 61, 61, .13);
+      --glow: rgba(196, 61, 61, .12);
+    }
+
+    [data-theme="light"][data-color="monochrome"] {
+      --primary: #111111;
+      --primary-on: #FFFFFF;
+      --primary-10: rgba(17, 17, 17, .10);
+      --primary-80: rgba(17, 17, 17, .80);
+      --primary-50: rgba(17, 17, 17, .50);
+      --primary-15: rgba(17, 17, 17, .15);
+      --primary-13: rgba(17, 17, 17, .13);
+      --glow: rgba(17, 17, 17, .12);
+    }
+
+    /* ─── Reset ─── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: var(--scaffold);
+      color: var(--on-surface);
+      -webkit-font-smoothing: antialiased;
+      transition: background .3s, color .3s;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--elevated);
+      border-radius: 4px;
+      transition: background .2s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--outline);
+    }
+
+    /* ─── Dashboard shell ─── */
+    .dash {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(14px, 3vw, 24px) clamp(14px, 4vw, 36px) clamp(10px, 2vw, 18px);
+      background:
+        radial-gradient(ellipse 800px 300px at 50% -40px, var(--glow) 0%, transparent 70%);
+      position: relative;
+    }
+
+    /* ─── Loading Overlay ─── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--scaffold);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      transition: opacity .5s ease, visibility .5s ease;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* ─── Logo wordmark: fades + elastic scale-in ─── */
+    .loading-logo-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 160px;
+      height: 120px;
+    }
+
+    .loading-word {
+      position: relative;
+      z-index: 1;
+      font-family: var(--font-mono);
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      color: var(--primary);
+      opacity: 0;
+      transform: scale(0);
+      animation: loadingLogoIntro .6s cubic-bezier(.34, 1.56, .64, 1) forwards;
+    }
+
+    /* ─── Tree row: cascades in, one tree at a time, with a bouncy overshoot ─── */
+    .loading-trees {
+      display: flex;
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .loading-tree-item {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--elevated);
+      box-shadow: 0 0 16px 1px var(--primary-15), 0 2px 8px var(--primary-10);
+      opacity: 0;
+      transform: translateY(16px) scale(.3) rotate(0deg);
+      animation-name: loadingTreeIntro;
+      animation-duration: .4s;
+      animation-timing-function: cubic-bezier(.34, 1.56, .64, 1);
+      animation-fill-mode: forwards;
+    }
+
+    [data-theme="light"] .loading-tree-item {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .08), 0 2px 6px rgba(0, 0, 0, .04);
+    }
+
+    .loading-tree-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .loading-tree-item:nth-child(1) {
+      animation-delay: .40s;
+    }
+
+    .loading-tree-item:nth-child(2) {
+      animation-delay: .50s;
+    }
+
+    .loading-tree-item:nth-child(3) {
+      animation-delay: .60s;
+    }
+
+    .loading-tree-item:nth-child(4) {
+      animation-delay: .70s;
+    }
+
+    .loading-version {
+      margin-top: 28px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--on-surface-dim);
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn .5s ease 1.2s forwards;
+    }
+
+    @keyframes loadingLogoIntro {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes loadingTreeIntro {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(var(--tilt));
+      }
+    }
+
+    /* ─── Dash content — fades in once as a single settled unit, avoids
+       individual cards popping/overlapping while data is still arriving ─── */
+    .dash-content {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity .5s ease;
+    }
+
+    .dash-content.ready {
+      opacity: 1;
+    }
+
+    /* ─── Greeting Header — centered, standalone ─── */
+    .greeting-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-shrink: 0;
+      padding: 8px 0 22px;
+      margin-bottom: 6px;
+      position: relative;
+      animation: fadeInUp .5s ease;
+      border-bottom: 1px solid var(--outline-faint);
+    }
+
+    .greet-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      color: var(--on-surface-v);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .greet-name {
+      font-family: var(--font-mono);
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: 900;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      color: var(--on-surface);
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--on-surface) 0%, var(--primary-80) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .greet-date {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--primary-50);
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    /* ─── Login overlay ─── */
+    .login-wrap {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, var(--primary-10), transparent 45%), var(--scaffold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2500;
+      padding: 24px;
+      pointer-events: auto;
+      transition: opacity .3s, visibility .3s;
+    }
+
+    .login-wrap.gone {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .login-box {
+      width: min(92vw, 380px);
+      background: var(--surface);
+      border-radius: 28px;
+      padding: 36px;
+      border: 1px solid var(--outline-faint);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .login-logo {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-align: center;
+      color: var(--on-surface);
+      margin-bottom: 4px;
+    }
+
+    .login-sub {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-align: center;
+      color: var(--on-surface-v);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .login-lbl {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--on-surface-v);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 0 6px 2px;
+    }
+
+    .login-inp {
+      width: 100%;
+      background: var(--elevated);
+      border: 1px solid transparent;
+      border-radius: 16px;
+      padding: 13px 16px;
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 14px;
+      transition: box-shadow .2s, border-color .2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .login-inp:focus {
+      box-shadow: 0 0 0 1.5px var(--primary);
+      border-color: var(--primary);
+    }
+
+    .login-inp::placeholder {
+      color: var(--on-surface-dim);
+    }
+
+    .login-err {
+      font-size: 11px;
+      color: var(--error);
+      text-align: center;
+      min-height: 16px;
+      margin-bottom: 10px;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--primary);
+      color: var(--primary-on);
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      cursor: pointer;
+      transition: filter .2s;
+    }
+
+    .login-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .maintenance-note {
+      display: none;
+      margin: -8px 0 18px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--warning);
+      background: rgba(255, 184, 0, 0.10);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .maintenance-note.on {
+      display: block;
+    }
+
+    .maintenance-chip {
+      width: max-content;
+      margin: 0 auto 18px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--error-15);
+      color: var(--error);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .maintenance-title {
+      font-family: var(--font-mono);
+      color: var(--on-surface);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      text-align: center;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+    }
+
+    .maintenance-copy {
+      color: var(--on-surface-v);
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: center;
+      margin: 0 0 22px;
+    }
+
+    /* ─── 3-column grid ─── */
+    .cols {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      gap: 22px;
+      overflow: hidden;
+    }
+
+    .col {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* ─── Schedule + Weather row ─── */
+    .schedule-weather-row {
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .schedule-weather-row .sec {
+      flex: 2;
+      min-height: 0;
+    }
+
+    /* ─── Section header — exact _buildSectionTile with huge icons ─── */
+    .sec-hdr {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 4px 10px;
+      flex-shrink: 0;
+    }
+
+    .sec-hdr-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(150deg, var(--primary-15) 0%, var(--primary-10) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .sec-hdr:hover .sec-hdr-icon {
+      box-shadow: 0 4px 12px var(--primary-10);
+    }
+
+    .sec-hdr:hover .sec-hdr-icon {
+      transform: scale(1.1);
+    }
+
+    .sec-hdr-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--primary-80);
+    }
+
+    .sec-hdr-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--on-surface-v);
+      white-space: nowrap;
+    }
+
+    .sec-hdr-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--outline-subtle), transparent);
+      margin-left: 4px;
+    }
+
+    /* section group */
+    .sec {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sec.grow {
+      flex: 3 1 0;
+      min-height: 0;
+    }
+
+    .sec.grow .sec-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sec-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── SnapshotTile — exact Flutter widget ─── */
+    .tile {
+      width: 100%;
+      background: linear-gradient(155deg, var(--surface) 0%, var(--elevated) 145%);
+      border-radius: 22px;
+      border: 1px solid var(--outline-faint);
+      box-shadow: var(--tile-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      transition: box-shadow .2s, transform .2s, border-color .2s;
+      position: relative;
+    }
+
+    .tile:not(:last-child) {
+      margin-bottom: 8px;
+    }
+
+    .tile:hover {
+      box-shadow: var(--tile-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      border-color: var(--outline-subtle);
+      transform: translateY(-1px);
+    }
+
+    /* Remove animation from schedule tiles to prevent flickering */
+    .tile.p-md {
+      animation: none;
+    }
+
+    /* tile padding variants */
+    .tile.p-md {
+      padding: 13px 16px;
+    }
+
+    /* absence/bus rows */
+    .tile.p-sm {
+      padding: 10px 14px;
+    }
+
+    /* compact rows */
+    .tile.p-lg {
+      padding: 16px 18px;
+    }
+
+    /* countdown/weather */
+    .tile.p-xs {
+      padding: 8px 12px;
+    }
+
+    /* sub-weather tiles */
+
+    /* ─── SnapshotDot ─── */
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-primary {
+      background: var(--primary);
+      box-shadow: 0 0 6px var(--primary-50);
+    }
+
+    .dot-success {
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success-15);
+    }
+
+    .dot-dim {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .dot-amber {
+      background: #FFB800;
+      box-shadow: 0 0 6px rgba(255, 184, 0, .5);
+    }
+
+    /* ─── SnapshotProgressBar ─── */
+    .prog-bg {
+      width: 100%;
+      height: 2px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.07);
+      overflow: hidden;
+      margin-top: 9px;
+    }
+
+    [data-theme="light"] .prog-bg {
+      background: rgba(26, 29, 31, 0.07);
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--primary);
+      width: 0%;
+      transition: width .4s ease;
+    }
+
+    /* ─── SnapshotPill ─── */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .pill-success {
+      background: var(--success-15);
+      color: var(--success);
+    }
+
+    .pill-error {
+      background: var(--error-15);
+      color: var(--error);
+    }
+
+    .pill-primary {
+      background: var(--primary-15);
+      color: var(--primary);
+    }
+
+    /* bus code badge */
+    .bus-code {
+      padding: 4px 12px;
+      border-radius: 9px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .bus-code.arrived {
+      background: var(--success-15);
+      color: var(--success);
+    }
+
+    .bus-code.unknown {
+      background: var(--error-13);
+      color: var(--error);
+    }
+
+    /* ─── Schedule card (richer restyle) ─── */
+    .sched-card {
+      background: linear-gradient(155deg, var(--surface) 0%, var(--elevated) 130%);
+      border: 1px solid var(--outline-faint);
+      border-radius: 22px;
+      padding: 18px 20px 17px;
+      box-shadow: var(--tile-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sched-card::before {
+      content: '';
+      position: absolute;
+      top: -46px;
+      right: -46px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-10) 0%, transparent 72%);
+      pointer-events: none;
+    }
+
+    .sched-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .sched-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .sched-pill .sdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+      flex-shrink: 0;
+    }
+
+    .sched-pill.pri {
+      background: var(--primary-15);
+      color: var(--primary);
+    }
+
+    .sched-pill.amber {
+      background: rgba(255, 184, 0, .15);
+      color: #FFB800;
+    }
+
+    .sched-pill.ok {
+      background: var(--success-15);
+      color: var(--success);
+    }
+
+    .sched-clock {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--on-surface-ghost);
+      flex-shrink: 0;
+    }
+
+    .sched-timer-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      margin-bottom: 13px;
+      position: relative;
+    }
+
+    .sched-timer {
+      font-family: var(--font-mono);
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      color: var(--on-surface);
+    }
+
+    .sched-timer-sub {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--on-surface-mid);
+      padding-bottom: 6px;
+    }
+
+    .sched-prog-bg {
+      width: 100%;
+      height: 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      overflow: hidden;
+      position: relative;
+    }
+
+    [data-theme="light"] .sched-prog-bg {
+      background: rgba(26, 29, 31, 0.07);
+    }
+
+    .sched-prog-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--primary-80), var(--primary));
+      box-shadow: 0 0 8px var(--primary-50);
+      width: 0%;
+      transition: width .4s ease;
+    }
+
+    .sched-static-row {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--on-surface-mid);
+      position: relative;
+    }
+
+    .sched-static-row strong {
+      color: var(--on-surface);
+      font-weight: 800;
+    }
+
+    .sched-done-msg {
+      font-family: var(--font-body);
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--success);
+      position: relative;
+    }
+
+    /* ─── Countdown text styles ─── */
+    .cd-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      color: var(--on-surface-dim);
+      text-transform: uppercase;
+    }
+
+    .cd-clock {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--on-surface-ghost);
+    }
+
+    .cd-timer {
+      font-family: var(--font-mono);
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+      color: var(--on-surface);
+      margin: 4px 0;
+    }
+
+    .cd-sub {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--on-surface-mid);
+    }
+
+    /* ─── Tile row layout helpers ─── */
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row-sb {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .col-s {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* tile title/sub text */
+    .t-title {
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--on-surface);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .t-title.sm {
+      font-size: 13px;
+    }
+
+    .t-sub {
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: var(--on-surface-mid);
+    }
+
+    .t-sub.dim {
+      color: var(--on-surface-dim);
+    }
+
+    /* ─── Weather combined card ─── */
+    .wx-combined {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .wx-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .wx-details {
+      display: flex;
+      gap: 8px;
+    }
+
+    .wx-detail-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--elevated);
+      border-radius: 14px;
+    }
+
+    .wx-detail-item svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--primary);
+      flex-shrink: 0;
+    }
+
+    /* ─── Calendar ─── */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .cal-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+
+    .cal-nav-btn {
+      background: none;
+      border: none;
+      color: var(--on-surface-v);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      transition: all .2s ease;
+    }
+
+    .cal-nav-btn:hover {
+      background: var(--elevated);
+      color: var(--on-surface);
+      transform: scale(1.1);
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-content: start;
+      row-gap: 10px;
+      column-gap: 8px;
+      text-align: center;
+      width: 100%;
+      max-width: 100%;
+      padding: 3px;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .cal-dh {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      /* weekday header hidden in compact dashboard */
+      display: none;
+    }
+
+    .cal-d {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--on-surface);
+      padding: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: background .15s ease, border-color .15s ease;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      border: 1px solid transparent;
+    }
+
+    .cal-d:hover {
+      background: var(--primary-10);
+      border-color: var(--primary-50);
+    }
+
+    .cal-d.empty {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cal-d.today {
+      background: var(--primary);
+      color: #FFF;
+      font-weight: 900;
+    }
+
+    .cal-d.sel {
+      box-shadow: 0 0 0 2px var(--primary);
+      border-color: var(--primary);
+    }
+
+    .cal-dot-ind {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--primary);
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: fadeIn .3s ease;
+    }
+
+    .cal-d.today .cal-dot-ind {
+      background: #FFF;
+    }
+
+    .cal-evts {
+      margin-top: 10px;
+    }
+
+    @keyframes calEvtsFadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    #calEvts.fade-in {
+      animation: calEvtsFadeIn .18s ease;
+    }
+
+    /* Prevent horizontal overflow in event list */
+    #calEvts {
+      overflow-x: hidden;
+      word-break: break-word;
+    }
+
+    .cal-event-card {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .cal-evt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 12px;
+      font-family: var(--font-body);
+    }
+
+    .cal-evt-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      background: var(--primary-15);
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    .cal-evt-link {
+      color: var(--primary);
+      text-decoration: underline;
+      text-decoration-color: var(--primary-50);
+      word-break: break-all;
+      transition: text-decoration-color .15s ease;
+    }
+
+    .cal-evt-link:hover {
+      text-decoration-color: var(--primary);
+    }
+
+    .cal-event-card {
+      margin-bottom: 8px;
+    }
+
+    .cal-event-card .row {
+      align-items: flex-start;
+    }
+
+    .cal-empty {
+      padding: 24px 10px;
+      color: var(--on-surface-v);
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* ─── Search input ─── */
+    .search-inp {
+      width: 100%;
+      background: var(--elevated);
+      border: none;
+      border-radius: 16px;
+      padding: 9px 14px;
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 12px;
+      outline: none;
+      margin-bottom: 10px;
+      transition: box-shadow .2s;
+      flex-shrink: 0;
+    }
+
+    .search-inp:focus {
+      box-shadow: 0 0 0 1.5px var(--primary);
+    }
+
+    ::placeholder {
+      color: var(--on-surface-v);
+    }
+
+    /* ─── News card ─── */
+    .news-card {
+      padding: 13px 15px;
+      border-radius: 16px;
+      background: linear-gradient(155deg, var(--elevated) 0%, var(--surface) 170%);
+      border: 1px solid var(--outline-faint);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+      margin-bottom: 10px;
+      transition: background .15s, transform .2s, box-shadow .2s, border-color .2s;
+      cursor: pointer;
+    }
+
+    .news-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .news-card:hover {
+      background: var(--primary-10);
+      border-color: var(--primary-50);
+      transform: translateY(-2px);
+      box-shadow: var(--tile-shadow-hover);
+    }
+
+    .news-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .news-arrow {
+      width: 12px;
+      height: 12px;
+      color: var(--primary);
+      opacity: 0;
+      transform: translate(-3px, 3px);
+      transition: opacity .2s ease, transform .2s ease;
+      flex-shrink: 0;
+    }
+
+    .news-card:hover .news-arrow {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    .news-source {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .news-headline {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--on-surface);
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .news-meta {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--on-surface-v);
+      margin-top: 4px;
+      letter-spacing: .5px;
+    }
+
+    /* ─── Lunch ─── */
+    .lunch-item {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--on-surface);
+      padding: 2px 0;
+    }
+
+    /* ─── Quick links ─── */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-auto-rows: minmax(48px, auto);
+      align-content: start;
+      gap: 10px;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 2px;
+    }
+
+    .link-btn {
+      height: 48px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      background: var(--surface);
+      border: 1px solid var(--outline-faint);
+      border-radius: 14px;
+      color: var(--on-surface-v);
+      text-decoration: none;
+      transition: all .2s cubic-bezier(.16, 1, .3, 1);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .link-btn:hover {
+      background: var(--primary-10);
+      color: var(--on-surface);
+      border-color: var(--primary-50);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .link-icon-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: var(--primary-10);
+      color: var(--primary-80);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform .2s cubic-bezier(.16, 1, .3, 1), background .2s ease;
+    }
+
+    .link-btn:hover .link-icon-box {
+      transform: scale(1.08);
+    }
+
+    .link-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    .link-btn span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link-btn-label {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .link-btn-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      grid-column: 1 / -1;
+      padding: 28px 12px;
+      color: var(--on-surface-dim);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .link-arrow {
+      width: 14px;
+      height: 14px;
+      color: var(--primary);
+      flex-shrink: 0;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .link-btn:hover .link-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      flex-shrink: 0;
+      padding-top: 14px;
+    }
+
+    .footer::before {
+      content: '';
+      display: block;
+      height: 1px;
+      margin: 0 0 12px;
+      background: linear-gradient(to right, transparent, var(--outline-subtle) 25%, var(--outline-subtle) 75%, transparent);
+    }
+
+    .footer-inner {
+      width: fit-content;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .footer-settings {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 20px;
+      background: var(--primary-10);
+      color: var(--primary);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: background .2s ease, box-shadow .2s ease;
+    }
+
+    .footer-settings svg {
+      width: 13px;
+      height: 13px;
+      fill: var(--primary);
+      transition: transform .35s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .footer-inner:hover .footer-settings {
+      background: var(--primary-15);
+      box-shadow: var(--tile-shadow);
+    }
+
+    .footer-inner:hover .footer-settings svg {
+      transform: rotate(90deg);
+    }
+
+    /* ─── PWA Install Banner ─── */
+    .pwa-banner {
+      position: fixed;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 16px;
+      padding: 12px 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      max-width: 90vw;
+      width: min(430px, calc(100vw - 28px));
+    }
+
+    .pwa-banner.show {
+      display: flex;
+    }
+
+    .pwa-banner-text {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--on-surface);
+      line-height: 1.35;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .pwa-banner-btn {
+      background: var(--primary);
+      color: var(--primary-on);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pwa-banner-close {
+      background: none;
+      border: none;
+      color: var(--on-surface-v);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+    }
+
+    @media (max-width: 520px) {
+      .pwa-banner {
+        align-items: flex-start;
+        border-radius: 14px;
+        padding: 12px 14px;
+      }
+
+      .pwa-banner-btn {
+        padding: 7px 12px;
+      }
+    }
+
+    .dl-native-links {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .dl-native-link {
+      flex: 1;
+      text-decoration: none;
+      border: 1px solid var(--outline);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--elevated);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .dl-native-link span {
+      display: block;
+      margin-top: 2px;
+      color: var(--on-surface-mid);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* ─── Modal ─── */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+      z-index: 800;
+    }
+
+    .modal-bg.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.95);
+      width: 380px;
+      max-width: 94vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: linear-gradient(165deg, var(--surface) 0%, var(--elevated) 150%);
+      border-radius: 28px;
+      border: 1px solid var(--outline-faint);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+      padding: 32px;
+      z-index: 900;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .3s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .modal.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: var(--elevated);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--on-surface-v);
+      font-size: 13px;
+      font-weight: 700;
+      transition: background .15s, color .15s;
+      z-index: 2;
+    }
+
+    .modal-close:hover {
+      background: var(--error-15);
+      color: var(--error);
+    }
+
+    .acc-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--outline-faint);
+      position: relative;
+    }
+
+    .acc-avi {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #1F6F5B, var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 800;
+      color: #FFF;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .18), 0 0 0 3px var(--primary-10);
+    }
+
+    .acc-name {
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--on-surface);
+    }
+
+    .acc-email {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--on-surface-v);
+      margin-top: 3px;
+    }
+
+    .pref-lbl {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--on-surface-v);
+      margin: 18px 0 10px;
+      position: relative;
+    }
+
+    .color-dots {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .cdot {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform .18s cubic-bezier(.16, 1, .3, 1), box-shadow .18s ease;
+      border: none;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+    }
+
+    .cdot:hover {
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .22);
+    }
+
+    .cdot.active {
+      box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--on-surface), 0 4px 10px rgba(0, 0, 0, .2);
+    }
+
+    .cdot.active::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      font-size: 12px;
+      font-weight: 900;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+    }
+
+    /* these three dots are light/bright — need dark ink for the checkmark to read,
+       matching AppThemeColor.onColor(Brightness.dark) in the Flutter app */
+    .cdot[data-col="aspen"].active::after,
+    .cdot[data-col="sakura"].active::after,
+    .cdot[data-col="monochrome"].active::after {
+      color: #000;
+      text-shadow: none;
+    }
+
+    .mode-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 15px;
+      border-radius: 16px;
+      background: var(--elevated);
+      border: 1px solid var(--outline-faint);
+      margin-top: 18px;
+      position: relative;
+    }
+
+    .mode-row-lbl {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+
+    .mode-btn {
+      background: var(--surface);
+      color: var(--on-surface);
+      border: 1px solid var(--outline-faint);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-family: var(--font-body);
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+
+    .mode-btn:hover {
+      background: var(--primary-10);
+      color: var(--primary);
+      border-color: var(--primary-50);
+    }
+
+    /* ─── Grouped menu rows (How to Download / Sign out) ─── */
+    .modal-menu {
+      margin-top: 18px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--outline-faint);
+      position: relative;
+    }
+
+    .modal-menu-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      cursor: pointer;
+      background: var(--surface);
+      transition: background .15s ease;
+    }
+
+    .modal-menu-row:not(:last-child) {
+      border-bottom: 1px solid var(--outline-faint);
+    }
+
+    .modal-menu-row:hover {
+      background: var(--elevated);
+    }
+
+    .modal-menu-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-10);
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .modal-menu-row.danger .modal-menu-icon {
+      background: var(--error-13);
+      color: var(--error);
+    }
+
+    .modal-menu-row.danger:hover {
+      background: var(--error-13);
+    }
+
+    .modal-menu-label {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--on-surface);
+      flex: 1;
+    }
+
+    .modal-menu-row.danger .modal-menu-label {
+      color: var(--error);
+    }
+
+    .modal-menu-chevron {
+      width: 14px;
+      height: 14px;
+      color: var(--on-surface-ghost);
+      flex-shrink: 0;
+      transition: transform .15s ease, color .15s ease;
+    }
+
+    .modal-menu-row:hover .modal-menu-chevron {
+      transform: translateX(2px);
+      color: var(--on-surface-v);
+    }
+
+    /* ─── How to Download modal ─── */
+    .dl-modal {
+      max-width: 420px;
+      max-height: 86vh;
+      overflow-y: auto;
+    }
+
+    /* ─── Privacy Policy modal ─── */
+    .privacy-modal {
+      max-width: 560px;
+      max-height: 86vh;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .privacy-section {
+      margin-bottom: 18px;
+    }
+
+    .privacy-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .privacy-section-title {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 6px;
+      letter-spacing: .2px;
+    }
+
+    .privacy-section-body {
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--on-surface-v);
+      white-space: pre-line;
+    }
+
+    .dl-title {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -.3px;
+      color: var(--on-surface);
+      margin-bottom: 6px;
+      position: relative;
+    }
+
+    .dl-intro {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--on-surface-v);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .dl-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .dl-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      background: var(--elevated);
+      border: 1px solid var(--outline-faint);
+      transition: border-color .15s ease, transform .15s ease;
+    }
+
+    .dl-step:hover {
+      border-color: var(--primary-50);
+      transform: translateY(-1px);
+    }
+
+    .dl-step-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--primary-10);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dl-step-title {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--on-surface);
+      margin-bottom: 3px;
+    }
+
+    .dl-step-body {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      color: var(--on-surface-v);
+      line-height: 1.5;
+    }
+
+    .dl-step-body strong {
+      color: var(--on-surface);
+      font-weight: 700;
+    }
+
+    .dl-author-note {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: var(--primary-10);
+      border: 1px solid var(--primary-15);
+      position: relative;
+    }
+
+    .dl-author-note-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .dl-author-note-body {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--on-surface);
+      line-height: 1.55;
+    }
+
+    .dl-author-sign {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--on-surface-v);
+      margin-top: 10px;
+      letter-spacing: .3px;
+    }
+
+    /* ─── Outer card wrapper (for teacher + bus panels) ─── */
+    .outer-card {
+      background: linear-gradient(155deg, var(--surface) 0%, var(--elevated) 145%);
+      border-radius: 22px;
+      border: 1px solid var(--outline-faint);
+      box-shadow: var(--tile-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      padding: 16px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .outer-card:not(.flat):hover {
+      box-shadow: var(--tile-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      border-color: var(--outline-subtle);
+    }
+
+    /* modifier: no border/shadow of its own — used where the widget's
+       children (links, event cards) are already individually carded,
+       so we don't want a card nested inside a card */
+    .outer-card.flat {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 2px 0;
+    }
+
+    /* ─── CustomTeacherCard — exact widget match ─── */
+    .tc {
+      background: linear-gradient(155deg, var(--surface) 0%, var(--elevated) 145%);
+      border-radius: 20px;
+      border: 1px solid var(--outline-faint);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s, border-color .2s;
+      overflow: hidden;
+    }
+
+    .tc:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--tile-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      border-color: var(--outline-subtle);
+    }
+
+    .tc:last-child {
+      margin-bottom: 0;
+    }
+
+    .tc-inner {
+      padding: 14px 16px;
+    }
+
+    .tc-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Star button */
+    .tc-star {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      margin-right: 12px;
+      line-height: 1;
+      transition: transform .2s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .tc-star:hover {
+      transform: scale(1.2);
+    }
+
+    .tc-star svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+
+    .tc-star.on svg {
+      fill: var(--primary);
+    }
+
+    .tc-star.off svg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 2;
+    }
+
+    [data-theme="light"] .tc-star.off svg {
+      stroke: rgba(26, 29, 31, 0.3);
+    }
+
+    /* Teacher name */
+    .tc-name {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-surface);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Status badge — exact CustomTeacherCard */
+    .tc-badge {
+      flex-shrink: 0;
+      margin-left: 10px;
+      padding: 6px 16px;
+      border-radius: 24px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .tc-badge.absent {
+      background: rgba(255, 138, 138, 0.20);
+      color: var(--error);
+    }
+
+    .tc-badge.present {
+      background: rgba(53, 181, 149, 0.08);
+      color: var(--success);
+    }
+
+    [data-theme="light"] .tc-badge.absent {
+      background: rgba(198, 40, 40, 0.12);
+      color: var(--error);
+    }
+
+    [data-theme="light"] .tc-badge.present {
+      background: rgba(31, 111, 91, 0.10);
+      color: var(--success);
+    }
+
+    /* Expanded detail rows */
+    .tc-expand {
+      padding: 0 16px 14px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeUp .2s ease;
+    }
+
+    .tc-expand.open {
+      display: flex;
+    }
+
+    .tc-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .tc-detail-icon svg {
+      width: 17px;
+      height: 17px;
+      margin-top: 1px;
+      fill: rgba(255, 255, 255, 0.35);
+      flex-shrink: 0;
+    }
+
+    [data-theme="light"] .tc-detail-icon svg {
+      fill: rgba(26, 29, 31, 0.35);
+    }
+
+    .tc-detail-text {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--on-surface-v);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ─── Empty state ─── */
+    .empty {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--on-surface-v);
+      text-align: center;
+      padding: 18px 8px;
+    }
+
+    /* ─── Animations ─── */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes selectPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 2px var(--primary);
+      }
+
+      50% {
+        box-shadow: 0 0 0 4px var(--primary-15);
+      }
+    }
+
+    .sec {
+      opacity: 0;
+      animation: fadeUp .45s ease forwards;
+    }
+
+    .greeting-header {
+      opacity: 0;
+      animation: fadeInUp .5s ease forwards;
+      animation-delay: .05s;
+    }
+
+    .loading-overlay {
+      opacity: 0;
+      animation: fadeIn .3s ease forwards;
+    }
+
+    .schedule-weather-row .sec:nth-child(1) {
+      animation-delay: .10s;
+    }
+
+    .schedule-weather-row .sec:nth-child(2) {
+      animation-delay: .12s;
+    }
+
+    .col:nth-child(1) .sec:nth-child(1) {
+      animation-delay: .08s;
+    }
+
+    .col:nth-child(2) .sec:nth-child(1) {
+      animation-delay: .10s;
+    }
+
+    .col:nth-child(2) .sec:nth-child(2) {
+      animation-delay: .12s;
+    }
+
+    .col:nth-child(3) .sec:nth-child(1) {
+      animation-delay: .14s;
+    }
+
+    .col:nth-child(3) .sec:nth-child(2) {
+      animation-delay: .16s;
+    }
+
+    .col:nth-child(3) .sec:nth-child(3) {
+      animation-delay: .18s;
+    }
+
+    /* ─── Responsive: tighten up before we need to stack ─── */
+    @media (max-width: 1300px) {
+      .cols {
+        gap: 14px;
+      }
+
+      .col {
+        gap: 12px;
+      }
+
+      .greet-eyebrow {
+        letter-spacing: 3px;
+      }
+    }
+
+    /* ─── Responsive: stack the 3 columns and let the page scroll ─── */
+    @media (max-width: 980px) {
+
+      html,
+      body {
+        height: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .dash {
+        height: auto;
+        min-height: 100vh;
+        width: 100%;
+        overflow: visible;
+      }
+
+      .dash-content {
+        overflow: visible;
+      }
+
+      .cols {
+        flex-direction: column;
+        overflow: visible;
+        height: auto;
+        gap: 20px;
+      }
+
+      .col {
+        flex: none !important;
+        width: 100%;
+        overflow: visible;
+        gap: 14px;
+      }
+
+      /* sections normally rely on column height to size themselves —
+         once stacked, give each one a comfortable fixed height and let
+         its own internal list keep scrolling inside it */
+      .sec {
+        flex: none !important;
+        height: 380px;
+        min-height: 280px;
+      }
+
+      .sec.grow {
+        height: 420px;
+      }
+
+      /* the schedule card is short by nature — don't force it tall */
+      .col:nth-child(3) .sec:nth-child(1) {
+        height: auto;
+        min-height: 0;
+      }
+
+      .footer {
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
+      }
+    }
+
+    /* ─── Responsive: phone widths ─── */
+    @media (max-width: 620px) {
+      .dash {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .sec {
+        height: 320px;
+      }
+
+      .sec.grow {
+        height: 360px;
+      }
+
+      .links-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+
+      .modal {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Login ── -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-box">
+      <h1 class="login-logo">GR0VE</h1>
+      <p class="login-sub">Student Dashboard</p>
+      <p class="maintenance-note" id="maintenanceLoginNote">
+        Maintenance mode is active. Beta testers can sign in to continue.
+      </p>
+      <label class="login-lbl">Bergen Email</label>
+      <input class="login-inp" id="loginEmail" type="email" placeholder="name@bergen.org" autocomplete="username">
+      <label class="login-lbl">Password</label>
+      <input class="login-inp" id="loginPw" type="password" placeholder="••••••••" autocomplete="current-password">
+      <p class="login-err" id="loginErr"></p>
+      <button class="login-btn" id="loginBtn">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ── Email verification gate — nothing behind this renders or fetches
+       any data until Firebase confirms the signed-in user is verified ── -->
+  <div class="login-wrap gone" id="verifyWrap">
+    <div class="login-box" style="text-align:center">
+      <h1 class="login-logo">GR0VE</h1>
+      <p class="login-sub">Verify Your Email</p>
+      <p
+        style="font-family:var(--font-body);font-size:13px;line-height:1.6;color:var(--on-surface-v);margin-bottom:22px">
+        We sent a verification link to<br>
+        <strong id="verifyEmailAddr" style="color:var(--on-surface)">—</strong><br>
+        Confirm it, then come back here to continue.
+      </p>
+      <p class="login-err" id="verifyErr"></p>
+      <button class="login-btn" id="verifyRefreshBtn">I've verified — continue</button>
+      <button class="login-btn" id="verifyResendBtn"
+        style="background:transparent;color:var(--on-surface-v);border:1px solid var(--outline);margin-top:10px">Resend
+        email</button>
+      <button class="login-btn" id="verifySignoutBtn"
+        style="background:transparent;color:var(--on-surface-v);margin-top:10px">Sign out</button>
+    </div>
+  </div>
+
+  <!-- ── Maintenance gate ── -->
+  <div class="login-wrap gone" id="maintenanceWrap">
+    <div class="login-box" style="text-align:center">
+      <div class="maintenance-chip">Maintenance</div>
+      <h1 class="maintenance-title" id="maintenanceTitle">UNDER_MAINTENANCE</h1>
+      <p class="maintenance-copy" id="maintenanceMessage">
+        The grove is currently resting. We'll be back shortly.
+      </p>
+      <p class="login-err" id="maintenanceErr"></p>
+      <button class="login-btn" id="maintenanceSignoutBtn">
+        Sign out / switch beta account
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Dashboard ── -->
+  <div class="dash">
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-logo-wrap">
+        <div class="loading-word">gr0ve</div>
+      </div>
+      <div class="loading-trees">
+        <div class="loading-tree-item" style="--tilt:6deg"><img data-tree="grover" src="assets/grover_dark.png" alt=""
+            onerror="this.style.visibility='hidden'"></div>
+        <div class="loading-tree-item" style="--tilt:-6deg"><img data-tree="aspen" src="assets/aspen_dark.png" alt=""
+            onerror="this.style.visibility='hidden'"></div>
+        <div class="loading-tree-item" style="--tilt:6deg"><img data-tree="rowan" src="assets/rowan_dark.png" alt=""
+            onerror="this.style.visibility='hidden'"></div>
+        <div class="loading-tree-item" style="--tilt:-6deg"><img data-tree="sakura" src="assets/sakura_dark.png" alt=""
+            onerror="this.style.visibility='hidden'"></div>
+      </div>
+      <div class="loading-version">gr0ve · BCA Student Dashboard</div>
+    </div>
+
+    <div class="dash-content" id="dashContent">
+
+      <!-- Greeting Header -->
+      <div class="greeting-header">
+        <p class="greet-eyebrow" id="greetEye">Good Morning</p>
+        <h1 class="greet-name" id="greetName">STUDENT</h1>
+        <p class="greet-date" id="greetDate">Friday, Jul 31</p>
+      </div>
+
+      <div class="cols">
+
+        <!-- ── Col 1: Teachers + Links (vertical stack) ── -->
+        <div class="col" style="flex:1.1">
+
+          <!-- ALL TEACHERS section -->
+          <div class="sec grow">
+            <div class="sec-hdr">
+              <div class="sec-hdr-icon"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg></div>
+              <span class="sec-hdr-label">Teachers</span>
+              <div class="sec-hdr-line"></div>
+              <span id="teacherCount"
+                style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-10);padding:3px 8px;border-radius:8px;flex-shrink:0">0</span>
+            </div>
+            <div class="outer-card">
+              <input class="search-inp" id="teacherQ" placeholder="Search teachers..." style="margin-bottom:10px">
+              <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;" id="teacherList"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Col 2: Buses + Calendar ── -->
+        <div class="col" style="flex:1.2">
+
+          <!-- BUSES section -->
+          <div class="sec" style="flex:1.2 1 0; min-height:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div class="sec-hdr">
+              <div class="sec-hdr-icon"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" />
+                </svg></div>
+              <span class="sec-hdr-label">Buses</span>
+              <div class="sec-hdr-line"></div>
+            </div>
+            <div class="outer-card">
+              <input class="search-inp" id="busQ" placeholder="Search town or route..." style="margin-bottom:10px">
+              <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;" id="busList"></div>
+            </div>
+          </div>
+
+          <!-- CALENDAR section (split view: grid + events) -->
+          <div class="sec" style="flex:1.5 1 0; min-height:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div class="sec-hdr">
+              <div class="sec-hdr-icon"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+                </svg></div>
+              <span class="sec-hdr-label">Calendar</span>
+              <div class="sec-hdr-line"></div>
+            </div>
+            <div class="outer-card" style="flex:1;min-height:0;display:flex;flex-direction:column;padding:22px;">
+              <div class="cal-shell">
+                <div class="row" style="gap:24px;flex:1;min-height:0;align-items:stretch;">
+                  <div style="flex:0 0 auto;min-width:0;display:flex;flex-direction:column;width:270px;">
+                    <div
+                      style="padding:0 0 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                      <button id="calPrev" class="cal-nav-btn" style="font-size:18px;padding:6px 8px;"
+                        aria-label="Previous month">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                      </button>
+                      <span id="calLabel"
+                        style="font-family:var(--font-mono);font-size:15px;font-weight:800;color:var(--on-surface);letter-spacing:-0.3px;text-align:center">August
+                        2026</span>
+                      <button id="calNext" class="cal-nav-btn" style="font-size:18px;padding:6px 8px;"
+                        aria-label="Next month">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="cal-grid" id="calGrid" style="flex:1;" aria-hidden="false"></div>
+                  </div>
+                  <div
+                    style="flex:1;min-width:0;border-left:1px solid var(--outline-faint);padding-left:22px;display:flex;flex-direction:column;">
+                    <div class="row-sb" style="padding:0 0 16px;flex-shrink:0;">
+                      <span id="calBannerDate"
+                        style="font-family:var(--font-body);font-size:14px;font-weight:700;color:var(--on-surface)"></span>
+                      <span id="calBannerEvtCount"
+                        style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--primary)">0
+                        events</span>
+                    </div>
+                    <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;" id="calEvts"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Col 3: News (shorter) + Links ── -->
+        <div class="col" style="flex:0.8">
+
+          <!-- SCHEDULE widget -->
+          <div class="sec" style="flex:0 0 auto; min-height:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div class="sec-hdr">
+              <div class="sec-hdr-icon"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+                </svg></div>
+              <span class="sec-hdr-label">Schedule</span>
+              <div class="sec-hdr-line"></div>
+            </div>
+            <div style="min-height:0;overflow-y:auto;overflow-x:hidden;" id="schedTile">
+              <!-- schedule content populated by tickSchedule() -->
+            </div>
+          </div>
+
+          <!-- NEWS section (shorter) -->
+          <div class="sec" style="flex:1.1 1 0; min-height:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div class="sec-hdr">
+              <div class="sec-hdr-icon"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                </svg></div>
+              <span class="sec-hdr-label">News</span>
+              <div class="sec-hdr-line"></div>
+            </div>
+            <div class="tile p-md" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;" id="newsBody"></div>
+          </div>
+
+          <!-- LINKS section -->
+          <div class="sec" style="flex:1 1 0; min-height:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div class="sec-hdr">
+              <div class="sec-hdr-icon"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                </svg></div>
+              <span class="sec-hdr-label">Links</span>
+              <div class="sec-hdr-line"></div>
+            </div>
+            <div class="outer-card">
+              <div class="links-grid"></div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /cols -->
+
+      <div class="footer">
+        <div class="footer-inner" id="footerBtn">
+          <span class="footer-settings">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M19.14 12.94c.04-.31.06-.62.06-.94s-.02-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.44.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.63c-.12.21-.08.47.12.61l2.03 1.58c-.05.31-.09.63-.09.94s.02.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+            </svg>
+            Settings
+          </span>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </div>
+
+  <!-- ── PWA Install Banner ── -->
+  <div class="pwa-banner" id="pwaBanner">
+    <div class="pwa-banner-text">
+      <strong>Install gr0ve</strong><br>
+      <span id="pwaInstructions">Add to home screen for quick access</span>
+    </div>
+    <button class="pwa-banner-btn" id="pwaInstallBtn">Install</button>
+    <button class="pwa-banner-close" id="pwaClose">&times;</button>
+  </div>
+
+  <!-- ── Account Modal ── -->
+  <div class="modal-bg" id="modalBg"></div>
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+
+    <div class="acc-row">
+      <div class="acc-avi" id="accAvi">AY</div>
+      <div>
+        <p class="acc-name" id="accName">Student</p>
+        <p class="acc-email" id="accEmail">student@bergen.org</p>
+      </div>
+    </div>
+
+    <p class="pref-lbl">Theme Color</p>
+    <div class="color-dots">
+      <div class="cdot active" data-col="grover" style="background:#35B595"></div>
+      <div class="cdot" data-col="aspen" style="background:#FFDD71"></div>
+      <div class="cdot" data-col="rowan" style="background:#FF6F2A"></div>
+      <div class="cdot" data-col="sakura" style="background:#EEC3F5"></div>
+      <div class="cdot" data-col="abies" style="background:#00C8FF"></div>
+      <div class="cdot" data-col="cedite" style="background:#B388EB"></div>
+      <div class="cdot" data-col="ash" style="background:#E55B5B"></div>
+      <div class="cdot" data-col="monochrome" style="background:#FFFFFF"></div>
+    </div>
+
+    <div class="mode-row">
+      <span class="mode-row-lbl">Appearance</span>
+      <button class="mode-btn" id="modeBtn">Switch to Light</button>
+    </div>
+
+    <div class="modal-menu">
+      <div class="modal-menu-row" id="downloadBtn">
+        <span class="modal-menu-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12" />
+            <polyline points="7 10 12 15 17 10" />
+            <path d="M5 21h14" />
+          </svg>
+        </span>
+        <span class="modal-menu-label">How to Download</span>
+        <svg class="modal-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 6 15 12 9 18"></polyline>
+        </svg>
+      </div>
+      <div class="modal-menu-row danger" id="signoutBtn">
+        <span class="modal-menu-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </span>
+        <span class="modal-menu-label">Sign Out</span>
+        <svg class="modal-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 6 15 12 9 18"></polyline>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── How to Download Modal ── -->
+  <div class="modal dl-modal" id="downloadModal">
+    <button class="modal-close" id="downloadModalClose">✕</button>
+
+    <p class="pref-lbl" style="margin-top:0;">How to Download</p>
+    <h2 class="dl-title">Get gr0ve on your device</h2>
+    <p class="dl-intro">gr0ve installs like a native app straight from your browser — no app store needed.</p>
+
+    <div class="dl-steps">
+      <div class="dl-step">
+        <div class="dl-step-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
+        </div>
+        <div>
+          <p class="dl-step-title">iPhone / iPad</p>
+          <p class="dl-step-body">Open gr0ve in Safari, tap the <strong>Share</strong> icon, then choose <strong>Add to
+              Home Screen</strong>.</p>
+        </div>
+      </div>
+
+      <div class="dl-step">
+        <div class="dl-step-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="12" cy="5" r="1" />
+            <circle cx="12" cy="19" r="1" />
+          </svg>
+        </div>
+        <div>
+          <p class="dl-step-title">Android</p>
+          <p class="dl-step-body">Open gr0ve in Chrome, tap the <strong>⋮ menu</strong>, then choose <strong>Add to Home
+              Screen</strong> or <strong>Install App</strong>.</p>
+        </div>
+      </div>
+
+      <div class="dl-step">
+        <div class="dl-step-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+        </div>
+        <div>
+          <p class="dl-step-title">Desktop</p>
+          <p class="dl-step-body">Look for the <strong>install icon</strong> in your browser's address bar, or use the
+            install prompt when it appears.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dl-author-note">
+      <p class="dl-author-note-label">A note from the author</p>
+      <p class="dl-author-note-body">Thanks for using gr0ve — I built this to make the school day a little less chaotic.
+        If something breaks or you've got an idea to make it better, I'd genuinely love to hear it.</p>
+      <p class="dl-author-sign">— The gr0ve developer</p>
+      <div class="dl-native-links">
+        <a class="dl-native-link" href="https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.apk">
+          APK
+          <span>for MORE features</span>
+        </a>
+        <a class="dl-native-link" href="https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.aab">
+          AAB
+          <span>for MORE features</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Privacy Policy Modal ── -->
+  <div class="modal privacy-modal" id="privacyModal">
+    <button class="modal-close" id="privacyModalClose">✕</button>
+
+    <p class="pref-lbl" style="margin-top:0;">Privacy Policy</p>
+    <h2 class="dl-title">Gr0ve Privacy Policy</h2>
+    <p class="dl-intro" id="privacyUpdated">Last Updated: —</p>
+
+    <div id="privacyBody"></div>
+  </div>
+
+  <script>
+    'use strict';
+    /* ══════════════════════════════════════════════════════════
+       gr0ve Web Dashboard — native component mirror
+       ══════════════════════════════════════════════════════════ */
+
+    firebase.initializeApp({
+      apiKey: 'AIzaSyCLDeU8w4ytIE41g1Wr810ubGr5rC9zlWk',
+      authDomain: 'gr0ve-bca.firebaseapp.com',
+      projectId: 'gr0ve-bca',
+      storageBucket: 'gr0ve-bca.firebasestorage.app',
+      messagingSenderId: '354104126282',
+      appId: '1:354104126282:web:d1a68662557f6df63d2fb3',
+    });
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const authReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .catch(err => console.warn('Could not enable local auth persistence:', err));
+
+    /* ── state ── */
+    let me = null, starredTeachers = new Set(), starredBuses = new Set();
+    let allTeachers = [], absenceMap = {}, allBuses = [], bcaEvents = [];
+    let expandedTeachers = new Set(); // names currently expanded
+    let calView = new Date(), selDate = new Date();
+    let themeMode = 'dark', themeColor = 'grover';
+    let dashboardBooted = false;
+    let pwaInstallPromptReady = false;
+    let featureFlagsUnsubscribe = null;
+    let featureFlags = {
+      maintenanceMode: false,
+      betaTesters: [],
+      maintenanceTitle: 'UNDER_MAINTENANCE',
+      maintenanceMessage: "The grove is currently resting. We'll be back shortly.",
+    };
+
+    /* ── SVGs for links ── */
+    const SVGS = {
+      school: '<svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>',
+      book: '<svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>',
+      doc: '<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>',
+      bus: '<svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>',
+      calendar: '<svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>',
+      shield: '<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>',
+      link: '<svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>',
+      map: '<svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>',
+      laptop: '<svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>',
+      person: '<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+    };
+
+    const DEFAULT_LINKS = [
+      { title: 'Schoology', url: 'https://bca.schoology.com/home', icon: 'school' },
+      { title: 'Powerschool', url: 'https://bcts.powerschool.com/public/', icon: 'book' },
+      { title: 'Cancellations', url: 'https://docs.google.com/document/d/e/2PACX-1vRkhySmwAiTtY88tcshckpV4F0vRrULccaGrYl_Sf2ubWpyyXA4l8c-KAOuMzSwFe-qyAQhLqXzVsbA/pub', icon: 'doc' },
+      { title: 'Bus Sheet', url: 'https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/', icon: 'bus' },
+      { title: 'Counselor Booking', url: 'https://outlook.office365.com/book/CounselorBookings@bergen.org/', icon: 'calendar' },
+      { title: 'BCA Website', url: 'https://www.bergen.org/bca', icon: 'laptop' },
+      { title: 'Staff Directory', url: 'https://www.bergen.org/bca/staff', icon: 'person' },
+      { title: 'Map', url: 'https://www.google.com/maps/place/Bergen+County+Academies', icon: 'map' },
+      { title: 'Privacy Policy', url: '/privacy_policy', icon: 'shield' },
+    ];
+
+    /* ── Privacy Policy — mirrored from privacy_policy.dart ── */
+    const PRIVACY_UPDATED = 'Last Updated: January 13, 2026';
+    const PRIVACY_SECTIONS = [
+      {
+        title: '01. Information Collection',
+        content: 'Gr0ve collects minimal personal information. This includes data required for account creation, such as email addresses and passwords. Non-sensitive usage data, like feature access and preferences, may be stored locally to improve app functionality.',
+      },
+      {
+        title: '02. Account Management',
+        content: 'Users may create accounts to access app features. Email verification is required for @bergen.org accounts. Users can delete their accounts at any time via the Account page, which immediately removes associated data from the device and the authentication system.',
+      },
+      {
+        title: '03. Access to Features',
+        content: 'Certain features, such as teacher-specific tools, require verified @bergen.org accounts. The app clearly indicates which features are available to each account type.',
+      },
+      {
+        title: '04. Use of Information',
+        content: 'Information collected (account credentials, usage preferences) is used solely to personalize the user experience, manage access to features, and maintain basic app functionality. Data is never sold, shared with third parties, or used for advertising or marketing purposes.',
+      },
+      {
+        title: '05. Data Sources',
+        content: 'All school-related information displayed in Gr0ve (teacher absences, class coverage, bus locations, quick links) is sourced from publicly accessible resources maintained by Bergen County Academies and the developer. No private or internal school records are accessed without explicit permission.',
+      },
+      {
+        title: '06. Data Storage & Security',
+        content: "All data is stored locally on the user's device, except for authentication credentials stored securely by Firebase Authentication. Reasonable safeguards are in place to protect locally stored data. Sensitive information such as passwords are never stored in plain text.",
+      },
+      {
+        title: "07. Children's Privacy",
+        content: 'Gr0ve is intended for students of Bergen County Academies, generally aged 13 and above. The app does not knowingly collect information from children under the age of 13. If a child under 13 creates an account by mistake, parents may request deletion via the support contact below.',
+      },
+      {
+        title: '08. Policy Updates',
+        content: 'Any updates to this Privacy Policy will be displayed within the app. The \u201CLast Updated\u201D date reflects the most recent revision. Users are encouraged to review the policy periodically.',
+      },
+      {
+        title: '09. Contact Information',
+        content: 'Developer: Arjun Yuvaraj\nEmail: gr0ve.bca@gmail.com\nFor questions about account deletion, data access, or privacy concerns, please reach out via the email above.',
+      },
+      {
+        title: '10. Third-Party Links',
+        content: 'Gr0ve may provide links to external resources (e.g., school quick links, app stores). These links are provided for convenience. Gr0ve is not responsible for the privacy practices of external websites or services.',
+      },
+    ];
+
+    function renderPrivacyPolicy() {
+      const updatedEl = document.getElementById('privacyUpdated');
+      const bodyEl = document.getElementById('privacyBody');
+      if (!updatedEl || !bodyEl) return;
+      updatedEl.textContent = PRIVACY_UPDATED;
+      bodyEl.innerHTML = PRIVACY_SECTIONS.map(s => `
+        <div class="privacy-section">
+          <div class="privacy-section-title">${s.title}</div>
+          <div class="privacy-section-body">${s.content}</div>
+        </div>
+      `).join('');
+    }
+    renderPrivacyPolicy();
+
+    function normalizeEmail(email) {
+      return (email || '').toLowerCase().trim();
+    }
+
+    function applyFeatureFlags(data = {}) {
+      const testers = Array.isArray(data.beta_testers) ? data.beta_testers : [];
+      featureFlags = {
+        maintenanceMode: data.maintenance_mode === true || data.lockdown_mode === true,
+        betaTesters: testers.map(normalizeEmail).filter(Boolean),
+        maintenanceTitle: (data.maintenance_title || 'UNDER_MAINTENANCE').toString().trim() || 'UNDER_MAINTENANCE',
+        maintenanceMessage: (data.maintenance_message || "The grove is currently resting. We'll be back shortly.").toString().trim() || "The grove is currently resting. We'll be back shortly.",
+      };
+      updateMaintenanceUi();
+    }
+
+    async function loadFeatureFlags() {
+      try {
+        const doc = await db.collection('app_config').doc('feature_flags').get();
+        applyFeatureFlags(doc.exists ? doc.data() : {});
+      } catch (err) {
+        console.warn('Could not load feature flags:', err);
+      }
+      return featureFlags;
+    }
+
+    function listenFeatureFlags() {
+      if (featureFlagsUnsubscribe) return;
+      featureFlagsUnsubscribe = db.collection('app_config').doc('feature_flags')
+        .onSnapshot(
+          doc => {
+            applyFeatureFlags(doc.exists ? doc.data() : {});
+            enforceMaintenanceGate(auth.currentUser);
+          },
+          err => console.warn('Feature flag listener stopped:', err)
+        );
+    }
+
+    function stopFeatureFlagListener() {
+      if (!featureFlagsUnsubscribe) return;
+      featureFlagsUnsubscribe();
+      featureFlagsUnsubscribe = null;
+    }
+
+    function isBetaTesterEmail(email) {
+      return featureFlags.betaTesters.includes(normalizeEmail(email));
+    }
+
+    function isMaintenanceBlocked(user) {
+      return featureFlags.maintenanceMode &&
+        user &&
+        user.emailVerified &&
+        !isBetaTesterEmail(user.email);
+    }
+
+    function updateMaintenanceUi() {
+      const note = document.getElementById('maintenanceLoginNote');
+      const title = document.getElementById('maintenanceTitle');
+      const message = document.getElementById('maintenanceMessage');
+
+      if (note) note.classList.toggle('on', featureFlags.maintenanceMode);
+      if (title) title.textContent = featureFlags.maintenanceTitle;
+      if (message) message.textContent = featureFlags.maintenanceMessage;
+    }
+
+    function setAuthGate({ login = false, verify = false, maintenance = false } = {}) {
+      document.getElementById('loginWrap')?.classList.toggle('gone', !login);
+      document.getElementById('verifyWrap')?.classList.toggle('gone', !verify);
+      document.getElementById('maintenanceWrap')?.classList.toggle('gone', !maintenance);
+    }
+
+    function enforceMaintenanceGate(user) {
+      updateMaintenanceUi();
+      if (!isMaintenanceBlocked(user)) {
+        document.getElementById('maintenanceWrap')?.classList.add('gone');
+        return false;
+      }
+
+      if (dashboardBooted) {
+        location.reload();
+        return true;
+      }
+
+      me = null;
+      setAuthGate({ maintenance: true });
+      document.getElementById('loadingOverlay')?.classList.add('hidden');
+      const err = document.getElementById('maintenanceErr');
+      if (err) err.textContent = `${user.email} is not on the beta tester allowlist.`;
+      return true;
+    }
+
+    /* ── schedule periods (from snapshot_countdown_card.dart) ── */
+    const PERIODS = [
+      { l: 'Period 1', sh: 8, sm: 0, eh: 8, em: 50 },
+      { l: 'IGS', sh: 8, sm: 54, eh: 8, em: 58 },
+      { l: 'Period 2', sh: 9, sm: 2, eh: 9, em: 52 },
+      { l: 'Period 3', sh: 9, sm: 56, eh: 10, em: 46 },
+      { l: 'Period 4', sh: 10, sm: 50, eh: 11, em: 40 },
+      { l: 'Period 5', sh: 11, sm: 44, eh: 12, em: 34 },
+      { l: 'Period 6', sh: 12, sm: 38, eh: 13, em: 28 },
+      { l: 'Period 7', sh: 13, sm: 32, eh: 14, em: 22 },
+      { l: 'Period 8', sh: 14, sm: 26, eh: 15, em: 16 },
+      { l: 'Period 9', sh: 15, sm: 20, eh: 16, em: 10 },
+    ];
+
+    /* ══ Auth ══ */
+    auth.onAuthStateChanged(async u => {
+      await authReady;
+      const loadingOverlay = document.getElementById('loadingOverlay');
+
+      if (!u) {
+        me = null;
+        dashboardBooted = false;
+        stopFeatureFlagListener();
+        await loadFeatureFlags();
+        setAuthGate({ login: true });
+        return;
+      }
+
+      await loadFeatureFlags();
+      listenFeatureFlags();
+
+      // emailVerified on the cached user object can be stale (e.g. verified
+      // in another tab), so force a refresh from Firebase before trusting it.
+      try { await u.reload(); } catch (_) { }
+      const current = auth.currentUser;
+
+      if (!current || !current.emailVerified) {
+        // Do NOT set `me`, do NOT call boot() — no Firestore listener is
+        // attached and nothing in the dashboard is ever fetched or rendered
+        // for an unverified account.
+        me = null;
+        setAuthGate({ verify: true });
+        loadingOverlay.classList.add('hidden');
+        document.getElementById('verifyEmailAddr').textContent = current?.email || '';
+        return;
+      }
+
+      if (enforceMaintenanceGate(current)) return;
+
+      me = current;
+      setAuthGate();
+      if (!dashboardBooted) {
+        dashboardBooted = true;
+        boot();
+      }
+    });
+
+    function handleLoginKey(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('loginBtn').click();
+      }
+    }
+
+    document.getElementById('loginEmail').addEventListener('keydown', handleLoginKey);
+    document.getElementById('loginPw').addEventListener('keydown', handleLoginKey);
+
+    document.getElementById('loginBtn').onclick = async () => {
+      const e = document.getElementById('loginEmail').value.trim();
+      const p = document.getElementById('loginPw').value;
+      const err = document.getElementById('loginErr');
+      err.textContent = '';
+      if (!e || !p) { err.textContent = 'Enter email and password'; return; }
+      try {
+        await authReady;
+        await auth.signInWithEmailAndPassword(e, p);
+      }
+      catch (ex) { err.textContent = ex.message.replace('Firebase:', '').trim(); }
+    };
+
+    document.getElementById('verifyRefreshBtn').onclick = async () => {
+      const err = document.getElementById('verifyErr');
+      err.textContent = '';
+      const u = auth.currentUser;
+      if (!u) return;
+      try {
+        await u.reload();
+        if (auth.currentUser.emailVerified) {
+          // Re-run the same gate the auth listener uses, now that it'll pass.
+          location.reload();
+        } else {
+          err.textContent = 'Still not verified — check your inbox (and spam folder).';
+        }
+      } catch (ex) {
+        err.textContent = 'Could not check verification status. Try again.';
+      }
+    };
+
+    document.getElementById('verifyResendBtn').onclick = async () => {
+      const err = document.getElementById('verifyErr');
+      const u = auth.currentUser;
+      if (!u) return;
+      try {
+        await u.sendEmailVerification();
+        err.textContent = 'Verification email sent.';
+      } catch (ex) {
+        err.textContent = ex.message.replace('Firebase:', '').trim();
+      }
+    };
+
+    document.getElementById('verifySignoutBtn').onclick = () => auth.signOut();
+    document.getElementById('maintenanceSignoutBtn').onclick = () => auth.signOut();
+
+    /* ══ Boot ══ */
+    function boot() {
+      updateGreeting();
+      setInterval(updateGreeting, 30000);
+      listenPrefs();
+      listenAbsences();
+      listenBuses();
+      listenEvents();
+      fetchNews();
+      renderLinks(DEFAULT_LINKS);
+      document.getElementById('teacherQ').addEventListener('input', () => renderTeachers());
+      document.getElementById('busQ').addEventListener('input', () => renderBuses());
+
+      // Wait for the data that actually determines layout height (teachers)
+      // before revealing, and hold the loader for a graceful minimum time
+      // so it never feels like a flash even on a fast connection.
+      const minDisplay = new Promise(res => setTimeout(res, 700));
+      Promise.all([loadAllTeachers(), minDisplay]).finally(() => {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+        document.getElementById('dashContent').classList.add('ready');
+      });
+
+      // Show PWA install prompt if supported
+      showPWAInstallPrompt();
+      // Start schedule updater
+      try { tickSchedule(); setInterval(tickSchedule, 1000); } catch (_) { }
+    }
+
+    /* ── Greeting — exact home_screen.dart ── */
+    function updateGreeting() {
+      const now = new Date();
+      const h = now.getHours();
+      const eye = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+      document.getElementById('greetEye').textContent = eye;
+
+      const nm = me?.displayName || me?.email?.split('@')[0] || 'GR0VE';
+      document.getElementById('greetName').textContent = nm.split(' ')[0].toUpperCase();
+
+      const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const MOS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      document.getElementById('greetDate').textContent =
+        `${DAYS[now.getDay() === 0 ? 6 : now.getDay() - 1]}, ${MOS[now.getMonth()]} ${now.getDate()}`.toUpperCase();
+    }
+
+    /* ── Schedule countdown — exact snapshot_countdown_card.dart ── */
+    function fmtSec(s) {
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sc = s % 60;
+      const mm = String(m).padStart(2, '0'), ss = String(sc).padStart(2, '0');
+      return h > 0 ? `${String(h).padStart(2, '0')}:${mm}:${ss}` : `${mm}:${ss}`;
+    }
+    function fmt12(d) {
+      const h = d.getHours() % 12 || 12, m = String(d.getMinutes()).padStart(2, '0');
+      return `${h}:${m} ${d.getHours() >= 12 ? 'PM' : 'AM'}`;
+    }
+
+    const DONE_MSGS = ["School's out.", "That's a wrap.", "Freedom.", "Go home.", "You survived."];
+
+    function tickSchedule() {
+      const now = new Date();
+      const nm = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+      const secNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const clock = fmt12(now);
+      const st = PERIODS[0].sh * 60 + PERIODS[0].sm;
+      const en = PERIODS[PERIODS.length - 1].eh * 60 + PERIODS[PERIODS.length - 1].em;
+
+      let html;
+
+      if (nm < st - 60) {
+        // _SSPre — before the 60-min window
+        html = `
+      <div class="tile sched-card">
+        <div class="sched-top-row">
+          <span class="sched-pill pri"><span class="sdot"></span>Before School</span>
+          <span class="sched-clock">${clock}</span>
+        </div>
+        <div class="sched-static-row">School starts at <strong>8:00 AM</strong></div>
+      </div>`;
+      } else if (nm < st) {
+        // _SSCountdown — within 60 min of school
+        const diffSec = Math.round((st - nm) * 60);
+        const prog = (1 - diffSec / 3600) * 100;
+        html = `
+      <div class="tile sched-card">
+        <div class="sched-top-row">
+          <span class="sched-pill pri"><span class="sdot"></span>Until School</span>
+          <span class="sched-clock">${clock}</span>
+        </div>
+        <div class="sched-timer-row"><span class="sched-timer">${fmtSec(diffSec)}</span></div>
+        <div class="sched-prog-bg"><div class="sched-prog-fill" style="width:${prog}%"></div></div>
+      </div>`;
+      } else if (nm >= en) {
+        // _SSDone
+        const msg = DONE_MSGS[now.getDay() % DONE_MSGS.length];
+        html = `
+      <div class="tile sched-card">
+        <div class="sched-top-row">
+          <span class="sched-pill ok"><span class="sdot"></span>Done</span>
+          <span class="sched-clock">${clock}</span>
+        </div>
+        <div class="sched-done-msg">${msg}</div>
+      </div>`;
+      } else {
+        // in period or passing
+        for (let i = 0; i < PERIODS.length; i++) {
+          const p = PERIODS[i];
+          const pS = p.sh * 3600 + p.sm * 60;
+          const pE = p.eh * 3600 + p.em * 60;
+          if (secNow >= pS && secNow < pE) {
+            // _SSInPeriod
+            const left = pE - secNow;
+            const prog = (1 - left / ((p.eh * 60 + p.em - p.sh * 60 - p.sm) * 60)) * 100;
+            html = `
+          <div class="tile sched-card">
+            <div class="sched-top-row">
+              <span class="sched-pill pri"><span class="sdot"></span>${p.l}</span>
+              <span class="sched-clock">${clock}</span>
+            </div>
+            <div class="sched-timer-row">
+              <span class="sched-timer">${fmtSec(left)}</span>
+              <span class="sched-timer-sub">remaining</span>
+            </div>
+            <div class="sched-prog-bg"><div class="sched-prog-fill" style="width:${prog.toFixed(1)}%"></div></div>
+          </div>`;
+            break;
+          }
+          if (i < PERIODS.length - 1) {
+            const nx = PERIODS[i + 1];
+            const nxS = nx.sh * 3600 + nx.sm * 60;
+            if (secNow >= pE && secNow < nxS) {
+              // _SSPassing
+              const diff = nxS - secNow;
+              html = `
+            <div class="tile sched-card">
+              <div class="sched-top-row">
+                <span class="sched-pill amber"><span class="sdot"></span>Passing</span>
+                <span class="sched-clock">${clock}</span>
+              </div>
+              <div class="sched-timer-row">
+                <span class="sched-timer">${fmtSec(diff)}</span>
+                <span class="sched-timer-sub">→ ${nx.l}</span>
+              </div>
+            </div>`;
+              break;
+            }
+          }
+        }
+      }
+      if (html) document.getElementById('schedTile').innerHTML = html;
+    }
+
+    /* ── Preferences ── */
+    function listenPrefs() {
+      db.collection('users').doc(me.uid).onSnapshot(doc => {
+        const d = doc.data() || {};
+        const name = d.name || me.displayName || 'Student';
+        const inits = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        document.getElementById('accAvi').textContent = inits;
+        document.getElementById('accName').textContent = name;
+        document.getElementById('accEmail').textContent = me.email;
+        if (d.themeColor) applyColor(d.themeColor);
+        if (d.themeMode) applyMode(d.themeMode);
+        renderLinks(d.links || DEFAULT_LINKS);
+      });
+
+      db.collection('users').doc(me.uid)
+        .collection('preferences').doc('starredTeachers').onSnapshot(doc => {
+          starredTeachers = new Set((doc.data()?.teachers) || []);
+          renderTeachers();
+        });
+
+      db.collection('users').doc(me.uid)
+        .collection('preferences').doc('starredTowns').onSnapshot(doc => {
+          starredBuses = new Set((doc.data()?.towns) || []);
+          renderBuses();
+        });
+    }
+
+    /* ── All Teachers — loads full teachers collection (name, dept, email) ── */
+    async function loadAllTeachers() {
+      try {
+        const snap = await db.collection('teachers').get();
+        allTeachers = snap.docs.map(d => ({
+          name: d.data().name || d.id,
+          department: d.data().department || '',
+          email: d.data().email || '',
+        }));
+        if (allTeachers.length > 0) {
+          console.log(`✓ Loaded ${allTeachers.length} teachers from Firebase`);
+        }
+      } catch (_) {
+        console.error('Error loading teachers:', _);
+        allTeachers = [];
+      }
+      renderTeachers();
+    }
+
+    /* ── Absence map stream ── */
+    function listenAbsences() {
+      db.collection('public_data').doc('teacher_absences').onSnapshot(doc => {
+        absenceMap = {};
+        const t = doc.data()?.teachers || {};
+        Object.entries(t).forEach(([k, v]) => { absenceMap[k] = String(v); });
+        console.log(`✓ Loaded ${absenceMap.length} absence records`);
+        renderTeachers();
+      });
+    }
+
+    /* ── Teacher matching algorithm — exact port of teacher_service.dart ── */
+    function handleEdgeCases(name) {
+      const map = {
+        'kim(dr)': 'kim, deok-yang', 'drkim': 'kim, deok-yang', 'dr.kim': 'kim, deok-yang',
+        'kim(ms)': 'kim, rosalyn', 'mskim': 'kim, rosalyn', 'ms.kim': 'kim, rosalyn',
+        'smith(ms)': 'smith, ericka', 'mssmith': 'smith, ericka', 'ms.smith': 'smith, ericka',
+        'smith(dr)': 'smith, michael', 'drsmith': 'smith, michael', 'dr.smith': 'smith, michael',
+        'crane(ms)': 'crane, laura', 'mscrane': 'crane, laura', 'ms.crane': 'crane, laura',
+        'crane(mr)': 'crane, todd', 'mrcrane': 'crane, todd', 'mr.crane': 'crane, todd',
+        'drapcznski': 'drapczynski, anna', 'msdrapcznski': 'drapczynski, anna',
+        'ms.drapcznski': 'drapczynski, anna', 'drapcznski(ms)': 'drapczynski, anna',
+      };
+      const norm = name.toLowerCase().replace(/\s+/g, '').replace(/\./g, '').replace(/,/g, '');
+      return map[norm] || null;
+    }
+
+    function normalizeTeacherName(raw) {
+      raw = raw.trim().replace(/\(.*?\)/g, '');
+      const titles = ['Dr.', 'Mr.', 'Ms.', 'Mrs.'];
+      for (const t of titles) {
+        if (raw.startsWith(t + ' ') || raw === t) {
+          raw = raw.replace(t, '').trim();
+        }
+      }
+      if (raw.includes(',') && raw.split(',').length === 2) return raw.trim();
+      const parts = raw.split(' ').filter(p => p.length > 0);
+      if (parts.length >= 2) return `${parts[parts.length - 1]}, ${parts[0]}`;
+      return raw;
+    }
+
+    function _cleanKey(key) {
+      return key.replace(/\s+/g, '').replace(/\(.*?\)/g, '').toLowerCase();
+    }
+
+    function matchesTeacher(docKey, teacherKey) {
+      if (docKey === 'date' || docKey === 'Date') return false;
+      const edgeCase = handleEdgeCases(docKey);
+      const docName = edgeCase || docKey;
+      const normTeacher = normalizeTeacherName(teacherKey);
+
+      const docClean = _cleanKey(docName);
+      const teacherClean = _cleanKey(normTeacher);
+
+      if (docClean === teacherClean) return true;
+
+      const docParts = docClean.split(',');
+      const teacherParts = teacherClean.split(',');
+      const docLast = docParts[0];
+      const teacherLast = teacherParts[0];
+
+      if (docLast && teacherLast && docLast === teacherLast) return true;
+
+      if (docClean.length >= 3 && teacherClean.includes(docClean)) return true;
+
+      return false;
+    }
+
+    function resolveStatus(teacherName) {
+      for (const [key, val] of Object.entries(absenceMap)) {
+        if (matchesTeacher(key, teacherName)) return val;
+      }
+      return 'Present';
+    }
+
+    /* toggle expand for a teacher card */
+    window.tcToggle = function (name) {
+      if (expandedTeachers.has(name)) expandedTeachers.delete(name);
+      else expandedTeachers.add(name);
+      renderTeachers();
+    };
+
+    /* toggle star for a teacher */
+    window.tcStar = function (e, name) {
+      e.stopPropagation();
+      const next = new Set(starredTeachers);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      starredTeachers = next;
+      if (me) {
+        db.collection('users').doc(me.uid)
+          .collection('preferences').doc('starredTeachers')
+          .set({ teachers: [...next] });
+      }
+      renderTeachers();
+    };
+
+    /* ── renderTeachers — mirrors CustomTeacherCard exactly ── */
+    function renderTeachers() {
+      const q = document.getElementById('teacherQ').value.toLowerCase();
+      const el = document.getElementById('teacherList');
+      const countEl = document.getElementById('teacherCount');
+
+      let list = allTeachers.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.department.toLowerCase().includes(q)
+      );
+
+      // sort: starred → absent → alphabetical
+      list.sort((a, b) => {
+        const aS = starredTeachers.has(a.name), bS = starredTeachers.has(b.name);
+        if (aS !== bS) return aS ? -1 : 1;
+        const aA = resolveStatus(a.name) !== 'Present';
+        const bA = resolveStatus(b.name) !== 'Present';
+        if (aA !== bA) return aA ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      countEl.textContent = list.length;
+
+      if (list.length === 0) {
+        el.innerHTML = `<p class="empty">No teachers found.</p>`; return;
+      }
+
+      const SCHOOL_SVG = `<svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>`;
+      const EMAIL_SVG = `<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`;
+      const STAR_ON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="#FFB800" style="display:block"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+      const STAR_OFF = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="display:block;opacity:0.35"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+
+      el.innerHTML = list.map(t => {
+        const status = resolveStatus(t.name);
+        const isAbs = status !== 'Present';
+        const isStar = starredTeachers.has(t.name);
+        const isExp = expandedTeachers.has(t.name);
+        const safeName = t.name.replace(/"/g, '"');
+
+        return `
+      <div class="tc" onclick="tcToggle('${safeName}')">
+        <div class="tc-inner">
+          <div class="tc-row">
+            <button class="tc-star ${isStar ? 'on' : 'off'}" onclick="tcStar(event,'${safeName}')">
+              ${isStar ? STAR_ON : STAR_OFF}
+            </button>
+            <span class="tc-name">${t.name}</span>
+            <span class="tc-badge ${isAbs ? 'absent' : 'present'}">${status}</span>
+          </div>
+        </div>
+        <div class="tc-expand ${isExp ? 'open' : ''}">
+          ${t.department ? `
+          <div class="tc-detail">
+            <div class="tc-detail-icon">${SCHOOL_SVG}</div>
+            <span class="tc-detail-text">${t.department}</span>
+          </div>` : ''}
+          ${t.email ? `
+          <div class="tc-detail">
+            <div class="tc-detail-icon">${EMAIL_SVG}</div>
+            <span class="tc-detail-text">${t.email}</span>
+          </div>` : ''}
+          ${!t.department && !t.email ? '<span class="tc-detail-text" style="padding-left:4px">No details on file.</span>' : ''}
+        </div>
+      </div>`;
+      }).join('');
+    }
+
+    /* ── Buses — exact CustomBusCard mirror with starring ── */
+    async function fetchBusRoutesFromSheets() {
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/1S5v7kTbSiqV8GottWVi5tzpqLdTrEgWEY4ND4zvyV3o/export?format=csv&gid=0';
+        const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+        const text = (await r.json()).contents;
+        const lines = text.split('\n').map(l => l.split(','));
+        const routes = [];
+        for (let i = 1; i < Math.min(lines.length, 24); i++) {
+          const row = lines[i];
+          if (row.length >= 2 && row[0]?.trim()) {
+            let code = row[1]?.trim() || '';
+            if (code.toLowerCase() === 'missing') code = '';
+            routes.push({ town: row[0].trim(), code, status: code ? 'Arrived' : 'Not here yet' });
+          }
+          if (row.length >= 4 && row[2]?.trim()) {
+            let code = row[3]?.trim() || '';
+            if (code.toLowerCase() === 'missing') code = '';
+            routes.push({ town: row[2].trim(), code, status: code ? 'Arrived' : 'Not here yet' });
+          }
+        }
+        if (routes.length) allBuses = routes;
+      } catch (_) { }
+      renderBuses();
+    }
+
+    function listenBuses() {
+      db.collection('public_data').doc('bus_routes').onSnapshot(doc => {
+        const r = doc.data()?.routes || {};
+        const list = Object.values(r).map(b => ({ town: b.town, code: b.code || '', status: b.status || '' }));
+        if (list.length) {
+          allBuses = list;
+          renderBuses();
+        } else {
+          fetchBusRoutesFromSheets();
+        }
+      });
+    }
+
+    function toggleBusStar(e, town) {
+      e.stopPropagation();
+      const next = new Set(starredBuses);
+      if (next.has(town)) next.delete(town); else next.add(town);
+      starredBuses = next;
+      if (me) {
+        db.collection('users').doc(me.uid)
+          .collection('preferences').doc('starredTowns')
+          .set({ towns: [...next] });
+      }
+      renderBuses();
+    }
+
+    function renderBuses() {
+      const q = document.getElementById('busQ').value.toLowerCase();
+      const el = document.getElementById('busList');
+
+      if (allBuses.length === 0) {
+        el.innerHTML = `<p class="empty">Loading bus routes...</p>`; return;
+      }
+      let list = allBuses.filter(b =>
+        b.town.toLowerCase().includes(q) || b.code.toLowerCase().includes(q)
+      );
+      list.sort((a, b) => {
+        const as = starredBuses.has(a.town), bs = starredBuses.has(b.town);
+        if (as !== bs) return as ? -1 : 1;
+        return a.town.localeCompare(b.town);
+      });
+      if (!list.length) { el.innerHTML = `<p class="empty">No results for "${q}"</p>`; return; }
+
+      const STAR_ON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="#FFB800" style="display:block"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+      const STAR_OFF = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="display:block;opacity:0.35"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+
+      el.innerHTML = list.map(b => {
+        const hasNoCode = !b.code || b.code.trim() === '?' || b.code.trim() === '';
+        const displayCode = hasNoCode ? '?' : b.code;
+        const codeCls = hasNoCode ? 'unknown' : 'arrived';
+        const isStar = starredBuses.has(b.town);
+        const safeTown = b.town.replace(/"/g, '"');
+        const statusText = b.status || (hasNoCode ? 'Not here yet' : 'Arrived');
+
+        return `
+      <div class="tc" style="margin-bottom:8px;">
+        <div class="tc-inner" style="padding:14px 16px;">
+          <div class="row-sb">
+            <div class="row" style="gap:4px;min-width:0;flex:1">
+              <button class="tc-star ${isStar ? 'on' : 'off'}" onclick="toggleBusStar(event,'${safeTown}')">
+                ${isStar ? STAR_ON : STAR_OFF}
+              </button>
+              <div class="col-s">
+                <span class="tc-name">${b.town}</span>
+                <span class="t-sub" style="margin-top:2px;font-weight:600">${statusText}</span>
+              </div>
+            </div>
+            <span class="bus-code ${codeCls}">${displayCode}</span>
+          </div>
+        </div>
+      </div>`;
+      }).join('');
+    }
+
+    /* ── Calendar events stream ── */
+    function normalizeCalendarEvent(data, fallbackId) {
+      const dt = data?.date?.toDate?.() || (data?.date ? new Date(data.date) : null);
+      if (!dt || Number.isNaN(dt.getTime())) return null;
+      return {
+        id: data?.id || fallbackId || `${dt.getTime()}-${Math.random().toString(16).slice(2)}`,
+        title: data?.title || 'Event',
+        description: data?.description || null,
+        category: data?.category || 'bca',
+        isAllDay: data?.isAllDay !== false,
+        startTime: data?.startTime || null,
+        endTime: data?.endTime || null,
+        date: dt,
+      };
+    }
+
+    function listenEvents() {
+      const eventsDocRef = db.collection('public_data').doc('bca_events');
+
+      eventsDocRef.onSnapshot(doc => {
+        const rawEvents = Array.isArray(doc.data()?.events) ? doc.data().events : [];
+        bcaEvents = rawEvents
+          .map((entry, index) => normalizeCalendarEvent({ ...entry, id: entry?.id || `doc-${index}` }, `doc-${index}`))
+          .filter(Boolean);
+        renderCal();
+      });
+
+      eventsDocRef.collection('items').onSnapshot(snap => {
+        const nextEvents = [];
+        snap.forEach(d => {
+          const item = normalizeCalendarEvent(d.data(), d.id);
+          if (item) nextEvents.push(item);
+        });
+        bcaEvents = nextEvents;
+        renderCal();
+      });
+    }
+    function animateMonthChange(dir, fn) {
+      const grid = document.getElementById('calGrid');
+      if (!grid) { fn(); return; }
+      grid.style.transition = 'transform .22s ease, opacity .18s ease';
+      grid.style.transform = `translateX(${dir === 'left' ? '-8%' : '8%'}) scale(.98)`;
+      grid.style.opacity = '0.6';
+      setTimeout(() => {
+        fn();
+        // reset and animate back
+        grid.style.transform = `translateX(${dir === 'left' ? '8%' : '-8%'}) scale(.98)`;
+        setTimeout(() => {
+          grid.style.transition = 'transform .26s ease, opacity .2s ease';
+          grid.style.transform = 'translateX(0) scale(1)';
+          grid.style.opacity = '1';
+        }, 40);
+      }, 160);
+    }
+
+    document.getElementById('calPrev').onclick = () => {
+      animateMonthChange('left', () => { calView.setMonth(calView.getMonth() - 1); renderCal(); });
+    };
+    document.getElementById('calNext').onclick = () => {
+      animateMonthChange('right', () => { calView.setMonth(calView.getMonth() + 1); renderCal(); });
+    };
+
+    // swipe gestures for calendar
+    (function attachCalSwipe() {
+      const grid = document.getElementById('calGrid');
+      if (!grid) return;
+      let sx = null;
+      grid.addEventListener('touchstart', e => { sx = e.touches[0].clientX; });
+      grid.addEventListener('touchend', e => {
+        if (sx === null) return; const ex = (e.changedTouches && e.changedTouches[0]?.clientX) || null; if (!ex) return;
+        const dx = ex - sx; sx = null;
+        if (Math.abs(dx) < 30) return;
+        if (dx < 0) document.getElementById('calNext').click(); else document.getElementById('calPrev').click();
+      });
+    })();
+
+    function renderCal() {
+      if (!selDate || Number.isNaN(selDate.getTime())) selDate = new Date();
+      if (!calView || Number.isNaN(calView.getTime())) calView = new Date(selDate);
+
+      const y = calView.getFullYear(), m = calView.getMonth();
+      const MOS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      document.getElementById('calLabel').textContent = `${MOS[m]} ${y}`;
+
+      // Update selected date display
+      const selDayEl = document.getElementById('calBannerDate');
+      if (selDayEl) {
+        const dname = DAYS[selDate.getDay()];
+        const mm = String(selDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(selDate.getDate()).padStart(2, '0');
+        const yy = String(selDate.getFullYear()).slice(-2);
+        selDayEl.textContent = `${dname}, ${mm}/${dd}/${yy}`;
+      }
+      const selCountEl = document.getElementById('calBannerEvtCount');
+      if (selCountEl) {
+        const evts = bcaEvents.filter(e => e.date.toDateString() === selDate.toDateString());
+        selCountEl.textContent = `${evts.length} event${evts.length !== 1 ? 's' : ''}`;
+      }
+
+      const first = new Date(y, m, 1).getDay();
+      const daysInM = new Date(y, m + 1, 0).getDate();
+      const today = new Date();
+
+      let g = '';
+      for (let i = 0; i < first; i++) g += `<span class="cal-d empty"></span>`;
+
+      for (let d = 1; d <= daysInM; d++) {
+        const cur = new Date(y, m, d);
+        const isT = cur.toDateString() === today.toDateString();
+        const isS = cur.toDateString() === selDate.toDateString();
+        const hasE = bcaEvents.some(e => e.date.toDateString() === cur.toDateString());
+        g += `<span class="cal-d${isT ? ' today' : ''}${isS ? ' sel' : ''}"
+               onclick="selCal(${y},${m},${d})"
+               style="cursor:pointer">
+            ${d}${hasE ? `<span class="cal-dot-ind"></span>` : ''}
+          </span>`;
+      }
+      document.getElementById('calGrid').innerHTML = g;
+      console.log(`✓ Calendar rendered: ${daysInM} days, ${bcaEvents.length} total events`);
+      renderCalEvts();
+    }
+    window.selCal = (y, m, d) => {
+      selDate = new Date(y, m, d);
+      renderCal();
+    };
+
+    /* Format Event Time helper to clean Firestore Timestamps */
+    function fmtEventTimeVal(val) {
+      if (!val) return '';
+      if (typeof val === 'string') {
+        if (val.includes('Timestamp(') || val.includes('seconds=')) {
+          const match = val.match(/seconds=(\d+)/);
+          if (match) {
+            const d = new Date(parseInt(match[1], 10) * 1000);
+            return fmt12(d);
+          }
+        }
+        return val;
+      }
+      if (typeof val === 'object') {
+        if (val.seconds) return fmt12(new Date(val.seconds * 1000));
+        if (typeof val.toDate === 'function') return fmt12(val.toDate());
+      }
+      return String(val);
+    }
+
+    function getEventTimeString(e) {
+      const start = fmtEventTimeVal(e.startTime);
+      const end = fmtEventTimeVal(e.endTime);
+      if (start && end) return `${start} - ${end}`;
+      if (start) return start;
+      return 'All Day';
+    }
+
+    /* Render CalendarEventCard — exact port of calendar_event_card.dart */
+    function linkify(text) {
+      if (!text) return '';
+      const escaped = String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return escaped.replace(/(https?:\/\/[^\s<]+)/g, url => {
+        const trimmed = url.replace(/[.,;:)\]]+$/, '');
+        const trail = url.slice(trimmed.length);
+        return `<a href="${trimmed}" target="_blank" rel="noopener noreferrer" class="cal-evt-link" onclick="event.stopPropagation()">${trimmed}</a>${trail}`;
+      });
+    }
+
+    function renderCalEvts() {
+      const el = document.getElementById('calEvts');
+      const evts = bcaEvents.filter(e => e.date.toDateString() === selDate.toDateString());
+      const countEl = document.getElementById('calBannerEvtCount');
+      if (countEl) countEl.textContent = `${evts.length} event${evts.length !== 1 ? 's' : ''}`;
+
+      el.classList.remove('fade-in');
+      void el.offsetWidth; // restart animation even if content is similar
+      el.classList.add('fade-in');
+
+      if (!evts.length) {
+        el.innerHTML = `<p class="cal-empty">No events scheduled for this day. Your calendar is nice and clear.</p>`;
+        return;
+      }
+
+      const SCHOOL_ICON = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>`;
+
+      el.innerHTML = evts.map(e => {
+        const timeStr = getEventTimeString(e);
+        const tag = (e.category || 'bca').toUpperCase();
+
+        return `
+      <div class="tile p-md cal-event-card" style="margin-bottom:8px;">
+        <div class="col-s" style="min-width:0">
+          <div style="font-family:var(--font-body);font-size:15px;font-weight:700;color:var(--on-surface);line-height:1.25">${e.title}</div>
+          ${e.description ? `<div style="font-family:var(--font-body);font-size:13px;color:var(--on-surface-mid);margin-top:4px;line-height:1.35">${linkify(e.description)}</div>` : ''}
+          <div class="row" style="gap:6px;margin-top:6px">
+            <span class="cal-evt-tag">${tag}</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--on-surface-dim)">${timeStr}</span>
+          </div>
+        </div>
+      </div>`;
+      }).join('');
+    }
+
+    /* ── Weather — combined single card ── */
+    const WX_LABEL = c => c === 0 ? 'Clear' : c <= 2 ? 'Partly Cloudy' : c <= 3 ? 'Overcast' : c <= 48 ? 'Foggy' : c <= 55 ? 'Drizzle' : c <= 65 ? 'Rain' : c <= 77 ? 'Snow' : c <= 82 ? 'Showers' : 'Thunderstorm';
+    const WX_SVG = c => {
+      if (c === 0) return '<svg viewBox="0 0 24 24" fill="currentColor" style="width:48px;height:48px"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.92h-2V3.5h2V.58zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.92h2V19.5h-2v2.92zm-6.45-3.26l-1.79 1.79 1.41 1.41 1.8-1.79-1.42-1.41z"/></svg>';
+      if (c <= 3) return '<svg viewBox="0 0 24 24" fill="currentColor" style="width:48px;height:48px"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>';
+      if (c <= 67) return '<svg viewBox="0 0 24 24" fill="currentColor" style="width:48px;height:48px"><path d="M17.66 8L12 2.35 6.34 8C4.78 9.56 4 11.64 4 13.64s.78 4.11 2.34 5.67 3.61 2.35 5.66 2.35 4.1-.79 5.66-2.35S20 15.64 20 13.64 19.22 9.56 17.66 8z"/></svg>';
+      return '<svg viewBox="0 0 24 24" fill="currentColor" style="width:48px;height:48px"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>';
+    };
+
+    async function fetchWeather() {
+      const el = document.getElementById('wxBody');
+      if (!el) return; // Element removed from DOM
+
+      try {
+        // Using Open-Meteo API for Hackensack, NJ
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.8859&longitude=-74.0435&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York';
+
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+
+        const d = await r.json();
+
+        // Validate response structure
+        if (!d || !d.current) {
+          throw new Error('Invalid weather data structure');
+        }
+
+        const c = d.current;
+        const temp = Math.round(c.temperature_2m);
+        const feels = Math.round(c.apparent_temperature);
+        const humidity = c.relative_humidity_2m;
+        const wind = Math.round(c.wind_speed_10m);
+        const condition = WX_LABEL(c.weather_code);
+        const icon = WX_SVG(c.weather_code);
+
+        // Render weather card with proper styling
+        el.innerHTML = `
+      <div class="tile p-lg" style="height:100%;display:flex;flex-direction:column;">
+        <div class="wx-combined" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div class="wx-main">
+            <div class="col-s">
+              <div style="font-family:var(--font-mono);font-size:40px;font-weight:900;letter-spacing:-2px;line-height:1;color:var(--on-surface)">${temp}°F</div>
+              <div style="font-size:13px;color:var(--on-surface-mid);margin-top:4px">${condition} · Feels ${feels}°</div>
+            </div>
+            <div style="color:var(--primary);flex-shrink:0">${icon}</div>
+          </div>
+          <div class="wx-details" style="margin-top:12px;">
+            <div class="wx-detail-item">
+              <svg viewBox="0 0 24 24"><path d="M17.66 8L12 2.35 6.34 8C4.78 9.56 4 11.64 4 13.64s.78 4.11 2.34 5.67 3.61 2.35 5.66 2.35 4.1-.79 5.66-2.35S20 15.64 20 13.64 19.22 9.56 17.66 8z"/></svg>
+              <div class="col-s">
+                <span style="font-family:var(--font-body);font-size:14px;font-weight:800;color:var(--on-surface)">${humidity}%</span>
+                <span class="t-sub dim">Humidity</span>
+              </div>
+            </div>
+            <div class="wx-detail-item">
+              <svg viewBox="0 0 24 24"><path d="M14.5 17c0 1.65-1.35 3-3 3s-3-1.35-3-3h2c0 .55.45 1 1 1s1-.45 1-1-.45-1-1-1H2v-2h9.5c1.65 0 3 1.35 3 3zM11 7c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1H2v2h10c1.65 0 3-1.35 3-3S13.65 4 12 4s-3 1.35-3 3h2zm4 4.5H2v2h13c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5v2c1.93 0 3.5-1.57 3.5-3.5S16.93 11.5 15 11.5z"/></svg>
+              <div class="col-s">
+                <span style="font-family:var(--font-body);font-size:14px;font-weight:800;color:var(--on-surface)">${wind} mph</span>
+                <span class="t-sub dim">Wind</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+      } catch (_) {
+        console.error('Weather error:', _);
+        if (el) {
+          el.innerHTML = `
+            <div class="tile p-md" style="height:100%;display:flex;align-items:center;justify-content:center;">
+              <p class="empty">Weather unavailable. Look out a window.</p>
+            </div>
+          `;
+        }
+      }
+    }
+
+    /* ── Lunch ── */
+    async function fetchLunch() {
+      const el = document.getElementById('lunchBody');
+      if (!el) return; // Element removed from DOM
+
+      try {
+        const n = new Date();
+        const y = n.getFullYear(), m = String(n.getMonth() + 1).padStart(2, '0'), d = String(n.getDate()).padStart(2, '0');
+        const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://bergen.api.nutrislice.com/menu/api/weeks/school/bergen-academy/menu-type/lunch/${y}/${m}/${d}?format=json`)}`);
+        const j = JSON.parse((await r.json()).contents);
+        const day = (j.days || []).find(x => x.date === `${y}-${m}-${d}`);
+        const items = (day?.menu_items || []).filter(i => i.food).slice(0, 6);
+        if (!items.length) { el.innerHTML = `<p class="empty">No lunch info today. Cafeteria is playing mystery box.</p>`; return; }
+        el.innerHTML = items.map(i => `<p class="lunch-item">· ${i.food.name}</p>`).join('');
+      } catch (_) {
+        el.innerHTML = `<p class="empty">Lunch data unavailable. Your stomach is on its own.</p>`;
+      }
+    }
+
+    /* ── News — using multiple fallback sources ── */
+    let allNewsItems = [];
+    let newsPage = 0;
+    const NEWS_PER_PAGE = 3;
+
+    async function fetchNews() {
+      const el = document.getElementById('newsBody');
+      if (!el) return; // Element removed from DOM
+
+      try {
+        // Try multiple news sources with CORS proxies
+        const sources = [
+          { url: 'https://api.rss2json.com/v1/api.json?rss_url=https://academychronicle.org/feed/', name: 'RSS2JSON' },
+          { url: 'https://rss.app/feeds/v1.1/academychronicle.org.xml', name: 'RSS.app' }
+        ];
+
+        let items = [];
+        for (const source of sources) {
+          try {
+            const r = await fetch(source.url);
+            if (!r.ok) continue;
+
+            const data = await r.json();
+            // Handle RSS2JSON format
+            if (data.items && data.items.length > 0) {
+              items = data.items;
+              console.log(`✓ Loaded ${items.length} articles from ${source.name}`);
+              break;
+            }
+          } catch (e) {
+            console.warn(`Failed to fetch from ${source.name}:`, e);
+            continue;
+          }
+        }
+
+        if (items.length) {
+          allNewsItems = items;
+          newsPage = 0;
+          renderNewsPage();
+        } else {
+          el.innerHTML = `<p class="empty">No news available. Check back later.</p>`;
+        }
+      } catch (_) {
+        console.error('News fetch error:', _);
+        el.innerHTML = `<p class="empty">News feed unavailable. Check the BCA website for updates.</p>`;
+      }
+    }
+
+    function renderNewsPage() {
+      const el = document.getElementById('newsBody');
+      const start = newsPage * NEWS_PER_PAGE;
+      const end = start + NEWS_PER_PAGE;
+      const pageItems = allNewsItems.slice(start, end);
+
+      if (pageItems.length === 0 && newsPage === 0) {
+        el.innerHTML = `<p class="empty">No news available. Check back later.</p>`;
+        return;
+      }
+
+      let html = pageItems.map(i => {
+        // Handle both JSON and XML formats
+        const title = i.title || i.getElementsByTagName('title')[0]?.textContent || 'Untitled';
+        const date = i.pubDate || i.getElementsByTagName('pubDate')[0]?.textContent || '';
+        const link = i.link || i.getElementsByTagName('link')[0]?.textContent || '#';
+
+        // Format date
+        const dateStr = date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+
+        return `
+          <div class="news-card" onclick="window.open('${link}', '_blank')">
+            <div class="news-card-top">
+              <div class="news-source">BCA News</div>
+              <svg class="news-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+            </div>
+            <div class="news-headline">${title}</div>
+            ${dateStr ? `<div class="news-meta">${dateStr}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Show only top 3 news articles
+      el.innerHTML = html;
+    }
+
+    /* ── Links ── */
+    function getLinkIcon(l) {
+      const key = l?.iconKey || l?.icon;
+      if (key && SVGS[key]) return SVGS[key];
+      const t = (l?.title || '').toLowerCase();
+      const u = (l?.url || '').toLowerCase();
+      if (t.includes('schoology') || u.includes('schoology')) return SVGS.school;
+      if (t.includes('power') || u.includes('powerschool')) return SVGS.book;
+      if (t.includes('cancel') || u.includes('docs.google.com/document')) return SVGS.doc;
+      if (t.includes('bus') || u.includes('spreadsheets')) return SVGS.bus;
+      if (t.includes('counselor') || t.includes('booking') || u.includes('office365')) return SVGS.calendar;
+      if (t.includes('bca') || t.includes('website') || u.includes('bergen.org/bca')) return SVGS.laptop;
+      if (t.includes('staff') || t.includes('directory') || u.includes('staff')) return SVGS.person;
+      if (t.includes('map') || u.includes('maps')) return SVGS.map;
+      if (t.includes('privacy') || u.includes('privacy')) return SVGS.shield;
+      return SVGS.link;
+    }
+
+    // Flutter stores QuickLink.color as an ARGB int (Color.value) — pull the RGB
+    // channels out so each link tile can carry its own accent, same as the app.
+    function linkAccent(l) {
+      const c = l?.color;
+      if (typeof c !== 'number' || Number.isNaN(c)) return null;
+      const r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+      return `${r}, ${g}, ${b}`;
+    }
+
+    function renderLinks(links) {
+      const items = (links && links.length) ? links : DEFAULT_LINKS;
+
+      if (!items.length) {
+        document.querySelectorAll('.links-grid').forEach(el => {
+          el.innerHTML = `<div class="link-btn-empty">No links yet — add some from the app.</div>`;
+        });
+        return;
+      }
+
+      const markup = items.map(l => {
+        const safeTitle = String(l?.title || 'Link').replace(/"/g, '&quot;');
+        const rawUrl = String(l?.url || '').trim();
+        const isPrivacy = rawUrl === '/privacy_policy' || rawUrl.toLowerCase().includes('privacy_policy');
+        const safeUrl = (rawUrl && rawUrl !== '#') ? rawUrl : 'https://www.bergen.org/bca';
+        const accent = linkAccent(l);
+        const iconStyle = accent
+          ? ` style="background:rgba(${accent},.14);color:rgb(${accent})"`
+          : '';
+
+        if (isPrivacy) {
+          return `
+      <a class="link-btn" href="#" onclick="event.preventDefault(); openPrivacyModal();">
+        <span class="link-icon-box"${iconStyle}>${getLinkIcon(l)}</span>
+        <span class="link-btn-label">${safeTitle}</span>
+        <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+      </a>`;
+        }
+
+        return `
+      <a class="link-btn" href="${safeUrl}" target="_blank" rel="noopener noreferrer">
+        <span class="link-icon-box"${iconStyle}>${getLinkIcon(l)}</span>
+        <span class="link-btn-label">${safeTitle}</span>
+        <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+      </a>`;
+      }).join('');
+
+      document.querySelectorAll('.links-grid').forEach(el => {
+        el.innerHTML = markup;
+      });
+    }
+
+    /* ── PWA Install ── */
+    let deferredPrompt;
+
+    function getDeviceContext() {
+      const ua = navigator.userAgent || '';
+      const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || isIPadOS;
+      const isAndroid = /Android/.test(ua);
+      const isTouch = window.matchMedia('(pointer: coarse)').matches;
+      const isSmallScreen = window.matchMedia('(max-width: 820px)').matches;
+      const isPhoneBrowser = (isIOS || isAndroid || /Mobile|Mobi/i.test(ua)) && (isTouch || isSmallScreen);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+      return {
+        isIOS,
+        isAndroid,
+        isPhoneBrowser,
+        isDesktopBrowser: !isPhoneBrowser,
+        isStandalone,
+      };
+    }
+
+    function showPWAInstallPrompt() {
+      if (pwaInstallPromptReady) return;
+      pwaInstallPromptReady = true;
+      const banner = document.getElementById('pwaBanner');
+      const device = getDeviceContext();
+      if (device.isStandalone) return;
+
+      // Show instructions based on platform
+      const instructions = document.getElementById('pwaInstructions');
+      const installBtn = document.getElementById('pwaInstallBtn');
+      if (device.isIOS && device.isPhoneBrowser) {
+        instructions.textContent = 'Tap Share, then Add to Home Screen';
+        installBtn.textContent = 'How';
+      } else if (device.isAndroid && device.isPhoneBrowser) {
+        instructions.textContent = 'Install the PWA for faster launch and saved login';
+        installBtn.textContent = 'Install';
+      } else if (device.isPhoneBrowser) {
+        instructions.textContent = 'Use your browser menu to add gr0ve to your home screen';
+        installBtn.textContent = 'How';
+      } else {
+        instructions.textContent = 'Install gr0ve as a desktop app from this browser';
+        installBtn.textContent = 'Install';
+      }
+
+      // Listen for install prompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Show banner after 3 seconds
+        setTimeout(() => {
+          if (deferredPrompt) {
+            banner.classList.add('show');
+          }
+        }, 3000);
+      });
+
+      if (device.isIOS && device.isPhoneBrowser) {
+        setTimeout(() => banner.classList.add('show'), 2600);
+      }
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        banner.classList.remove('show');
+      });
+
+      // Close button
+      document.getElementById('pwaClose').onclick = () => {
+        banner.classList.remove('show');
+      };
+
+      // Install button
+      document.getElementById('pwaInstallBtn').onclick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const result = await deferredPrompt.userChoice;
+          console.log('Install result:', result);
+          deferredPrompt = null;
+          banner.classList.remove('show');
+        } else {
+          // Show manual instructions
+          alert(`To install gr0ve:\n\n${device.isIOS ? '1. Open this page in Safari\n2. Tap the Share button\n3. Tap "Add to Home Screen"' : device.isAndroid ? '1. Open this page in Chrome\n2. Tap the menu\n3. Tap "Install App" or "Add to Home screen"' : device.isPhoneBrowser ? '1. Open your browser menu\n2. Choose the home screen or install option' : '1. Look for the install icon in your desktop browser address bar\n2. Click Install'}`);
+        }
+      };
+    }
+
+    /* ── Modal ── */
+    const modBg = document.getElementById('modalBg');
+    const mod = document.getElementById('modal');
+    const dlMod = document.getElementById('downloadModal');
+    const privacyMod = document.getElementById('privacyModal');
+    const open = () => { modBg.classList.add('open'); mod.classList.add('open'); dlMod.classList.remove('open'); privacyMod.classList.remove('open'); };
+    const close = () => { modBg.classList.remove('open'); mod.classList.remove('open'); dlMod.classList.remove('open'); privacyMod.classList.remove('open'); };
+    const openDownload = () => { modBg.classList.add('open'); mod.classList.remove('open'); dlMod.classList.add('open'); privacyMod.classList.remove('open'); };
+    const openPrivacy = () => { modBg.classList.add('open'); mod.classList.remove('open'); dlMod.classList.remove('open'); privacyMod.classList.add('open'); };
+    document.getElementById('footerBtn').onclick = open;
+    document.getElementById('modalClose').onclick = close;
+    document.getElementById('downloadBtn').onclick = openDownload;
+    document.getElementById('downloadModalClose').onclick = close;
+    document.getElementById('privacyModalClose').onclick = close;
+    modBg.onclick = close;
+    window.openPrivacyModal = openPrivacy;
+
+    /* color dots */
+    document.querySelectorAll('.cdot').forEach(dot => {
+      dot.onclick = () => {
+        applyColor(dot.dataset.col);
+        if (me) db.collection('users').doc(me.uid).set({ themeColor: dot.dataset.col }, { merge: true });
+      };
+    });
+
+    /* mode toggle */
+    document.getElementById('modeBtn').onclick = () => {
+      const next = themeMode === 'dark' ? 'light' : 'dark';
+      applyMode(next);
+      if (me) db.collection('users').doc(me.uid).set({ themeMode: next }, { merge: true });
+    };
+
+    /* sign out */
+    document.getElementById('signoutBtn').onclick = () => { auth.signOut(); close(); };
+
+    function applyColor(col) {
+      themeColor = col;
+      document.documentElement.setAttribute('data-color', col);
+      document.querySelectorAll('.cdot').forEach(d => d.classList.toggle('active', d.dataset.col === col));
+      updateLoadingTree();
+    }
+    function applyMode(mode) {
+      themeMode = mode;
+      document.documentElement.setAttribute('data-theme', mode);
+      document.getElementById('modeBtn').textContent = mode === 'dark' ? 'Switch to Light' : 'Switch to Dark';
+      updateLoadingTree();
+    }
+
+    /* ── Loading screen tree — matches active color + light/dark mode ── */
+    const TREE_NAMES = {
+      grover: 'grover', aspen: 'aspen', rowan: 'rowan', sakura: 'sakura',
+      abies: 'abies', cedite: 'cedite', ash: 'ash', monochrome: 'grover',
+    };
+    function updateLoadingTree() {
+      const img = document.getElementById('loadingTreeImg');
+      if (!img) return;
+      const color = document.documentElement.getAttribute('data-color') || 'grover';
+      const mode = document.documentElement.getAttribute('data-theme') || 'dark';
+      const tree = TREE_NAMES[color] || 'grover';
+      img.style.visibility = '';
+      img.src = `assets/${tree}_${mode}.png`;
+    }
+    updateLoadingTree();
+  </script>
+</body>
+
+</html>

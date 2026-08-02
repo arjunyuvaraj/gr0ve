@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'dart:async';
 
 class MaintenanceScreen extends StatefulWidget {
@@ -33,7 +35,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
     super.initState();
     _addLog("SYSTEM_BOOT_SEQUENCE_START");
     _addLog("INITIALIZING_MAINTENANCE_MODE");
-    _addLog("LOCKDOWN_PROTOCOL_ACTIVE");
+    _addLog("MAINTENANCE_PROTOCOL_ACTIVE");
 
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       if (mounted) {
@@ -74,6 +76,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
   @override
   Widget build(BuildContext context) {
     final dots = "." * _dotCount;
+    final title = AppFeatureFlags.maintenanceTitle.value;
+    final message = AppFeatureFlags.maintenanceMessage.value;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -118,7 +122,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
               const SizedBox(height: 32),
 
               Text(
-                "UNDER_MAINTENANCE",
+                title,
                 style: GoogleFonts.jetBrainsMono(
                   color: Colors.white,
                   fontSize: 28,
@@ -180,11 +184,23 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "The grove is currently resting. We'll be back shortly.",
+                      message,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         color: Colors.white.withOpacity(0.3),
                         fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      child: Text(
+                        "Sign out / switch beta account",
+                        style: GoogleFonts.jetBrainsMono(
+                          color: Colors.greenAccent.withOpacity(0.72),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],

@@ -29,9 +29,15 @@ class QuickLink {
   };
 
   factory QuickLink.fromMap(Map<String, dynamic> map) {
+    final id = map['id'] ?? 'unknown';
+    final rawTitle = map['title'] ?? '';
+    final title = id == 'privacy_policy' || rawTitle == 'Pirvacy Policy'
+        ? 'Privacy Policy'
+        : rawTitle;
+
     return QuickLink(
-      id: map['id'] ?? 'unknown',
-      title: map['title'] ?? '',
+      id: id,
+      title: title,
       url: map['url'] ?? '',
       iconKey: map['iconKey'] ?? 'link',
       color: map['color'] != null ? Color(map['color']) : Colors.blue,
@@ -107,7 +113,7 @@ class LinkService {
     ),
     QuickLink(
       id: 'privacy_policy',
-      title: 'Pirvacy Policy',
+      title: 'Privacy Policy',
       url: '/privacy_policy',
       iconKey: 'privacy_tip',
       color: Color(0xFF6A1B9A),

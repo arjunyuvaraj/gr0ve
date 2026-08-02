@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gr0ve/core/widgets/images/remote_asset_image.dart';
 import 'package:gr0ve/features/counselor/services/counselor_persona_service.dart';
 import 'package:gr0ve/features/counselor/services/persona_voice.dart';
 
@@ -416,7 +417,7 @@ class _BottomContent extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12.5),
-                      child: Image.asset(
+                      child: RemoteAssetImage(
                         persona.avatarAsset(brightness),
                         fit: BoxFit.cover,
                       ),
