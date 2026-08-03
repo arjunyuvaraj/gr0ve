@@ -32,24 +32,4 @@ gr0ve is built with **Flutter**, allowing the same codebase to power Android, iO
 
 ---
 
-## Changelog
-
-### v2.5.0 *(Current)*
-
-The latest release introduces the new BCA Dashboard, bringing school resources together into a centralized hub. Progressive Web App support has also been added, allowing gr0ve to be installed directly from a browser. This release also includes numerous performance improvements and bug fixes, serving as the first major update for the 2026–2027 school year.
-
-### v2.4.0
-
-Focused on stability and polish, this update resolved navigation issues that could lead to blank pages, improved keyboard behavior across the app, introduced several Field Day improvements, and laid the groundwork for the new BCA Dashboard.
-
-### v2.1.0
-
-This release added the administrative absence management grid, introduced contributor credits, made the complete version history available from v1.0 onward, and included several iOS-specific fixes.
-
-### v2.0.0
-
-Version 2.0 represented a complete redesign of gr0ve, introducing the adaptive dashboard, a refreshed interface, custom avatars, dynamic icons, and reorderable navigation.
-
----
-
 Built for the Bergen County Academies community.
