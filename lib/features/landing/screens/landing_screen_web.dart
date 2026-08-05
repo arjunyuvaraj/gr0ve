@@ -24,9 +24,9 @@ class LandingWebsiteScreen extends StatelessWidget {
   const LandingWebsiteScreen({super.key});
 
   static const _apkUrl =
-      'https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.apk';
+      'https://github.com/arjunyuvaraj/gr0ve/releases/download/v2.5.0/gr0ve-v2.5.0.apk';
   static const _aabUrl =
-      'https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.aab';
+      'https://github.com/arjunyuvaraj/gr0ve/releases/download/v2.5.0/gr0ve-v2.5.0.aab';
 
   static Future<void> _launch(String url, {String windowName = '_self'}) async {
     await launchUrl(
@@ -155,7 +155,6 @@ class LandingWebsiteScreen extends StatelessWidget {
                       Expanded(
                         child: _StoreButton(
                           label: 'APK',
-                          subtitle: 'for MORE features',
                           icon: Icons.android_rounded,
                           onTap: () => _launch(_apkUrl, windowName: '_blank'),
                           isDark: isDark,
@@ -166,7 +165,6 @@ class LandingWebsiteScreen extends StatelessWidget {
                       Expanded(
                         child: _StoreButton(
                           label: 'AAB',
-                          subtitle: 'for MORE features',
                           icon: Icons.inventory_2_rounded,
                           onTap: () => _launch(_aabUrl, windowName: '_blank'),
                           isDark: isDark,
@@ -353,7 +351,6 @@ class _OutlineButton extends StatelessWidget {
 /// Store download button pill.
 class _StoreButton extends StatelessWidget {
   final String label;
-  final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
   final bool isDark;
@@ -361,7 +358,6 @@ class _StoreButton extends StatelessWidget {
 
   const _StoreButton({
     required this.label,
-    required this.subtitle,
     required this.icon,
     required this.onTap,
     required this.isDark,
@@ -392,30 +388,12 @@ class _StoreButton extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: colors.onSurface.withOpacity(0.7)),
             const SizedBox(width: 8),
-            Flexible(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label,
-                    style: text.labelMedium?.copyWith(
-                      color: colors.onSurface.withOpacity(0.78),
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: text.labelSmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.48),
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ],
+            Text(
+              label,
+              style: text.labelMedium?.copyWith(
+                color: colors.onSurface.withOpacity(0.78),
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.4,
               ),
             ),
           ],

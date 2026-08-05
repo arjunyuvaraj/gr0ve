@@ -1,0 +1,58 @@
+name: Teacher Absence
+
+on:
+  # Cron is UTC only — GitHub Actions has no per-workflow timezone option.
+  # 11:00-22:00 UTC covers 7am-5pm US/Eastern across both EST (UTC-5) and
+  # EDT (UTC-4) with some slack; the script's own _within_tracking_window()
+  # does the precise, DST-aware filtering using pytz, so this outer window
+  # only needs to be a superset.
+  schedule:
+    - cron: "*/10 11-22 * * 1-5"
+  # Lets you trigger a run manually from the Actions tab for testing.
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright's Chromium
+        run: playwright install --with-deps chromium
+
+      - name: Write credentials from secrets
+        env:
+          CHROME_STATE_JSON: ${{ secrets.CHROME_STATE_JSON }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          printf '%s' "$CHROME_STATE_JSON" > chrome_state.json
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase.json
+
+      - name: Run scraper
+        env:
+          GR0VE_SEND_PUSH: "true"
+        run: python teachers_auto.py
+
+      # Runs even on failure so you can pull the auth-wall HTML straight
+      # from the Actions UI instead of re-triggering and hoping to catch it.
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-artifacts
+          path: |
+            debug_last_page.html
+            debug_last_response.json
+          if-no-files-found: ignore
+          retention-days: 3

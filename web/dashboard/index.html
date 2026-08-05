@@ -22,6 +22,23 @@
   <link rel="icon" type="image/png" sizes="512x512" href="../icons/Icon-512.png">
   <link rel="manifest" href="../manifest.json" id="app-manifest">
   <script>
+    /* Restore last-used theme/color immediately, before first paint,
+       so the login screen matches what this browser used last instead
+       of always flashing dark. Falls back to the data-theme/data-color
+       attributes already on <html> (dark/grover) if nothing is saved. */
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('gr0veThemeMode');
+        const savedColor = localStorage.getItem('gr0veThemeColor');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedColor) document.documentElement.setAttribute('data-color', savedColor);
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme && savedTheme) {
+          metaTheme.setAttribute('content', savedTheme === 'light' ? '#F8F9F9' : '#111111');
+        }
+      } catch (e) { /* localStorage unavailable — keep defaults */ }
+    })();
+
     const dashboardUa = navigator.userAgent || '';
     const dashboardIsIPadOS =
       navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
@@ -126,8 +143,8 @@
       --error: #C62828;
       --error-15: rgba(198, 40, 40, 0.15);
       --error-13: rgba(198, 40, 40, 0.13);
-      --tile-shadow: 0 10px 24px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
-      --tile-shadow-hover: 0 16px 36px rgba(0, 0, 0, 0.13), 0 3px 8px rgba(0, 0, 0, 0.06);
+      --tile-shadow: 0 10px 24px rgba(26, 29, 31, 0.08), 0 1px 2px rgba(26, 29, 31, 0.04);
+      --tile-shadow-hover: 0 16px 36px rgba(26, 29, 31, 0.14), 0 3px 8px rgba(26, 29, 31, 0.06);
       --glow: rgba(31, 111, 91, 0.07);
     }
 
@@ -295,6 +312,21 @@
       color: var(--on-surface);
       -webkit-font-smoothing: antialiased;
       transition: background .3s, color .3s;
+    }
+
+    /* ─── Theme transition — applied for a moment whenever dark/light is
+         toggled so every surface, border, shadow and text color crossfades
+         together instead of hard-cutting. Anthropic/gr0ve note: this class
+         is added + removed by applyMode() in the script at the bottom, it
+         intentionally isn't left on permanently so other transitions
+         (hover, press, etc.) keep their normal snappier timings. ─── */
+    html.theme-transitioning,
+    html.theme-transitioning *,
+    html.theme-transitioning *::before,
+    html.theme-transitioning *::after {
+      transition: background-color .45s ease, background .45s ease,
+        border-color .45s ease, box-shadow .45s ease,
+        color .45s ease, fill .45s ease, stroke .45s ease !important;
     }
 
     ::-webkit-scrollbar {
@@ -489,7 +521,7 @@
       line-height: 1.1;
       color: var(--on-surface);
       text-transform: uppercase;
-      background: linear-gradient(135deg, var(--on-surface) 0%, var(--primary-80) 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-50) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -532,6 +564,10 @@
       padding: 36px;
       border: 1px solid var(--outline-faint);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    [data-theme="light"] .login-box {
+      box-shadow: 0 20px 48px rgba(26, 29, 31, 0.10), 0 4px 12px rgba(26, 29, 31, 0.05);
     }
 
     .login-logo {
@@ -719,6 +755,10 @@
       flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.04);
       transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    [data-theme="light"] .sec-hdr-icon {
+      box-shadow: 0 2px 6px rgba(26, 29, 31, 0.05);
     }
 
     .sec-hdr:hover .sec-hdr-icon {
@@ -1410,6 +1450,10 @@
       cursor: pointer;
     }
 
+    [data-theme="light"] .news-card {
+      box-shadow: 0 2px 8px rgba(26, 29, 31, 0.04);
+    }
+
     .news-card:last-child {
       margin-bottom: 0;
     }
@@ -1515,12 +1559,20 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
+    [data-theme="light"] .link-btn {
+      box-shadow: 0 2px 8px rgba(26, 29, 31, 0.04);
+    }
+
     .link-btn:hover {
       background: var(--primary-10);
       color: var(--on-surface);
       border-color: var(--primary-50);
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .link-btn:hover {
+      box-shadow: 0 8px 18px rgba(26, 29, 31, 0.09), 0 2px 6px rgba(26, 29, 31, 0.04);
     }
 
     .link-icon-box {
@@ -1663,6 +1715,10 @@
       display: flex;
     }
 
+    [data-theme="light"] .pwa-banner {
+      box-shadow: 0 8px 28px rgba(26, 29, 31, 0.12), 0 2px 8px rgba(26, 29, 31, 0.06);
+    }
+
     .pwa-banner-text {
       font-family: var(--font-body);
       font-size: 12px;
@@ -1708,35 +1764,6 @@
       }
     }
 
-    .dl-native-links {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .dl-native-link {
-      flex: 1;
-      text-decoration: none;
-      border: 1px solid var(--outline);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: var(--elevated);
-      color: var(--on-surface);
-      font-family: var(--font-body);
-      font-size: 12px;
-      font-weight: 800;
-      text-align: center;
-    }
-
-    .dl-native-link span {
-      display: block;
-      margin-top: 2px;
-      color: var(--on-surface-mid);
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
     /* ─── Modal ─── */
     .modal-bg {
       position: fixed;
@@ -1771,6 +1798,10 @@
       opacity: 0;
       pointer-events: none;
       transition: all .3s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    [data-theme="light"] .modal {
+      box-shadow: 0 24px 54px rgba(26, 29, 31, 0.14), 0 4px 14px rgba(26, 29, 31, 0.06);
     }
 
     .modal::before {
@@ -1840,6 +1871,10 @@
       box-shadow: 0 4px 14px rgba(0, 0, 0, .18), 0 0 0 3px var(--primary-10);
     }
 
+    [data-theme="light"] .acc-avi {
+      box-shadow: 0 4px 12px rgba(26, 29, 31, 0.16), 0 0 0 3px var(--primary-10);
+    }
+
     .acc-name {
       font-family: var(--font-body);
       font-size: 16px;
@@ -1891,6 +1926,18 @@
 
     .cdot.active {
       box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--on-surface), 0 4px 10px rgba(0, 0, 0, .2);
+    }
+
+    [data-theme="light"] .cdot {
+      box-shadow: 0 2px 6px rgba(26, 29, 31, .14);
+    }
+
+    [data-theme="light"] .cdot:hover {
+      box-shadow: 0 6px 14px rgba(26, 29, 31, .18);
+    }
+
+    [data-theme="light"] .cdot.active {
+      box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--on-surface), 0 4px 10px rgba(26, 29, 31, .16);
     }
 
     .cdot.active::after {
@@ -2027,13 +2074,6 @@
       color: var(--on-surface-v);
     }
 
-    /* ─── How to Download modal ─── */
-    .dl-modal {
-      max-width: 420px;
-      max-height: 86vh;
-      overflow-y: auto;
-    }
-
     /* ─── Privacy Policy modal ─── */
     .privacy-modal {
       max-width: 560px;
@@ -2141,42 +2181,6 @@
       font-weight: 700;
     }
 
-    .dl-author-note {
-      margin-top: 20px;
-      padding: 16px 18px;
-      border-radius: 18px;
-      background: var(--primary-10);
-      border: 1px solid var(--primary-15);
-      position: relative;
-    }
-
-    .dl-author-note-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-
-    .dl-author-note-body {
-      font-family: var(--font-body);
-      font-size: 12.5px;
-      font-weight: 500;
-      color: var(--on-surface);
-      line-height: 1.55;
-    }
-
-    .dl-author-sign {
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      font-weight: 700;
-      color: var(--on-surface-v);
-      margin-top: 10px;
-      letter-spacing: .3px;
-    }
-
     /* ─── Outer card wrapper (for teacher + bus panels) ─── */
     .outer-card {
       background: linear-gradient(155deg, var(--surface) 0%, var(--elevated) 145%);
@@ -2223,6 +2227,10 @@
       transform: translateY(-1px);
       box-shadow: var(--tile-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.03);
       border-color: var(--outline-subtle);
+    }
+
+    [data-theme="light"] .tc {
+      box-shadow: 0 3px 10px rgba(26, 29, 31, 0.05);
     }
 
     .tc:last-child {
@@ -2903,21 +2911,6 @@
     </div>
 
     <div class="modal-menu">
-      <div class="modal-menu-row" id="downloadBtn">
-        <span class="modal-menu-icon">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v12" />
-            <polyline points="7 10 12 15 17 10" />
-            <path d="M5 21h14" />
-          </svg>
-        </span>
-        <span class="modal-menu-label">How to Download</span>
-        <svg class="modal-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 6 15 12 9 18"></polyline>
-        </svg>
-      </div>
       <div class="modal-menu-row danger" id="signoutBtn">
         <span class="modal-menu-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2931,82 +2924,6 @@
           stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 6 15 12 9 18"></polyline>
         </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── How to Download Modal ── -->
-  <div class="modal dl-modal" id="downloadModal">
-    <button class="modal-close" id="downloadModalClose">✕</button>
-
-    <p class="pref-lbl" style="margin-top:0;">How to Download</p>
-    <h2 class="dl-title">Get gr0ve on your device</h2>
-    <p class="dl-intro">gr0ve installs like a native app straight from your browser — no app store needed.</p>
-
-    <div class="dl-steps">
-      <div class="dl-step">
-        <div class="dl-step-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-            <polyline points="16 6 12 2 8 6" />
-            <line x1="12" y1="2" x2="12" y2="15" />
-          </svg>
-        </div>
-        <div>
-          <p class="dl-step-title">iPhone / iPad</p>
-          <p class="dl-step-body">Open gr0ve in Safari, tap the <strong>Share</strong> icon, then choose <strong>Add to
-              Home Screen</strong>.</p>
-        </div>
-      </div>
-
-      <div class="dl-step">
-        <div class="dl-step-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="12" cy="5" r="1" />
-            <circle cx="12" cy="19" r="1" />
-          </svg>
-        </div>
-        <div>
-          <p class="dl-step-title">Android</p>
-          <p class="dl-step-body">Open gr0ve in Chrome, tap the <strong>⋮ menu</strong>, then choose <strong>Add to Home
-              Screen</strong> or <strong>Install App</strong>.</p>
-        </div>
-      </div>
-
-      <div class="dl-step">
-        <div class="dl-step-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-            <line x1="8" y1="21" x2="16" y2="21" />
-            <line x1="12" y1="17" x2="12" y2="21" />
-          </svg>
-        </div>
-        <div>
-          <p class="dl-step-title">Desktop</p>
-          <p class="dl-step-body">Look for the <strong>install icon</strong> in your browser's address bar, or use the
-            install prompt when it appears.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="dl-author-note">
-      <p class="dl-author-note-label">A note from the author</p>
-      <p class="dl-author-note-body">Thanks for using gr0ve — I built this to make the school day a little less chaotic.
-        If something breaks or you've got an idea to make it better, I'd genuinely love to hear it.</p>
-      <p class="dl-author-sign">— The gr0ve developer</p>
-      <div class="dl-native-links">
-        <a class="dl-native-link" href="https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.apk">
-          APK
-          <span>for MORE features</span>
-        </a>
-        <a class="dl-native-link" href="https://github.com/arjunyuvaraj/gr0ve-downloads/releases/latest/download/gr0ve-latest.aab">
-          AAB
-          <span>for MORE features</span>
-        </a>
       </div>
     </div>
   </div>
@@ -4347,16 +4264,12 @@
     /* ── Modal ── */
     const modBg = document.getElementById('modalBg');
     const mod = document.getElementById('modal');
-    const dlMod = document.getElementById('downloadModal');
     const privacyMod = document.getElementById('privacyModal');
-    const open = () => { modBg.classList.add('open'); mod.classList.add('open'); dlMod.classList.remove('open'); privacyMod.classList.remove('open'); };
-    const close = () => { modBg.classList.remove('open'); mod.classList.remove('open'); dlMod.classList.remove('open'); privacyMod.classList.remove('open'); };
-    const openDownload = () => { modBg.classList.add('open'); mod.classList.remove('open'); dlMod.classList.add('open'); privacyMod.classList.remove('open'); };
-    const openPrivacy = () => { modBg.classList.add('open'); mod.classList.remove('open'); dlMod.classList.remove('open'); privacyMod.classList.add('open'); };
+    const open = () => { modBg.classList.add('open'); mod.classList.add('open'); privacyMod.classList.remove('open'); };
+    const close = () => { modBg.classList.remove('open'); mod.classList.remove('open'); privacyMod.classList.remove('open'); };
+    const openPrivacy = () => { modBg.classList.add('open'); mod.classList.remove('open'); privacyMod.classList.add('open'); };
     document.getElementById('footerBtn').onclick = open;
     document.getElementById('modalClose').onclick = close;
-    document.getElementById('downloadBtn').onclick = openDownload;
-    document.getElementById('downloadModalClose').onclick = close;
     document.getElementById('privacyModalClose').onclick = close;
     modBg.onclick = close;
     window.openPrivacyModal = openPrivacy;
@@ -4382,29 +4295,43 @@
     function applyColor(col) {
       themeColor = col;
       document.documentElement.setAttribute('data-color', col);
+      try { localStorage.setItem('gr0veThemeColor', col); } catch (e) { }
       document.querySelectorAll('.cdot').forEach(d => d.classList.toggle('active', d.dataset.col === col));
       updateLoadingTree();
     }
+    let themeTransitionTimer = null;
     function applyMode(mode) {
       themeMode = mode;
+
+      /* Briefly let every color-bearing property animate so switching
+         dark<->light crossfades instead of snapping. Removed again after
+         the transition finishes so hover/press states keep their own
+         (faster) transition timings the rest of the time. */
+      document.documentElement.classList.add('theme-transitioning');
+      window.clearTimeout(themeTransitionTimer);
+      themeTransitionTimer = window.setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 500);
+
       document.documentElement.setAttribute('data-theme', mode);
+      try { localStorage.setItem('gr0veThemeMode', mode); } catch (e) { }
       document.getElementById('modeBtn').textContent = mode === 'dark' ? 'Switch to Light' : 'Switch to Dark';
+
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', mode === 'dark' ? '#111111' : '#F8F9F9');
+
       updateLoadingTree();
     }
 
-    /* ── Loading screen tree — matches active color + light/dark mode ── */
-    const TREE_NAMES = {
-      grover: 'grover', aspen: 'aspen', rowan: 'rowan', sakura: 'sakura',
-      abies: 'abies', cedite: 'cedite', ash: 'ash', monochrome: 'grover',
-    };
+    /* ── Loading screen trees — each icon keeps its own tree name via
+       data-tree and just swaps the _dark/_light suffix to match mode ── */
     function updateLoadingTree() {
-      const img = document.getElementById('loadingTreeImg');
-      if (!img) return;
-      const color = document.documentElement.getAttribute('data-color') || 'grover';
       const mode = document.documentElement.getAttribute('data-theme') || 'dark';
-      const tree = TREE_NAMES[color] || 'grover';
-      img.style.visibility = '';
-      img.src = `assets/${tree}_${mode}.png`;
+      document.querySelectorAll('.loading-tree-item img[data-tree]').forEach(img => {
+        const tree = img.dataset.tree || 'grover';
+        img.style.visibility = '';
+        img.src = `assets/${tree}_${mode}.png`;
+      });
     }
     updateLoadingTree();
   </script>
