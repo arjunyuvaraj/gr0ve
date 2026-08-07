@@ -239,17 +239,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
     if (_user == null) return;
 
     try {
-      final email = _user!.email ?? '';
-      final isManagerEmail = email == "gr0ve.bca.manager@gmail.com";
-
       final adminDoc = await FirebaseFirestore.instance
-          .collection('admins')
+          .collection('platformAdmins')
           .doc(_user!.uid)
           .get();
 
       if (mounted) {
         setState(() {
-          _isPlatformAdmin = adminDoc.exists || isManagerEmail;
+          _isPlatformAdmin = adminDoc.exists;
           _buildNavigation();
         });
       }

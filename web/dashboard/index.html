@@ -3063,11 +3063,41 @@
       return (email || '').toLowerCase().trim();
     }
 
+    /* ── XSS-safe rendering helpers ──
+       escapeHtml: the ONLY correct way to put untrusted text inside an HTML
+       string template. (The old `.replace(/"/g, '"')` calls scattered through
+       this file were no-ops — they replaced a quote with the same quote —
+       and did not protect against anything.)
+       safeHref: validates a URL before it's ever written into an href/src or
+       passed to window.open, rejecting things like `javascript:` URIs. */
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function safeHref(url, allowedProtocols = ['https:']) {
+      try {
+        const u = new URL(String(url ?? ''), location.href);
+        if (!allowedProtocols.includes(u.protocol)) return null;
+        return u.href;
+      } catch (_) {
+        return null;
+      }
+    }
+
     function applyFeatureFlags(data = {}) {
-      const testers = Array.isArray(data.beta_testers) ? data.beta_testers : [];
+      // NOTE: this now reads app_config/maintenance_status, a document that
+      // intentionally contains ONLY these public fields — never beta_testers.
+      // Firestore rules can't return part of a document (hide one field,
+      // expose the rest), so the beta tester allowlist lives in its own
+      // `beta_testers/{email}` collection instead, and each signed-in user
+      // can only check their OWN email against it (see checkBetaTesterStatus).
       featureFlags = {
         maintenanceMode: data.maintenance_mode === true || data.lockdown_mode === true,
-        betaTesters: testers.map(normalizeEmail).filter(Boolean),
         maintenanceTitle: (data.maintenance_title || 'UNDER_MAINTENANCE').toString().trim() || 'UNDER_MAINTENANCE',
         maintenanceMessage: (data.maintenance_message || "The grove is currently resting. We'll be back shortly.").toString().trim() || "The grove is currently resting. We'll be back shortly.",
       };
@@ -3076,7 +3106,7 @@
 
     async function loadFeatureFlags() {
       try {
-        const doc = await db.collection('app_config').doc('feature_flags').get();
+        const doc = await db.collection('app_config').doc('maintenance_status').get();
         applyFeatureFlags(doc.exists ? doc.data() : {});
       } catch (err) {
         console.warn('Could not load feature flags:', err);
@@ -3086,7 +3116,7 @@
 
     function listenFeatureFlags() {
       if (featureFlagsUnsubscribe) return;
-      featureFlagsUnsubscribe = db.collection('app_config').doc('feature_flags')
+      featureFlagsUnsubscribe = db.collection('app_config').doc('maintenance_status')
         .onSnapshot(
           doc => {
             applyFeatureFlags(doc.exists ? doc.data() : {});
@@ -3102,15 +3132,28 @@
       featureFlagsUnsubscribe = null;
     }
 
-    function isBetaTesterEmail(email) {
-      return featureFlags.betaTesters.includes(normalizeEmail(email));
+    // Cache keyed by email so we don't re-read Firestore on every gate check.
+    // The lookup is scoped to the signed-in user's OWN email — the rules only
+    // allow reading beta_testers/{yourEmail}, so this can never be used to
+    // enumerate or download the full tester list.
+    const betaTesterCache = new Map();
+    async function checkBetaTesterStatus(email) {
+      const norm = normalizeEmail(email);
+      if (!norm) return false;
+      if (betaTesterCache.has(norm)) return betaTesterCache.get(norm);
+      try {
+        const doc = await db.collection('beta_testers').doc(norm).get();
+        betaTesterCache.set(norm, doc.exists);
+        return doc.exists;
+      } catch (err) {
+        console.warn('Could not check beta tester status:', err);
+        return false; // fail closed: treat as not a tester
+      }
     }
 
-    function isMaintenanceBlocked(user) {
-      return featureFlags.maintenanceMode &&
-        user &&
-        user.emailVerified &&
-        !isBetaTesterEmail(user.email);
+    async function isMaintenanceBlocked(user) {
+      if (!featureFlags.maintenanceMode || !user || !user.emailVerified) return false;
+      return !(await checkBetaTesterStatus(user.email));
     }
 
     function updateMaintenanceUi() {
@@ -3129,9 +3172,9 @@
       document.getElementById('maintenanceWrap')?.classList.toggle('gone', !maintenance);
     }
 
-    function enforceMaintenanceGate(user) {
+    async function enforceMaintenanceGate(user) {
       updateMaintenanceUi();
-      if (!isMaintenanceBlocked(user)) {
+      if (!(await isMaintenanceBlocked(user))) {
         document.getElementById('maintenanceWrap')?.classList.add('gone');
         return false;
       }
@@ -3196,7 +3239,7 @@
         return;
       }
 
-      if (enforceMaintenanceGate(current)) return;
+      if (await enforceMaintenanceGate(current)) return;
 
       me = current;
       setAuthGate();
@@ -3533,14 +3576,14 @@
     }
 
     /* toggle expand for a teacher card */
-    window.tcToggle = function (name) {
+    function tcToggle(name) {
       if (expandedTeachers.has(name)) expandedTeachers.delete(name);
       else expandedTeachers.add(name);
       renderTeachers();
-    };
+    }
 
     /* toggle star for a teacher */
-    window.tcStar = function (e, name) {
+    function tcStar(e, name) {
       e.stopPropagation();
       const next = new Set(starredTeachers);
       if (next.has(name)) next.delete(name); else next.add(name);
@@ -3551,7 +3594,18 @@
           .set({ teachers: [...next] });
       }
       renderTeachers();
-    };
+    }
+
+    // Event delegation: the teacher name is read from a data-* attribute
+    // (HTML-attribute-escaped by escapeHtml below) rather than being spliced
+    // into an inline onclick="..." JS string, which is what made a stray
+    // apostrophe or quote in a teacher's name dangerous before.
+    document.getElementById('teacherList')?.addEventListener('click', (e) => {
+      const starBtn = e.target.closest('.tc-star');
+      if (starBtn) { tcStar(e, starBtn.dataset.name); return; }
+      const card = e.target.closest('.tc');
+      if (card) tcToggle(card.dataset.name);
+    });
 
     /* ── renderTeachers — mirrors CustomTeacherCard exactly ── */
     function renderTeachers() {
@@ -3590,29 +3644,32 @@
         const isAbs = status !== 'Present';
         const isStar = starredTeachers.has(t.name);
         const isExp = expandedTeachers.has(t.name);
-        const safeName = t.name.replace(/"/g, '"');
+        const safeName = escapeHtml(t.name);
+        const safeDept = escapeHtml(t.department);
+        const safeEmail = escapeHtml(t.email);
+        const safeStatus = escapeHtml(status);
 
         return `
-      <div class="tc" onclick="tcToggle('${safeName}')">
+      <div class="tc" data-name="${safeName}">
         <div class="tc-inner">
           <div class="tc-row">
-            <button class="tc-star ${isStar ? 'on' : 'off'}" onclick="tcStar(event,'${safeName}')">
+            <button class="tc-star ${isStar ? 'on' : 'off'}" data-name="${safeName}">
               ${isStar ? STAR_ON : STAR_OFF}
             </button>
-            <span class="tc-name">${t.name}</span>
-            <span class="tc-badge ${isAbs ? 'absent' : 'present'}">${status}</span>
+            <span class="tc-name">${safeName}</span>
+            <span class="tc-badge ${isAbs ? 'absent' : 'present'}">${safeStatus}</span>
           </div>
         </div>
         <div class="tc-expand ${isExp ? 'open' : ''}">
           ${t.department ? `
           <div class="tc-detail">
             <div class="tc-detail-icon">${SCHOOL_SVG}</div>
-            <span class="tc-detail-text">${t.department}</span>
+            <span class="tc-detail-text">${safeDept}</span>
           </div>` : ''}
           ${t.email ? `
           <div class="tc-detail">
             <div class="tc-detail-icon">${EMAIL_SVG}</div>
-            <span class="tc-detail-text">${t.email}</span>
+            <span class="tc-detail-text">${safeEmail}</span>
           </div>` : ''}
           ${!t.department && !t.email ? '<span class="tc-detail-text" style="padding-left:4px">No details on file.</span>' : ''}
         </div>
@@ -3672,6 +3729,13 @@
       renderBuses();
     }
 
+    // Delegated so the town name never has to be spliced into an inline
+    // onclick string (same fix as the teacher list above).
+    document.getElementById('busList')?.addEventListener('click', (e) => {
+      const starBtn = e.target.closest('.tc-star');
+      if (starBtn) toggleBusStar(e, starBtn.dataset.town);
+    });
+
     function renderBuses() {
       const q = document.getElementById('busQ').value.toLowerCase();
       const el = document.getElementById('busList');
@@ -3687,7 +3751,7 @@
         if (as !== bs) return as ? -1 : 1;
         return a.town.localeCompare(b.town);
       });
-      if (!list.length) { el.innerHTML = `<p class="empty">No results for "${q}"</p>`; return; }
+      if (!list.length) { el.innerHTML = `<p class="empty">No results for "${escapeHtml(q)}"</p>`; return; }
 
       const STAR_ON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="#FFB800" style="display:block"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
       const STAR_OFF = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="display:block;opacity:0.35"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
@@ -3697,23 +3761,23 @@
         const displayCode = hasNoCode ? '?' : b.code;
         const codeCls = hasNoCode ? 'unknown' : 'arrived';
         const isStar = starredBuses.has(b.town);
-        const safeTown = b.town.replace(/"/g, '"');
-        const statusText = b.status || (hasNoCode ? 'Not here yet' : 'Arrived');
+        const safeTown = escapeHtml(b.town);
+        const statusText = escapeHtml(b.status || (hasNoCode ? 'Not here yet' : 'Arrived'));
 
         return `
       <div class="tc" style="margin-bottom:8px;">
         <div class="tc-inner" style="padding:14px 16px;">
           <div class="row-sb">
             <div class="row" style="gap:4px;min-width:0;flex:1">
-              <button class="tc-star ${isStar ? 'on' : 'off'}" onclick="toggleBusStar(event,'${safeTown}')">
+              <button class="tc-star ${isStar ? 'on' : 'off'}" data-town="${safeTown}">
                 ${isStar ? STAR_ON : STAR_OFF}
               </button>
               <div class="col-s">
-                <span class="tc-name">${b.town}</span>
+                <span class="tc-name">${safeTown}</span>
                 <span class="t-sub" style="margin-top:2px;font-weight:600">${statusText}</span>
               </div>
             </div>
-            <span class="bus-code ${codeCls}">${displayCode}</span>
+            <span class="bus-code ${codeCls}">${escapeHtml(displayCode)}</span>
           </div>
         </div>
       </div>`;
@@ -3879,16 +3943,34 @@
     /* Render CalendarEventCard — exact port of calendar_event_card.dart */
     function linkify(text) {
       if (!text) return '';
-      const escaped = String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-      return escaped.replace(/(https?:\/\/[^\s<]+)/g, url => {
-        const trimmed = url.replace(/[.,;:)\]]+$/, '');
-        const trail = url.slice(trimmed.length);
-        return `<a href="${trimmed}" target="_blank" rel="noopener noreferrer" class="cal-evt-link" onclick="event.stopPropagation()">${trimmed}</a>${trail}`;
+      // Escape the whole string first (handles &, <, >, quotes, apostrophes),
+      // THEN find URLs in the escaped text and re-validate/re-escape each one
+      // before it goes into href="...". Escaping quotes here is what actually
+      // prevents an attacker-controlled URL like `https://x/"onmouseover="...`
+      // from breaking out of the href attribute — matching brackets alone
+      // (the old behavior) does not stop that.
+      const escaped = escapeHtml(text);
+      return escaped.replace(/(https?:\/\/[^\s<]+)/g, escapedUrl => {
+        // Undo the &amp;/&quot;/&#39; escaping just for trailing-punctuation
+        // trimming purposes, then re-escape before writing into the attribute.
+        const rawUrl = escapedUrl
+          .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        const trimmedRaw = rawUrl.replace(/[.,;:)\]]+$/, '');
+        const trailRaw = rawUrl.slice(trimmedRaw.length);
+        const href = safeHref(trimmedRaw);
+        if (!href) return escapedUrl; // not a valid https URL — leave as plain escaped text
+        const label = escapeHtml(trimmedRaw);
+        const trail = escapeHtml(trailRaw);
+        return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="cal-evt-link">${label}</a>${trail}`;
       });
     }
+    // Note: click-stopPropagation for these links is handled by a single
+    // delegated listener (see calEvts click handler below) instead of an
+    // inline onclick="..." string, so nothing here is ever built by
+    // concatenating untrusted text into JS source.
+    document.getElementById('calEvts')?.addEventListener('click', (e) => {
+      if (e.target.closest('a.cal-evt-link')) e.stopPropagation();
+    });
 
     function renderCalEvts() {
       const el = document.getElementById('calEvts');
@@ -3909,12 +3991,13 @@
 
       el.innerHTML = evts.map(e => {
         const timeStr = getEventTimeString(e);
-        const tag = (e.category || 'bca').toUpperCase();
+        const tag = escapeHtml((e.category || 'bca').toUpperCase());
+        const safeTitle = escapeHtml(e.title || '');
 
         return `
       <div class="tile p-md cal-event-card" style="margin-bottom:8px;">
         <div class="col-s" style="min-width:0">
-          <div style="font-family:var(--font-body);font-size:15px;font-weight:700;color:var(--on-surface);line-height:1.25">${e.title}</div>
+          <div style="font-family:var(--font-body);font-size:15px;font-weight:700;color:var(--on-surface);line-height:1.25">${safeTitle}</div>
           ${e.description ? `<div style="font-family:var(--font-body);font-size:13px;color:var(--on-surface-mid);margin-top:4px;line-height:1.35">${linkify(e.description)}</div>` : ''}
           <div class="row" style="gap:6px;margin-top:6px">
             <span class="cal-evt-tag">${tag}</span>
@@ -4014,7 +4097,7 @@
         const day = (j.days || []).find(x => x.date === `${y}-${m}-${d}`);
         const items = (day?.menu_items || []).filter(i => i.food).slice(0, 6);
         if (!items.length) { el.innerHTML = `<p class="empty">No lunch info today. Cafeteria is playing mystery box.</p>`; return; }
-        el.innerHTML = items.map(i => `<p class="lunch-item">· ${i.food.name}</p>`).join('');
+        el.innerHTML = items.map(i => `<p class="lunch-item">· ${escapeHtml(i.food.name)}</p>`).join('');
       } catch (_) {
         el.innerHTML = `<p class="empty">Lunch data unavailable. Your stomach is on its own.</p>`;
       }
@@ -4088,14 +4171,22 @@
         // Format date
         const dateStr = date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
 
+        // Validate the link now (rejects javascript:/data:/etc.) and stash it
+        // in a data attribute rather than splicing it into an inline
+        // onclick="..." string — the feed is a third-party source and its
+        // title/link fields are not trusted input.
+        const safeLink = safeHref(link) || '#';
+        const safeTitle = escapeHtml(title);
+        const safeDateStr = escapeHtml(dateStr);
+
         return `
-          <div class="news-card" onclick="window.open('${link}', '_blank')">
+          <div class="news-card" data-link="${escapeHtml(safeLink)}" style="cursor:pointer">
             <div class="news-card-top">
               <div class="news-source">BCA News</div>
               <svg class="news-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
             </div>
-            <div class="news-headline">${title}</div>
-            ${dateStr ? `<div class="news-meta">${dateStr}</div>` : ''}
+            <div class="news-headline">${safeTitle}</div>
+            ${safeDateStr ? `<div class="news-meta">${safeDateStr}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -4103,6 +4194,15 @@
       // Show only top 3 news articles
       el.innerHTML = html;
     }
+
+    // Delegated click handler — reads the pre-validated URL out of the DOM
+    // attribute instead of ever building a JS string out of feed content.
+    document.getElementById('newsBody')?.addEventListener('click', (e) => {
+      const card = e.target.closest('.news-card');
+      if (!card) return;
+      const link = card.dataset.link;
+      if (link && link !== '#') window.open(link, '_blank', 'noopener,noreferrer');
+    });
 
     /* ── Links ── */
     function getLinkIcon(l) {
@@ -4142,10 +4242,14 @@
       }
 
       const markup = items.map(l => {
-        const safeTitle = String(l?.title || 'Link').replace(/"/g, '&quot;');
+        const safeTitle = escapeHtml(l?.title || 'Link');
         const rawUrl = String(l?.url || '').trim();
         const isPrivacy = rawUrl === '/privacy_policy' || rawUrl.toLowerCase().includes('privacy_policy');
-        const safeUrl = (rawUrl && rawUrl !== '#') ? rawUrl : 'https://www.bergen.org/bca';
+        // safeHref rejects javascript:/data:/etc. and normalizes the URL;
+        // fall back to the school site if the stored value isn't a valid
+        // https link (this data can come from a user's own document, but we
+        // still don't trust it enough to write it into href unvalidated).
+        const safeUrl = escapeHtml(safeHref(rawUrl) || 'https://www.bergen.org/bca');
         const accent = linkAccent(l);
         const iconStyle = accent
           ? ` style="background:rgba(${accent},.14);color:rgb(${accent})"`

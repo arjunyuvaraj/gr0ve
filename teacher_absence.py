@@ -316,40 +316,53 @@ def send_teacher_absence_notification(tokens: List[str]):
         log("No FCM tokens found", "WARNING")
         return
 
-    success = 0
-    failure = 0
-
     body_text = random.choice(FUN_TEACHER_MESSAGES)
 
-    for token in tokens:
-        try:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title="\U0001f9d1\u200d\U0001f3eb Teacher Absence Update",
-                    body=body_text,
-                ),
-                data={"payload": "teacher_absence"},
-                token=token,
-                android=messaging.AndroidConfig(
-                    priority="high",
-                    notification=messaging.AndroidNotification(channel_id="gr0ve_channel"),
-                ),
-                apns=messaging.APNSConfig(
-                    payload=messaging.APNSPayload(
-                        aps=messaging.Aps(
-                            alert=messaging.ApsAlert(
-                                title="\U0001f9d1\u200d\U0001f3eb Teacher Absence Update",
-                                body=body_text,
-                            ),
-                            sound="default",
+    def build_message(token: str) -> messaging.Message:
+        return messaging.Message(
+            notification=messaging.Notification(
+                title="\U0001f9d1\u200d\U0001f3eb Teacher Absence Update",
+                body=body_text,
+            ),
+            data={"payload": "teacher_absence"},
+            token=token,
+            android=messaging.AndroidConfig(
+                priority="high",
+                notification=messaging.AndroidNotification(channel_id="gr0ve_channel"),
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        alert=messaging.ApsAlert(
+                            title="\U0001f9d1\u200d\U0001f3eb Teacher Absence Update",
+                            body=body_text,
                         ),
+                        sound="default",
                     ),
                 ),
-            )
-            messaging.send(message)
-            success += 1
-        except Exception:
-            failure += 1
+            ),
+        )
+
+    # A per-token loop with one network round trip each does not scale —
+    # with enough registered devices it can eat the entire job's runtime
+    # (this is what caused the workflow to get cancelled by its own
+    # timeout). send_each() dispatches the batch concurrently instead of
+    # sequentially, which is the whole difference for a few hundred tokens.
+    success = 0
+    failure = 0
+    CHUNK_SIZE = 500  # FCM's per-call cap
+
+    for i in range(0, len(tokens), CHUNK_SIZE):
+        chunk = tokens[i : i + CHUNK_SIZE]
+        messages = [build_message(token) for token in chunk]
+
+        try:
+            response = messaging.send_each(messages)
+            success += response.success_count
+            failure += response.failure_count
+        except Exception as e:
+            log(f"Batch send failed for {len(chunk)} tokens: {e}", "ERROR")
+            failure += len(chunk)
 
     log(f'Notifications sent: {success} using message: "{body_text}"')
     if failure:

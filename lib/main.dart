@@ -343,9 +343,12 @@ class _MyAppState extends State<MyApp> {
                               );
 
                             final user = snapshot.data;
-                            final isBeta = AppFeatureFlags.isBetaTester(
-                              user?.email,
-                            );
+                            // AppFeatureFlags.isBeta is populated for the
+                            // currently signed-in user (see
+                            // counselor_persona_service.dart) — there is no
+                            // longer a bulk allowlist on the client to look
+                            // arbitrary emails up against.
+                            final isBeta = AppFeatureFlags.isBeta.value;
 
                             if (isLocked && user != null && !isBeta) {
                               return const MaintenanceScreen();

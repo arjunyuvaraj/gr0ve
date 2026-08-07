@@ -2,79 +2,204 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-
+    // ---------- helpers ----------
     function isAuthenticated() {
       return request.auth != null;
     }
-
     function isPlatformAdmin() {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/platformAdmins/$(request.auth.uid));
     }
-
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isBergenEmail() {
+      return isAuthenticated() &&
+             request.auth.token.email != null &&
+             request.auth.token.email.lower().matches('.*@bergen[.]org$');
+    }
     function isGroupAdmin(groupId) {
       return isAuthenticated() &&
              request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.adminIds;
     }
-
     function isGroupMember(groupId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));
     }
-
     function isActiveGroup(groupId) {
       return get(/databases/$(database)/documents/groups/$(groupId)).data.status == 'active';
     }
 
+    // ---------- maintenance mode ----------
+    // Firestore rules can only allow or deny a whole document — they cannot
+    // expose one field (maintenance_message) while hiding another
+    // (beta_testers) in the same doc. So the public status lives in
+    // app_config/maintenance_status (no tester emails, ever), and tester
+    // membership lives in its own collection that each user can only check
+    // for THEIR OWN email (see beta_testers/{email} below). Never reintroduce
+    // a beta_testers array on a document readable by isAuthenticated()/true.
+    function maintenanceModeOn() {
+      return get(/databases/$(database)/documents/app_config/maintenance_status)
+               .data.maintenance_mode == true;
+    }
+    function isBetaTester() {
+      return isAuthenticated() &&
+             request.auth.token.email != null &&
+             exists(/databases/$(database)/documents/beta_testers/$(request.auth.token.email.lower()));
+    }
+    // The actual server-side maintenance gate: outside maintenance mode
+    // everyone with the collection's normal permission gets through; during
+    // maintenance mode only admins and allowlisted beta testers do. This is
+    // what makes maintenance mode real — the client-side "curtain" UI is only
+    // a convenience, not the enforcement.
+    function allowedDuringMaintenance() {
+      return !maintenanceModeOn() || isPlatformAdmin() || isBetaTester();
+    }
 
-
-
-
-
+    // ---------- platform admins ----------
+    // Only ever written by the Admin SDK / a trusted Cloud Function / the console.
+    // No client, including an already-admin client, can grant admin through this rule set.
     match /platformAdmins/{userId} {
       allow read: if isPlatformAdmin();
       allow write: if false;
     }
 
+    // Legacy/orphaned collection referenced by old client code (admin_helper.dart).
+    // It is not used for authorization anywhere in these rules; deny outright and
+    // remove the collection + the client code that touches it (see admin_helper.dart).
+    match /admins/{userId} {
+      allow read, write: if false;
+    }
 
+    // ---------- global feature flags / maintenance mode ----------
+    // Public status doc: maintenance_mode / maintenance_title / maintenance_message
+    // ONLY. Readable by anyone, including a signed-out visitor on the login
+    // screen — that's the whole point of it being split out. Never add a
+    // beta_testers (or any other sensitive) field to this document.
+    match /app_config/maintenance_status {
+      allow read: if true;
+      allow write: if isPlatformAdmin();
+    }
+
+    // Anything else under app_config (e.g. a legacy/admin-only feature_flags
+    // doc) is admin-only — no client ships a beta tester list in bulk.
+    match /app_config/{docId} {
+      allow read: if isPlatformAdmin();
+      allow write: if isPlatformAdmin();
+    }
+
+    // Beta tester allowlist, one doc per tester, keyed by lowercased email.
+    // A signed-in user may only `get` the doc matching their OWN token email
+    // (so they can check "am I a tester") — `list` is denied outright, so
+    // the collection can never be enumerated or bulk-downloaded, unlike the
+    // old array-on-a-shared-doc approach.
+    match /beta_testers/{email} {
+      allow get: if isAuthenticated() &&
+                    request.auth.token.email != null &&
+                    request.auth.token.email.lower() == email;
+      allow list: if isPlatformAdmin();
+      allow write: if isPlatformAdmin();
+    }
+
+    // ---------- users ----------
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+
+      // Per-user subcollections. All strictly owner-only; nothing here should
+      // ever be readable/writable by another student.
+      match /preferences/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /settings/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /counselor_history/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /grove_history/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /calendar/{eventsDoc} {
+        allow read, write: if isOwner(userId);
+        match /items/{itemId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+    }
+
+    // Push tokens: only the owning device/user should ever read or write their own token doc.
+    match /notification_tokens/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ---------- school directory / admin-curated public data ----------
+    // Read-only for verified Bergen accounts, write-only for platform admins.
+    // (teacher_service.dart already restricts reads client-side to @bergen.org
+    // emails; enforce the same thing server-side rather than relying on the client.)
+    match /teachers/{teacherId} {
+      allow read: if isBergenEmail() && allowedDuringMaintenance();
+      allow write: if isPlatformAdmin();
+    }
+
+    // Bus delays, teacher absences, calendar events, and other admin-published
+    // public docs (e.g. public_data/teacher_absences, bus_routes, bca_events),
+    // plus nested public calendar items. Gated by allowedDuringMaintenance()
+    // so that clicking past the client-side maintenance curtain (e.g. via
+    // devtools) doesn't actually get you the data — the server enforces it too.
+    match /public_data/{docId} {
+      allow read: if isAuthenticated() && allowedDuringMaintenance();
+      allow write: if isPlatformAdmin();
+      match /items/{itemId} {
+        allow read: if isAuthenticated() && allowedDuringMaintenance();
+        allow write: if isPlatformAdmin();
+      }
+    }
+
+    // Community calendar submissions: a user can propose an event, only an
+    // admin can approve/reject it. Mirrors groupCreationRequests below.
+    match /public_event_requests/{requestId} {
+      allow create: if isAuthenticated() &&
+                       request.resource.data.requesterId == request.auth.uid &&
+                       request.resource.data.status == 'pending';
+      allow read: if isPlatformAdmin() ||
+                     (isAuthenticated() && resource.data.requesterId == request.auth.uid);
+      allow update: if isPlatformAdmin() &&
+                       request.resource.data.status in ['approved', 'rejected'] &&
+                       resource.data.status == 'pending';
+      allow delete: if isPlatformAdmin();
+    }
+
+    // ---------- club / group requests to exist ----------
     match /groupCreationRequests/{requestId} {
       allow create: if isAuthenticated() &&
                        request.resource.data.requesterId == request.auth.uid &&
                        request.resource.data.status == 'pending';
-
       allow read: if isPlatformAdmin() ||
                      (isAuthenticated() && resource.data.requesterId == request.auth.uid);
-
       allow update: if isPlatformAdmin() &&
                        request.resource.data.status in ['approved', 'rejected'] &&
                        resource.data.status == 'pending';
-
       allow delete: if isPlatformAdmin();
     }
 
-
+    // ---------- groups / clubs ----------
     match /groups/{groupId} {
       allow read: if isAuthenticated();
-
-      allow create: if false;
-
+      allow create: if false; // groups are only created via approval of a groupCreationRequest (Cloud Function/Admin SDK)
       allow update: if isPlatformAdmin() ||
                        (isGroupAdmin(groupId) &&
                         request.resource.data.diff(resource.data).affectedKeys()
                           .hasOnly(['joinCode', 'description', 'metadata']));
-
       allow delete: if isPlatformAdmin();
-
 
       match /members/{userId} {
         allow read: if isAuthenticated();
-
-        allow create: if false;
-
-        allow delete: if isGroupAdmin(groupId) ||
-                         (isAuthenticated() && request.auth.uid == userId);
+        allow create: if false; // membership is only created by approving a joinRequest
+        allow delete: if isGroupAdmin(groupId) || isOwner(userId);
       }
-
 
       match /joinRequests/{userId} {
         allow create: if isAuthenticated() &&
@@ -82,47 +207,59 @@ service cloud.firestore {
                          request.resource.data.status == 'pending' &&
                          isActiveGroup(groupId) &&
                          !isGroupMember(groupId);
-
-        allow read: if isGroupAdmin(groupId) ||
-                       (isAuthenticated() && request.auth.uid == userId);
-
+        allow read: if isGroupAdmin(groupId) || isOwner(userId);
         allow update: if isGroupAdmin(groupId) &&
                          resource.data.status == 'pending' &&
                          request.resource.data.status in ['approved', 'rejected'];
-
         allow delete: if isGroupAdmin(groupId);
       }
 
+      // Group calendar: members can read, group admins can write.
+      match /calendar/{eventsDoc} {
+        allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+        allow write: if isGroupAdmin(groupId) && isActiveGroup(groupId);
+        match /items/{itemId} {
+          allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+          allow write: if isGroupAdmin(groupId) && isActiveGroup(groupId);
+        }
+      }
 
       match /announcements/{announcementId} {
         allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
-
         allow create: if isGroupAdmin(groupId) &&
                          request.resource.data.authorId == request.auth.uid &&
                          isActiveGroup(groupId);
-
         allow update, delete: if isGroupAdmin(groupId) && isActiveGroup(groupId);
+
+        // Q&A thread on an announcement: any member can ask/read, only the
+        // question's author or a group admin can remove a question.
+        match /questions/{questionId} {
+          allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+          allow create: if isGroupMember(groupId) &&
+                           isActiveGroup(groupId) &&
+                           request.resource.data.authorId == request.auth.uid;
+          allow update, delete: if isGroupAdmin(groupId) ||
+                                   (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
+          match /replies/{replyId} {
+            allow read: if isGroupMember(groupId) && isActiveGroup(groupId);
+            allow create: if isGroupAdmin(groupId) &&
+                             isActiveGroup(groupId) &&
+                             request.resource.data.authorId == request.auth.uid;
+            allow update, delete: if isGroupAdmin(groupId) ||
+                                     (isAuthenticated() && resource.data.authorId == request.auth.uid);
+          }
+        }
       }
     }
 
-
-
-
-    match /users/{userId} {
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAuthenticated() && request.auth.uid == userId;
-      allow delete: if false;
-    }
-
-
-
-
-
-
-
+    // ---------- default deny ----------
+    // Anything not explicitly matched above is inaccessible. Add a new
+    // explicit match block above (with real ownership/role checks) whenever
+    // the client starts using a new top-level collection, rather than
+    // widening this rule.
     match /{document=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if false;
     }
   }
 }

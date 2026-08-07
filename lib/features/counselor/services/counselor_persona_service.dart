@@ -130,13 +130,30 @@ class AppFeatureFlags {
   static final ValueNotifier<String> maintenanceMessage = ValueNotifier(
     "The grove is currently resting. We'll be back shortly.",
   );
-  static final List<String> _betaTesters = [];
   static StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
   _flagsSubscription;
 
-  static bool isBetaTester(String? email) {
-    if (email == null) return false;
-    return _betaTesters.contains(email.toLowerCase().trim());
+  // Firestore rules can only allow/deny a whole document, so the beta tester
+  // allowlist can no longer live as an array field on a doc every signed-in
+  // (or, worse, signed-out) client can read — that shipped every tester's
+  // email to every device. It now lives in its own `beta_testers/{email}`
+  // collection where the rules only let a user `get` the doc matching their
+  // OWN token email; `list` is admin-only, so the collection can't be
+  // enumerated. This does mean isBetaTester is no longer a synchronous local
+  // lookup — check AppFeatureFlags.isBeta (populated for the current user
+  // below) instead of calling Firestore ad hoc for arbitrary emails.
+  static Future<bool> _checkBetaTesterStatus(String? email) async {
+    if (email == null || email.isEmpty) return false;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('beta_testers')
+          .doc(email.toLowerCase().trim())
+          .get();
+      return doc.exists;
+    } catch (e) {
+      if (kDebugMode) print('[FLAGS] Beta tester check failed: $e');
+      return false; // fail closed
+    }
   }
 
   static bool get ashUnlocked => false;
@@ -152,13 +169,16 @@ class AppFeatureFlags {
 
   static Future<void> _loadFlags() async {
     try {
+      // Public status doc: maintenance_mode/title/message + the non-sensitive
+      // feature toggles. NEVER add beta_testers (or anything sensitive) to
+      // this document — see the comment on _checkBetaTesterStatus above.
       final doc = await FirebaseFirestore.instance
           .collection('app_config')
-          .doc('feature_flags')
+          .doc('maintenance_status')
           .get();
       if (!doc.exists) return;
 
-      _applyFlagData(doc.data());
+      await _applyFlagData(doc.data());
     } catch (e) {
       print('[FLAGS] Load error: $e');
     }
@@ -170,7 +190,7 @@ class AppFeatureFlags {
 
     _flagsSubscription = FirebaseFirestore.instance
         .collection('app_config')
-        .doc('feature_flags')
+        .doc('maintenance_status')
         .snapshots()
         .listen(
           (doc) {
@@ -185,15 +205,11 @@ class AppFeatureFlags {
         );
   }
 
-  static void _applyFlagData(Map<String, dynamic>? data) {
+  static Future<void> _applyFlagData(Map<String, dynamic>? data) async {
     if (data == null) return;
 
     lockdownMode.value =
         (data['maintenance_mode'] ?? data['lockdown_mode'] ?? false) == true;
-
-    final testers = List<String>.from(data['beta_testers'] ?? []);
-    _betaTesters.clear();
-    _betaTesters.addAll(testers.map((e) => e.toLowerCase().trim()));
 
     final title = data['maintenance_title']?.toString().trim();
     final message = data['maintenance_message']?.toString().trim();
@@ -205,7 +221,7 @@ class AppFeatureFlags {
         : "The grove is currently resting. We'll be back shortly.";
 
     final currentEmail = FirebaseAuth.instance.currentUser?.email;
-    final isBetaTesterFlag = isBetaTester(currentEmail);
+    final isBetaTesterFlag = await _checkBetaTesterStatus(currentEmail);
     isBeta.value = isBetaTesterFlag;
 
     enableClubs.value = (data['enable_clubs'] ?? false) || isBetaTesterFlag;

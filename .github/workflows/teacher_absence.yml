@@ -1,4 +1,4 @@
-name: Teacher Absence
+name: Teacher Absence Scraper
 
 on:
   # Cron is UTC only — GitHub Actions has no per-workflow timezone option.
@@ -14,7 +14,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -42,7 +42,7 @@ jobs:
       - name: Run scraper
         env:
           GR0VE_SEND_PUSH: "true"
-        run: python teacher_absence.py
+        run: python teachers_auto.py
 
       # Runs even on failure so you can pull the auth-wall HTML straight
       # from the Actions UI instead of re-triggering and hoping to catch it.
