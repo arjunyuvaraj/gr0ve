@@ -1,3 +1,7 @@
 playwright>=1.44
 firebase-admin>=6.5
 pytz>=2024.1
+gspread>=6.1
+google-auth>=2.29
+firebase-admin>=6.5
+pytz>=2024.1

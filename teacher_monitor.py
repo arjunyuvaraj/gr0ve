@@ -1,23 +1,3 @@
-"""
-Gr0ve Teacher Absence Scraper — GitHub Actions version.
-
-Uses real Playwright + Chromium (confirmed necessary: Google rejects
-cookie-replay from plain HTTP clients like `requests`/`fetch` for this
-doc, but accepts the same cookies from an actual browser engine).
-
-Runs as a single-shot script triggered by a GitHub Actions scheduled
-workflow (see .github/workflows/scrape.yml) — no long-running process,
-no server to maintain.
-
-IMPORTANT — statelessness: GitHub Actions runners are ephemeral, so there
-is no local disk to persist a "last known state" cache between runs.
-Firestore's existing `public_data/teacher_absences` document IS that
-state — we read it back at the start of each run instead of a local
-cache file. FCM tokens are queried fresh each run rather than cached,
-since a Firestore read at this frequency is cheap and it avoids a whole
-class of "stale cache on a fresh container" bugs.
-"""
-
 from __future__ import annotations
 
 import hashlib

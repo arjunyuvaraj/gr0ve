@@ -1,0 +1,45 @@
+name: Bus Monitor
+
+on:
+  # Cron is UTC only. 15:00-22:00 UTC covers 11am-5pm US/Eastern across
+  # both EST (UTC-5) and EDT (UTC-4) with some slack; the script's own
+  # is_within_window() does the precise, DST-aware filtering using pytz.
+  #
+  # NOTE: the original script polled every 90 seconds in a loop. GitHub
+  # Actions cron cannot reproduce that cadence reliably — every 5 minutes
+  # is close to the practical floor, and even scheduled runs can lag
+  # during GitHub's busy periods. If 90-second responsiveness is actually
+  # required, this workflow is not a faithful replacement for that part.
+  schedule:
+    - cron: "*/5 15-22 * * 1-5"
+  workflow_dispatch: {}
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements-bus.txt
+
+      - name: Write credentials from secrets
+        env:
+          GSHEETS_SERVICE_ACCOUNT_JSON: ${{ secrets.GSHEETS_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          printf '%s' "$GSHEETS_SERVICE_ACCOUNT_JSON" > gsheets.json
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase.json
+
+      - name: Run bus monitor
+        env:
+          GR0VE_SEND_PUSH: "true"
+        run: python bus_monitor.py
