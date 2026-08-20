@@ -1,35 +1,28 @@
 # gr0ve
 
-**gr0ve** is the all-in-one student companion for the Bergen County Academies (BCA). Designed specifically for BCA students, it brings together schedules, transportation, calendars, teacher absences, announcements, dining information, and AI-powered assistance into a single application that adapts throughout the school day.
+**gr0ve** is the all-in-one student companion for the Bergen County Academies (BCA). Designed specifically for BCA students, it brings together schedules, transportation, calendars, teacher absences, announcements, dining information, and AI-powered assistance into a single application that adapts throughout the school day. School information is often spread across multiple websites, emails, and portals. gr0ve brings everything together in one place, giving students quick access to the information they need without having to jump between different services. Whether you're checking your bus before school, looking for a teacher absence between classes, or planning your schedule for tomorrow, gr0ve keeps the right information available at the right time.
 
 ---
+The first release of the 2026–2027 school year is here.
 
-## About
+This update introduces one of the biggest changes to gr0ve since Version 2: **the new BCA Dashboard**. Designed to serve as a central hub for everyday school life, it brings together the resources students use most into a single, streamlined experience.
 
-School information is often spread across multiple websites, emails, and portals. gr0ve brings everything together in one place, giving students quick access to the information they need without having to jump between different services. Whether you're checking your bus before school, looking for a teacher absence between classes, or planning your schedule for tomorrow, gr0ve keeps the right information available at the right time.
+This release also marks gr0ve's transition to a Progressive Web App (PWA). You can now install gr0ve directly from your browser on supported devices, making it easier than ever to access the app without visiting an app store.
 
----
+## What's New
+### BCA Dashboard
 
-## Features
+- Added an entirely new centralized dashboard.
+- Brings together schedules, buses, calendars, teacher absences, and other daily resources.
+- Designed for faster navigation and easier access to frequently used features.
 
-The home dashboard automatically changes throughout the day to prioritize the information that's most relevant. Before school, you'll see bus arrivals and your schedule for the day. During school hours, the dashboard shifts its focus to your current period, teacher absences, and important updates. In the evening, it transitions to tomorrow's schedule, upcoming events, and reminders.
+### Progressive Web App Support
+- gr0ve can now be installed directly from supported web browsers.
+- Native-like experience across desktop, Android, and other compatible platforms.
+- Faster updates with no app store downloads required.
+### Improvements
+- Various bug fixes throughout the application.
+- General performance and stability improvements.
+- UI polish and small quality-of-life refinements.
 
-gr0ve also includes a collection of AI counselors, each with a unique personality and conversational style. Students can chat with characters such as Grover, Aspen, and Rowan, or use voice mode for a more natural experience. Hidden counselors can also be discovered throughout the app for those willing to explore.
-
-Scheduling is fully integrated into the app. Alongside the official BCA calendar, students can create personal assignments, reminders, and events, allowing both school and personal planning to live in the same place.
-
-Transportation features provide live BCA bus tracking with optional notifications for starred buses, making it easier to know when buses arrive or depart without constantly refreshing information.
-
-Teacher absences are updated in real time, allowing students to quickly check classroom coverage throughout the day. Administrative tools are also available to simplify absence management.
-
-The dining section provides the daily cafeteria menu together with nutritional information and allergen details, helping students make informed choices before lunch.
-
----
-
-## Technology
-
-gr0ve is built with **Flutter**, allowing the same codebase to power Android, iOS, the web, and Progressive Web Apps. Authentication, cloud storage, and backend services are provided through **Firebase**, while AI functionality is powered by **Ollama** and voice interactions are supported through **AWS Polly** and **Coqui**. The interface combines dynamic theming, glassmorphism, and **HugeIcons** to create a clean, modern experience tailored for everyday student use.
-
----
-
-Built for the Bergen County Academies community.
+Thank you to everyone who has used gr0ve, reported bugs, and shared feedback. Welcome back, BCA!
